@@ -23,15 +23,22 @@ export const csrfOk = req => req.method === 'GET' || req.method === 'HEAD' || re
 
 export function ipDe(req, context) { return context?.ip || req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || ''; }
 
-/** Envolve a função: CSRF, erros inesperados viram 500 sem vazar detalhes internos. */
-export function rota(fn) {
+/* v13.76.1 · CORS nas rotas entre ambientes (saude, inter, ambientes). Sem Allow-Credentials: o cookie de sessão
+   (HttpOnly, SameSite=Strict) nunca vai numa chamada de outro domínio, então o CORS aberto não expõe dados logados. */
+export const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-max-age': '86400' };
+function comCors(r) { const h = new Headers(r.headers); for (const [k, v] of Object.entries(CORS)) h.set(k, v); return new Response(r.body, { status: r.status, statusText: r.statusText, headers: h }); }
+
+/** Envolve a função: CSRF, erros inesperados viram 500 sem vazar detalhes internos; { cors: true } liga o CORS e o pre-flight. */
+export function rota(fn, { cors = false } = {}) {
   return async (req, context) => {
-    if (!csrfOk(req)) return erro(403, 'Requisição recusada (cabeçalho x-painel ausente).');
-    try { return await fn(req, context); }
+    const fim = r => (cors ? comCors(r) : r);
+    if (cors && req.method === 'OPTIONS') return fim(new Response(null, { status: 204 }));
+    if (!csrfOk(req)) return fim(erro(403, 'Requisição recusada (cabeçalho x-painel ausente).'));
+    try { return fim(await fn(req, context)); }
     catch (e) {
-      if (e && e.status) return erro(e.status, e.message, e.extra || {});
+      if (e && e.status) return fim(erro(e.status, e.message, e.extra || {}));
       console.error('[painel]', e);
-      return erro(500, 'Erro interno no servidor do painel.');
+      return fim(erro(500, 'Erro interno no servidor do painel.'));
     }
   };
 }

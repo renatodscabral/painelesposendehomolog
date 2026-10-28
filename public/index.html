@@ -1732,7 +1732,9 @@ class NetlifyAdapter {
     catch (e) { if (metodo === 'GET' && tent < 2) { await sleep(500 * (tent + 1)); return this._req(metodo, url, corpo, bruto, tent + 1); } const x = new Error('Sem conexão com o servidor do painel.'); x.code = 'unavailable'; throw x; }
     if (r.status >= 500 && metodo === 'GET' && tent < 2) { await sleep(500 * (tent + 1)); return this._req(metodo, url, corpo, bruto, tent + 1); }
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error(j.erro || 'Erro ' + r.status + ' no servidor do painel.'); e.status = r.status; e.dados = j; e.code = { 401: 'unauthenticated', 403: 'permission-denied', 429: 'resource-exhausted' }[r.status] || 'unavailable'; throw e; }
+    if (!r.ok) { const e = new Error(j.erro || 'Erro ' + r.status + ' no servidor do painel.'); e.status = r.status; e.dados = j; e.code = { 401: 'unauthenticated', 403: 'permission-denied', 429: 'resource-exhausted' }[r.status] || 'unavailable';
+      if (this.remoto) console.warn(`[painel][ambientes] ${this.remoto}: HTTP ${r.status} — ${e.message}`, j.detalhe || ''); /* v13.76.1 */
+      throw e; }
     return j;
   }
   /* ---------- sessão (login por CPF no servidor) ---------- */
@@ -3071,7 +3073,7 @@ const Ambiente = {
   permitido(id) { return id === 'prod' || !!Auth.podeEditarNuvem || !!Cloud.base?.netlify; },
   /** v13.76 · Netlify: o ambiente é o do site (PAINEL_AMBIENTE) e os demais ambientes são outros endereços. */
   urls: null, ROT_SITE: { prod: 'Esposende (Produção)', homolog: 'Esposende (Homologação)', rc: 'RC Consultoria (White-Label)' },
-  fixarSite(info) { if (!info) return; if (this.def(info.ambiente)) this.gravar(info.ambiente); this.urls = info.ambientes || {}; this.interligado = !!info.interligado; Marca.aplicar(); },
+  fixarSite(info) { if (!info) return; if (this.def(info.ambiente)) this.gravar(info.ambiente); this.urls = info.ambientes || {}; this.interligado = !!info.interligado; this.chaveEstado = info.chave || ''; Marca.aplicar(); },
   irPara(id) {
     if (!this.def(id) || id === this.id) return;
     const u = this.urls?.[id]?.url;
@@ -3205,7 +3207,8 @@ const GestaoAmbientes = {
     const esp = !Ambiente.rc;
     return `<div class="panel amb-gestao" id="ambGestao"><h2>Gestão de Ambientes</h2>
       <p class="sub">${Cloud.base?.netlify ? 'Três sites do Netlify, cada um com o seu banco PostgreSQL (Netlify Database): o que é feito em Homologação ou na RC Consultoria nunca alcança a Produção sozinho. As ações abaixo passam de um site ao outro pela chave entre ambientes.' : 'Três bancos isolados no mesmo painel: o que é feito em Homologação ou na RC Consultoria nunca alcança a Produção.'} Só o Master usa estas ações; cada uma pede confirmação dupla e fica no log.</p>
-      ${Cloud.base?.netlify && !Ambiente.interligado ? '<div class="note warn amb-sem-ligacao" style="margin:0 0 10px">Este site ainda não está interligado aos outros ambientes: configure no Netlify as variáveis <b>PAINEL_CHAVE_AMBIENTES</b> (a mesma nos três sites) e <b>PAINEL_URL_PROD / PAINEL_URL_HOMOLOG / PAINEL_URL_RC</b>.</div>' : ''}
+      ${Cloud.base?.netlify && !Ambiente.interligado ? `<div class="note warn amb-sem-ligacao" style="margin:0 0 10px">Este site ainda não está interligado aos outros ambientes: ${Ambiente.chaveEstado === 'curta' ? 'a <b>PAINEL_CHAVE_AMBIENTES</b> deste site tem menos de 16 caracteres' : 'configure no Netlify a <b>PAINEL_CHAVE_AMBIENTES</b> (a mesma nos três sites)'} e <b>PAINEL_URL_PROD / PAINEL_URL_HOMOLOG / PAINEL_URL_RC</b>, e faça um novo deploy.</div>` : ''}
+      ${Cloud.base?.netlify ? '<p style="margin:0 0 10px"><button class="btn sec sm" data-a="bkp-amb-diag">Testar conexão entre ambientes</button></p>' : ''}
       <div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Empresa</th><th>Ambiente</th><th>Banco</th><th></th></tr></thead><tbody>${AMBIENTES.map(linha).join('')}</tbody></table></div>
       ${Recursos.ativo('versoes_v1368') ? `<div class="amb-versoes-box" id="ambVersoes" data-marca-fixa>${Versoes.htmlCache() || '<p class="hint">Carregando as versões dos ambientes…</p>'}</div>${(setTimeout(() => Versoes.preencher('ambVersoes'), 0), '')}` : ''}
       <div class="amb-acoes">
@@ -3305,6 +3308,18 @@ const GestaoAmbientes = {
   },
 
   /* 3 · Resetar Banco da RC Consultoria */
+  /** v13.76.1 · Netlify: testa a ligação deste site com os outros dois e mostra a causa exata de cada falha. */
+  async diagnostico() {
+    const ld = UI.carregando('Testando a conexão entre os ambientes…'); let r;
+    try { r = await Cloud.base._req('GET', '/api/ambientes/diagnostico'); } catch (e) { ld.fechar(); console.error('[painel][ambientes] diagnóstico', e.status, e.message, e.dados); return UI.toast('Não consegui testar: ' + (e.message || e)); }
+    ld.fechar();
+    console.table(r.ambientes.map(a => ({ ambiente: a.id, url: a.url, ok: a.ok, http: a.http, ms: a.ms, motivo: a.motivo }))); console.info('[painel][ambientes] chave deste site', r.chave);
+    const lin = a => `<tr><td><b>${esc(a.rotulo)}</b><div class="hint mono">${esc(a.url || '— endereço não configurado')}</div></td><td>${a.ok ? '<span class="pill ok">conectado</span>' : '<span class="pill bad">falhou</span>'}</td><td class="num">${a.http ?? '—'}</td><td class="hint">${esc(a.ok ? `${a.ms} ms` : a.motivo || a.erro || '')}</td></tr>`;
+    UI.modal({ titulo: 'Conexão entre ambientes', largo: true, corpo: `<p style="margin:0 0 8px">Este site: <b>${esc(Ambiente.ROT_SITE[r.ambiente] || r.ambiente)}</b> · chave ${r.chave.estado === 'ok' ? `configurada (${r.chave.tamanho} caracteres${r.chave.fraca ? ', recomendado 32+' : ''}) · impressão <b class="mono">${esc(r.chave.impressao)}</b>` : `<b>${r.chave.estado === 'curta' ? 'curta demais' : 'não configurada'}</b>`}</p>
+      <div class="tbl-wrap"><table class="nolabel diag-amb"><thead><tr><th>Ambiente</th><th>Situação</th><th class="num">HTTP</th><th>Detalhe</th></tr></thead><tbody>${r.ambientes.map(lin).join('')}</tbody></table></div>
+      <p class="hint" style="margin:8px 0 0">A impressão da chave tem que ser a mesma nos três sites (rode este teste em cada um). O detalhe também fica no console do navegador e em Netlify › Logs › Functions.</p>`, acoes: [{ rotulo: 'Fechar', classe: 'sec' }] });
+    return r;
+  },
   async resetarRC() {
     if (!this.pode()) return;
     if (!(await UI.confirmarImpacto('Resetar Banco da RC Consultoria', 'Todos os dados do banco <b>DB_RC_Consultoria</b> (lojas, equipe, acessos, lançamentos, log…) serão <b>apagados definitivamente</b> e a RC volta ao estado inicial — só com o usuário Master herdado da Produção (mesmo CPF e senha). Os bancos da Esposende (Produção e Homologação) não são afetados.'))) return;
@@ -3327,6 +3342,7 @@ const GestaoAmbientes = {
     if (a === 'bkp-amb-clonar') return this.clonar();
     if (a === 'bkp-amb-promover') return this.promover();
     if (a === 'bkp-amb-reset-rc') return this.resetarRC();
+    if (a === 'bkp-amb-diag') return this.diagnostico(); /* v13.76.1 */
   },
 };
 

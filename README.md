@@ -56,7 +56,7 @@ Cada ambiente é um **site (projeto) próprio no Netlify**, com o **seu próprio
 | `PAINEL_URL_PROD` | endereço da Produção | endereço da Produção | endereço da Produção |
 | `PAINEL_URL_HOMOLOG` | endereço da Homologação | endereço da Homologação | endereço da Homologação |
 | `PAINEL_URL_RC` | endereço da RC | endereço da RC | endereço da RC |
-| `PAINEL_CHAVE_AMBIENTES` | **o mesmo segredo nos três** (32+ caracteres) | idem | idem |
+| `PAINEL_CHAVE_AMBIENTES` | **o mesmo segredo nos três** (mínimo 16 caracteres; recomendado 32+ aleatórios) | idem | idem |
 | `PAINEL_MOSTRAR_AMBIENTES` | — | — | `0` para os clientes da RC não verem a Esposende no seletor (opcional) |
 | `PAINEL_SO_MASTER` | — (padrão: todos) | — (padrão: só o Master) | — (padrão: todos) |
 
@@ -94,6 +94,29 @@ Depois de alterar variáveis, faça um novo deploy (*Deploys › Trigger deploy*
 - **Banco inicial por site:**
   - **Produção e Homologação:** usam as duas migrações (esquema + semente).
   - **RC:** **apague `netlify/database/migrations/20261027120100_semente_inicial.sql` do repositório da RC antes do primeiro deploy.** Ela tem as lojas da Esposende. A RC começa vazia, e o Master vem herdado da Produção.
+
+### Se a Produção mostrar "não interligado" ou "sem acesso a este banco"
+
+Entre como Master em **Backup › Gestão de Ambientes** e clique em **Testar conexão entre ambientes** (v13.76.1). O teste mostra, para cada ambiente:
+
+- o endereço chamado;
+- o código HTTP;
+- a causa exata, que pode ser uma destas:
+  - endereço vazio ou inválido;
+  - falha de rede ou tempo esgotado;
+  - redirecionamento (endereço diferente do real);
+  - rota `/api/inter` inexistente (site de destino numa versão antiga);
+  - chave diferente;
+  - chave curta demais (menos de 16 caracteres);
+  - chave não configurada no destino.
+
+A **impressão da chave**, um código curto que não revela o valor, precisa ser igual nos três sites. Rode o teste em cada um para comparar.
+
+O mesmo detalhe vai para o console do navegador (`[painel][ambientes]`) e para **Netlify › Logs › Functions** (`[painel][inter]`), dos dois lados da chamada.
+
+A chave é conferida sem espaços nas pontas e sem aspas coladas por engano. Depois de mudar uma variável, faça **um novo deploy** em cada site: o Netlify só aplica a variável nova às funções publicadas depois.
+
+As rotas `/api/saude`, `/api/inter/*` e `/api/ambientes/*` respondem com CORS (`*`) e aceitam o pre-flight `OPTIONS`. A comunicação entre os sites é de servidor para servidor e não depende de CORS. O cookie de login (HttpOnly, SameSite=Strict) nunca é enviado a outro domínio.
 
 ## Publicar
 
