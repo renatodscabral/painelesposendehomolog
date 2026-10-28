@@ -1,0 +1,13 @@
+{
+  "name": "painel-gestao-esposende",
+  "private": true,
+  "type": "module",
+  "description": "Painel de Gestão Esposende no Netlify com Netlify Database (Postgres) e Netlify Functions",
+  "engines": { "node": ">=20.12.2" },
+  "scripts": {
+    "semente": "node scripts/gerar-semente-sql.mjs"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1"
+  }
+}
