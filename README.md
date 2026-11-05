@@ -254,3 +254,70 @@ O perfil Loja não tem acesso.
   lançados. O catálogo embutido não volta a ser mesclado. Conta nova que chega por planilha entra na lista e vai para o de-para
   (pendente/automática).
 - **Testes:** `tests/teste-contabil.mjs` (38 verificações, inclui o de-para).
+
+## v13.87 · Recebível Diário (FCX): cartão por operação e bandeira
+
+- **Recurso:** `rd_cartao_v1387` (Homologação sempre; Produção depois da liberação). Sem ele, o relatório fica como na v13.86.
+- **Prestação no cartão de débito (antes "Débito (LOTE)"):** aparece como "Débito Visa", "Débito Mastercard"… (sem o texto LOTE),
+  pelo líquido do MDR do ERP. Se o ERP não traz a taxa, usa o MDR % das vendas no débito da mesma adquirente e bandeira no dia (marcado com *).
+- **Cartão:** a tabela ganha a coluna Operação (Débito × Crédito). O novo **Resumo de Fechamento por Adquirente** mostra Débito (bruto,
+  MDR, líquido), Crédito (bruto, MDR, antecipação, líquido), aluguel de POS, subtotal por adquirente e Total Geral.
+- **Credsystem:** sai a tabela analítica (as linhas "OUTRAS"). Ficam o bruto, o MDR com o % médio, o líquido futuro e a agenda
+  (vencimento D+30/1º dia útil e valor total).
+- **Dados:** o Cruzamento da Auditoria de Adquirentes passa a gravar `bandeiras[].modalidade` e `loteBandeiras` no
+  `conc_fechamento`. Dias gravados antes da v13.87 mostram um aviso para regravar o Cruzamento; até lá, a prestação entra bruta.
+- Nenhuma mudança no servidor, no banco nem no `contabilidade.html`.
+
+## v13.88 · Correção da Gestão de Acessos + Prestação de Contas de Adiantamentos
+
+### Correção: "permissão marcada, mas o menu não aparece"
+- **Causa:** no Netlify, os dados de Contratos, Auditoria de Adquirentes/Conciliação, DFC e IEO eram entregues só ao Master
+  (regra `admin` do banco), e o painel escondia esses menus de quem não é Master, mesmo com a matriz liberando. Permissões
+  gravadas em formatos antigos (`true`, `"LEITURA"`, `{ nivel: 'Ler' }`…) também eram lidas como "sem acesso".
+- **Servidor:** `netlify/lib/permissoes.mjs` normaliza o JSON de permissões (strings, booleanos, números, aninhamentos, JSON em
+  texto) e calcula as permissões efetivas pela matriz. `sessaoDe` relê a conta a cada requisição. `documentos.mjs` entrega as
+  coleções da tabela `COLECOES_MATRIZ` a quem a matriz libera. A matriz do servidor (`netlify/lib/matriz-acessos.mjs`) é
+  **gerada do index.html** no build, então servidor e painel usam a mesma regra.
+- **Painel:** leitura padronizada (`PermNorm`), `temAcesso(modulo, acao)` global (menu, roteador e telas). Ao salvar, as linhas da
+  matriz que estão fora da tela não se perdem. As permissões da sessão são revalidadas na hora: conta alterada, volta para a
+  aba e a cada 60 s. Quem perde a tela aberta volta ao Início.
+- Salários, PDI, Ponto de Equilíbrio, Ocorrências/Pendências Credsystem, Auditoria, Backup e Gestão de Acessos continuam só do Master.
+
+### Prestação de Contas de Adiantamentos (recurso `adiant_v1388`)
+- **Importação** do arquivo de prestação (CSV, Excel ou JSON) no detalhe da viagem. Só o Master ou quem tem a nova opção
+  **"Pode importar arquivo de prestação de contas"** (`viagens.importar`, linha de Viagens na Gestão de Acessos).
+- **Motor de Crítica:** sinaliza despesa fora do período da viagem/solicitação, comprovante duplicado (na viagem e em outras
+  viagens), gasto não reembolsável (bebida alcoólica, multas, gastos pessoais) e teto por categoria (alimentação e transporte =
+  diárias; hospedagem = teto da política). A crítica sugere o valor aprovado; o Master/financeiro ajusta.
+- **Acerto de Contas Final** (tela + impressão A4): (+) adiantamento, (−) despesas comprovadas e aprovadas, (=) saldo a devolver ao
+  caixa ou a reembolsar ao viajante.
+- **Encerrar Prestação de Contas** (só o Master, ou aprovando na Liberação Remota) chama `POST /api/contabil/adiantamentos/encerrar`.
+  Isso trava a prestação, gera o título (devolução a receber / reembolso a pagar) e grava em partidas dobradas: o adiantamento pago
+  (D 1.1.2.03.002 / C Banco) e a liquidação (D Viagens e Estadias [+ D Devoluções a Receber] / C Adiantamentos [+ C Reembolsos a Pagar]).
+  Sem plano de contas, a contabilização fica pendente (`/contabilizar` depois). A baixa do título é feita em `/baixar`.
+  Tudo é idempotente pelo documento do lançamento.
+- **Migração** `20261107120000_esquema_adiantamentos.sql`: índice por documento nos lançamentos (checagem de duplicidade).
+- **Testes:** `tests/teste-adiantamentos.mjs` (13) e `tests/teste-contabil.mjs` (38).
+
+## v13.89 · Relatórios operacionais e pré-visualização de impressão padronizada (recurso `rel_v1389`)
+Só tela (painel e Módulo Contábil). Nenhuma função, tabela ou migração nova no backend.
+- **Solicitações Operacionais → aba "Relatório por período":** filtro de/até (data da solicitação) e loja. Mostra a contagem e os
+  valores por **status** (Atendida/Concluída, Em Andamento, Pendente), por **loja/filial** e por **tipo** (Manutenção, Insumos, TI,
+  Serviços, Equipamentos de Segurança, Outros), com a linha de total, o % de conclusão e o prazo médio de atendimento. No pedido
+  entram os campos **Tipo** (se vazio, vem do 1º item marcado), **Valor** (opcional) e **Situação** (Pendente / Em Andamento).
+  Na lista há o botão **"Em andamento"**.
+- **Adiantamento de Viagens → aba "Resumo Operacional":** filtro de/até (data de ida). Considera as viagens pagas. Cards no topo
+  (total adiantado, despesas comprovadas, deslocamento, saldo). Custos por tipo: adiantamentos, hotelaria/hospedagem,
+  alimentação, deslocamento/passagens e outros. Despesa = valor aprovado no Acerto de Contas, senão o comprovado. A tabela por
+  **setor/centro de custo** é expansível e abre as viagens de cada setor. Pode ser impressa.
+- **Pessoas → Imprimir relatório da equipe:** antes de imprimir abre as opções (período de/até e Férias).
+  - Folgas: saem só as **folgas agendadas no período** (aprovadas na Liberação Remota). As folgas fixas da escala não saem.
+  - Férias: o padrão é **"Imprimir apenas Períodos de Férias Programados/Agendados"**. A opção **"Incluir Períodos Aquisitivos
+    A Vencer"** acrescenta a situação do período aquisitivo.
+- **Pré-visualização de impressão universal:** todo documento abre numa folha A4 (retrato ou paisagem) com a barra
+  **[Imprimir] [Baixar PDF] [Fechar]** no topo. No celular, a folha aparece em escala reduzida.
+  - Os botões que baixavam o PDF direto agora passam pela prévia: Falta de Caixa, Histórico de Infrações, Termo de DVC, Ponto
+    de Equilíbrio e Resumo de Adiantamentos.
+  - No resumo de viagem, "Baixar PDF" continua gerando o PDF completo com os vouchers.
+  - O "Imprimir" do Módulo Contábil usa a mesma prévia.
+- Com o recurso desligado, tudo funciona como na v13.88.

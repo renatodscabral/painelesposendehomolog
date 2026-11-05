@@ -1,0 +1,110 @@
+/* v13.88 · Permissões da Gestão de Acessos no SERVIDOR — a mesma leitura do painel (public/index.html):
+   1) normalizarPermissoes: aceita o JSON gravado em qualquer formato antigo ou novo — strings ('ler', 'Modificar', 'EXCLUIR',
+      'editar', 'total'…), números (0–3), booleanos (true = Ler), listas e aninhamentos ({ fcx: { nivel: 'ler' } },
+      { fcx: { ler: true, modificar: true } }, { modulos: { … } }, JSON em texto) — e devolve a forma canônica
+      { <módulo>: ''|'ler'|'modificar'|'excluir', '<opção.extra>': true, sub: { … } }.
+   2) permissoesEfetivas: a lista de permissões do usuário pela matriz (níveis, opções extras, sub-permissões de telas e
+      ações, perfil Loja), igual a permissoesDaMatriz() do painel.
+   3) acessoPorMatriz: coleções que o banco reserva ao Master (regra 'admin') passam a ser entregues a quem a matriz
+      libera o módulo correspondente — era o defeito "permissão marcada, mas o menu não aparece" no Netlify. */
+import MATRIZ from './matriz-acessos.mjs';
+
+export const NIVEIS = ['', 'ler', 'modificar', 'excluir'];
+const IDS = new Set(MATRIZ.modulos.map(m => m.id));
+const CONHECIDAS = new Set(MATRIZ.modulos.flatMap(m => [...m.ler, ...m.modificar, ...m.excluir, ...m.extras.map(e => e[0])]));
+const sem = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const PAL = {
+  ler: ['ler', 'leitura', 'ver', 'visualizar', 'visualizacao', 'consulta', 'consultar', 'r', 'read', 'view', 'sim', 's', 'true', 'acesso'],
+  modificar: ['modificar', 'editar', 'edicao', 'escrever', 'gravar', 'alterar', 'lancar', 'w', 'write', 'edit', 'interact'],
+  excluir: ['excluir', 'exclusao', 'apagar', 'remover', 'total', 'completo', 'tudo', 'admin', 'd', 'delete', 'full'],
+};
+/** Nível canônico ('' | 'ler' | 'modificar' | 'excluir') de qualquer valor gravado. */
+export function nivelDe(v) {
+  if (v == null || v === false) return '';
+  if (v === true) return 'ler';
+  if (typeof v === 'number') return NIVEIS[Math.max(0, Math.min(3, Math.round(v)))] || '';
+  if (Array.isArray(v)) return v.map(nivelDe).reduce((a, x) => (NIVEIS.indexOf(x) > NIVEIS.indexOf(a) ? x : a), '');
+  if (typeof v === 'object') {
+    for (const k of ['nivel', 'nível', 'acesso', 'level', 'valor', 'value', 'permissao']) if (k in v) return nivelDe(v[k]);
+    let n = 0; for (const [k, x] of Object.entries(v)) { if (!x) continue; const t = sem(k); NIVEIS.forEach((nv, i) => { if (i && (PAL[nv].includes(t) || t === nv)) n = Math.max(n, i); }); }
+    return NIVEIS[n];
+  }
+  const t = sem(v); if (!t || ['nenhum', 'nao', 'n', 'sem', '-', 'false', 'none', '0'].includes(t)) return '';
+  if (/^[0-3]$/.test(t)) return NIVEIS[Number(t)];
+  for (const nv of ['excluir', 'modificar', 'ler']) if (PAL[nv].includes(t)) return nv;
+  return '';
+}
+const sim = v => v === true || v === 1 || ['true', 'sim', 's', '1', 'yes', 'on'].includes(sem(v)) || (typeof v === 'string' && nivelDe(v) !== '');
+/** Forma canônica do JSON de permissões (ver o cabeçalho). Nunca lança erro: formato desconhecido = sem acesso. */
+export function normalizarPermissoes(p) {
+  if (typeof p === 'string') { try { p = JSON.parse(p); } catch { return {}; } }
+  if (!p || typeof p !== 'object') return {};
+  const out = {};
+  const aplicar = (obj, prefixo = '') => {
+    if (Array.isArray(obj)) { obj.forEach(x => { if (typeof x === 'string') { const t = x.trim(); if (CONHECIDAS.has(t)) out[t] = true; else { const [m, n] = t.split(/[:=]/); if (IDS.has(sem(m))) out[sem(m)] = nivelDe(n ?? true); } } else if (x && typeof x === 'object' && (x.modulo || x.id)) { const id = sem(x.modulo || x.id); if (IDS.has(id)) out[id] = nivelDe(x); } }); return; }
+    for (const [k0, v] of Object.entries(obj)) {
+      const k = String(k0).trim(), kk = sem(k);
+      if (kk === 'sub') { if (v && typeof v === 'object') out.sub = v; continue; }
+      if (['modulos', 'matriz', 'niveis', 'permissoes', 'acessos'].includes(kk) && v && typeof v === 'object' && !prefixo) { aplicar(v, k); continue; }
+      if (IDS.has(kk)) { out[kk] = nivelDe(v); continue; }
+      if (k.includes('.')) { if (CONHECIDAS.has(k)) out[k] = sim(v); continue; }
+    }
+  };
+  aplicar(p);
+  return out;
+}
+export const normalizarPerfil = p => { const t = sem(p).toUpperCase(); return t === 'MASTER' || t === 'GESTOR' || t === 'ADMIN' ? 'MASTER' : t === 'LOJA' ? 'LOJA' : t === 'OPERACIONAL' || t === 'OPERADOR' ? 'OPERACIONAL' : t; };
+
+/** Sub-permissões (v13.83): telas desmarcadas tiram as permissões que levam; ações marcadas filtram Modificar/Excluir. */
+function recorte(modId, s = {}) {
+  const ts = Object.entries(MATRIZ.telas).filter(([, c]) => c.mod === modId).flatMap(([rota, c]) => c.telas.map(([k, perms]) => ({ id: rota + ':' + k, perms })));
+  const on = Array.isArray(s.telas) ? new Set(s.telas) : null, fora = new Set();
+  if (on) { const ficam = new Set(ts.filter(t => on.has(t.id)).flatMap(t => t.perms)); ts.filter(t => !on.has(t.id)).forEach(t => t.perms.forEach(p => { if (!ficam.has(p)) fora.add(p); })); }
+  return { fora, acoes: Array.isArray(s.acoes) ? new Set(s.acoes) : null };
+}
+/**
+ * Permissões efetivas pela matriz (Set). recursoAtivo(k): recursos liberados no ambiente (Homologação: todos).
+ * Master: '*'. Perfil Loja: só leitura (Solicitações até Modificar), como no painel.
+ */
+export function permissoesEfetivas(usuario, recursoAtivo = () => true) {
+  const perfil = normalizarPerfil(usuario?.perfil); if (perfil === 'MASTER') return new Set(['*']);
+  if (perfil !== 'OPERACIONAL' && perfil !== 'LOJA') return new Set();
+  const m = normalizarPermissoes(usuario?.permissoes), v83 = recursoAtivo('acessos_v1383'), loja = perfil === 'LOJA', sub = (v83 && m.sub) || {}, out = new Set();
+  for (const mod of MATRIZ.modulos) {
+    if ((mod.v1383 && !v83) || (mod.rec && !recursoAtivo(mod.rec))) continue;
+    let n = NIVEIS.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); if (n < 0) n = 0;
+    mod.extras.forEach(([k, livre]) => { if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); });
+    if (n <= 0) continue;
+    if (loja) n = mod.id === 'solicitacoes' ? Math.min(n, 2) : 1;
+    const { fora, acoes } = recorte(mod.id, sub[mod.id] || {}), pode = (p, acao) => !fora.has(p) && (!acao || !acoes || acoes.has(p));
+    mod.ler.forEach(p => pode(p) && out.add(p)); if (n >= 2) mod.modificar.forEach(p => pode(p, 1) && out.add(p)); if (n >= 3) mod.excluir.forEach(p => pode(p, 1) && out.add(p));
+  }
+  return out;
+}
+export const tem = (perms, p) => !!perms && (perms.has('*') || perms.has(p));
+
+/* Coleções de regra 'admin' liberadas pela matriz: [permissões que liberam a leitura, permissões que liberam a gravação]. */
+export const COLECOES_MATRIZ = {
+  contratos_locacao: [['lojas.contratos.ver'], ['lojas.contratos.editar', 'lojas.contrato.editar', 'lojas.contratos.excluir']],
+  aluguel_projecoes: [['lojas.contratos.ver'], ['lojas.contratos.editar', 'lojas.contrato.editar']],
+  adq_taxas: [['retaguarda.adq.ver'], ['retaguarda.adq.taxas']],
+  adq_auditorias: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']],
+  adq_excecoes: [['retaguarda.adq.ver'], ['retaguarda.adq.importar', 'retaguarda.adq.taxas']],
+  ec_taxas: [['retaguarda.adq.ver'], ['retaguarda.adq.taxas']],
+  conc_fechamento: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']],
+  contasBancarias: [['fcx.dfc.ver'], ['fcx.dfc.contas']],
+  extratos: [['fcx.dfc.ver'], ['fcx.dfc.importar']],
+  dfc: [['fcx.dfc.ver'], ['fcx.dfc.importar', 'fcx.dfc.regras']],
+  ieo_ocorrencias: [[], ['retaguarda.ieo.lancar']],
+  ieo_fechamentos: [[], ['retaguarda.ieo.fechar']],
+  ieo_laudos: [[], ['retaguarda.ieo.laudo']],
+  ieo_auto: [[], ['retaguarda.ieo.lancar', 'retaguarda.ieo.fechar']],
+};
+const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
+/** A matriz libera esta leitura ('r') ou gravação ('w')? (só para as coleções da lista acima; Loja nunca grava por aqui) */
+export function acessoPorMatriz(sess, caminho, op) {
+  if (!sess || sess.trocaPendente || !sess.perms) return false;
+  const r = COLECOES_MATRIZ[semAmb(caminho).split('/')[0]]; if (!r) return false;
+  if (op === 'w' && sess.perfil === 'LOJA') return false;
+  return (op === 'r' ? r[0] : r[1]).some(p => tem(sess.perms, p));
+}

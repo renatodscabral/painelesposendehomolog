@@ -27,13 +27,21 @@
    POST   /api/contabil/depara                        { rotulo, conta? } → nova conta para o FCX, criada no Módulo Contábil
    PUT    /api/contabil/depara                        { itens: [{ chave, conta?, status?, ativa? }] } → revisão (conta escolhida = "revisado")
    GET    /api/contabil/fcx-contas                    → lista somente leitura para o FCX (quem lê o FCX lê esta lista)
-   POST   /api/contabil/fcx-contas                    { contas: [rótulos] } → rótulos que o FCX usa e o plano ainda não conhece (ficam para revisão) */
+   POST   /api/contabil/fcx-contas                    { contas: [rótulos] } → rótulos que o FCX usa e o plano ainda não conhece (ficam para revisão)
+   v13.88 · Adiantamentos de viagem (Módulo 8) — acerto de contas final em partidas dobradas:
+   POST   /api/contabil/adiantamentos/encerrar        { viagemId } → só o Master: trava a prestação, grava o acerto e os títulos
+                                                        (devolução a receber / reembolso a pagar) e contabiliza o adiantamento e a liquidação
+   POST   /api/contabil/adiantamentos/contabilizar    { viagemId } → contabiliza um acerto encerrado sem plano de contas (pendente)
+   POST   /api/contabil/adiantamentos/baixar          { viagemId, funcionarioId?, data, forma? } → baixa do título (devolução recebida /
+                                                        reembolso pago): Master ou "Viagens · Modificar" (financeiro) */
 import { createHash, randomUUID } from 'node:crypto';
 import { q, tx } from '../lib/db.mjs';
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
 import { sessaoDe } from '../lib/sessao.mjs';
 import { NIVEL } from '../lib/regras.mjs';
 import * as M from '../lib/contabil-motor.mjs';
+import { permissoesEfetivas, normalizarPermissoes, tem } from '../lib/permissoes.mjs';
+import { gravar as gravarDoc } from '../lib/documentos.mjs';
 
 /* ---------------------------------------------------------------- acesso */
 /* Master: tudo. Operacional: linha "Contabilidade" da Gestão de Acessos (Ler = ver; Modificar = lançar e plano;
@@ -43,9 +51,8 @@ export function permissoesContabil(sess) {
   if (!sess || sess.trocaPendente) return new Set();
   if (sess.nivel >= NIVEL.admin) return new Set(Object.values(ACOES).flat());
   if (sess.perfil !== 'OPERACIONAL') return new Set();
-  const p = sess.usuario?.permissoes || {}, n = ['', 'ler', 'modificar', 'excluir'].indexOf(p.contabil || ''), sub = p.sub?.contabil?.acoes, out = new Set();
-  ['ler', 'modificar', 'excluir'].forEach((k, i) => { if (n > i) ACOES[k].forEach(a => { if (k === 'ler' || !sub || sub.includes(a)) out.add(a); }); });
-  return out;
+  /* v13.88: mesma matriz do painel (níveis normalizados, sub-permissões de ações) — permissões efetivas da sessão */
+  const perms = sess.perms || permissoesEfetivas(sess.usuario); return new Set(Object.values(ACOES).flat().filter(a => tem(perms, a)));
 }
 const exigir = (perms, a) => { if (!perms.has(a)) throw new ErroHttp(403, 'Seu acesso não permite esta operação no Módulo Contábil (Gestão de Acessos › Contabilidade).'); };
 
@@ -148,7 +155,7 @@ const deparaDb = r => ({ chave: r.chave, erpCodigo: r.erp_codigo, erpNome: r.erp
 async function lerDepara(t = q) { return (await t(`SELECT d.*, c.nome AS conta_nome FROM contab_depara d LEFT JOIN contab_contas c ON c.codigo = d.conta WHERE d.origem = 'fcx'`)).map(deparaDb).sort((a, b) => M.cmpRotuloFCX(a.chave, b.chave)); }
 const resumoDepara = l => ({ total: l.length, automatico: l.filter(x => x.status === 'automatico').length, revisado: l.filter(x => x.status === 'revisado').length, pendente: l.filter(x => x.status === 'pendente').length, agrupadores: l.filter(x => x.agrupador).length, doContabil: l.filter(x => x.fonte === 'contabil').length, inativas: l.filter(x => !x.ativa).length });
 /** Nível do usuário no FCX (0 nenhum · 1 ler · 2 modificar · 3 excluir); o Master tem tudo. */
-function nivelFcx(sess) { if (!sess || sess.trocaPendente) return 0; if (sess.nivel >= NIVEL.admin) return 3; const n = ['', 'ler', 'modificar', 'excluir'].indexOf(sess.usuario?.permissoes?.fcx || ''); return sess.perfil === 'OPERACIONAL' ? Math.max(1, n) : Math.max(0, n); }
+function nivelFcx(sess) { if (!sess || sess.trocaPendente) return 0; if (sess.nivel >= NIVEL.admin) return 3; const n = ['', 'ler', 'modificar', 'excluir'].indexOf(normalizarPermissoes(sess.usuario?.permissoes).fcx || ''); /* v13.88: normalizado */ return sess.perfil === 'OPERACIONAL' ? Math.max(1, n) : Math.max(0, n); }
 /** 'novo:<k>' → conta analítica do complemento (criada uma vez, pelo nome, debaixo da mãe). podeCriar=false: só procura. */
 async function contaNova(t, k, contas, uid, podeCriar) {
   const n = M.NOVAS_CONTAS_FCX[k]; if (!n) return null;
@@ -178,6 +185,120 @@ async function gravarDepara(t, rotulos, { usadas = [], uid, podeCriar = false, r
   return { novos, atualizados, criadas };
 }
 
+/* ---------------------------------------------------------------- v13.88 · adiantamentos de viagem: acerto, contabilização e baixa */
+const CAM_VIAGEM = id => 'funcionarios/_viagens/pedidos/' + id;
+const cts = v => Math.round((Number(v) || 0) * 100);
+/** Acerto da prestação (em centavos): por pessoa no repasse individual; senão, um grupo só. Exige a análise gravada em cada despesa
+    (despesas[].aprovacao.valor = valor aprovado depois da crítica: glosas e excedentes de teto fora). */
+export function acertoDaViagem(v) {
+  const ind = v?.pagamento?.modo === 'individual', contas = v?.pagamento?.contas || [], desp = v?.despesas || [];
+  const aprov = d => Math.max(0, Math.min(cts(d.valor), cts(d.aprovacao?.valor)));
+  const grupos = (ind && contas.length ? contas.map(c => ({ funcionarioId: c.funcionarioId, nome: c.nome, adiantado: cts(c.valorPago ?? c.valor) }))
+    : [{ funcionarioId: v.funcionarioId, nome: v.nome, adiantado: cts(v.valorPago ?? v.valor) }]).map(g => {
+    const ds = ind && contas.length ? desp.filter(d => d.funcionarioId === g.funcionarioId) : desp, comprovado = ds.reduce((a, d) => a + cts(d.valor), 0), aprovado = ds.reduce((a, d) => a + aprov(d), 0), saldo = g.adiantado - aprovado;
+    return { ...g, comprovado, aprovado, glosado: comprovado - aprovado, saldo, tipo: saldo > 0 ? 'devolver' : saldo < 0 ? 'reembolsar' : 'quitado' };
+  });
+  const porCategoria = {}; desp.forEach(d => { const x = aprov(d); if (x) porCategoria[d.categoria || 'Outros'] = (porCategoria[d.categoria || 'Outros'] || 0) + x; });
+  const soma = f => grupos.reduce((a, g) => a + f(g), 0);
+  return { semAnalise: desp.filter(d => !d.aprovacao || !Number.isFinite(Number(d.aprovacao.valor))).length, grupos, porCategoria,
+    adiantado: soma(g => g.adiantado), comprovado: soma(g => g.comprovado), aprovado: soma(g => g.aprovado), devolver: soma(g => Math.max(0, g.saldo)), reembolsar: soma(g => Math.max(0, -g.saldo)) };
+}
+const CONTAS_ADT = { adiantamento: '1.1.2.03.002', banco: '1.1.1.02.001' };
+const NOVAS_ADT = { devolver: { pai: '1.1.2.03', nome: 'Devoluções de Adiantamentos de Viagem a Receber' }, reembolsar: { pai: '2.1.5.01', nome: 'Reembolsos de Despesas de Viagem a Pagar' } };
+/** Contas do acerto: parâmetros 'adiantamentos' do Módulo Contábil (opcional) ou as do plano padrão; as que faltam são criadas uma vez. */
+async function contasAdt(t, sess) {
+  const contas = await lerContas(t), cfg = (await t(`SELECT valor FROM contab_parametros WHERE chave = 'adiantamentos'`))[0]?.valor || {}, por = c => contas.find(x => x.codigo === c);
+  const analitica = (cod, rot) => { const c = por(cod); if (!c || c.tipo !== 'A' || !c.ativa) throw new ErroHttp(422, `Conta de ${rot} (${cod}) não existe ou não é analítica ativa no plano de contas — ajuste no Módulo Contábil.`); return c.codigo; };
+  const nova = async k => { if (cfg['conta' + k[0].toUpperCase() + k.slice(1)]) return analitica(cfg['conta' + k[0].toUpperCase() + k.slice(1)], k);
+    const n = NOVAS_ADT[k], ja = contas.find(c => c.pai === n.pai && M.normalizar(c.nome) === M.normalizar(n.nome)); if (ja) return ja.codigo;
+    if (!por(n.pai) || por(n.pai).tipo !== 'S') throw new ErroHttp(422, `A conta-mãe ${n.pai} não existe no plano de contas.`);
+    const codigo = M.proximoCodigo(n.pai, contas), c = M.validarConta({ codigo, nome: n.nome, tipo: 'A' }, contas);
+    await t(`INSERT INTO contab_contas (codigo, nome, grupo, natureza, tipo, pai, nivel, redutora, dre, dva, tributos, modelo_tributario, ia, criado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+      [c.codigo, c.nome, c.grupo, c.natureza, c.tipo, c.pai, c.nivel, c.redutora, c.dre, c.dva, c.tributos, c.modeloTributario, JSON.stringify({ origem: 'acerto de adiantamentos (v13.88)' }), sess.uid]); contas.push({ ...c, ativa: true }); return c.codigo; };
+  const despesa = cfg.contaDespesa ? analitica(cfg.contaDespesa, 'despesa de viagem') : (await contaNova(t, 'viagens', contas, sess.uid, true))?.codigo;
+  if (!despesa) throw new ErroHttp(422, 'Não encontrei a conta de despesas de viagem (5.3.3 · Viagens e Estadias).');
+  return { adiantamento: analitica(cfg.contaAdiantamento || CONTAS_ADT.adiantamento, 'adiantamento a empregados'), banco: analitica(cfg.contaBanco || CONTAS_ADT.banco, 'banco'), despesa, devolver: await nova('devolver'), reembolsar: await nova('reembolsar') };
+}
+const hojeISO = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); /* dia em Brasília */
+const itensLanc = xs => xs.filter(x => x.valor > 0).map((x, i) => ({ seq: i + 1, conta: x.conta, dc: x.dc, valor: x.valor, centro: x.centro || null, historico: x.historico || null }));
+/** Lançamentos do adiantamento (pagamento) e da liquidação; idempotente pelo documento (ADT-<id> e ADT-<id>-ACERTO, sem estorno). */
+async function contabilizarViagem(t, sess, v, ac) {
+  const [n] = await t('SELECT count(*)::int AS n FROM contab_contas'); if (!n.n) return { pendente: true, motivo: 'O plano de contas do Módulo Contábil ainda não foi criado.' };
+  const params = await lerParametros(t), hoje = hojeISO(); if (params.fechadoAte && hoje <= params.fechadoAte) throw new ErroHttp(422, `O período contábil está fechado até ${params.fechadoAte.split('-').reverse().join('/')}.`);
+  const c = await contasAdt(t, sess), A = `ADT-${v.id}`, B = `ADT-${v.id}-ACERTO`;
+  const feitos = new Map((await t(`SELECT doc_ref, numero FROM contab_lancamentos l WHERE doc_ref = ANY($1) AND origem <> 'estorno' AND NOT EXISTS (SELECT 1 FROM contab_lancamentos e WHERE e.estorno_de = l.id)`, [[A, B]])).map(r => [r.doc_ref, Number(r.numero)]));
+  const quem = (v.pagamento?.modo === 'individual' ? (v.pagamento.contas || []).map(x => x.nome) : [v.nome]).filter(Boolean).join(', '), destino = v.destino || v.destinoCidade || '', centro = v.centroCusto || null, out = [];
+  if (feitos.has(A)) out.push({ tipo: 'adiantamento', numero: feitos.get(A), existente: true });
+  else if (ac.adiantado > 0) { const pago = String(v.pagoData || hoje).slice(0, 10), data = params.fechadoAte && pago <= params.fechadoAte ? hoje : pago;
+    const r = await gravarLancamento(t, sess, { data, historico: `Adiantamento de viagem pago · ${quem}${destino ? ' · ' + destino : ''}${data !== pago ? ` (pago em ${pago.split('-').reverse().join('/')}; período fechado)` : ''}`.slice(0, 500), origem: 'adiantamento', docRef: A, total: ac.adiantado,
+      itens: itensLanc([{ conta: c.adiantamento, dc: 'D', valor: ac.adiantado, centro }, { conta: c.banco, dc: 'C', valor: ac.adiantado, centro }]) }); out.push({ tipo: 'adiantamento', numero: r.numero, id: r.id }); }
+  if (feitos.has(B)) out.push({ tipo: 'acerto', numero: feitos.get(B), existente: true });
+  else if (ac.adiantado > 0 || ac.aprovado > 0) {
+    const ds = Object.entries(ac.porCategoria).map(([cat, val]) => ({ conta: c.despesa, dc: 'D', valor: val, centro, historico: cat }));
+    const itens = itensLanc([...ds, { conta: c.devolver, dc: 'D', valor: ac.devolver, historico: 'Saldo a devolver pelo viajante ao caixa' }, { conta: c.adiantamento, dc: 'C', valor: ac.adiantado, centro }, { conta: c.reembolsar, dc: 'C', valor: ac.reembolsar, historico: 'Saldo a reembolsar ao viajante' }]);
+    const tot = itens.filter(i => i.dc === 'D').reduce((a, i) => a + i.valor, 0);
+    const r = await gravarLancamento(t, sess, { data: hoje, historico: `Acerto de contas da prestação · ${quem}${destino ? ' · ' + destino : ''}: despesas aprovadas ${M.fmt(ac.aprovado)}${ac.devolver ? ` · a devolver ${M.fmt(ac.devolver)}` : ''}${ac.reembolsar ? ` · a reembolsar ${M.fmt(ac.reembolsar)}` : ''}`.slice(0, 500), origem: 'adiantamento', docRef: B, total: tot, itens });
+    out.push({ tipo: 'acerto', numero: r.numero, id: r.id });
+  }
+  return { pendente: false, lancamentos: out, contas: c, em: new Date().toISOString() };
+}
+async function lerViagem(t, id) { const [d] = await t('SELECT doc_id, dados FROM documentos WHERE caminho = $1 FOR UPDATE', [CAM_VIAGEM(String(id || ''))]); if (!d) throw new ErroHttp(404, 'Viagem não encontrada.'); return { id: d.doc_id, ...d.dados }; }
+const histV = (v, sess, txt, de, para) => [...(v.historico || []), { em: new Date().toISOString(), por: sess.uid, porNome: sess.usuario?.nome || 'Master', txt, ...(de ? { de, para } : {}) }].slice(-40);
+const reais = c => M.reais(c);
+async function rotaAdiantamentos(req, sess, perms, acao) {
+  const d = await corpo(req), master = sess.nivel >= NIVEL.admin;
+  if (acao === 'encerrar') {
+    if (!master) throw new ErroHttp(403, 'Só o Master encerra a prestação de contas (dinheiro de viagem é decisão do Master).');
+    return tx(async t => {
+      const v = await lerViagem(t, d.viagemId); if (v.acerto?.encerradoEm || v.status === 'concluido') throw new ErroHttp(409, 'Esta prestação de contas já foi encerrada.');
+      if (!['aguardando_prestacao', 'prestacao_enviada'].includes(v.status)) throw new ErroHttp(422, 'A prestação só é encerrada depois do pagamento do adiantamento.');
+      const ac = acertoDaViagem(v); if (ac.semAnalise) throw new ErroHttp(422, `${ac.semAnalise} despesa(s) sem análise gravada: abra o Acerto de Contas, confira a crítica e salve antes de encerrar.`);
+      const venc = v.politica?.prazoData && v.politica.prazoData >= hojeISO() ? v.politica.prazoData : hojeISO();
+      const titulos = ac.grupos.filter(g => g.saldo).map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, tipo: g.tipo, valor: reais(Math.abs(g.saldo)), status: 'aberto', vencimento: venc }));
+      /* sem SAVEPOINT: as partidas só entram na transação do próprio lançamento (trava do banco). Erro contábil (período
+         fechado, conta faltando) desfaz o encerramento inteiro e volta para a tela; sem plano de contas, fica "pendente". */
+      const contabil = await contabilizarViagem(t, sess, v, ac);
+      const acerto = { encerradoEm: new Date().toISOString(), encerradoPor: sess.uid, encerradoPorNome: sess.usuario?.nome || 'Master', adiantado: reais(ac.adiantado), comprovado: reais(ac.comprovado), aprovado: reais(ac.aprovado), glosado: reais(ac.comprovado - ac.aprovado),
+        saldo: reais(ac.adiantado - ac.aprovado), devolver: reais(ac.devolver), reembolsar: reais(ac.reembolsar), grupos: ac.grupos.map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, adiantado: reais(g.adiantado), aprovado: reais(g.aprovado), glosado: reais(g.glosado), saldo: reais(g.saldo), tipo: g.tipo })), titulos, contabil };
+      const txt = `Prestação encerrada (acerto final) · despesas aprovadas ${M.fmt(ac.aprovado)} de ${M.fmt(ac.adiantado)} adiantados${ac.devolver ? ` · a devolver ${M.fmt(ac.devolver)}` : ''}${ac.reembolsar ? ` · a reembolsar ${M.fmt(ac.reembolsar)}` : ''}${contabil.pendente ? ' · contabilização pendente' : ` · lançamentos nº ${contabil.lancamentos.map(l => l.numero).join(', ')}`}`;
+      const { id, ...dados } = v; await gravarDoc(t, sess, CAM_VIAGEM(id), { ...dados, status: 'concluido', concluidoEm: acerto.encerradoEm, concluidoPor: sess.uid, concluidoPorNome: acerto.encerradoPorNome, acerto, historico: histV(v, sess, txt, v.status, 'concluido') });
+      return json(200, { acerto });
+    });
+  }
+  if (acao === 'contabilizar') {
+    if (!master && !perms.has('contabil.lancar')) throw new ErroHttp(403, 'Contabilizar o acerto: Master ou "Contabilidade · Modificar".');
+    return tx(async t => {
+      const v = await lerViagem(t, d.viagemId); if (!v.acerto?.encerradoEm) throw new ErroHttp(422, 'Encerre a prestação de contas antes de contabilizar.');
+      if (v.acerto.contabil && !v.acerto.contabil.pendente) return json(200, { acerto: v.acerto });
+      const contabil = await contabilizarViagem(t, sess, v, acertoDaViagem(v)); if (contabil.pendente) throw new ErroHttp(409, contabil.motivo);
+      const acerto = { ...v.acerto, contabil }, { id, ...dados } = v;
+      await gravarDoc(t, sess, CAM_VIAGEM(id), { ...dados, acerto, historico: histV(v, sess, `Acerto contabilizado · lançamentos nº ${contabil.lancamentos.map(l => l.numero).join(', ')}`) });
+      return json(200, { acerto });
+    });
+  }
+  if (acao === 'baixar') {
+    if (!master && !tem(sess.perms, 'viagens.pagar')) throw new ErroHttp(403, 'Baixar o título: Master ou o financeiro ("Viagens · Modificar").');
+    const data = String(d.data || hojeISO()); if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) throw new ErroHttp(422, 'Data da baixa inválida (AAAA-MM-DD).');
+    return tx(async t => {
+      const v = await lerViagem(t, d.viagemId), ts = v.acerto?.titulos || [], i = ts.findIndex(x => x.status === 'aberto' && (!d.funcionarioId || x.funcionarioId === d.funcionarioId)); if (i < 0) throw new ErroHttp(404, 'Nenhum título em aberto nesta viagem.');
+      const ti = ts[i], val = cts(ti.valor); let lanc = null;
+      if (v.acerto.contabil && !v.acerto.contabil.pendente) {
+        const params = await lerParametros(t); if (params.fechadoAte && data <= params.fechadoAte) throw new ErroHttp(422, 'Data da baixa em período contábil fechado.');
+        const c = await contasAdt(t, sess), ref = `ADT-${v.id}-BAIXA-${ti.funcionarioId || 'unico'}`;
+        const [ja] = await t(`SELECT numero FROM contab_lancamentos l WHERE doc_ref = $1 AND NOT EXISTS (SELECT 1 FROM contab_lancamentos e WHERE e.estorno_de = l.id)`, [ref]);
+        if (ja) lanc = { numero: Number(ja.numero), existente: true };
+        else { const dev = ti.tipo === 'devolver', r = await gravarLancamento(t, sess, { data, historico: `${dev ? 'Devolução de saldo de adiantamento recebida' : 'Reembolso de despesas de viagem pago'} · ${ti.nome}${d.forma ? ' · ' + String(d.forma).slice(0, 40) : ''}`, origem: 'adiantamento', docRef: ref, total: val,
+            itens: itensLanc(dev ? [{ conta: c.banco, dc: 'D', valor: val }, { conta: c.devolver, dc: 'C', valor: val }] : [{ conta: c.reembolsar, dc: 'D', valor: val }, { conta: c.banco, dc: 'C', valor: val }]) }); lanc = { numero: r.numero, id: r.id }; }
+      }
+      const titulos = ts.map((x, k) => k === i ? { ...x, status: 'baixado', baixa: { data, forma: d.forma ? String(d.forma).slice(0, 40) : '', por: sess.uid, porNome: sess.usuario?.nome || '', em: new Date().toISOString(), lancamento: lanc } } : x);
+      const acerto = { ...v.acerto, titulos }, { id, ...dados } = v;
+      await gravarDoc(t, sess, CAM_VIAGEM(id), { ...dados, acerto, historico: histV(v, sess, `${ti.tipo === 'devolver' ? 'Devolução recebida' : 'Reembolso pago'} · ${ti.nome} · ${M.fmt(val)}${lanc ? ` · lançamento nº ${lanc.numero}` : ''}`) });
+      return json(200, { acerto });
+    });
+  }
+  throw new ErroHttp(404, 'Ação de adiantamentos desconhecida.');
+}
+
 /* ---------------------------------------------------------------- rota */
 async function corpo(req) { const t = await req.text(); if (t.length > 2 * 1024 * 1024) throw new ErroHttp(413, 'Requisição grande demais.'); try { return t ? JSON.parse(t) : {}; } catch { throw new ErroHttp(400, 'Corpo inválido.'); } }
 const pgErro = e => { const m = String(e?.message || ''); if (e?.code === 'P0001' || m.startsWith('CONTAB:')) return new ErroHttp(422, m.replace(/^CONTAB:\s*/, '')); if (e?.code === '23505') return new ErroHttp(409, /estorno_de/.test(m + (e.constraint || '')) ? 'Este lançamento já foi estornado.' : 'Registro duplicado (código ou nome já existe nesta conta-mãe).'); if (e?.code === '23503') return new ErroHttp(409, 'A conta está em uso (lançamentos ou contas filhas) — inative em vez de excluir.'); if (e?.code === '23514') return new ErroHttp(422, 'Dados fora das regras do plano de contas (' + (e.constraint || 'verificação') + ').'); return e; };
@@ -198,6 +319,7 @@ export default rota(async req => {
         return json(200, { registradas: r.novos, criadas: r.criadas });
       }
     }
+    if (r0 === 'adiantamentos' && met === 'POST') return await rotaAdiantamentos(req, sess, perms, r1); /* v13.88: Master/financeiro (não exige o Módulo Contábil aberto) */
     exigir(perms, 'contabil.ver');
     if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
 

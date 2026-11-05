@@ -2,6 +2,7 @@
    Níveis: view (1) < interact (2) < admin (3). No Netlify: perfil MASTER = admin; OPERACIONAL = interact.
    Coleções fora da lista: leitura e gravação para qualquer usuário logado (interact), como no claude.ai.
    {self}: o ramo da própria conta (auditoria/<id>, presenca/<id>) — a conta é o id do usuário logado. */
+import { normalizarPerfil, normalizarPermissoes } from './permissoes.mjs';
 export const REGRAS = {
   salarios: ['admin', 'admin'], config: ['interact', 'admin'], auditoria: ['admin', 'admin'], 'auditoria/{self}': ['interact', 'interact'],
   presenca: ['admin', 'admin'], 'presenca/{self}': ['interact', 'interact'], contasBancarias: ['admin', 'admin'], extratos: ['admin', 'admin'],
@@ -15,7 +16,7 @@ export const REGRAS = {
   lojas_faturamento: ['interact', 'admin'], cred_pendencias: ['admin', 'admin'], ec_taxas: ['admin', 'admin'], conc_fechamento: ['admin', 'admin'],
 };
 export const NIVEL = { nenhum: 0, view: 1, interact: 2, admin: 3 };
-export const nivelDoPerfil = perfil => (perfil === 'MASTER' ? NIVEL.admin : perfil === 'OPERACIONAL' || perfil === 'LOJA' ? NIVEL.interact : NIVEL.nenhum); // v13.83: LOJA lê como Operacional
+export const nivelDoPerfil = perfil0 => { const perfil = normalizarPerfil(perfil0); return perfil === 'MASTER' ? NIVEL.admin : perfil === 'OPERACIONAL' || perfil === 'LOJA' ? NIVEL.interact : NIVEL.nenhum; }; // v13.83: LOJA lê como Operacional · v13.88: perfil normalizado ('Operacional', 'master'…)
 
 /* v13.83 · Perfil Loja (ponta): lê como Operacional, mas só grava o que é dele — a Nova Solicitação de Viagem (com
    "Pode solicitar viagem"), o pedido de aprovação dela na Liberação Remota, os documentos do RH pedidos na viagem
@@ -23,12 +24,12 @@ export const nivelDoPerfil = perfil => (perfil === 'MASTER' ? NIVEL.admin : perf
 const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
 export const DOCS_VIAGEM = ['cpf', 'rg', 'nascimento', 'docsAtualizadosEm', 'docsOrigem', 'atualizadoEm', 'atualizadoPor', 'criadoEm', 'criadoPor'];
 export function lojaPodeGravar(sess, caminho, op, atual, novo) {
-  if (!sess || sess.perfil !== 'LOJA') return true;
+  if (!sess || normalizarPerfil(sess.perfil) !== 'LOJA') return true;
   if (op === 'remove') return false;
-  const c = semAmb(caminho), s = c.split('/'), perms = sess.usuario?.permissoes || {}, viagem = perms['viagens.solicitar'] === true;
+  const c = semAmb(caminho), s = c.split('/'), perms = normalizarPermissoes(sess.usuario?.permissoes), viagem = perms['viagens.solicitar'] === true; /* v13.88: formato normalizado */
   if ((s[0] === 'auditoria' || s[0] === 'presenca') && s[1] === sess.uid) return true;
   if (s[0] === 'usuarios') return s[1] === sess.uid;
-  if (s[0] === 'solicitacoes' && s.length === 2) return perms.solicitacoes !== '' ;
+  if (s[0] === 'solicitacoes' && s.length === 2) return perms.solicitacoes !== '';
   if (!viagem) return false;
   if (c.startsWith('funcionarios/_viagens/pedidos/') && s.length === 4) return !atual && novo?.status === 'aguardando_aprovacao' && novo?.solicitadoPor === sess.uid;
   if (c.startsWith('funcionarios/_liberacoes/pedidos/') && s.length === 4) return !atual && novo?.tipo === 'viagem';

@@ -458,6 +458,21 @@ table.cz td.fav{color:var(--ok);} table.cz td.desf{color:var(--bad);}
 body.fcx-on #main{padding-bottom:0;}
 .fcx-host{padding-top:0!important;}
 .fcx-host[hidden]{display:none!important;}
+/* v13.89 · pré-visualização A4 padronizada */
+.modal footer:empty{display:none;}
+.prev-barra{position:sticky;top:-2px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 8px rgba(17,22,63,.08);}
+.prev-info{display:flex;flex-direction:column;min-width:0;} .prev-bts{display:flex;gap:8px;flex-wrap:wrap;}
+.prev-mesa{background:#D9DCE6;border-radius:10px;padding:16px;max-height:68vh;overflow:auto;}
+.prev-escala{margin:0 auto;position:relative;overflow:hidden;}
+.prev-folha{display:block;border:0;background:#fff;box-shadow:0 6px 22px rgba(17,22,63,.24);transform-origin:0 0;}
+.prev-dica{margin:8px 0 0;}
+@media (max-width:700px){.prev-mesa{padding:8px;max-height:60dvh;} .prev-bts{width:100%;} .prev-bts .btn{flex:1;}}
+/* v13.89 · relatórios */
+.sol-rel-h{margin:16px 0 6px;font-size:14px;} table.sol-rel tr.tot td, table.vg-res tr.tot td{font-weight:700;border-top:2px solid var(--line);background:var(--panel-2);}
+table.vg-res tr.sub td, table.vg-res tr.cc td{font-weight:600;} table.vg-res tr.det td{font-size:12.5px;background:var(--panel-2);} table.vg-res tr.det td:first-child{padding-left:26px;}
+.vg-cc-bt{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;} .vg-cc-bt:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+/* v13.88 · Acerto de Contas Final */
+.adt-crit{margin-top:4px;} .adt-crit .pill{margin:2px 2px 0 0;} .adt-resumo{width:100%;border-collapse:collapse;margin:4px 0 8px;} .adt-resumo td{padding:7px 10px;border-bottom:1px solid var(--line);} .adt-resumo td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;} .adt-resumo tr.adt-saldo td{font-weight:700;border-top:2px solid var(--line);background:var(--panel-2);} .adt-resumo tr.s-devolver td{color:var(--warn);} .adt-resumo tr.s-reembolsar td{color:var(--accent);} .adt-h4{margin:10px 0 2px;font-size:13px;}
 /* v13.86 · Módulo Contábil (iframe fixo, como o FCX) */
 body.ct-on #main{padding-bottom:0;}
 .ct-frame{background:var(--bg);}
@@ -1980,7 +1995,8 @@ const MATRIZ_MODULOS = [
   { id: 'visao', curto: 'Visão', rotulo: 'Visão / Dashboard (Tela Inicial com o Resumo do Recebível do Dia)', num: 'Início', ler: ['visao.dashboard'], modificar: [], excluir: [], v1383: true }, // v13.83
 ];
 /* v13.83 · "Pode solicitar viagem": opção da linha do Módulo 8 que vale sozinha (não exige Ler, que é "ver todos os pedidos") */
-MATRIZ_MODULOS.find(m => m.id === 'viagens').extras = [['viagens.solicitar', 'Pode solicitar viagem', 'Libera a tela "Nova Solicitação de Viagem" para a própria pessoa e a equipe da loja dela (não exige Ler, que é ver todos os pedidos)', true]];
+MATRIZ_MODULOS.find(m => m.id === 'viagens').extras = [['viagens.solicitar', 'Pode solicitar viagem', 'Libera a tela "Nova Solicitação de Viagem" para a própria pessoa e a equipe da loja dela (não exige Ler, que é ver todos os pedidos)', true],
+  ['viagens.importar', 'Pode importar arquivo de prestação de contas', 'Libera a leitura automática de arquivo de prestação (CSV, Excel ou JSON) com a crítica de itens indevidos — exige Ler ou mais neste módulo (v13.88)']];
 
 /**
  * v13.83 · SUB-PERMISSÕES (telas e ações de cada módulo) — Gestão de Acessos.
@@ -2024,7 +2040,53 @@ const MATRIZ_PADRAO = { pdi: 'ler', lojas: 'modificar', contratos: '', fcx: 'ler
 const PERM_SO_EDITOR = ['pe.', 'pessoal.salario.', 'pessoal.parametros', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.matriz', 'retaguarda.ieo.lancar', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo', 'auditoria.', 'backup.', 'acessos.'];
 /** v13.86 · linha da matriz visível? (v13.83: linhas novas só com o recurso; rec: recurso próprio da linha) */
 const matrizOk = (m, v83) => (!m.v1383 || v83) && (!m.rec || Recursos.ativo(m.rec));
+/**
+ * v13.88 · LEITURA PADRONIZADA DO JSON DE PERMISSÕES (a mesma de netlify/lib/permissoes.mjs, no servidor).
+ * Aceita, sem quebrar, tudo o que já foi gravado: strings ('ler', 'Modificar', 'EXCLUIR', 'editar', 'total'…), números (0–3),
+ * booleanos (true = Ler), listas e aninhamentos ({ fcx: { nivel: 'ler' } }, { fcx: { ler: true, modificar: true } },
+ * { modulos: { … } }, JSON em texto). Devolve a forma canônica { <módulo>: ''|'ler'|'modificar'|'excluir', '<opção.extra>': true, sub }.
+ */
+const PermNorm = (() => {
+  const N = ['', 'ler', 'modificar', 'excluir'], sem = x => String(x ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const PAL = { ler: ['ler', 'leitura', 'ver', 'visualizar', 'visualizacao', 'consulta', 'consultar', 'r', 'read', 'view', 'sim', 's', 'true', 'acesso'],
+    modificar: ['modificar', 'editar', 'edicao', 'escrever', 'gravar', 'alterar', 'lancar', 'w', 'write', 'edit', 'interact'],
+    excluir: ['excluir', 'exclusao', 'apagar', 'remover', 'total', 'completo', 'tudo', 'admin', 'd', 'delete', 'full'] };
+  const nivelDe = v => {
+    if (v == null || v === false) return ''; if (v === true) return 'ler';
+    if (typeof v === 'number') return N[Math.max(0, Math.min(3, Math.round(v)))] || '';
+    if (Array.isArray(v)) return v.map(nivelDe).reduce((a, x) => (N.indexOf(x) > N.indexOf(a) ? x : a), '');
+    if (typeof v === 'object') { for (const k of ['nivel', 'nível', 'acesso', 'level', 'valor', 'value', 'permissao']) if (k in v) return nivelDe(v[k]);
+      let n = 0; Object.entries(v).forEach(([k, x]) => { if (!x) return; const t = sem(k); N.forEach((nv, i) => { if (i && (PAL[nv].includes(t) || t === nv)) n = Math.max(n, i); }); }); return N[n]; }
+    const t = sem(v); if (!t || ['nenhum', 'nao', 'n', 'sem', '-', 'false', 'none', '0'].includes(t)) return '';
+    if (/^[0-3]$/.test(t)) return N[Number(t)];
+    for (const nv of ['excluir', 'modificar', 'ler']) if (PAL[nv].includes(t)) return nv;
+    return '';
+  };
+  const sim = v => v === true || v === 1 || ['true', 'sim', 's', '1', 'yes', 'on'].includes(sem(v)) || (typeof v === 'string' && nivelDe(v) !== '');
+  const ids = () => new Set(MATRIZ_MODULOS.map(m => m.id)), conhecidas = () => new Set(MATRIZ_MODULOS.flatMap(m => [...m.ler, ...m.modificar, ...m.excluir, ...(m.extras || []).map(e => e[0])]));
+  function normalizar(p) {
+    if (typeof p === 'string') { try { p = JSON.parse(p); } catch { return {}; } }
+    if (!p || typeof p !== 'object') return {};
+    const out = {}, IDS = ids(), CON = conhecidas();
+    const aplicar = (obj, dentro = false) => {
+      if (Array.isArray(obj)) { obj.forEach(x => { if (typeof x === 'string') { const t = x.trim(); if (CON.has(t)) out[t] = true; else { const [m, n] = t.split(/[:=]/); if (IDS.has(sem(m))) out[sem(m)] = nivelDe(n ?? true); } } else if (x && typeof x === 'object' && (x.modulo || x.id)) { const id = sem(x.modulo || x.id); if (IDS.has(id)) out[id] = nivelDe(x); } }); return; }
+      Object.entries(obj).forEach(([k0, v]) => { const k = String(k0).trim(), kk = sem(k);
+        if (kk === 'sub') { if (v && typeof v === 'object') out.sub = v; return; }
+        if (['modulos', 'matriz', 'niveis', 'permissoes', 'acessos'].includes(kk) && v && typeof v === 'object' && !dentro) return aplicar(v, true);
+        if (IDS.has(kk)) { out[kk] = nivelDe(v); return; }
+        if (k.includes('.') && CON.has(k)) out[k] = sim(v); });
+    };
+    aplicar(p); return out;
+  }
+  const perfil = p => { const t = sem(p).toUpperCase(); return t === 'MASTER' || t === 'GESTOR' || t === 'ADMIN' ? 'MASTER' : t === 'LOJA' ? 'LOJA' : t === 'OPERACIONAL' || t === 'OPERADOR' ? 'OPERACIONAL' : t; };
+  return { nivelDe, normalizar, perfil, NIVEIS: N };
+})();
+window.PermNorm = PermNorm;
+/** v13.88 · No Netlify o servidor passou a entregar estes dados a quem a matriz libera (antes: só o Master) — ver COLECOES_MATRIZ. */
+const PERM_MATRIZ_SERVIDOR = ['lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.'];
+const permDoServidor = perm => !!Cloud.base?.netlify && PERM_MATRIZ_SERVIDOR.some(p => p.endsWith('.') ? String(perm).startsWith(p) : perm === p);
 function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
+  m = PermNorm.normalizar(m); perfil = PermNorm.perfil(perfil); // v13.88: aceita qualquer formato gravado
   const out = new Set(), v83 = Acesso.ativo(), loja = perfil === 'LOJA', sub = (v83 && m.sub) || {};
   for (const mod of MATRIZ_MODULOS) {
     if (!matrizOk(mod, v83)) continue; // v13.83: linha nova só com o recurso liberado · v13.86: + recurso da linha
@@ -2077,7 +2139,7 @@ const Auth = {
     const lista = this.matriz[this.perfil] || [];
     if (!lista.some(p => p === '*' || p === perm || (p.endsWith('.*') && perm.startsWith(p.slice(0, -1))))
       && !(this.PERM_SUPERVISOR.includes(perm) && this.perfil !== 'GESTOR' && !this.loja && this.ehSupervisor())) return false; // v13.83: perfil Loja não ganha o bônus de supervisor
-    return this.podeEditarNuvem || !PERM_SO_EDITOR.some(p => p.endsWith('.') ? perm.startsWith(p) : perm === p);
+    return this.podeEditarNuvem || !PERM_SO_EDITOR.some(p => p.endsWith('.') ? perm.startsWith(p) : perm === p) || permDoServidor(perm); // v13.88: no Netlify a matriz vale também para estes dados
   },
   /** Nomes para o log: usuário do login → funcionário do Módulo 1 (ou Master avulso); ids antigos → conta Claude. */
   async nomes(ids) {
@@ -2092,12 +2154,12 @@ const Auth = {
   /** Aplica o usuário que acabou de entrar (MASTER = todas as permissões; OPERACIONAL = matriz). */
   aplicarUsuario(u, f) {
     this.id = u.id; this.usuario = u; this.funcionario = f || null; this.nome = f?.nome || u.nome || 'Usuário'; this.simulado = null;
-    this.perfilReal = u.perfil === 'MASTER' ? 'GESTOR' : 'OPERACIONAL'; this.loja = u.perfil === 'LOJA'; // v13.83: perfil Loja (ponta) roda como Operacional só leitura
+    const pf = PermNorm.perfil(u.perfil); this.perfilReal = pf === 'MASTER' ? 'GESTOR' : 'OPERACIONAL'; this.loja = pf === 'LOJA'; // v13.88: perfil normalizado // v13.83: perfil Loja (ponta) roda como Operacional só leitura
     this.recalcular();
   },
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
   chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
-  recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: u.perfil === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
+  recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
   loja: false,
   limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
 };
@@ -2142,7 +2204,7 @@ const Acesso = {
     if (m.id === 'equilibrio') return 'O Ponto de Equilíbrio é exclusivo do Master.';
     if (m.id === 'conciliacao' && typeof ConcMP !== 'undefined' && !ConcMP.ativo()) return 'A Conciliação de Meios de Pagamento ainda não foi liberada neste ambiente.';
     const ed = PERM_SO_EDITOR.some(p => p.endsWith('.') ? String(m.perm).startsWith(p) : m.perm === p);
-    if (m.perm && this._temNaMatriz(m.perm) && ed && !Auth.podeEditarNuvem) return `${m.titulo}: a matriz libera, mas estes dados só são entregues a quem ${Cloud.base?.netlify ? 'é Master neste site' : 'tem “Pode editar” no compartilhamento do painel (claude.ai)'}.`;
+    if (m.perm && this._temNaMatriz(m.perm) && ed && !Auth.podeEditarNuvem && !permDoServidor(m.perm)) return `${m.titulo}: a matriz libera, mas estes dados só são entregues a quem ${Cloud.base?.netlify ? 'é Master neste site' : 'tem “Pode editar” no compartilhamento do painel (claude.ai)'}.`;
     if (!this.rotaOk(m.id)) return `${m.titulo}: nenhuma tela deste módulo está marcada nas suas sub-permissões (Gestão de Acessos).`;
     return `Seu acesso não inclui ${m.titulo} (Gestão de Acessos › Permissões).`;
   },
@@ -2682,7 +2744,37 @@ window.addEventListener('load',function(){prontas().then(function(){setTimeout(f
    * "Imprimir" abre a janela de impressão nativa do navegador (onde também dá para "Salvar como PDF").
    * opts.domPrint (v13.34): documentos com imagens pesadas (vouchers) imprimem pela substituição temporária do DOM.
    */
+  /** v13.89 · pré-visualização padronizada ligada (recurso rel_v1389)? */
+  v89() { return typeof Recursos !== 'undefined' && Recursos.ativo('rel_v1389'); },
+  /** v13.89 · saída de documento: pré-visualização A4 (antes alguns botões baixavam o PDF direto). */
+  saida(titulo, html, nome, opts = {}) { return this.v89() ? this.previa(titulo, html, nome, opts) : this.pdfDireto(titulo, html, nome); },
+  /**
+   * v13.89 · PRÉ-VISUALIZAÇÃO DE IMPRESSÃO universal: a folha A4 (retrato ou paisagem, pelo @page do documento) sobre uma
+   * "mesa" cinza, em escala na tela pequena, e a barra no topo: [Imprimir] (janela do navegador) · [Baixar PDF] · [Fechar].
+   * opts.baixarPdf: função própria de PDF (ex.: viagens — resumo + vouchers num PDF só). opts.domPrint: imagens pesadas.
+   */
+  previaA4(titulo, html, nome, opts = {}) {
+    const dom = !!opts.domPrint, paisagem = /@page\s*\{[^}]*landscape/i.test(html), W = paisagem ? 1123 : 794, H = paisagem ? 794 : 1123; let ocupado = false;
+    UI.modal({ titulo: 'Pré-visualização de impressão — ' + titulo, largo: true, acoes: [],
+      corpo: `<div class="prev-barra" role="toolbar" aria-label="Ações do documento"><div class="prev-info"><b>${esc(titulo)}</b><span class="hint">Folha A4 ${paisagem ? 'paisagem' : 'retrato'} · <span data-prev-pag>montando…</span></span></div>
+          <div class="prev-bts"><button type="button" class="btn" data-prev="imprimir">Imprimir</button><button type="button" class="btn sec" data-prev="pdf">Baixar PDF</button><button type="button" class="btn sec" data-x>Fechar</button></div></div>
+        <div class="prev-mesa" data-prev-mesa><div class="prev-escala" data-prev-escala><iframe class="prev-folha" title="Pré-visualização do documento em folha A4" sandbox="allow-same-origin"></iframe></div></div>
+        <p class="hint prev-dica">“Imprimir” abre a janela de impressão do navegador (onde também dá para “Salvar como PDF”)${dom ? '; o documento ocupa a tela por um instante para desenhar as imagens dos vouchers' : ''}. “Baixar PDF” gera o arquivo em A4${opts.baixarPdf ? ', completo com os anexos' : ''}.</p>`,
+      aoAbrir: m => {
+        const fr = $('iframe', m), mesa = $('[data-prev-mesa]', m), caixa = $('[data-prev-escala]', m);
+        const ajustar = () => { try { const d = fr.contentDocument, h = Math.max(H, d?.documentElement?.scrollHeight || H), k = Math.max(0.3, Math.min(1, (mesa.clientWidth - 32) / W));
+          fr.style.width = W + 'px'; fr.style.height = h + 'px'; fr.style.transform = `scale(${k})`; caixa.style.width = Math.round(W * k) + 'px'; caixa.style.height = Math.round(h * k) + 'px';
+          const pg = $('[data-prev-pag]', m); if (pg) pg.textContent = `≈ ${Math.max(1, Math.ceil((h - 8) / H))} página(s)`; } catch { /* prévia sem acesso ao conteúdo */ } };
+        fr.addEventListener('load', () => { ajustar(); setTimeout(ajustar, 500); });
+        fr.srcdoc = html.replace(/<script\b[\s\S]*?<\/script>/g, ''); // prévia sem scripts (a impressão automática fica só no "Imprimir")
+        if (window.ResizeObserver) new ResizeObserver(ajustar).observe(mesa);
+        m.addEventListener('click', async e => { const b = e.target.closest('[data-prev]'); if (!b || ocupado) return; ocupado = true; b.disabled = true;
+          try { if (b.dataset.prev === 'imprimir') await (dom ? this.imprimirNoDOM(html, nome, titulo) : this.imprimirNativo(html)); else await (opts.baixarPdf ? opts.baixarPdf() : this.pdfDireto(titulo, html, nome)); }
+          catch (err) { UI.toast('Não foi possível: ' + (err.message || err)); } finally { ocupado = false; b.disabled = false; } });
+      } });
+  },
   previa(titulo, htmlCompleto, nomeArquivo, opts = {}) {
+    if (this.v89()) return this.previaA4(titulo, htmlCompleto, nomeArquivo, opts); /* v13.89 */
     const dom = !!opts.domPrint;
     UI.modal({
       titulo: 'Prévia — ' + titulo, largo: true,
@@ -3524,7 +3616,7 @@ const GestaoAmbientes = {
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a RC).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -4333,7 +4425,41 @@ const Pessoal = {
     return { datas: out, txt: out.map(x => `${x.dia} ${Fmt.data(x.iso).slice(0, 5)}`).join(' · ') || 'Nenhuma no período', ferias: emFerias ? `Férias ${Fmt.data(f.ferias.programadaInicio)} a ${Fmt.data(f.ferias.programadaFim)}` : '', obs: f.folgaObs || '' };
   },
   /** v13.3 · Relatório da equipe (lista filtrada da tela) para imprimir ou salvar em PDF. */
-  relatorioEquipe() {
+  /** v13.89 · opções da impressão da equipe: período das folgas agendadas e o que sai em Férias. */
+  opcoesRelatorioEquipe() {
+    const h = Datas.hojeISO(), fim = Datas.iso(new Date(Datas.hoje().getTime() + 30 * 864e5));
+    UI.modal({ titulo: 'Imprimir relatório da equipe', corpo: `<form class="form-grid" onsubmit="return false">${campo('Período · de', 'de', h, { tipo: 'date' })}${campo('Período · até', 'ate', fim, { tipo: 'date' })}
+        <fieldset class="full ct-grupo"><legend>Férias</legend>
+          <label class="check"><input type="radio" name="ferias" value="programadas" checked> Imprimir apenas Períodos de Férias Programados/Agendados <span class="hint">(padrão)</span></label>
+          <label class="check"><input type="radio" name="ferias" value="aquisitivos"> Incluir Períodos Aquisitivos A Vencer</label></fieldset>
+        <p class="hint full" style="margin:0">Folgas: saem só as folgas efetivamente agendadas no período (aprovadas na Liberação Remota). As folgas fixas da escala não são impressas.</p></form>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Pré-visualizar', acao: m => { const d = UI.lerForm(m), fe = m.querySelector('[name="ferias"]:checked')?.value || 'programadas';
+        if (!d.de || !d.ate) { UI.toast('Informe o período (de / até).'); return false; } if (d.de > d.ate) { UI.toast('A data inicial é depois da final.'); return false; }
+        setTimeout(() => this.relatorioEquipe({ de: d.de, ate: d.ate, ferias: fe }), 30); } }] });
+  },
+  /** v13.89 · relatório da equipe respeitando as opções: folgas agendadas no período e férias programadas (± aquisitivos a vencer). */
+  relatorioEquipeV89({ de, ate, ferias = 'programadas' }) {
+    const lista = this.filtrados(), aq = ferias === 'aquisitivos', nomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const filtro = [this.ui.lotacao ? (this.opcoesLotacao().find(([v]) => v === this.ui.lotacao) || [])[1] : 'Todas as lotações', this.ui.status || 'Todas as situações', this.ui.busca ? `busca “${this.ui.busca}”` : ''].filter(Boolean).join(' · ');
+    const folgas = f => { if ((f.status || 'Ativo') === 'Desligado') return 'Desligado'; const xs = (f.folgasAvulsas || []).filter(x => x.data >= de && x.data <= ate).sort((a, b) => a.data.localeCompare(b.data));
+      return xs.length ? xs.map(x => `${nomes[Datas.de(x.data).getDay()]} ${Fmt.data(x.data)}${x.motivo ? ` <span class="sub">(${esc(x.motivo)})</span>` : ''}`).join('<br>') : '<span class="sub">Nenhuma folga agendada no período</span>'; };
+    const feriasHtml = f => { const ini = f.ferias?.programadaInicio, fim = f.ferias?.programadaFim, partes = [];
+      if (ini && fim && fim >= de) partes.push(`<b>Programadas:</b> ${Fmt.data(ini)} a ${Fmt.data(fim)}${ini <= ate ? ' <span class="sub">(no período)</span>' : ''}`);
+      else if (!aq) partes.push('<span class="sub">Nenhum período programado</span>');
+      if (aq) { const fe = this.ferias(f); partes.push(`<b>Aquisitivo:</b> ${esc(fe.txt)}${fe.det ? ` <span class="sub">${esc(fe.det)}</span>` : ''}`); }
+      return partes.join('<br>'); };
+    const linhas = lista.map(f => { const bh = Number(f.bancoHoras) || 0;
+      return `<tr><td><b>${esc(f.nome)}</b><div class="sub">Mat. ${esc(f.matricula || '—')} · ${esc(f.status || 'Ativo')}</div></td><td>${esc(this.cargoNome(f) || '—')}<div class="sub">${esc(this.lotacaoNome(f))}</div></td>
+        <td class="mono">${Fmt.data(f.admissao)}</td><td>${esc(f.escala || '—')}</td><td class="mono num ${bh < 0 ? 'neg' : ''}">${Fmt.horas(bh)}</td><td>${feriasHtml(f)}</td><td>${folgas(f)}</td></tr>`; }).join('');
+    const corpo = `${Documento.cabecalho('Relatório da Equipe', `${lista.length} colaborador(es) · ${filtro}`)}
+      <p style="margin:0 0 10px"><b>Período:</b> ${Fmt.data(de)} a ${Fmt.data(ate)} · <b>Folgas:</b> só as agendadas no período (aprovadas na Liberação Remota; folgas fixas da escala não entram) · <b>Férias:</b> ${aq ? 'períodos programados e períodos aquisitivos a vencer' : 'apenas períodos programados/agendados'}.</p>
+      <table class="eq"><thead><tr><th>Colaborador</th><th>Cargo</th><th>Admissão</th><th>Escala</th><th class="num">Banco de horas</th><th>${aq ? 'Férias (programadas e aquisitivos)' : 'Férias programadas'}</th><th>Folgas agendadas no período</th></tr></thead><tbody>${linhas}</tbody></table>
+      <div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>`;
+    const css = `table.eq{font-size:10.5px;} table.eq td{padding:5px 6px;} table.eq th{padding:5px 6px;} table.eq tr{break-inside:avoid;} .sub{font-size:9.5px;color:#585E7F;} td.num{text-align:right;white-space:nowrap;} td.neg{color:#B63A2F;} .mono{font-family:'IBM Plex Mono',monospace;}`;
+    Documento.previa('Relatório da equipe', Documento.montar('Relatório da Equipe', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Relatorio_Equipe_${de}_a_${ate}`);
+  },
+  relatorioEquipe(opts = null) {
+    if (Documento.v89()) return opts ? this.relatorioEquipeV89(opts) : this.opcoesRelatorioEquipe(); /* v13.89 */
     const lista = this.filtrados(), hoje = Datas.hoje(), fim = new Date(hoje.getTime() + 30 * 864e5);
     const filtro = [this.ui.lotacao ? (this.opcoesLotacao().find(([v]) => v === this.ui.lotacao) || [])[1] : 'Todas as lotações', this.ui.status || 'Todas as situações', this.ui.busca ? `busca “${this.ui.busca}”` : ''].filter(Boolean).join(' · ');
     const linhas = lista.map(f => {
@@ -8800,7 +8926,7 @@ const Retaguarda = {
     if (!this.podeGerarDoc(i.status)) return UI.toast(this.DICA_DOC_BLOQ);
     const nome = `Falta_Caixa_${i.caixa?.nome || 'Operador'}_${i.data}`; // v13.49: Falta_Caixa_[Operador]_[Data]
     Audit.registrar({ modulo: 'retaguarda', acao: 'emitiu', entidade: 'faltas', entidadeId: itemId, rotulo: 'Documento de Falta de Caixa', detalhe: `${i.caixa?.nome || ''} · ${Fmt.brl(i.valor)}`, mudancas: [] });
-    return Documento.pdfDireto('Documento de Falta de Caixa', this.htmlDocumentoFalta(doc.lojaId, i), nome);
+    return Documento.saida('Documento de Falta de Caixa', this.htmlDocumentoFalta(doc.lojaId, i), nome);
   },
   /** Financeiro da Retaguarda (vê CPF completo, gera/anexa documentos): Master ou quem aprova faltas. */
   finRet() { return Auth.perfil === 'GESTOR' || Auth.can('retaguarda.faltas.status'); },
@@ -9472,7 +9598,7 @@ Object.assign(Retaguarda, {
         ${lista.length ? `<table><thead><tr><th>Data</th><th>Colaborador</th><th>Loja</th><th>Infração</th><th style="text-align:right">Valor</th><th>Situação</th></tr></thead><tbody>${lista.map(x => `<tr><td>${Fmt.data(x.data)}</td><td><b>${esc(x.nome || '—')}</b>${x.matricula ? `<br><span style="color:#585E7F;font-size:10px">Mat. ${esc(x.matricula)}</span>` : ''}</td><td>${esc(this.nomeLoja(x.lojaId))}</td><td>${esc(ORIG[x.origem] || x.origem)}<br><span style="color:#585E7F;font-size:10px">${esc(x.descricao || '')}</span></td><td style="text-align:right;white-space:nowrap">${Fmt.brl(x.valor || 0)}</td><td>${esc(x.situacao || '—')}</td></tr>`).join('')}</tbody></table>` : '<p>Nenhuma infração registrada.</p>'}
         <div class="foot">Esposende · Painel de Gestão · Retaguarda · histórico gravado automaticamente a cada falta de caixa e DVC por erro operacional.</div>`;
       Audit.registrar({ modulo: 'retaguarda', acao: 'emitiu', entidade: RET_LOJA.LOG, entidadeId: 'historico', rotulo: 'Histórico de infrações (PDF)', detalhe: `${lista.length} registro(s)`, mudancas: [] });
-      return Documento.pdfDireto('Histórico de Infrações', Documento.montar('Histórico de Infrações', corpo, { paisagem: true, margem: '10mm' }), `Historico_Infracoes_IEO_${q ? q + '_' : ''}${Datas.hojeISO()}`);
+      return Documento.saida('Histórico de Infrações', Documento.montar('Histórico de Infrações', corpo, { paisagem: true, margem: '10mm' }), `Historico_Infracoes_IEO_${q ? q + '_' : ''}${Datas.hojeISO()}`);
     };
     UI.modal({ titulo: 'Histórico de infrações (log do IEO)', largo: true,
       corpo: `<div class="field" style="max-width:340px;margin-bottom:10px"><label class="lbl" for="logBusca">Buscar colaborador</label><input id="logBusca" type="search" placeholder="Nome, matrícula, loja…"></div><div id="logTab">${tabela('')}</div>`,
@@ -9817,7 +9943,7 @@ Object.assign(Retaguarda, {
   termoDvc(id) {
     const o = Repo.get(RET_LOJA.OC, id); if (!o) return;
     Audit.registrar({ modulo: 'retaguarda', acao: 'emitiu', entidade: RET_LOJA.OC, entidadeId: id, rotulo: 'Termo de DVC', detalhe: `${this.nomeLoja(o.lojaId)} · ${Fmt.brl(o.valor)}`, mudancas: [] });
-    return Documento.pdfDireto('Termo de DVC', this.htmlTermoDvc(o), `Termo_DVC_${Documento.rotuloLoja(o.lojaId)}_${o.dataDevolucao || o.dataVenda || Datas.hojeISO()}${o.nf ? '_NF' + o.nf : ''}`); // v13.49: Termo_DVC_[Loja]_[Data] (sem o nome do cliente no arquivo — LGPD)
+    return Documento.saida('Termo de DVC', this.htmlTermoDvc(o), `Termo_DVC_${Documento.rotuloLoja(o.lojaId)}_${o.dataDevolucao || o.dataVenda || Datas.hojeISO()}${o.nf ? '_NF' + o.nf : ''}`); // v13.49: Termo_DVC_[Loja]_[Data] (sem o nome do cliente no arquivo — LGPD)
   },
   async anexarTermo(id, file) {
     const o = Repo.get(RET_LOJA.OC, id); if (!o || !file) return;
@@ -13151,18 +13277,21 @@ const Sessao = {
       if (!this.ativa) return;
       const sit = this.situacao(u, f); if (sit !== 'ok') return this.encerrar(sit);
       if (u.trocarSenha) return this.encerrar('resetada'); // senha resetada pelo Master: precisa criar outra
-      const mudou = JSON.stringify([u.perfil, u.permissoes]) !== JSON.stringify([Auth.usuario?.perfil, Auth.usuario?.permissoes]);
+      const mudou = JSON.stringify([PermNorm.perfil(u.perfil), PermNorm.normalizar(u.permissoes)]) !== JSON.stringify([PermNorm.perfil(Auth.usuario?.perfil), PermNorm.normalizar(Auth.usuario?.permissoes)]); // v13.88: compara a forma normalizada
       Auth.usuario = u;
-      if (mudou) { Auth.aplicarUsuario(u, f); UI.toast('Suas permissões foram atualizadas pelo Master.'); App.render(); }
+      if (mudou) { Auth.aplicarUsuario(u, f); UI.toast('Suas permissões foram atualizadas pelo Master.'); const tela = [...MODULOS, ...ADMIN].find(x => x.id === App.rota); if (tela && !App.pode(tela)) App.ir('menu'); else App.render(); } // v13.88: perdeu a tela aberta → volta ao Início
     };
     const w = Cloud.adapter.watchDoc.bind(Cloud.adapter);
+    this._revalidar = async () => { try { const d = await Cloud.adapter.get('usuarios/' + u.id); if (d && this.ativa) { u = d; reavaliar(); } } catch { /* sem rede: a próxima tentativa resolve */ } }; /* v13.88 */
     this._unsubs.push(w('usuarios/' + u.id, async d => {
       // v13.14: o login ganhou (ou trocou) o cadastro do RH — ex.: "Vincular Usuário Master ao RH" — lê o cadastro novo antes de reavaliar
       if (d && d.funcionarioId && d.funcionarioId !== f?.id) { const nf = await Cloud.adapter.get('funcionarios/' + d.funcionarioId).catch(() => null); if (nf) { f = nf; Auth.funcionario = nf; } }
       u = d; reavaliar(); }));
     if (u.funcionarioId) this._unsubs.push(w('funcionarios/' + u.funcionarioId, d => { f = d; reavaliar(); }));
   },
-  pararVigia() { this._unsubs.forEach(x => { try { x(); } catch { } }); this._unsubs = []; },
+  pararVigia() { this._unsubs.forEach(x => { try { x(); } catch { } }); this._unsubs = []; this._revalidar = null; },
+  /** v13.88 · relê a conta no banco e aplica perfil/permissões na hora (conta alterada, volta para a aba, a cada minuto). */
+  revalidar() { return this._revalidar ? this._revalidar() : Promise.resolve(); },
   /** Fecha o painel: solta assinaturas, caches e arquivos em memória e volta para a tela de entrada. */
   encerrar(motivo = 'saiu') {
     try { BackupDiario.parar(); } catch { } // v13.64
@@ -13404,15 +13533,17 @@ const Acessos = {
     UI.modal({
       titulo: 'Permissões · ' + this.nomeDe(u), largo: true,
       corpo: `<div class="form-grid">${campo('Perfil', 'perfil', u.perfil, { opcoes: [['OPERACIONAL', 'Operacional (matriz por módulo)'], ...(Acesso.ativo() || u.perfil === 'LOJA' ? [['LOJA', 'Loja (ponta) — leitura + Solicitações e viagem']] : []), ['MASTER', 'Master (acesso total)']], attrs: eu ? 'disabled' : '' })}
-        <div class="field full"><span class="lbl">Permissões por módulo</span><div id="accMatriz">${this.matrizHTML(u.permissoes || {}, u.perfil === 'MASTER', u.perfil)}</div></div>
-        <div class="field full" id="accPrevia">${this.previaHTML(u.perfil === 'MASTER' ? {} : u.permissoes || {}, u.perfil)}</div>
+        <div class="field full"><span class="lbl">Permissões por módulo</span><div id="accMatriz">${this.matrizHTML(PermNorm.normalizar(u.permissoes), PermNorm.perfil(u.perfil) === 'MASTER', PermNorm.perfil(u.perfil))}</div></div>
+        <div class="field full" id="accPrevia">${this.previaHTML(PermNorm.perfil(u.perfil) === 'MASTER' ? {} : PermNorm.normalizar(u.permissoes), PermNorm.perfil(u.perfil))}</div>
         ${campo('Visão da Equipe e do PDI (Módulo 1)', 'escopo', u.escopo || 'auto', { opcoes: this.opcoesEscopo(u), full: true, dica: 'Automático: Supervisor/Regional vê as lojas da regional (campo Supervisor do Módulo 2); Gerente vê a loja de lotação; os demais veem só o próprio cadastro e os liderados diretos. Master: “Minha equipe” + botão “Ver Base Inteira”.' })}</div>${eu ? '<p class="hint">Você não pode mudar o seu próprio perfil.</p>' : ''}`,
       aoAbrir: m => m.addEventListener('change', e => { if (e.target.matches('[data-mod]')) this.sincronizarMatriz(m, e.target); else if (e.target.name === 'perfil' || e.target.matches('[data-tela],[data-acao],[data-extra]')) this.sincronizarMatriz(m); }), // v13.83
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar permissões', acao: async m => {
         const perfil = eu ? u.perfil : $('[name="perfil"]', m).value;
         if (u.perfil === 'MASTER' && perfil !== 'MASTER' && this.masters().length <= 1) { UI.toast('Este é o único Master ativo: defina outro Master antes.'); return false; }
         const { id: _, ...d } = u;
-        await Repo.salvar(this.COL, id, { ...d, perfil, permissoes: perfil === 'MASTER' ? {} : this.lerMatriz(m), escopo: $('[name="escopo"]', m)?.value || 'auto' }, { modulo: 'acessos', rotulo: `Acesso · ${this.nomeDe(u)}`, detalhe: 'Permissões alteradas' });
+        const ant = PermNorm.normalizar(u.permissoes), ocultos = Object.fromEntries(MATRIZ_MODULOS.filter(mm => !matrizOk(mm, Acesso.ativo())).flatMap(mm => [[mm.id, ant[mm.id]], ...(mm.extras || []).map(([k]) => [k, ant[k]])]).filter(([, x]) => x !== undefined && x !== '' && x !== false)); /* v13.88: linhas fora da tela não se perdem */
+        await Repo.salvar(this.COL, id, { ...d, perfil, permissoes: perfil === 'MASTER' ? {} : { ...ocultos, ...this.lerMatriz(m) }, escopo: $('[name="escopo"]', m)?.value || 'auto' }, { modulo: 'acessos', rotulo: `Acesso · ${this.nomeDe(u)}`, detalhe: 'Permissões alteradas' });
+        if (id === Auth.id) Sessao.revalidar(); /* v13.88: a própria conta: aplica na hora */
         UI.toast('Permissões salvas: valem na hora para a pessoa.');
       } }],
     });
@@ -13477,6 +13608,257 @@ const Acessos = {
                 solicitanteId, solicitanteNome, gestorId, dados:{...}, criadoEm, expiraEm?, decididoPor,
                 decididoPorNome, decididoEm, obsDecisao }
    ===================================================================== */
+/* =====================================================================
+   v13.88 · ADIANTAMENTOS — PRESTAÇÃO DE CONTAS (Módulo 8), recurso adiant_v1388
+   • Importação automática do arquivo de prestação (CSV, Excel ou JSON): só Master ou quem tem "Pode importar arquivo de
+     prestação de contas" (viagens.importar) na Gestão de Acessos.
+   • Motor de Crítica de Itens Indevidos (CriticaPrestacao): fora do período da viagem/solicitação, comprovante duplicado (na
+     viagem e em outras viagens), gasto não reembolsável pela política (bebida alcoólica, multas, gastos pessoais) e
+     extrapolação do teto por categoria (alimentação e transporte = diárias dos parâmetros; hospedagem = teto da política).
+   • Acerto de Contas Final: (+) adiantamento concedido, (−) despesas comprovadas e aprovadas, (=) saldo a devolver pelo viajante
+     ao caixa ou a reembolsar ao viajante; impressão A4; "Encerrar Prestação de Contas" (só o Master) trava a edição, gera o
+     título (devolução a receber / reembolso a pagar) e, no Netlify, os lançamentos em partidas dobradas no Módulo Contábil.
+   ===================================================================== */
+const CriticaPrestacao = {
+  POLITICA: [
+    ['bebida alcoólica', /\b(cerveja|cervejas|chopp?|chope|vinho|vinhos|whisk(e)?y|uisque|vodka|cachaca|gin|licor|rum|tequila|caipirinha|caipiroska|drink|drinks|espumante|aperitivo|long neck|bebida alcoolica|bebidas alcoolicas)\b/],
+    ['multa', /\b(multa|multas|infracao|infracoes|auto de infracao|detran)\b/],
+    ['gasto pessoal', /\b(cigarro|cigarros|tabaco|tabacaria|presente|presentes|souvenir|lembranca|lembrancas|perfume|cosmetico|cosmeticos|maquiagem|roupa|roupas|vestuario|academia|salao de beleza|barbearia|cinema|ingresso|ingressos|frigobar|pay per view|loteria|aposta|apostas|pessoal|particular)\b/],
+  ],
+  norm: s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(),
+  grupoCat(c) { const t = this.norm(c); return /hosped|hotel|pousada/.test(t) ? 'hospedagem' : /aliment|refei|restaur|lanche|almoco|jantar/.test(t) ? 'alimentacao' : /transp|taxi|aplicativo|onibus|combust|gasolina|etanol|\bpedag|estacion|uber|metro/.test(t) ? 'transporte' : ''; }, /* hospedagem primeiro: "hospedagem" contém "pedag" */
+  ROT: { alimentacao: 'alimentação', transporte: 'transporte', hospedagem: 'hospedagem' },
+  /** Tetos diários por categoria: alimentação e transporte = diárias dos parâmetros (por pessoa); hospedagem = teto da política (por quarto). */
+  tetos(v) {
+    const p = Viagens.params() || {}; /* diárias da própria viagem (cálculo do adiantamento) ou, sem cálculo, as dos parâmetros */
+    return { alimentacao: Number(v.calculo?.diariaAlimentacao ?? p.alimentacao) || 0, transporte: Number(v.calculo?.diariaDeslocamento ?? p.deslocamento) || 0, hospedagem: Number(p.hospedagemMedia) > 0 ? Viagens.tetoHosp(p) : 0 };
+  },
+  chaveDoc(d) { const doc = String(d.doc || '').replace(/[^0-9a-z]/gi, '').toLowerCase(); if (doc.length >= 3) return 'doc:' + doc + '|' + (String(d.cnpj || '').replace(/\D/g, '') || this.norm(d.fornecedor)); return 'sem:' + d.data + '|' + Math.round((Number(d.valor) || 0) * 100) + '|' + this.norm(d.fornecedor || d.descricao); },
+  /**
+   * Analisa as despesas (ou itens a importar) de uma viagem. Devolve Map(id → { flags: [{ tipo, nivel: 'glosa'|'alerta', msg }], excesso, padrao })
+   * padrao = valor aprovado sugerido (glosa → 0; teto → valor − excesso). outras = despesas das demais viagens (duplicidade).
+   */
+  analisar(v, itens = v.despesas || [], { outras } = {}) {
+    const r2 = n => Math.round(n * 100) / 100, out = new Map(), ini = String(v.ida || ''), fim = String(v.volta || ''), solic = String(v.solicitadoEm || v.criadoEm || '').slice(0, 10);
+    const vistos = new Map(); (outras || Repo.todos(Viagens.COL).filter(x => x.id !== v.id).flatMap(x => (x.despesas || []).map(d => ({ ...d, _viagem: x })))).forEach(d => { if (Number(d.valor) > 0) vistos.set(this.chaveDoc(d), { fora: d._viagem }); });
+    itens.forEach((d, i) => {
+      const id = d.id || 'i' + i, flags = [], txt = this.norm([d.descricao, d.fornecedor, d.categoria].join(' '));
+      if (d.data && ((ini && d.data < ini) || (fim && d.data > fim))) flags.push({ tipo: 'periodo', nivel: 'glosa', msg: `Fora do período da viagem (${Fmt.data(ini)} a ${Fmt.data(fim)})${solic && d.data < solic ? ' e anterior à solicitação' : ''}` });
+      else if (d.data && solic && d.data < solic && d.data < ini) flags.push({ tipo: 'periodo', nivel: 'glosa', msg: `Anterior à solicitação (${Fmt.data(solic)})` });
+      const k = this.chaveDoc(d), ja = vistos.get(k);
+      if (ja) flags.push({ tipo: 'duplicado', nivel: 'glosa', msg: ja.fora ? `Comprovante já lançado em outra viagem (${Trajeto.rota(ja.fora)} · ${Fmt.data(ja.fora.ida)})` : `Comprovante duplicado nesta prestação${d.doc ? ' (nº ' + d.doc + ')' : ''}` });
+      else vistos.set(k, { fora: null });
+      const pol = this.POLITICA.find(([, re]) => re.test(txt)); if (pol) flags.push({ tipo: 'politica', nivel: 'glosa', msg: `Não reembolsável pela política interna: ${pol[0]}` });
+      out.set(id, { flags, excesso: 0, padrao: flags.some(f => f.nivel === 'glosa') ? 0 : r2(Number(d.valor) || 0) });
+    });
+    /* teto por categoria × dia (× pessoas da conta); o excesso é glosado nos últimos itens do dia */
+    const t = this.tetos(v), ind = Viagens.modo(v) === 'individual', pessoas = ind ? 1 : Math.max(1, Viagens.participantes(v).length), quartos = Math.max(1, v.hospedagem?.quartos?.length || 1), grupos = new Map();
+    itens.forEach((d, i) => { const g = this.grupoCat(d.categoria), id = d.id || 'i' + i; if (!g || !t[g] || !d.data || out.get(id).padrao <= 0) return; const k = [ind ? d.funcionarioId : '', d.data, g].join('|'); (grupos.get(k) || grupos.set(k, []).get(k)).push({ d, id, g }); });
+    grupos.forEach(xs => {
+      const g = xs[0].g, teto = r2(t[g] * (g === 'hospedagem' ? quartos : pessoas)), soma = r2(xs.reduce((a, x) => a + (Number(x.d.valor) || 0), 0)); if (soma <= teto + 0.004) return;
+      let resto = r2(soma - teto); for (let j = xs.length - 1; j >= 0 && resto > 0; j--) { const c = out.get(xs[j].id), e = r2(Math.min(resto, c.padrao)); c.excesso = r2(c.excesso + e); c.padrao = r2(c.padrao - e); resto = r2(resto - e); }
+      xs.forEach(x => out.get(x.id).flags.push({ tipo: 'teto', nivel: 'alerta', msg: `Acima do teto de ${this.ROT[g]}: ${Fmt.brl(soma)} no dia para ${Fmt.brl(teto)} (${Fmt.brl(t[g])}${g === 'hospedagem' ? '/quarto' : '/pessoa'}) · excedente ${Fmt.brl(r2(soma - teto))}` }));
+    });
+    return out;
+  },
+  pills(c) { if (!c || !c.flags.length) return ''; return `<div class="adt-crit">${c.flags.map(f => `<span class="pill ${f.nivel === 'glosa' ? 'bad' : 'warn'}" title="${esc(f.msg)}">${esc({ periodo: 'Fora do período', duplicado: 'Duplicado', politica: 'Não reembolsável', teto: 'Acima do teto' }[f.tipo])}</span>`).join(' ')}<div class="cell-sub">${c.flags.map(f => esc(f.msg)).join(' · ')}</div></div>`; },
+};
+window.CriticaPrestacao = CriticaPrestacao;
+
+const Adiantamentos = {
+  ativo() { return typeof Recursos !== 'undefined' && Recursos.ativo('adiant_v1388'); },
+  podeImportar() { return Viagens.master() || Auth.can('viagens.importar'); },
+  podeAnalisar() { return Viagens.master() || Viagens.financeiro(); },
+  podeEncerrar() { return Viagens.master(); },
+  podeBaixar() { return Viagens.master() || Auth.can('viagens.pagar'); },
+  editavel(v) { return !v.acerto?.encerradoEm && ['aguardando_prestacao', 'prestacao_enviada'].includes(v.status); },
+
+  /* ---------------- importação ---------------- */
+  MAPA: { data: ['data', 'dt', 'datadespesa', 'dataemissao', 'emissao', 'datacompra', 'datadocumento', 'dia'], categoria: ['categoria', 'tipo', 'tipodespesa', 'natureza', 'grupo', 'classificacao'],
+    descricao: ['descricao', 'historico', 'item', 'detalhe', 'produto', 'observacao', 'obs', 'despesa'], valor: ['valor', 'valortotal', 'total', 'vlr', 'valorr', 'valorpago', 'montante', 'valorbruto'],
+    doc: ['documento', 'doc', 'nota', 'notafiscal', 'nf', 'nfe', 'nfce', 'cupom', 'cupomfiscal', 'numero', 'numerodocumento', 'ndocumento', 'recibo', 'chave', 'chaveacesso', 'comprovante'],
+    fornecedor: ['fornecedor', 'estabelecimento', 'razaosocial', 'emitente', 'empresa', 'local', 'prestador', 'loja'], cnpj: ['cnpj', 'cpfcnpj', 'cnpjemitente', 'cnpjfornecedor'], pessoa: ['colaborador', 'viajante', 'pessoa', 'funcionario', 'nomecolaborador'] },
+  categoria(txt) {
+    const t = CriticaPrestacao.norm(txt);
+    const m = [[/aliment|refei|restaur|lanche|almoco|jantar|cafe/, 0], [/taxi|uber|aplicativo|onibus|metro|transporte|corrida/, 1], [/hosped|hotel|pousada/, 2], [/passag|aereo|voo|rodoviar|bilhete/, 3], [/combust|gasolina|etanol|diesel|posto/, 4], [/pedag|estacion/, 5]].find(([re]) => re.test(t));
+    return m ? VIAGEM_CATEGORIAS[m[1]] : (VIAGEM_CATEGORIAS.find(c => CriticaPrestacao.norm(c) === t) || 'Outros');
+  },
+  /** Lê o arquivo (CSV, Excel ou JSON) → { itens: [{ data, categoria, descricao, valor, doc, fornecedor, cnpj, pessoa, linha }], avisos }. */
+  async ler(file) {
+    const avisos = [], itens = [], num = x => (typeof x === 'number' ? x : ConcMP.num(String(x ?? '').replace(/R\$\s*/i, '').trim()));
+    const data = x => { if (x == null || x === '') return ''; if (typeof x === 'number') return ConcMP.dataHora(x); const t = String(x).trim(); return /^\d{4}-\d{2}-\d{2}/.test(t) ? t.slice(0, 10) : ConcMP.dataHora(t) || ''; };
+    const add = (o, linha) => { const r = { data: data(o.data), categoria: this.categoria(o.categoria || o.descricao), descricao: String(o.descricao ?? '').trim().slice(0, 200), valor: Math.round((num(o.valor) || 0) * 100) / 100, doc: String(o.doc ?? '').trim().slice(0, 60), fornecedor: String(o.fornecedor ?? '').trim().slice(0, 120), cnpj: String(o.cnpj ?? '').trim().slice(0, 20), pessoa: String(o.pessoa ?? '').trim(), linha };
+      if (!r.data) return avisos.push(`Linha ${linha}: data inválida — ignorada.`); if (!(r.valor > 0)) return avisos.push(`Linha ${linha}: valor inválido — ignorada.`); itens.push(r); };
+    if (/\.json$/i.test(file.name) || file.type === 'application/json') {
+      let j; try { j = JSON.parse(await file.text()); } catch { throw new Error('JSON inválido.'); }
+      const arr = Array.isArray(j) ? j : j.itens || j.despesas || j.prestacao || j.items || [];
+      if (!Array.isArray(arr) || !arr.length) throw new Error('O JSON não tem uma lista de despesas (itens/despesas).');
+      const idx = Object.fromEntries(Object.entries(this.MAPA).flatMap(([k, ns]) => ns.map(n => [n, k])));
+      arr.forEach((o, i) => { const x = {}; Object.entries(o || {}).forEach(([k, val]) => { const c = idx[ConcMP.norm(k)]; if (c && x[c] == null) x[c] = val; }); add(x, i + 1); });
+    } else {
+      const tabs = await ConcMP.tabelas(file); let h = null, rows = null;
+      for (const tb of tabs) { h = ConcMP.cabecalho(tb.rows, this.MAPA, ['data', 'valor'], 30); if (h) { rows = tb.rows; break; } }
+      if (!h) throw new Error('Não encontrei o cabeçalho (é preciso ao menos as colunas Data e Valor).');
+      rows.slice(h.i + 1).forEach((r, i) => { if (!(r || []).some(c => c != null && String(c).trim() !== '')) return; const x = {}; Object.entries(h.col).forEach(([k, j]) => { x[k] = r[j]; }); if (/^total/i.test(String(x.descricao || x.categoria || x.data || ''))) return; add(x, h.i + i + 2); });
+    }
+    if (!itens.length) throw new Error('Nenhuma despesa válida no arquivo.' + (avisos.length ? ' ' + avisos.slice(0, 3).join(' ') : ''));
+    return { itens, avisos, arquivo: file.name };
+  },
+  pessoaDe(v, txt) { const ps = Viagens.participantes(v), t = CriticaPrestacao.norm(txt), c = String(txt || '').replace(/\D/g, ''); if (!t) return null;
+    return ps.find(p => CriticaPrestacao.norm(p.nome) === t) || ps.find(p => c.length === 11 && CPF.limpar(Repo.get('funcionarios', p.funcionarioId)?.cpf) === c) || ps.find(p => CriticaPrestacao.norm(p.nome).startsWith(t)) || null; },
+  importar(id) {
+    const v0 = Repo.get(Viagens.COL, id); if (!v0) return;
+    if (!this.podeImportar()) return UI.toast('Importar arquivo de prestação: Master ou "Pode importar arquivo de prestação de contas" (Gestão de Acessos › Viagens).');
+    if (!Viagens.podeEditarPrestacao(v0)) return UI.toast('A importação só é feita enquanto a viagem aguarda a prestação de contas.');
+    let lido = null;
+    const prever = async (m, file) => {
+      const v = Repo.get(Viagens.COL, id), alvo = $('#adtPrev', m); alvo.innerHTML = '<p class="hint">Lendo o arquivo…</p>';
+      try { lido = await this.ler(file); } catch (e) { lido = null; alvo.innerHTML = `<div class="note warn">${esc(e.message || String(e))}</div>`; return; }
+      const ind = Viagens.modo(v) === 'individual', lanc = Viagens.lancaveis(v), padrao = lanc[0] || v.funcionarioId;
+      lido.itens.forEach((x, i) => { x.id = 'imp' + i; const p = ind ? this.pessoaDe(v, x.pessoa) : null; x.funcionarioId = p && lanc.includes(p.funcionarioId) ? p.funcionarioId : padrao; if (ind && x.pessoa && !p) lido.avisos.push(`Linha ${x.linha}: "${x.pessoa}" não é participante — lançada para ${Viagens.participantes(v).find(q => q.funcionarioId === padrao)?.nome || 'o titular'}.`); });
+      const crit = CriticaPrestacao.analisar(v, [...(v.despesas || []), ...lido.itens]), nG = lido.itens.filter(x => crit.get(x.id).flags.some(f => f.nivel === 'glosa')).length, nA = lido.itens.filter(x => crit.get(x.id).flags.some(f => f.nivel === 'alerta')).length;
+      const tot = lido.itens.reduce((a, x) => a + x.valor, 0);
+      alvo.innerHTML = `<div class="row" style="gap:6px;margin:8px 0"><span class="pill info">${lido.itens.length} despesa(s) · ${Fmt.brl(tot)}</span>${nG ? `<span class="pill bad">${nG} com glosa sugerida</span>` : ''}${nA ? `<span class="pill warn">${nA} acima do teto</span>` : ''}${!nG && !nA ? '<span class="pill ok">nenhum item indevido</span>' : ''}</div>
+        ${lido.avisos.length ? `<div class="note warn" style="margin-bottom:8px">${lido.avisos.slice(0, 8).map(esc).join('<br>')}${lido.avisos.length > 8 ? `<br>… e mais ${lido.avisos.length - 8}` : ''}</div>` : ''}
+        <div class="tbl-wrap" style="max-height:46vh"><table class="nolabel adt-prev"><thead><tr><th aria-label="Importar"></th><th>Data</th>${ind ? '<th>De</th>' : ''}<th>Despesa</th><th>Documento</th><th class="num">Valor</th></tr></thead><tbody>
+        ${lido.itens.map(x => { const c = crit.get(x.id); return `<tr><td><input type="checkbox" data-adt-inc="${x.id}" checked aria-label="Importar a linha ${x.linha}"></td><td class="mono">${Fmt.data(x.data)}</td>${ind ? `<td>${esc(Viagens.participantes(v).find(p => p.funcionarioId === x.funcionarioId)?.nome || '')}</td>` : ''}<td>${esc(x.categoria)}${x.descricao ? `<div class="cell-sub">${esc(x.descricao)}</div>` : ''}${x.fornecedor ? `<div class="cell-sub">${esc(x.fornecedor)}${x.cnpj ? ' · ' + esc(x.cnpj) : ''}</div>` : ''}${CriticaPrestacao.pills(c)}</td><td class="mono">${esc(x.doc || '—')}</td><td class="num">${Fmt.brl(x.valor)}</td></tr>`; }).join('')}</tbody></table></div>
+        <p class="hint" style="margin:6px 0 0">As despesas entram sem comprovante anexado (origem: ${esc(lido.arquivo)}). A crítica é só sugestão: a decisão final (aprovar, glosar ou aprovar parcialmente) é feita no Acerto de Contas Final.</p>`;
+    };
+    UI.modal({ titulo: 'Importar arquivo de prestação de contas', largo: true,
+      corpo: `<p style="margin:0 0 10px">${esc(Viagens.nomes ? Viagens.nomes(v0) : v0.nome)} · ${esc(Trajeto.rota(v0))} (${Viagens.periodo(v0)}).</p>
+        <div class="field full"><label class="lbl" for="adtArq">Arquivo de prestação (CSV, Excel ou JSON) · colunas: Data, Categoria, Descrição, Valor, Documento/Cupom, Fornecedor, CNPJ${Viagens.modo(v0) === 'individual' ? ', Colaborador' : ''}</label><input id="adtArq" type="file" accept=".csv,.txt,.xlsx,.xls,.json,application/json,text/csv"></div><div id="adtPrev"></div>`,
+      aoAbrir: m => m.addEventListener('change', e => { if (e.target.id === 'adtArq' && e.target.files[0]) prever(m, e.target.files[0]); }),
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Importar despesas', acao: async m => {
+        if (!lido) { UI.toast('Escolha o arquivo de prestação.'); return false; }
+        const inc = new Set($$('[data-adt-inc]:checked', m).map(x => x.dataset.adtInc)), xs = lido.itens.filter(x => inc.has(x.id)); if (!xs.length) { UI.toast('Nenhuma linha marcada.'); return false; }
+        const v = Repo.get(Viagens.COL, id); if (!Viagens.podeEditarPrestacao(v)) { UI.toast('A prestação não está mais aberta para edição.'); return false; }
+        const novos = xs.map(x => ({ id: 'd' + uid(), data: x.data, categoria: x.categoria, descricao: x.descricao, valor: x.valor, arquivo: null, funcionarioId: x.funcionarioId, nomePessoa: Viagens.participantes(v).find(p => p.funcionarioId === x.funcionarioId)?.nome || '',
+          lancadoPor: Auth.id, em: new Date().toISOString(), origem: 'importado', arquivoOrigem: lido.arquivo, doc: x.doc, fornecedor: x.fornecedor, cnpj: x.cnpj }));
+        await Viagens.gravar(v, { txt: `Importação da prestação: ${novos.length} despesa(s) · ${Fmt.brl(novos.reduce((a, x) => a + x.valor, 0))} (${lido.arquivo})` }, { despesas: [...(v.despesas || []), ...novos] });
+        UI.toast(`${novos.length} despesa(s) importada(s). Confira a crítica no Acerto de Contas Final.`); setTimeout(() => Viagens.abrir(id, true), 50);
+      } }] });
+  },
+
+  /* ---------------- acerto ---------------- */
+  /** Itens com a crítica e o valor aprovado (decisão gravada ou sugestão) + grupos (por pessoa no repasse individual) em centavos. */
+  calcular(v, valores = null) {
+    const crit = CriticaPrestacao.analisar(v), ind = Viagens.modo(v) === 'individual', cs = Viagens.contas(v), c = x => Math.round((Number(x) || 0) * 100);
+    const itens = (v.despesas || []).map(d => { const k = crit.get(d.id) || { flags: [], padrao: d.valor, excesso: 0 }, manual = valores && valores[d.id] != null ? Number(valores[d.id]) : d.aprovacao?.manual ? Number(d.aprovacao.valor) : null;
+      const aprovado = Math.max(0, Math.min(Number(d.valor) || 0, manual != null && !isNaN(manual) ? manual : k.padrao)); return { d, crit: k, aprovado: Math.round(aprovado * 100) / 100, manual: manual != null && Math.abs(manual - k.padrao) > 0.004 }; });
+    const base = ind && cs.length ? cs.map(x => ({ funcionarioId: x.funcionarioId, nome: x.nome, adiantado: c(x.valorPago ?? x.valor) })) : [{ funcionarioId: v.funcionarioId, nome: v.nome, adiantado: c(v.valorPago ?? v.valor) }];
+    const grupos = base.map(g => { const xs = ind && cs.length ? itens.filter(i => i.d.funcionarioId === g.funcionarioId) : itens, comprovado = xs.reduce((a, i) => a + c(i.d.valor), 0), aprovado = xs.reduce((a, i) => a + c(i.aprovado), 0), saldo = g.adiantado - aprovado;
+      return { ...g, comprovado, aprovado, glosado: comprovado - aprovado, saldo, tipo: saldo > 0 ? 'devolver' : saldo < 0 ? 'reembolsar' : 'quitado' }; });
+    const soma = f => grupos.reduce((a, g) => a + f(g), 0);
+    return { itens, grupos, adiantado: soma(g => g.adiantado), comprovado: soma(g => g.comprovado), aprovado: soma(g => g.aprovado), devolver: soma(g => Math.max(0, g.saldo)), reembolsar: soma(g => Math.max(0, -g.saldo)) };
+  },
+  TIPO: { devolver: ['Saldo a Devolver pelo Viajante ao Caixa', 'warn'], reembolsar: ['Saldo a Reembolsar ao Viajante', 'info'], quitado: ['Quitado (sem saldo)', 'ok'] },
+  resumoHtml(g) { const b = x => Fmt.brl(x / 100), t = this.TIPO[g.tipo]; return `<table class="adt-resumo"><tbody>
+      <tr><td>(+) Valor Total do Adiantamento Concedido</td><td class="num">${b(g.adiantado)}</td></tr>
+      <tr><td>(−) Total de Despesas Comprovadas e Aprovadas${g.glosado ? ` <span class="hint">(comprovado ${b(g.comprovado)} · glosado ${b(g.glosado)})</span>` : ''}</td><td class="num">${b(g.aprovado)}</td></tr>
+      <tr class="adt-saldo s-${g.tipo}"><td>(=) ${t[0]}</td><td class="num">${b(Math.abs(g.saldo))}</td></tr></tbody></table>`; },
+  abrir(id) {
+    [...$$('.overlay')].filter(o => o.querySelector('[data-adt-id="' + id + '"]')).forEach(o => o.remove());
+    const v = Repo.get(Viagens.COL, id); if (!v || !Viagens.noAlcance(v)) return;
+    const ed = this.editavel(v) && this.podeAnalisar(), enc = !!v.acerto?.encerradoEm, a = this.calcular(v), ind = Viagens.modo(v) === 'individual', parts = Viagens.participantes(v);
+    const nome = fid => parts.find(p => p.funcionarioId === fid)?.nome || '—', ac = v.acerto;
+    const linhas = a.itens.map(({ d, crit, aprovado, manual }) => `<tr><td class="mono">${Fmt.data(d.data)}</td>${ind ? `<td>${esc(d.nomePessoa || nome(d.funcionarioId))}</td>` : ''}<td>${esc(d.categoria)}${d.descricao ? `<div class="cell-sub">${esc(d.descricao)}</div>` : ''}${d.fornecedor ? `<div class="cell-sub">${esc(d.fornecedor)}</div>` : ''}${CriticaPrestacao.pills(crit)}</td>
+      <td class="mono">${esc(d.doc || (d.arquivo ? 'anexo' : '—'))}</td><td class="num">${Fmt.brl(d.valor)}</td>
+      <td class="num">${ed ? `<input type="number" step="0.01" min="0" max="${d.valor}" value="${aprovado.toFixed(2)}" data-adt-ap="${d.id}" aria-label="Valor aprovado da despesa de ${Fmt.data(d.data)}" style="max-width:110px;text-align:right">${manual ? '<div class="cell-sub">ajustado</div>' : ''}` : `${Fmt.brl(enc ? (d.aprovacao?.valor ?? aprovado) : aprovado)}${aprovado < d.valor ? `<div class="cell-sub">glosa ${Fmt.brl(Math.round((d.valor - aprovado) * 100) / 100)}</div>` : ''}`}</td></tr>`).join('');
+    const nGl = a.itens.filter(i => i.crit.flags.some(f => f.nivel === 'glosa')).length, nAl = a.itens.filter(i => i.crit.flags.some(f => f.nivel === 'alerta')).length;
+    const grupos = enc ? ac.grupos.map(g => ({ ...g, adiantado: Math.round(g.adiantado * 100), aprovado: Math.round(g.aprovado * 100), comprovado: Math.round((g.aprovado + g.glosado) * 100), glosado: Math.round(g.glosado * 100), saldo: Math.round(g.saldo * 100) })) : a.grupos;
+    const resumo = grupos.map(g => `${grupos.length > 1 ? `<h4 class="adt-h4">${esc(g.nome)}</h4>` : ''}${this.resumoHtml(g)}`).join('');
+    const tit = enc ? (ac.titulos || []).map(t => `<tr><td>${esc(t.nome)}</td><td>${t.tipo === 'devolver' ? 'Devolução a receber do viajante' : 'Reembolso a pagar ao viajante'}</td><td class="num">${Fmt.brl(t.valor)}</td><td>${Fmt.data(t.vencimento)}</td><td>${t.status === 'baixado' ? `<span class="pill ok">Baixado em ${Fmt.data(t.baixa?.data)}</span>${t.baixa?.lancamento ? `<div class="cell-sub">lançamento nº ${t.baixa.lancamento.numero}</div>` : ''}` : `<span class="pill warn">Em aberto</span>${this.podeBaixar() ? ` <button type="button" class="btn sm" data-adt-baixa="${esc(t.funcionarioId || '')}">${t.tipo === 'devolver' ? 'Registrar devolução' : 'Registrar reembolso'}</button>` : ''}`}</td></tr>`).join('') : '';
+    const ctb = enc ? (ac.contabil?.pendente ? `<div class="note warn" style="margin-top:8px">Contabilização pendente: ${esc(ac.contabil.motivo || '')}${Cloud.base?.netlify && (Viagens.master() || Auth.can('contabil.lancar')) ? ' <button type="button" class="btn sm" data-adt-ctb>Contabilizar agora</button>' : ''}</div>`
+      : `<p class="hint" style="margin:8px 0 0">Lançamentos contábeis (partidas dobradas): ${(ac.contabil?.lancamentos || []).map(l => `nº ${l.numero} (${l.tipo === 'adiantamento' ? 'adiantamento pago' : 'acerto/liquidação'})`).join(' · ')}</p>`) : '';
+    const acoes = [{ rotulo: 'Fechar', classe: 'sec' }, { rotulo: 'Imprimir Acerto de Contas', classe: 'sec', acao: () => { this.imprimir(id); return false; } }];
+    if (ed) acoes.push({ rotulo: 'Salvar análise', classe: 'sec', acao: m => { this.salvarAnalise(id, this.valoresDe(m)).then(() => this.abrir(id)); return false; } });
+    if (!enc && this.editavel(v) && this.podeEncerrar()) acoes.push({ rotulo: 'Encerrar Prestação de Contas', acao: m => { this.encerrar(id, { valores: this.valoresDe(m) }); return false; } });
+    UI.modal({ titulo: 'Acerto de Contas Final da Prestação', largo: true, acoes,
+      corpo: `<div data-adt-id="${v.id}"></div><div class="row between" style="gap:10px;align-items:flex-start;margin-bottom:8px"><div><b>${esc(ind || parts.length > 1 ? parts.map(p => p.nome).join(', ') : v.nome)}</b><div class="hint">${esc(Trajeto.rota(v))} · ${Viagens.periodo(v)} · ${esc(Viagens.MODOS[Viagens.modo(v)] || '')}</div></div>${Viagens.rotStatus(v)}</div>
+        ${enc ? `<div class="note ok" style="margin-bottom:10px"><b>Prestação encerrada</b> em ${Fmt.dataHora(ac.encerradoEm)} por ${esc(ac.encerradoPorNome || '')}: edição travada.</div>` : `<div class="row" style="gap:6px;margin-bottom:8px">${nGl ? `<span class="pill bad">${nGl} item(ns) com glosa sugerida</span>` : ''}${nAl ? `<span class="pill warn">${nAl} acima do teto</span>` : ''}${!nGl && !nAl ? '<span class="pill ok">Crítica: nenhum item indevido</span>' : ''}</div>`}
+        <div class="tbl-wrap" style="max-height:40vh"><table class="nolabel adt-itens"><thead><tr><th>Data</th>${ind ? '<th>De</th>' : ''}<th>Despesa · crítica</th><th>Documento</th><th class="num">Comprovado</th><th class="num">Aprovado</th></tr></thead><tbody>${linhas || `<tr><td colspan="${ind ? 6 : 5}" class="hint">Nenhuma despesa lançada.</td></tr>`}</tbody></table></div>
+        ${ed ? '<p class="hint" style="margin:6px 0 0">A coluna Aprovado já vem com a sugestão da crítica (glosa = 0; teto = valor − excedente). Ajuste o que for preciso e salve; o encerramento usa estes valores.</p>' : ''}
+        <h3 class="cp-h3" style="margin-top:14px">Acerto de Contas</h3>${resumo}
+        ${enc && tit ? `<h3 class="cp-h3" style="margin-top:14px">Títulos do acerto</h3><div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Viajante</th><th>Título</th><th class="num">Valor</th><th>Vencimento</th><th>Situação</th></tr></thead><tbody>${tit}</tbody></table></div>` : ''}${ctb}
+        ${!enc && !this.podeEncerrar() ? '<p class="hint" style="margin-top:8px">O encerramento é do Master (direto aqui ou aprovando a prestação na Liberação Remota).</p>' : ''}`,
+      aoAbrir: m => m.addEventListener('click', e => { const b = e.target.closest('[data-adt-baixa]'); if (b) return this.baixar(id, b.dataset.adtBaixa); if (e.target.closest('[data-adt-ctb]')) return this.contabilizar(id); }) });
+  },
+  valoresDe(m) { const o = {}; $$('[data-adt-ap]', m).forEach(x => { const n = Number(x.value); o[x.dataset.adtAp] = isNaN(n) ? 0 : n; }); return Object.keys(o).length ? o : null; },
+  /** Grava em cada despesa a análise (valor aprovado, situação e motivo da crítica). */
+  async salvarAnalise(id, valores) {
+    const v = Repo.get(Viagens.COL, id); if (!v || !this.editavel(v) || !this.podeAnalisar()) return false;
+    const a = this.calcular(v, valores), em = new Date().toISOString(), por = new Map(a.itens.map(i => [i.d.id, i]));
+    const despesas = (v.despesas || []).map(d => { const i = por.get(d.id); return { ...d, aprovacao: { valor: i.aprovado, status: i.aprovado <= 0 ? 'glosado' : i.aprovado < d.valor ? 'parcial' : 'aprovado', manual: i.manual, motivo: i.crit.flags.map(f => f.msg).join(' · ').slice(0, 300), por: Auth.id, porNome: Auth.nome, em } }; });
+    await Viagens.gravar(v, { txt: `Análise da prestação salva · aprovado ${Fmt.brl(a.aprovado / 100)} de ${Fmt.brl(a.comprovado / 100)} comprovados` }, { despesas });
+    UI.toast('Análise da prestação salva.'); return true;
+  },
+  /** Encerramento: grava a análise, trava a prestação, gera título(s) e (no Netlify) os lançamentos. Só o Master. */
+  async encerrar(id, { valores = null, daLiberacao = false } = {}) {
+    let v = Repo.get(Viagens.COL, id); if (!v) return;
+    if (!this.podeEncerrar()) return UI.toast('Só o Master encerra a prestação de contas.');
+    if (!this.editavel(v)) return UI.toast('Esta prestação já foi encerrada ou ainda não foi paga.');
+    const a = this.calcular(v, valores), b = x => Fmt.brl(x / 100), res = a.grupos.map(g => `${a.grupos.length > 1 ? esc(g.nome) + ': ' : ''}<b>${this.TIPO[g.tipo][0]}${g.saldo ? ' ' + b(Math.abs(g.saldo)) : ''}</b>`).join('<br>');
+    if (!daLiberacao && !(await UI.confirmarImpacto('Encerrar Prestação de Contas', `Adiantamento ${b(a.adiantado)} · despesas aprovadas ${b(a.aprovado)} (glosado ${b(a.comprovado - a.aprovado)}).<br>${res}<br><br>Ao encerrar, a prestação fica <b>travada</b>, o título do saldo é gerado e ${Cloud.base?.netlify ? 'os lançamentos de liquidação são registrados no Módulo Contábil (partidas dobradas)' : 'a contabilização fica pendente (Módulo Contábil só na versão Netlify)'}.`, { acao: 'editar', rotulo: 'Encerrar prestação' }))) return;
+    if ((await this.salvarAnalise(id, valores)) === false) return; v = Repo.get(Viagens.COL, id);
+    try {
+      if (Cloud.base?.netlify) {
+        const r = await Cloud.base._req('POST', '/api/contabil/adiantamentos/encerrar', { viagemId: id }); await this.recarregar(id);
+        UI.toast(r.acerto.contabil?.pendente ? `Prestação encerrada. Contabilização pendente: ${r.acerto.contabil.motivo}` : `Prestação encerrada · lançamentos nº ${r.acerto.contabil.lancamentos.map(l => l.numero).join(', ')}.`);
+      } else {
+        const ac = this.calcular(v), r2 = x => Math.round(x) / 100, venc = v.politica?.prazoData && v.politica.prazoData >= Datas.hojeISO() ? v.politica.prazoData : Datas.hojeISO(), em = new Date().toISOString();
+        const acerto = { encerradoEm: em, encerradoPor: Auth.id, encerradoPorNome: Auth.nome, adiantado: r2(ac.adiantado), comprovado: r2(ac.comprovado), aprovado: r2(ac.aprovado), glosado: r2(ac.comprovado - ac.aprovado), saldo: r2(ac.adiantado - ac.aprovado), devolver: r2(ac.devolver), reembolsar: r2(ac.reembolsar),
+          grupos: ac.grupos.map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, adiantado: r2(g.adiantado), aprovado: r2(g.aprovado), glosado: r2(g.glosado), saldo: r2(g.saldo), tipo: g.tipo })),
+          titulos: ac.grupos.filter(g => g.saldo).map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, tipo: g.tipo, valor: r2(Math.abs(g.saldo)), status: 'aberto', vencimento: venc })), contabil: { pendente: true, motivo: 'O Módulo Contábil (lançamentos em partidas dobradas) roda na versão Netlify do painel.' } };
+        await Viagens.gravar(v, { de: v.status, para: 'concluido', txt: `Prestação encerrada (acerto final) · aprovado ${Fmt.brl(acerto.aprovado)} de ${Fmt.brl(acerto.adiantado)} adiantados` }, { status: 'concluido', concluidoEm: em, concluidoPor: Auth.id, concluidoPorNome: Auth.nome, acerto });
+        UI.toast('Prestação encerrada. Contabilização pendente (Módulo Contábil só na versão Netlify).');
+      }
+    } catch (e) { return UI.toast('Encerramento não concluído: ' + (e.message || e)); }
+    if (!daLiberacao) await this.resolverLiberacao(Repo.get(Viagens.COL, id) || v);
+    this.abrir(id);
+  },
+  async resolverLiberacao(v) {
+    const lid = v.prestacaoLiberacaoId, r = lid && Repo.get(Liberacao.COL, lid); if (!r || r.status !== 'pendente') return;
+    const { id: _i, ...base } = r; await Repo.salvar(Liberacao.COL, lid, { ...base, status: 'aprovado', decididoPor: Auth.id, decididoPorNome: Auth.nome, decididoEm: new Date().toISOString(), obsDecisao: 'Encerrada pelo Acerto de Contas Final' }, { modulo: 'liberacao', rotulo: `Aprovou · ${Liberacao.TIPOS[r.tipo]} · ${r.solicitanteNome}` });
+  },
+  /** Depois de uma gravação feita no servidor: lê o documento e atualiza a tela na hora (sem esperar a sincronização). */
+  async recarregar(id) { try { const d = await Cloud.adapter.get(Viagens.COL + '/' + id); if (d && Repo.cols[Viagens.COL]) { Repo.cols[Viagens.COL].set(id, { ...d, id }); Repo._bump(Viagens.COL); } } catch { } },
+  async contabilizar(id) { try { const r = await Cloud.base._req('POST', '/api/contabil/adiantamentos/contabilizar', { viagemId: id }); await this.recarregar(id); UI.toast(`Acerto contabilizado · lançamentos nº ${r.acerto.contabil.lancamentos.map(l => l.numero).join(', ')}.`); this.abrir(id); } catch (e) { UI.toast('Não contabilizado: ' + (e.message || e)); } },
+  baixar(id, fid) {
+    const v = Repo.get(Viagens.COL, id), t = (v?.acerto?.titulos || []).find(x => x.status === 'aberto' && (x.funcionarioId || '') === (fid || '')); if (!t) return;
+    const dev = t.tipo === 'devolver';
+    UI.modal({ titulo: dev ? 'Registrar devolução recebida' : 'Registrar reembolso pago', corpo: `<p style="margin:0 0 10px">${dev ? 'Devolução do saldo do adiantamento por' : 'Reembolso de despesas de viagem para'} <b>${esc(t.nome)}</b>: <b>${Fmt.brl(t.valor)}</b>.</p><form class="form-grid" onsubmit="return false">${campo('Data', 'data', Datas.hojeISO(), { tipo: 'date' })}${campo('Forma', 'forma', 'PIX', { opcoes: ['PIX', 'TED', 'Depósito', 'Dinheiro', 'Desconto em folha'] })}</form>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Registrar', acao: async m => { const d = UI.lerForm(m);
+        try {
+          if (Cloud.base?.netlify) { await Cloud.base._req('POST', '/api/contabil/adiantamentos/baixar', { viagemId: id, funcionarioId: t.funcionarioId, data: d.data, forma: d.forma }); await this.recarregar(id); }
+          else { const x = Repo.get(Viagens.COL, id), titulos = x.acerto.titulos.map(y => y === t || (y.status === 'aberto' && y.funcionarioId === t.funcionarioId) ? { ...y, status: 'baixado', baixa: { data: d.data, forma: d.forma, por: Auth.id, porNome: Auth.nome, em: new Date().toISOString(), lancamento: null } } : y);
+            await Viagens.gravar(x, { txt: `${dev ? 'Devolução recebida' : 'Reembolso pago'} · ${t.nome} · ${Fmt.brl(t.valor)}` }, { acerto: { ...x.acerto, titulos } }); }
+          UI.toast(dev ? 'Devolução registrada.' : 'Reembolso registrado.'); setTimeout(() => this.abrir(id), 50);
+        } catch (e) { UI.toast('Não registrado: ' + (e.message || e)); return false; } } }] });
+  },
+  /** Relatório impresso (A4): Acerto de Contas Final da Prestação. */
+  imprimir(id) {
+    const v = Repo.get(Viagens.COL, id); if (!v) return;
+    const enc = !!v.acerto?.encerradoEm, a = this.calcular(v), ind = Viagens.modo(v) === 'individual', parts = Viagens.participantes(v), ac = v.acerto;
+    const grupos = enc ? ac.grupos.map(g => ({ ...g, adiantado: Math.round(g.adiantado * 100), aprovado: Math.round(g.aprovado * 100), comprovado: Math.round((g.aprovado + g.glosado) * 100), glosado: Math.round(g.glosado * 100), saldo: Math.round(g.saldo * 100) })) : a.grupos;
+    const linhas = a.itens.map(({ d, crit, aprovado }) => { const ap = enc ? (d.aprovacao?.valor ?? aprovado) : aprovado; return `<tr><td>${Fmt.data(d.data)}</td>${ind ? `<td>${esc(d.nomePessoa || '')}</td>` : ''}<td>${esc(d.categoria)}${d.descricao ? ` · ${esc(d.descricao)}` : ''}${d.fornecedor ? `<br><small>${esc(d.fornecedor)}${d.cnpj ? ' · ' + esc(d.cnpj) : ''}</small>` : ''}${crit.flags.length ? `<br><small class="glosa">${crit.flags.map(f => esc(f.msg)).join(' · ')}</small>` : ''}</td><td>${esc(d.doc || (d.arquivo ? 'anexo' : '—'))}</td><td class="n">${Fmt.brl(d.valor)}</td><td class="n">${Fmt.brl(ap)}</td></tr>`; }).join('');
+    const css = `@page{size:A4;margin:14mm 12mm}body{font:11px/1.4 Inter,Arial,sans-serif;color:#151934}h1{font-size:16px;margin:0 0 2px;color:#1B2362}h2{font-size:12.5px;margin:14px 0 6px;color:#1B2362}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #DDE0EC;padding:4px 6px;text-align:left;vertical-align:top}th{background:#F1F2F8;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.n{text-align:right;white-space:nowrap}small{color:#585E7F}.glosa{color:#9A2F25}.res td{font-size:12px}.res tr.s td{font-weight:700;border-top:2px solid #1B2362;background:#F1F2F8}.ass{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}.ass div{border-top:1px solid #151934;padding-top:4px;text-align:center;font-size:10px}.cab{display:flex;justify-content:space-between;border-bottom:2px solid #1B2362;padding-bottom:6px;margin-bottom:8px}`;
+    const res = grupos.map(g => `${grupos.length > 1 ? `<h2>${esc(g.nome)}</h2>` : ''}<table class="res"><tbody><tr><td>(+) Valor Total do Adiantamento Concedido</td><td class="n">${Fmt.brl(g.adiantado / 100)}</td></tr><tr><td>(−) Total de Despesas Comprovadas e Aprovadas${g.glosado ? ` <small>(comprovado ${Fmt.brl(g.comprovado / 100)} · glosado ${Fmt.brl(g.glosado / 100)})</small>` : ''}</td><td class="n">${Fmt.brl(g.aprovado / 100)}</td></tr><tr class="s"><td>(=) ${this.TIPO[g.tipo][0]}</td><td class="n">${Fmt.brl(Math.abs(g.saldo) / 100)}</td></tr></tbody></table>`).join('');
+    const extra = enc ? `<h2>Encerramento</h2><p>Encerrada em ${Fmt.dataHora(ac.encerradoEm)} por ${esc(ac.encerradoPorNome || '')}. ${ac.contabil?.pendente ? 'Contabilização pendente: ' + esc(ac.contabil.motivo || '') : 'Lançamentos contábeis nº ' + (ac.contabil?.lancamentos || []).map(l => l.numero).join(', ') + '.'}</p>${(ac.titulos || []).map(t => `<p>${t.tipo === 'devolver' ? 'Título de devolução a receber' : 'Obrigação de reembolso a pagar'} · ${esc(t.nome)} · ${Fmt.brl(t.valor)} · venc. ${Fmt.data(t.vencimento)} · ${t.status === 'baixado' ? 'baixado em ' + Fmt.data(t.baixa?.data) : 'em aberto'}</p>`).join('')}` : '<p><small>Prévia: a prestação ainda não foi encerrada.</small></p>';
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Acerto de Contas Final da Prestação</title><style>${css}</style></head><body>
+      <div class="cab"><div><h1>Acerto de Contas Final da Prestação</h1><div>${esc(parts.map(p => p.nome).join(', ') || v.nome)} · ${esc(Trajeto.rota(v))} · ${Viagens.periodo(v)}</div></div><div style="text-align:right"><small>Emitido em ${Fmt.dataHora(new Date().toISOString())}</small><br><small>${esc(VIAGEM_ST[v.status]?.rot || v.status)}</small></div></div>
+      <h2>Despesas comprovadas e análise (crítica de itens indevidos)</h2><table><thead><tr><th>Data</th>${ind ? '<th>De</th>' : ''}<th>Despesa</th><th>Documento</th><th class="n">Comprovado</th><th class="n">Aprovado</th></tr></thead><tbody>${linhas || '<tr><td colspan="6">Nenhuma despesa.</td></tr>'}</tbody></table>
+      <h2>Acerto de contas</h2>${res}${extra}
+      <div class="ass"><div>Viajante</div><div>Financeiro</div><div>Master</div></div>
+      </body></html>`;
+    Documento.previa('Acerto de Contas Final da Prestação', html, 'Acerto_Prestacao_' + (v.nome || 'viagem').replace(/\W+/g, '_') + '_' + Datas.hojeISO());
+  },
+};
+window.Adiantamentos = Adiantamentos;
+/* v13.88 · revalidação das permissões da sessão: ao voltar para a aba/janela e a cada 60 s (fora da região da Regra de Ouro) */
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && typeof Sessao !== 'undefined' && Sessao.ativa) Sessao.revalidar(); });
+window.addEventListener('focus', () => { if (typeof Sessao !== 'undefined' && Sessao.ativa) Sessao.revalidar(); });
+setInterval(() => { if (typeof Sessao !== 'undefined' && Sessao.ativa && document.visibilityState === 'visible') Sessao.revalidar(); }, 60000);
+
 const Liberacao = {
   COL: 'funcionarios/_liberacoes/pedidos', // subcoleção de funcionarios: herda a regra de leitura/gravação 'interact' (quem só visualiza não lê)
   PRAZO_FCX: 3 * 60 * 1000,
@@ -13972,10 +14354,11 @@ const VIAGEM_ST = {
 };
 const VIAGEM_CATEGORIAS = ['Alimentação', 'Transporte (táxi, aplicativo, ônibus)', 'Hospedagem', 'Passagem', 'Combustível', 'Pedágio e estacionamento', 'Outros'];
 
+const r2s = n => Math.round((Number(n) || 0) * 100) / 100; /* v13.89 */
 const Viagens = {
   COL: 'funcionarios/_viagens/pedidos',
   PARAM: 'funcionarios/_viagens/parametros', /* v13.24: doc 'diarias' (subcoleção de funcionarios: mesma proteção dos pedidos) */
-  ui: { filtro: 'andamento', busca: '' },
+  ui: { filtro: 'andamento', busca: '', aba: 'pedidos', de: '', ate: '', ccAbertos: [] },
   PAGOS: ['aguardando_prestacao', 'prestacao_enviada', 'concluido'],
 
   /* ---------------- quem vê / quem faz ---------------- */
@@ -14500,6 +14883,7 @@ const Viagens = {
       await this.gravar(v, { de: v.status, para: aprovar ? 'aprovado_pagamento' : 'recusado', txt: aprovar ? 'Aprovado para pagamento' : 'Recusado' + (obs ? ': ' + obs : '') }, { status: aprovar ? 'aprovado_pagamento' : 'recusado', aprovadoPor: Auth.id, aprovadoPorNome: Auth.nome, aprovadoEm: new Date().toISOString(), obsDecisao: obs || '' });
       return UI.toast(aprovar ? 'Adiantamento aprovado: agora o financeiro registra o pagamento.' : 'Adiantamento recusado.');
     }
+    if (r.tipo === 'viagem-prestacao' && aprovar && Adiantamentos.ativo()) return Adiantamentos.encerrar(v.id, { daLiberacao: true }); /* v13.88: aprovar = encerrar pelo Acerto de Contas Final (com os lançamentos) */
     if (r.tipo === 'viagem-prestacao') {
       const t = this.totais(v);
       if (aprovar) await this.gravar(v, { de: v.status, para: 'concluido', txt: `Prestação aprovada · ${t.sit.rot}${t.abs ? ' ' + Fmt.brl(t.abs) : ''}` }, { status: 'concluido', concluidoEm: new Date().toISOString(), concluidoPor: Auth.id, concluidoPorNome: Auth.nome, fechamento: { adiantado: t.adiantado, gasto: t.gasto, saldo: t.saldo, situacao: t.sit.rot, ...(this.modo(v) === 'individual' ? { porPessoa: this.porPessoa(v).map(x => ({ funcionarioId: x.funcionarioId, nome: x.nome, adiantado: x.adiantado, gasto: x.gasto, saldo: x.saldo, situacao: x.sit.rot })) } : {}) } });
@@ -14800,7 +15184,8 @@ const Viagens = {
     const v = Repo.get(this.COL, id); if (!v || !this.noAlcance(v)) return;
     const t = this.totais(v), ed = this.podeEditarPrestacao(v), f = Repo.get('funcionarios', v.funcionarioId), mostrarContas = this.PAGOS.includes(v.status);
     const parts = this.participantes(v), grupo = parts.length > 1, modo = this.modo(v), ind = modo === 'individual', cs = this.contas(v), pp = ind ? this.porPessoa(v) : null;
-    const desp = (v.despesas || []).map(d => `<tr><td class="mono">${Fmt.data(d.data)}</td>${ind ? `<td>${esc(d.nomePessoa || parts.find(p => p.funcionarioId === d.funcionarioId)?.nome || '—')}</td>` : ''}<td>${esc(d.categoria)}${d.descricao ? `<div class="cell-sub">${esc(d.descricao)}</div>` : ''}</td><td class="num">${Fmt.brl(d.valor)}</td>
+    const crit = Adiantamentos.ativo() ? CriticaPrestacao.analisar(v) : null; /* v13.88: crítica de itens indevidos */
+    const desp = (v.despesas || []).map(d => `<tr><td class="mono">${Fmt.data(d.data)}</td>${ind ? `<td>${esc(d.nomePessoa || parts.find(p => p.funcionarioId === d.funcionarioId)?.nome || '—')}</td>` : ''}<td>${esc(d.categoria)}${d.descricao ? `<div class="cell-sub">${esc(d.descricao)}</div>` : ''}${crit ? CriticaPrestacao.pills(crit.get(d.id)) : ''}</td><td class="num">${Fmt.brl(d.valor)}</td>
       <td>${d.arquivo ? Arquivos.botao(d.arquivo, { classe: 'btn ghost sm arq-tab' }) : '<span class="pill warn">sem comprovante</span>'}</td>${ed ? `<td class="acts">${this.podeApagarDespesa(v, d) ? `<button type="button" class="iconbtn" data-vg-del="${d.id}" aria-label="Excluir despesa">${ICON.lixo}</button>` : ''}</td>` : ''}</tr>`).join('');
     const saldoBox = (x, titulo = '') => `<div class="vg-saldo s-${x.sit.k}">${titulo ? `<div class="vg-saldo-t">${esc(titulo)}</div>` : ''}<div><span>Adiantado</span><b>${Fmt.brl(x.adiantado)}</b></div><div><span>Despesas</span><b>${Fmt.brl(x.gasto)}</b></div>
         <div class="vg-res"><span>Saldo</span><b>${x.sit.rot}${x.abs ? ' · ' + Fmt.brl(x.abs) : ''}</b></div></div>`;
@@ -14817,6 +15202,8 @@ const Viagens = {
     acoes.unshift({ rotulo: 'Excluir', classe: 'danger', acao: () => { this.excluir(id); return false; } });
     if (v.status === 'aprovado_pagamento' && this.financeiro()) acoes.push({ rotulo: 'Registrar pagamento', acao: () => { this.marcarPago(id); } });
     if (ed) acoes.push({ rotulo: 'Enviar prestação de contas', acao: () => { this.enviarPrestacao(id); return false; } });
+    if (Adiantamentos.ativo() && ed && Adiantamentos.podeImportar()) acoes.push({ rotulo: 'Importar arquivo de prestação', classe: 'sec', acao: () => { Adiantamentos.importar(id); return false; } }); /* v13.88 */
+    if (Adiantamentos.ativo() && mostrarContas) acoes.push({ rotulo: v.acerto?.encerradoEm ? 'Acerto de Contas Final (encerrado)' : 'Acerto de Contas Final', classe: v.status === 'prestacao_enviada' && Viagens.master() ? '' : 'sec', acao: () => { Adiantamentos.abrir(id); return false; } }); /* v13.88 */
     if (this.podeImprimir(v)) { /* v13.27: duas impressões — interna (com valores) e espelho para a agência (sem valores) */
       acoes.push({ rotulo: 'Imprimir Resumo (Uso Interno/Financeiro)', classe: 'sec', acao: () => { this.imprimir(id); return false; } });
       if (this.financeiro()) acoes.push({ rotulo: 'Imprimir Espelho para Agência (Sem Valores)', classe: 'sec', acao: () => { this.imprimirAgencia(id); return false; } }); // v13.28: traz CPF/RG/nascimento → só Financeiro/Master
@@ -14861,7 +15248,8 @@ const Viagens = {
    * Centralizado: documento único no nome de quem recebe, com a lista de acompanhantes e as notas unificadas.
    * Individual: uma página de aprovação por pessoa (quebra de página), com o valor e os dados bancários dela, para cada um assinar o seu.
    */
-  async imprimir(id, { unificado = true } = {}) {
+  async imprimir(id, { unificado = true, direto = false, baixarPdf = null } = {}) {
+    if (unificado && !direto && Documento.v89()) return this.imprimir(id, { unificado: false, baixarPdf: () => this.imprimir(id, { unificado: true, direto: true }) }); /* v13.89: pré-visualização; "Baixar PDF" = PDF unificado */
     const v = Repo.get(this.COL, id); if (!v || !this.noAlcance(v)) return;
     if (!this.podeImprimir(v)) return UI.toast('O resumo fica disponível a partir de "Aprovado para Pagamento".');
     /* v13.36 · mesma lógica do Resumo para o Viajante: PDF gerado no navegador, vouchers mesclados no final, download direto */
@@ -14943,7 +15331,7 @@ const Viagens = {
     const nome = `Resumo_Viagem_${RH.chave(v.nome).split(' ')[0] || 'colaborador'}_${v.ida}${modo === 'individual' ? '_individual' : modo === 'centralizado' ? '_centralizado' : ''}`.replace(/[^\w-]+/g, '_');
     const htmlDoc = Documento.montar('Resumo de Adiantamento de Viagem', corpo, { margem: '14mm 14mm', css });
     if (unificado) return this.concluirUnificado(v, U, htmlDoc, `Resumo_Uso_Interno${U.prontos.some(x => !x.falhou) ? '_e_Vouchers' : ''}_${RH.chave(v.nome).split(' ')[0] || 'viagem'}_${v.ida}${modo === 'individual' ? '_individual' : modo === 'centralizado' ? '_centralizado' : ''}`, 'Resumo de Uso Interno');
-    Documento.previa(modo === 'individual' ? `Resumo da viagem · ${cs.length} páginas` : 'Resumo da viagem', htmlDoc, nome, { domPrint: !!VC.paginas }); // v13.34
+    Documento.previa(modo === 'individual' ? `Resumo da viagem · ${cs.length} páginas` : 'Resumo da viagem', htmlDoc, nome, { domPrint: !!VC.paginas, baixarPdf }); // v13.34 · v13.89: + PDF unificado
   },
 
   /**
@@ -14956,7 +15344,8 @@ const Viagens = {
    * (prazo da prestação e desconto em folha), com assinatura de ciência. Vouchers em imagem entram nas páginas seguintes;
    * vouchers em PDF ficam avisados no documento e para download no painel. Sem dados bancários nem CPF.
    */
-  async imprimirViajante(id, { unificado = true } = {}) {
+  async imprimirViajante(id, { unificado = true, direto = false, baixarPdf = null } = {}) {
+    if (unificado && !direto && Documento.v89()) return this.imprimirViajante(id, { unificado: false, baixarPdf: () => this.imprimirViajante(id, { unificado: true, direto: true }) }); /* v13.89 */
     const v = Repo.get(this.COL, id); if (!v || !this.noAlcance(v)) return;
     if (!this.podeImprimir(v)) return UI.toast('O resumo fica disponível a partir de "Aprovado para Pagamento".');
     if (!(v.vouchers || []).length) return UI.toast('Anexe os vouchers da agência para liberar o resumo do viajante'); // v13.31
@@ -15009,7 +15398,7 @@ const Viagens = {
       ${this.CSS_DIARIAS} ${this.CSS_VOUCHERS}`;
     const nome = `Resumo_Viajante_${RH.chave(v.nome).split(' ')[0] || 'viagem'}_${v.ida}`.replace(/[^\w-]+/g, '_');
     const htmlDoc = Documento.montar('Resumo da Viagem para o Viajante', paginas.join('') + (unificado ? '' : VC.paginas), { margem: '14mm 14mm', css });
-    if (!unificado) return Documento.previa(`Resumo para o viajante${paginas.length + qtdImgs > 1 ? ' · ' + (paginas.length + qtdImgs) + ' páginas' : ''}`, htmlDoc, nome, { domPrint: !!VC.paginas });
+    if (!unificado) return Documento.previa(`Resumo para o viajante${paginas.length + qtdImgs > 1 ? ' · ' + (paginas.length + qtdImgs) + ' páginas' : ''}`, htmlDoc, nome, { domPrint: !!VC.paginas, baixarPdf });
     return this.concluirUnificado(v, U, htmlDoc, `Resumo_e_Vouchers_Viagem_${RH.chave(v.nome).split(' ')[0] || 'viagem'}_${v.ida}`, 'Resumo para o Viajante');
   },
   /** v13.30 · rooming list + referência de hospedagem (valor médio e tolerância) para a agência. */
@@ -15099,12 +15488,12 @@ const Viagens = {
       <p class="hint" id="vgResumoQtd" style="margin:8px 0 0"></p>`,
       aoAbrir: m => { const at = () => { const de = m.querySelector('[name=de]').value, ate = m.querySelector('[name=ate]').value, st = m.querySelector('[name=st]').value, q = this.linhasResumo(de, ate, st).length; m.querySelector('#vgResumoQtd').textContent = de && ate && de > ate ? 'A data inicial é depois da final.' : `${q} pedido(s) no período.`; };
         m.querySelectorAll('input,select').forEach(i => i.addEventListener('change', at)); at(); },
-      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Gerar PDF', acao: async m => {
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: Documento.v89() ? 'Pré-visualizar' : 'Gerar PDF', acao: async m => {
         const de = m.querySelector('[name=de]').value, ate = m.querySelector('[name=ate]').value, st = m.querySelector('[name=st]').value;
         if (!de || !ate) { UI.toast('Informe o período (de / até).'); return false; }
         if (de > ate) { UI.toast('A data inicial é depois da final.'); return false; }
         const r = this.htmlResumoAdiantamentos(de, ate, st), nome = `Resumo_Adiantamentos_${de}_a_${ate}`;
-        const ok = await Documento.pdfDireto('Resumo de Adiantamentos', r.html, nome);
+        const ok = await Documento.saida('Resumo de Adiantamentos', r.html, nome); /* v13.89: pré-visualização */
         if (ok !== false) Audit.registrar({ modulo: 'viagens', acao: 'emitiu', entidade: 'documento', entidadeId: 'resumo-adiantamentos', rotulo: nome, mudancas: [], detalhe: `Resumo de Adiantamentos · ${r.qtd} pedido(s) · solicitado ${Fmt.brl(r.totSol)} · adiantado ${Fmt.brl(r.totAd)}` });
       } }] });
   },
@@ -15115,6 +15504,7 @@ const Viagens = {
     const head = `<div class="page-head"><div><div class="eyebrow-mod">Módulo 8</div><h1>Adiantamento de Viagens</h1><p>Solicitação, aprovação, pagamento e prestação de contas das viagens a trabalho, com os comprovantes de cada despesa e o saldo calculado automaticamente.</p></div>
       <div class="row" style="flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="vg-csv-modelo">Baixar Modelo de Solicitação (CSV)</button>${this.financeiro() ? '<button class="btn ghost" data-a="vg-csv-importar">Importar Solicitação (CSV)</button>' : ''}${this.financeiro() || this.podeParametrizar() ? '<button class="btn ghost" data-a="vg-param">Parâmetros de viagem</button>' : ''}<button class="btn ghost" data-a="vg-resumo-adiant">Gerar Resumo de Adiantamentos</button>${this.podeCriar() ? `<button class="btn" data-a="vg-novo">+ ${this.financeiro() ? 'Nova solicitação' : 'Nova Solicitação de Viagem'}</button>` : ''}</div></div>`;
     if (!pronto) return head + '<div class="panel"><p class="muted" style="margin:0">Carregando…</p></div>';
+    if (Documento.v89() && this.podeResumo() && this.ui.aba === 'resumo') return head + this.abasHtml() + this.renderResumoOp(); /* v13.89 */
     const u = this.ui, todos = this.todos(), q = RH.chave(u.busca);
     const grupos = { andamento: v => !['concluido', 'recusado'].includes(v.status), prestacao: v => v.status === 'aguardando_prestacao', pagar: v => v.status === 'aprovado_pagamento', concluidos: v => ['concluido', 'recusado'].includes(v.status), todos: () => true };
     const lista = todos.filter(grupos[u.filtro] || grupos.andamento).filter(v => !q || RH.chave(`${this.participantes(v).map(p => p.nome).join(' ')} ${v.origem || ''} ${v.destino} ${v.motivo}`).includes(q));
@@ -15125,7 +15515,7 @@ const Viagens = {
     const linhas = lista.map(v => { const t = this.totais(v), np = this.participantes(v).length; return `<tr class="click" data-a="vg-abrir" data-id="${v.id}"><td><div class="cell-main">${esc(this.nomes(v))}${np > 1 ? ` <span class="pill neutral" title="${esc(this.participantes(v).map(p => p.nome).join(', '))}">grupo · ${esc(this.MODOS[this.modo(v)].replace('Repasse ', ''))}</span>` : ''}</div><div class="cell-sub">${esc(v.motivo).slice(0, 80)}</div></td>
         <td>${esc(Trajeto.rota(v))}<div class="cell-sub mono">${this.periodo(v)}</div>${v.transporte ? `<div class="cell-sub">${esc(Trajeto.resumo(v))}</div>` : ''}</td><td class="num">${Fmt.brl(v.valorPago ?? v.valor)}</td><td>${this.rotStatus(v)}</td>
         <td>${this.PAGOS.includes(v.status) && this.saldoCelula(v) ? this.saldoCelula(v) : '<span class="hint">—</span>'}</td></tr>`; }).join('');
-    return head + `<div class="grid g4" style="margin-bottom:14px">
+    return head + (Documento.v89() && this.podeResumo() ? this.abasHtml() : '') + `<div class="grid g4" style="margin-bottom:14px">
         ${kpi('Aguardando aprovação', todos.filter(v => v.status === 'aguardando_aprovacao').length, 'na Liberação Remota')}
         ${kpi('Aprovados para pagamento', todos.filter(v => v.status === 'aprovado_pagamento').length, 'aguardando o financeiro', todos.some(v => v.status === 'aprovado_pagamento') ? '--warn' : '')}
         ${kpi('Aguardando prestação de contas', todos.filter(v => v.status === 'aguardando_prestacao').length, `${Fmt.brl(emAberto)} adiantados em aberto`, todos.some(v => v.status === 'aguardando_prestacao') ? '--warn' : '')}
@@ -15144,6 +15534,61 @@ const Viagens = {
     if (a === 'vg-csv-importar') return this.importarCSV();
     if (a === 'vg-filtro') { this.ui.filtro = el.dataset.v; return App.render(); }
     if (a === 'vg-resumo-adiant') return this.resumoAdiantamentos();
+    if (a === 'vg-aba') { this.ui.aba = el.dataset.v; return App.render(); } /* v13.89 */
+    if (a === 'vg-cc') { const k = el.dataset.v, s = new Set(this.ui.ccAbertos); s.has(k) ? s.delete(k) : s.add(k); this.ui.ccAbertos = [...s]; return App.render(); }
+    if (a === 'vg-res-imprimir') return this.imprimirResumoOp();
+  },
+  mudanca(a, el) { if (a === 'vg-res') { this.ui[el.dataset.k] = el.value; App.render(); } }, /* v13.89: período do Resumo Operacional */
+  /* ---------------- v13.89 · Resumo Operacional e Financeiro ---------------- */
+  podeResumo() { return this.verTodos() || this.financeiro(); },
+  abasHtml() { const a = this.ui.aba || 'pedidos'; return `<div class="tabs" role="tablist" style="margin-bottom:12px">${[['pedidos', 'Pedidos e prestações'], ['resumo', 'Resumo Operacional']].map(([k, r]) => `<button class="${a === k ? 'on' : ''}" role="tab" aria-selected="${a === k}" data-a="vg-aba" data-v="${k}">${r}</button>`).join('')}</div>`; },
+  TIPOS_CUSTO: [['hospedagem', 'Hotelaria / Hospedagem'], ['alimentacao', 'Alimentação'], ['deslocamento', 'Deslocamento / Passagens'], ['outros', 'Outros']],
+  tipoCusto(cat) { const t = RH.chave(cat); return /HOSPED|HOTEL|POUSADA/.test(t) ? 'hospedagem' : /ALIMENT|REFEI/.test(t) ? 'alimentacao' : /TRANSP|PASSAG|COMBUST|PEDAG|ESTACION|TAXI|AEREO|ONIBUS/.test(t) ? 'deslocamento' : 'outros'; },
+  periodoResumo() { const u = this.ui, h = Datas.hojeISO(); if (!u.de) u.de = h.slice(0, 8) + '01'; if (!u.ate) u.ate = h; return { de: u.de, ate: u.ate }; },
+  /** Viagens pagas com ida no período: adiantado, despesas (aprovado no acerto, senão o comprovado) por tipo e por centro de custo. */
+  dadosResumo() {
+    const { de, ate } = this.periodoResumo(), r2 = n => Math.round(n * 100) / 100, z = () => ({ adiantado: 0, hospedagem: 0, alimentacao: 0, deslocamento: 0, outros: 0, despesas: 0, n: 0 });
+    const vs = this.todos().filter(v => this.PAGOS.includes(v.status) && v.ida >= de && v.ida <= ate), tot = z(), porCC = new Map();
+    const linhas = vs.map(v => { const x = z(); x.n = 1; x.adiantado = Number(v.valorPago ?? v.valor) || 0;
+      (v.despesas || []).forEach(d => { const val = Number(d.aprovacao?.valor ?? d.valor) || 0; x[this.tipoCusto(d.categoria)] += val; x.despesas += val; });
+      Object.keys(x).forEach(k => { x[k] = r2(x[k]); }); return { v, cc: this.centroCustoTxt(v), ...x }; });
+    linhas.forEach(l => { const g = porCC.get(l.cc) || porCC.set(l.cc, { cc: l.cc, ...z(), viagens: [] }).get(l.cc); Object.keys(z()).forEach(k => { g[k] = r2(g[k] + l[k]); tot[k] = r2(tot[k] + l[k]); }); g.viagens.push(l); });
+    return { de, ate, linhas, tot, porCC: [...porCC.values()].sort((a, b) => (b.adiantado + b.despesas) - (a.adiantado + a.despesas) || a.cc.localeCompare(b.cc, 'pt-BR')) };
+  },
+  tabelasResumo(r, impressao = false) {
+    const T = r.tot, pct = (a, b) => b ? Fmt.pct(a / b * 100, 1) : '—', ab = new Set(this.ui.ccAbertos);
+    const tipos = `<table class="vg-res"><thead><tr><th>Tipo de custo</th><th class="num">Valor</th><th class="num">% das despesas</th></tr></thead><tbody>
+      <tr class="sub"><td>Adiantamentos concedidos</td><td class="num">${Fmt.brl(T.adiantado)}</td><td class="num">—</td></tr>
+      ${this.TIPOS_CUSTO.map(([k, rot]) => `<tr><td>${rot}</td><td class="num">${Fmt.brl(T[k])}</td><td class="num">${pct(T[k], T.despesas)}</td></tr>`).join('')}
+      <tr class="tot"><td>Total de despesas comprovadas</td><td class="num">${Fmt.brl(T.despesas)}</td><td class="num">${T.despesas ? '100%' : '—'}</td></tr>
+      <tr><td>Saldo (adiantado − despesas)</td><td class="num">${Fmt.brl(r2s(T.adiantado - T.despesas))}</td><td class="num">${T.adiantado - T.despesas > 0.004 ? 'a devolver' : T.adiantado - T.despesas < -0.004 ? 'a reembolsar' : 'quitado'}</td></tr></tbody></table>`;
+    const cels = x => `<td class="num">${x.n}</td><td class="num">${Fmt.brl(x.adiantado)}</td>${this.TIPOS_CUSTO.map(([k]) => `<td class="num">${Fmt.brl(x[k])}</td>`).join('')}<td class="num"><b>${Fmt.brl(x.despesas)}</b></td><td class="num">${Fmt.brl(r2s(x.adiantado - x.despesas))}</td>`;
+    const cc = `<table class="vg-res vg-res-cc"><thead><tr><th>Setor / Centro de Custo</th><th class="num">Viagens</th><th class="num">Adiantado</th>${this.TIPOS_CUSTO.map(([, rot]) => `<th class="num">${rot.split(' / ')[0]}</th>`).join('')}<th class="num">Despesas</th><th class="num">Saldo</th></tr></thead><tbody>
+      ${r.porCC.map(g => { const aberto = impressao || ab.has(g.cc); return `<tr class="cc${aberto ? ' aberto' : ''}">${impressao ? `<td><b>${esc(g.cc)}</b></td>` : `<td><button type="button" class="vg-cc-bt" data-a="vg-cc" data-v="${esc(g.cc)}" aria-expanded="${aberto}"><span aria-hidden="true">${aberto ? '▾' : '▸'}</span> ${esc(g.cc)}</button></td>`}${cels(g)}</tr>
+        ${aberto ? g.viagens.map(l => `<tr class="det"><td><span class="vg-det-n">${esc(this.nomes(l.v))}</span><div class="cell-sub">${esc(Trajeto.rota(l.v))} · ${this.periodo(l.v)} · ${esc(VIAGEM_ST[l.v.status]?.rot || l.v.status)}</div></td>${cels(l)}</tr>`).join('') : ''}`; }).join('')}
+      <tr class="tot"><td>Total geral</td>${cels(T)}</tr></tbody></table>`;
+    return { tipos, cc };
+  },
+  renderResumoOp() {
+    const r = this.dadosResumo(), T = r.tot, t = this.tabelasResumo(r), saldo = r2s(T.adiantado - T.despesas);
+    const kpi = (k, v, d, cls = '') => `<div class="kpi ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+    return `<div class="panel"><div class="row between" style="gap:10px;flex-wrap:wrap;align-items:flex-end"><div class="toolbar" style="margin:0">
+        <div class="field"><label class="lbl" for="vgResDe">Data inicial (de)</label><input id="vgResDe" type="date" value="${esc(r.de)}" data-a="vg-res" data-k="de"></div>
+        <div class="field"><label class="lbl" for="vgResAte">Data final (até)</label><input id="vgResAte" type="date" value="${esc(r.ate)}" data-a="vg-res" data-k="ate"></div></div>
+        <button class="btn sec" data-a="vg-res-imprimir" ${r.linhas.length ? '' : 'disabled'}>Imprimir resumo</button></div>
+      ${r.de > r.ate ? '<div class="note warn" style="margin-top:10px">A data inicial é depois da final.</div>' : ''}
+      <div class="grid g4" style="margin:14px 0">${kpi('Total adiantado no período', Fmt.brl(T.adiantado), `${r.linhas.length} viagem(ns) paga(s) com ida no período`)}${kpi('Despesas comprovadas', Fmt.brl(T.despesas), `hospedagem ${Fmt.brl(T.hospedagem)} · alimentação ${Fmt.brl(T.alimentacao)}`)}${kpi('Deslocamento / passagens', Fmt.brl(T.deslocamento), `outros ${Fmt.brl(T.outros)}`)}${kpi(saldo >= 0 ? 'Saldo a devolver' : 'Saldo a reembolsar', Fmt.brl(Math.abs(saldo)), r.linhas.length ? `custo médio por viagem ${Fmt.brl(T.despesas / r.linhas.length)}` : 'sem viagens no período', saldo > 0.004 ? 'zona-kpi warn' : '')}</div>
+      ${r.linhas.length ? `<div style="max-width:640px"><h3 class="cp-h3">Detalhamento de custos por tipo</h3><div class="tbl-wrap">${t.tipos}</div></div>
+        <div style="margin-top:16px"><h3 class="cp-h3">Por setor / centro de custo <span class="hint">(clique para abrir as viagens)</span></h3><div class="tbl-wrap">${t.cc}</div></div>` : '<div class="empty">Nenhuma viagem paga com ida neste período.</div>'}
+      <p class="hint" style="margin:10px 0 0">Viagens pagas (aguardando prestação, em análise ou concluídas) com data de ida no período. Despesas: o valor aprovado no Acerto de Contas, quando houver; senão, o comprovado. Centro de custo: o da viagem (ou o do cadastro do viajante).</p></div>`;
+  },
+  imprimirResumoOp() {
+    const r = this.dadosResumo(), T = r.tot, t = this.tabelasResumo(r, true);
+    const corpo = `${Documento.cabecalho('Resumo Operacional e Financeiro de Viagens', `${Fmt.data(r.de)} a ${Fmt.data(r.ate)} · ${r.linhas.length} viagem(ns)`)}
+      <div class="grid" style="grid-template-columns:repeat(4,1fr)"><div><div class="t">Total adiantado</div><div class="d big">${Fmt.brl(T.adiantado)}</div></div><div><div class="t">Despesas comprovadas</div><div class="d big">${Fmt.brl(T.despesas)}</div></div><div><div class="t">Hospedagem</div><div class="d big">${Fmt.brl(T.hospedagem)}</div></div><div><div class="t">Deslocamento / passagens</div><div class="d big">${Fmt.brl(T.deslocamento)}</div></div></div>
+      <h2>Detalhamento de custos por tipo</h2>${t.tipos}<h2>Por setor / centro de custo</h2>${t.cc}<div class="foot">Despesas: valor aprovado no Acerto de Contas, quando houver; senão, o comprovado · Painel de Gestão</div>`;
+    const css = `.big{font-size:17px} table.vg-res td.num,table.vg-res th.num{text-align:right;white-space:nowrap} table.vg-res tr.tot td{font-weight:700;border-top:1.5px solid #1B2362;background:#F1F2F8;-webkit-print-color-adjust:exact;print-color-adjust:exact} table.vg-res tr.sub td,table.vg-res tr.cc td{font-weight:600} table.vg-res tr.det td{font-size:10.5px;color:#3A3F5C} table.vg-res tr.det td:first-child{padding-left:18px} .cell-sub{font-size:9.5px;color:#585E7F} table.vg-res tr{break-inside:avoid}`;
+    Documento.previa('Resumo Operacional de Viagens', Documento.montar('Resumo Operacional e Financeiro de Viagens', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Resumo_Operacional_Viagens_${r.de}_a_${r.ate}`);
   },
   entrada(a, el) { if (a === 'vg-busca') { this.ui.busca = el.value; App.render(); const i = $('[data-a="vg-busca"]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } } },
 };
@@ -15163,6 +15608,9 @@ window.Viagens = Viagens;
    conta sem loja vinculada vê as próprias solicitações e escolhe a loja de destino.
    ===================================================================== */
 const SOL_ITENS = [['canetas', 'Canetas Detectoras'], ['cameras', 'Câmeras'], ['pinpad', 'Pinpad'], ['pos', 'POS'], ['bobinas', 'Bobinas de Impressão'], ['maquinas', 'Máquinas Detectoras de Notas Falsas'], ['cartoes', 'Cartões Esposende']];
+/* v13.89 · tipo de solicitação (para o relatório): escolhido no pedido ou, se vazio, deduzido do 1º item marcado */
+const SOL_TIPOS = ['Manutenção', 'Insumos', 'TI', 'Serviços', 'Equipamentos de Segurança', 'Outros'];
+const SOL_TIPO_ITEM = { canetas: 'Equipamentos de Segurança', maquinas: 'Equipamentos de Segurança', cameras: 'Equipamentos de Segurança', pinpad: 'TI', pos: 'TI', bobinas: 'Insumos', cartoes: 'Insumos' };
 
 const Solicitacoes = {
   COL: 'solicitacoes',
@@ -15205,6 +15653,68 @@ const Solicitacoes = {
     return Repo.todos(this.COL).filter(s => !lj || lj.has(s.lojaId) || s.solicitante?.id === Auth.id);
   },
   status(s) { return s.dataAtendimento ? 'Atendida' : 'Em Aberto'; },
+  /* ---------------- v13.89 · tipo, status da operação e relatório por período ---------------- */
+  v89() { return Documento.v89(); },
+  tipoDe(s) { if (s.tipo && SOL_TIPOS.includes(s.tipo)) return s.tipo; const k = SOL_ITENS.map(([k]) => k).find(k => s.itens?.[k]); return k ? SOL_TIPO_ITEM[k] : 'Outros'; },
+  /** concluida (com Data do Atendimento) · andamento (marcada "Em Andamento") · pendente */
+  statusOp(s) { return s.dataAtendimento ? 'concluida' : s.emAndamento ? 'andamento' : 'pendente'; },
+  ST_OP: { concluida: ['Atendida / Concluída', 'ok'], andamento: ['Em Andamento', 'info'], pendente: ['Pendente', 'warn'] },
+  pillStatus(s) { if (!this.v89()) { const at = !!s.dataAtendimento; return `<span class="pill ${at ? 'ok' : this.diasAberto(s) > 3 ? 'bad' : 'warn'}">${at ? 'Atendida' : 'Em Aberto'}</span>`; }
+    const k = this.statusOp(s), [r, c] = this.ST_OP[k]; return `<span class="pill ${k === 'pendente' && this.diasAberto(s) > 3 ? 'bad' : c}">${r}</span>`; },
+  camposV89(v, atende) {
+    return `${campo('Tipo de Solicitação', 'tipo', v.tipo || '', { opcoes: [['', 'Automático pelos itens marcados'], ...SOL_TIPOS.map(t => [t, t])] })}${campo('Valor / custo (R$)', 'valor', v.valor ?? '', { tipo: 'number', attrs: 'min="0" step="0.01" placeholder="opcional"' })}
+      ${atende && !v.dataAtendimento ? campo('Situação', 'situacao', v.emAndamento ? 'andamento' : 'pendente', { opcoes: [['pendente', 'Pendente'], ['andamento', 'Em Andamento']] }) : ''}`;
+  },
+  extrasV89(d, s, dataAt, atende) {
+    const val = Number(String(d.valor ?? '').replace(',', '.')), and = !dataAt && (atende ? d.situacao === 'andamento' : !!s?.emAndamento);
+    return { tipo: SOL_TIPOS.includes(d.tipo) ? d.tipo : '', valor: val > 0 ? Math.round(val * 100) / 100 : null, emAndamento: and, andamentoEm: and ? (s?.andamentoEm || new Date().toISOString()) : null };
+  },
+  async marcarAndamento(id) {
+    const s = Repo.get(this.COL, id); if (!s || !this.podeAtender() || s.dataAtendimento) return;
+    await Repo.salvar(this.COL, id, { ...Repo.semMeta(s), emAndamento: true, andamentoEm: new Date().toISOString(), andamentoPor: Auth.id }, { modulo: 'solicitacoes', rotulo: `Solicitação · ${this.nomeLoja(s.lojaId)}`, detalhe: 'Em andamento' });
+    UI.toast('Solicitação marcada como Em Andamento');
+  },
+  abasHtml() { const v = this.ui.vista || 'lista'; return `<div class="tabs" role="tablist" style="margin-bottom:12px">${[['lista', 'Solicitações'], ['relatorio', 'Relatório por período']].map(([k, r]) => `<button class="${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-a="sol-vista" data-v="${k}">${r}</button>`).join('')}</div>`; },
+  periodo() { const u = this.ui, h = Datas.hojeISO(); if (!u.de) u.de = h.slice(0, 8) + '01'; if (!u.ate) u.ate = h; return { de: u.de, ate: u.ate }; },
+  relatorioDados() {
+    const { de, ate } = this.periodo(), u = this.ui, xs = this.visiveis().filter(s => s.dataSolicitacao >= de && s.dataSolicitacao <= ate && (!u.loja || s.lojaId === u.loja));
+    const novo = k => ({ k, n: 0, concluida: 0, andamento: 0, pendente: 0, valor: 0, dias: 0, nDias: 0 });
+    const somar = (g, s) => { g.n++; g[this.statusOp(s)]++; g.valor += Number(s.valor) || 0; if (s.dataAtendimento) { const a = Datas.de(s.dataSolicitacao), b = Datas.de(s.dataAtendimento); if (a && b) { g.dias += Math.max(0, Datas.dias(a, b)); g.nDias++; } } };
+    const agrupar = f => { const m = new Map(); xs.forEach(s => { const k = f(s); somar(m.get(k) || m.set(k, novo(k)).get(k), s); }); return [...m.values()].sort((a, b) => b.n - a.n || String(a.k).localeCompare(String(b.k), 'pt-BR')); };
+    const tot = novo('Total geral'); xs.forEach(s => somar(tot, s)); tot.valor = Math.round(tot.valor * 100) / 100;
+    return { de, ate, xs, porLoja: agrupar(s => this.nomeLoja(s.lojaId)), porTipo: agrupar(s => this.tipoDe(s)), tot };
+  },
+  relatorioTabelas(r) {
+    const pct = (a, b) => b ? Fmt.pct(a / b * 100, 1) : '—', T = r.tot;
+    const linha = (g, cls = '') => `<tr${cls ? ` class="${cls}"` : ''}><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${g.concluida}</td><td class="num">${g.andamento}</td><td class="num">${g.pendente}</td><td class="num"><b>${pct(g.concluida, g.n)}</b></td><td class="num">${Fmt.brl(g.valor)}</td><td class="num">${pct(g.valor, T.valor)}</td></tr>`;
+    const cab = t => `<thead><tr><th>${t}</th><th class="num">Qtd.</th><th class="num">Concluídas</th><th class="num">Em andamento</th><th class="num">Pendentes</th><th class="num">% conclusão</th><th class="num">Valor</th><th class="num">% do valor</th></tr></thead>`;
+    const status = Object.entries(this.ST_OP).map(([k, [rot]]) => { const xs = r.xs.filter(s => this.statusOp(s) === k), v = xs.reduce((a, s) => a + (Number(s.valor) || 0), 0); return `<tr><td>${rot}</td><td class="num">${xs.length}</td><td class="num">${pct(xs.length, T.n)}</td><td class="num">${Fmt.brl(v)}</td><td class="num">${pct(v, T.valor)}</td></tr>`; }).join('');
+    return `<h3 class="sol-rel-h">Por status da operação</h3><div class="tbl-wrap"><table class="sol-rel"><thead><tr><th>Status</th><th class="num">Qtd.</th><th class="num">% do total</th><th class="num">Valor</th><th class="num">% do valor</th></tr></thead><tbody>${status}<tr class="tot"><td>Total geral</td><td class="num">${T.n}</td><td class="num">${T.n ? '100%' : '—'}</td><td class="num">${Fmt.brl(T.valor)}</td><td class="num">${T.valor ? '100%' : '—'}</td></tr></tbody></table></div>
+      <h3 class="sol-rel-h">Por loja / filial</h3><div class="tbl-wrap"><table class="sol-rel">${cab('Loja / filial')}<tbody>${r.porLoja.map(g => linha(g)).join('')}${linha(T, 'tot')}</tbody></table></div>
+      <h3 class="sol-rel-h">Por tipo de solicitação</h3><div class="tbl-wrap"><table class="sol-rel">${cab('Tipo')}<tbody>${r.porTipo.map(g => linha(g)).join('')}${linha(T, 'tot')}</tbody></table></div>`;
+  },
+  renderRelatorio(lojasFiltro) {
+    const u = this.ui, r = this.relatorioDados(), T = r.tot, pct = (a, b) => b ? Fmt.pct(a / b * 100, 1) : '—', medio = T.nDias ? Fmt.num(T.dias / T.nDias, 1) + ' dia(s)' : '—';
+    const kpi = (k, v, d, cls = '') => `<div class="kpi ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+    return `<div class="page-head"><div><div class="eyebrow-mod">Módulo 10 · Pessoas &amp; Operação</div><h1>Solicitações Operacionais</h1><p>Relatório consolidado do período: contagem e valores por loja, tipo de solicitação e status da operação.</p></div>
+        <div class="row" style="gap:8px"><button class="btn sec" data-a="sol-rel-imprimir" ${T.n ? '' : 'disabled'}>Imprimir relatório</button></div></div>${this.abasHtml()}
+      <div class="panel"><div class="toolbar">
+        <div class="field"><label class="lbl" for="solDe">Data inicial (de)</label><input id="solDe" type="date" value="${esc(r.de)}" data-a="sol-filtro" data-k="de"></div>
+        <div class="field"><label class="lbl" for="solAte">Data final (até)</label><input id="solAte" type="date" value="${esc(r.ate)}" data-a="sol-filtro" data-k="ate"></div>
+        ${lojasFiltro.length ? `<div class="field" style="min-width:240px"><label class="lbl" for="solLojaR">Loja</label><select id="solLojaR" data-a="sol-filtro" data-k="loja"><option value="">Todas as Lojas</option>${lojasFiltro.map(([v, x]) => `<option value="${v}" ${v === u.loja ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>` : ''}</div>
+        ${r.de > r.ate ? '<div class="note warn">A data inicial é depois da final.</div>' : ''}
+        <div class="grid g4" style="margin:12px 0">${kpi('Solicitações no período', T.n, `${Fmt.data(r.de)} a ${Fmt.data(r.ate)}`)}${kpi('Atendidas / Concluídas', T.concluida, `${pct(T.concluida, T.n)} de conclusão · prazo médio ${medio}`, 'zona-kpi ok')}${kpi('Em andamento', T.andamento, pct(T.andamento, T.n) + ' do total', T.andamento ? 'zona-kpi warn' : '')}${kpi('Pendentes', T.pendente, `${pct(T.pendente, T.n)} · valor total ${Fmt.brl(T.valor)}`, T.pendente ? 'zona-kpi bad' : '')}</div>
+        ${T.n ? this.relatorioTabelas(r) : '<div class="empty">Nenhuma solicitação no período.</div>'}
+        <p class="hint" style="margin:10px 0 0">Período pela data da solicitação. Tipo: o escolhido no pedido ou, se vazio, o do 1º item marcado. Valor: o informado no pedido (opcional).</p></div>`;
+  },
+  imprimirRelatorio() {
+    const r = this.relatorioDados(), T = r.tot, pct = (a, b) => b ? Fmt.pct(a / b * 100, 1) : '—', loja = this.ui.loja ? ' · ' + this.nomeLoja(this.ui.loja) : '';
+    const corpo = `${Documento.cabecalho('Relatório de Solicitações Operacionais', `${Fmt.data(r.de)} a ${Fmt.data(r.ate)}${loja}`)}
+      <div class="grid" style="grid-template-columns:repeat(5,1fr)"><div><div class="t">Solicitações</div><div class="d big">${T.n}</div></div><div><div class="t">Concluídas</div><div class="d big">${T.concluida}</div></div><div><div class="t">Em andamento</div><div class="d big">${T.andamento}</div></div><div><div class="t">Pendentes</div><div class="d big">${T.pendente}</div></div><div><div class="t">% de conclusão</div><div class="d big">${pct(T.concluida, T.n)}</div></div></div>
+      ${this.relatorioTabelas(r).replace(/<div class="tbl-wrap">|<\/div>/g, '')}<div class="foot">Valor total no período: ${Fmt.brl(T.valor)} · Painel de Gestão</div>`;
+    const css = `.big{font-size:22px} .sol-rel-h{margin:16px 0 6px;font-size:12.5px} table.sol-rel td.num,table.sol-rel th.num{text-align:right;white-space:nowrap} table.sol-rel tr.tot td{font-weight:700;border-top:1.5px solid #1B2362;background:#F1F2F8;-webkit-print-color-adjust:exact;print-color-adjust:exact} table.sol-rel tr{break-inside:avoid}`;
+    Documento.previa('Relatório de Solicitações Operacionais', Documento.montar('Relatório de Solicitações Operacionais', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Solicitacoes_${r.de}_a_${r.ate}`);
+  },
   diasAberto(s) { const a = Datas.de(s.dataSolicitacao); return a ? Math.max(0, Datas.dias(a, Datas.hoje())) : 0; },
   pendentes() { return Repo.prontas.has(this.COL) ? this.visiveis().filter(s => !s.dataAtendimento) : []; },
   rotuloItens(s) { return SOL_ITENS.filter(([k]) => s.itens?.[k]).map(([k, r]) => k === 'pos' && s.adquirentePos ? `${r} (${s.adquirentePos})` : r); },
@@ -15227,13 +15737,14 @@ const Solicitacoes = {
     const lojasFiltro = !lj ? Repo.todos('lojas').filter(l => l.ativa || todas.some(s => s.lojaId === l.id)).sort((a, b) => String(a.codigo).localeCompare(String(b.codigo))).map(l => [l.id, this.rotLoja(l)])
       : lj.size > 1 ? [...lj].map(id => Repo.get('lojas', id)).filter(Boolean).map(l => [l.id, this.rotLoja(l)]).sort((a, b) => a[1].localeCompare(b[1])) : [];
     if (u.loja && !lojasFiltro.some(([v]) => v === u.loja)) u.loja = '';
+    if (this.v89() && u.vista === 'relatorio') return this.renderRelatorio(lojasFiltro); /* v13.89 */
     const antigas = pend.filter(s => this.diasAberto(s) > 3).length;
     return `<div class="page-head"><div><div class="eyebrow-mod">Módulo 10 · Pessoas &amp; Operação</div><h1>Solicitações Operacionais</h1><p>Pedidos das lojas de canetas e máquinas detectoras, câmeras, pinpad, POS, bobinas e Cartões Esposende — do pedido à entrega. Visão: ${esc(escopo)}.</p></div>
         ${this.podeLancar() ? '<button class="btn" data-a="sol-nova">+ Nova solicitação</button>' : ''}</div>
       ${lj && !lj.size ? '<div class="note" style="margin-bottom:12px">Sua conta não tem loja vinculada: aqui aparecem as solicitações que você abriu, e no formulário você escolhe a loja de destino. Para ver e gerenciar todas as filiais, o Master pode marcar <b>“Acessar todas as lojas”</b> na linha do Módulo 10 da Gestão de Acessos.</div>' : ''}
       ${pend.length ? `<div class="alerta-critico sol-alerta" role="alert"><div class="ic">${ICON.alerta}</div><div style="flex:1;min-width:0"><b>${pend.length} solicitação(ões) em aberto aguardando atendimento</b>${antigas ? ` · ${antigas} há mais de 3 dias` : ''}
         <div class="hint" style="color:inherit">${pend.slice(0, 4).map(s => `${esc(this.nomeLoja(s.lojaId))}: ${esc(this.rotuloItens(s).join(', '))} (${this.diasAberto(s)}d)`).join(' · ')}${pend.length > 4 ? ' …' : ''}</div></div></div>` : ''}
-      <div class="grid g4" style="margin-bottom:14px">
+      ${this.v89() ? this.abasHtml() : ''}<div class="grid g4" style="margin-bottom:14px">
         <div class="kpi zona-kpi ${pend.length ? 'warn' : 'ok'}"><div class="k">Em Aberto</div><div class="v">${pend.length}</div><div class="d">aguardando atendimento</div></div>
         <div class="kpi zona-kpi ${antigas ? 'bad' : 'ok'}"><div class="k">Abertas há mais de 3 dias</div><div class="v">${antigas}</div><div class="d">priorize a entrega</div></div>
         <div class="kpi"><div class="k">Atendidas</div><div class="v">${todas.length - pend.length}</div><div class="d">com quem levou/entregou</div></div>
@@ -15244,9 +15755,9 @@ const Solicitacoes = {
       ${lista.length ? `<div class="tbl-wrap"><table class="sol-tab"><thead><tr><th>Solicitação</th><th>Loja</th><th>Itens solicitados</th><th>Status</th><th>Atendimento</th><th></th></tr></thead><tbody>
         ${lista.map(s => { const at = !!s.dataAtendimento; return `<tr data-sol="${s.id}"><td class="mono">${Fmt.data(s.dataSolicitacao)}${s.solicitante?.nome ? `<div class="cell-sub">por ${esc(s.solicitante.nome)}</div>` : ''}</td><td>${esc(this.nomeLoja(s.lojaId))}</td>
           <td>${this.rotuloItens(s).map(r => `<span class="pill neutral" style="margin:0 4px 4px 0">${esc(r)}</span>`).join('')}${s.obs ? `<div class="cell-sub">${esc(s.obs)}</div>` : ''}</td>
-          <td><span class="pill ${at ? 'ok' : this.diasAberto(s) > 3 ? 'bad' : 'warn'}">${at ? 'Atendida' : 'Em Aberto'}</span>${at ? '' : `<div class="cell-sub">há ${this.diasAberto(s)} dia(s)</div>`}</td>
+          <td>${this.pillStatus(s)}${at ? '' : `<div class="cell-sub">há ${this.diasAberto(s)} dia(s)</div>`}${this.v89() ? `<div class="cell-sub">${esc(this.tipoDe(s))}${s.valor ? ' · ' + Fmt.brl(s.valor) : ''}</div>` : ''}</td>
           <td>${at ? `<span class="mono">${Fmt.data(s.dataAtendimento)}</span><div class="cell-sub">Levou/entregou: ${esc(s.quemEntregou || '—')}</div>` : '<span class="hint">—</span>'}</td>
-          <td class="acts">${!at && this.podeAtender() ? `<button class="btn sec sm" data-a="sol-atender" data-id="${s.id}">Registrar atendimento</button>` : ''}${this.podeEditar(s) ? `<button class="iconbtn" data-a="sol-editar" data-id="${s.id}" aria-label="Editar">${ICON.editar}</button>` : ''}${this.podeExcluir() ? `<button class="iconbtn" data-a="sol-del" data-id="${s.id}" aria-label="Excluir">${ICON.lixo}</button>` : ''}</td></tr>`; }).join('')}</tbody></table></div>`
+          <td class="acts">${!at && this.v89() && this.podeAtender() && !s.emAndamento ? `<button class="btn ghost sm" data-a="sol-andamento" data-id="${s.id}">Em andamento</button>` : ''}${!at && this.podeAtender() ? `<button class="btn sec sm" data-a="sol-atender" data-id="${s.id}">Registrar atendimento</button>` : ''}${this.podeEditar(s) ? `<button class="iconbtn" data-a="sol-editar" data-id="${s.id}" aria-label="Editar">${ICON.editar}</button>` : ''}${this.podeExcluir() ? `<button class="iconbtn" data-a="sol-del" data-id="${s.id}" aria-label="Excluir">${ICON.lixo}</button>` : ''}</td></tr>`; }).join('')}</tbody></table></div>`
         : `<div class="empty">Nenhuma solicitação ${u.status === 'aberto' ? 'em aberto' : u.status === 'atendida' ? 'atendida' : ''}${u.loja ? ' para esta loja' : ''}.${this.podeLancar() ? ' Use “+ Nova solicitação”.' : ''}</div>`}</div>`;
   },
   podeEditar(s) { return this.podeAtender() || (this.podeLancar() && !s.dataAtendimento && (s.solicitante?.id === Auth.id || this.lojasUsuario()?.has(s.lojaId))); },
@@ -15259,7 +15770,7 @@ const Solicitacoes = {
     const adqs = listaAdquirentes(), lj = this.lojasUsuario(), travada = !!lj && lj.size === 1; // v13.61: usuário de uma loja → travada nela
     const dicaLoja = travada ? 'Travada na sua loja.' : !lj ? 'Você pode abrir a solicitação em nome de qualquer loja da rede.' : lj.size ? 'Escolha uma das suas lojas.' : 'Conta sem loja vinculada: escolha a loja de destino.';
     const campoLoja = `<div class="field"><label class="lbl" for="f_lojaId">Loja Solicitante / Destino</label><select id="f_lojaId" name="lojaId" ${travada ? 'disabled aria-disabled="true"' : ''}>${travada ? '' : '<option value="">Selecione a loja…</option>'}${ops.map(([id, r]) => `<option value="${id}" ${id === v.lojaId ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select><span class="hint" style="margin-top:4px">${travada ? '🔒 ' : ''}${dicaLoja}</span></div>`;
-    const corpo = `<div class="form-grid">${campoLoja}${campo('Data da Solicitação', 'dataSolicitacao', v.dataSolicitacao, { tipo: 'date' })}
+    const corpo = `<div class="form-grid">${campoLoja}${campo('Data da Solicitação', 'dataSolicitacao', v.dataSolicitacao, { tipo: 'date' })}${this.v89() ? this.camposV89(v, atende) : ''}
       <fieldset class="full ct-grupo"><legend>Itens solicitados</legend><div class="sol-itens">${SOL_ITENS.map(([k, r]) => `<label class="check"><input type="checkbox" name="itens.${k}" ${v.itens?.[k] ? 'checked' : ''}> ${r}</label>`).join('')}</div>
         <div class="field" id="solPos" ${v.itens?.pos ? '' : 'hidden'} style="margin-top:10px;max-width:320px"><label class="lbl" for="f_adquirentePos">Adquirente do POS</label><select id="f_adquirentePos" name="adquirentePos"><option value="">Selecione a adquirente…</option>${adqs.map(a => `<option ${a === v.adquirentePos ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select></div></fieldset>
       ${campo('Observações', 'obs', v.obs, { tipo: 'textarea', full: true, attrs: 'placeholder="Quantidade, modelo, urgência…"' })}
@@ -15275,7 +15786,7 @@ const Solicitacoes = {
         if (dataAt && !quem) { UI.toast('Com a Data do Atendimento preenchida, informe Quem Levou / Entregou.'); return false; }
         if (dataAt && dataAt < d.dataSolicitacao) { UI.toast('O atendimento não pode ser anterior à solicitação.'); return false; }
         const reg = { ...(s ? Repo.semMeta(s) : {}), lojaId: d.lojaId, dataSolicitacao: d.dataSolicitacao, itens, adquirentePos: itens.pos ? d.adquirentePos : '', obs: d.obs || '', dataAtendimento: dataAt, quemEntregou: dataAt ? quem : '',
-          solicitante: s?.solicitante || { id: Auth.id, nome: Auth.nome || '' }, ...(dataAt && !s?.dataAtendimento ? { atendidoPor: Auth.id, atendidoEm: new Date().toISOString() } : {}) };
+          ...(this.v89() ? this.extrasV89(d, s, dataAt, atende) : {}), solicitante: s?.solicitante || { id: Auth.id, nome: Auth.nome || '' }, ...(dataAt && !s?.dataAtendimento ? { atendidoPor: Auth.id, atendidoEm: new Date().toISOString() } : {}) };
         await Repo.salvar(this.COL, s?.id || 'sol-' + uid(), reg, { modulo: 'solicitacoes', rotulo: `Solicitação · ${this.nomeLoja(d.lojaId)}`, detalhe: `${this.rotuloItens(reg).join(', ')} · ${this.status(reg)}` });
         UI.toast(dataAt ? 'Solicitação atendida' : 'Solicitação registrada · Em Aberto');
       } }] });
@@ -15303,6 +15814,9 @@ const Solicitacoes = {
     if (a === 'sol-atender') return this.atender(el.dataset.id);
     if (a === 'sol-del') return this.excluir(el.dataset.id);
     if (a === 'sol-status') { this.ui.status = el.dataset.v; return App.render(); }
+    if (a === 'sol-vista') { this.ui.vista = el.dataset.v; return App.render(); } /* v13.89 */
+    if (a === 'sol-andamento') return this.marcarAndamento(el.dataset.id);
+    if (a === 'sol-rel-imprimir') return this.imprimirRelatorio();
   },
   mudanca(a, el) { if (a === 'sol-filtro') { this.ui[el.dataset.k] = el.value; App.render(); } },
 };
@@ -15983,7 +16497,7 @@ const PontoEquilibrio = {
       .kp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px;} .kp>div{border:1px solid #D9DCEA;border-radius:8px;padding:8px 10px;} .kp .t{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#8E93AE;font-weight:600;} .kp .d{font-family:'Sora',Arial;font-size:14px;font-weight:700;color:#2A217A;}
       .gr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;} .gr>div{border:1px solid #ECEEF5;border-radius:8px;padding:6px;min-height:20px;} .gr .gt{font-size:10px;font-weight:700;color:#2A217A;margin:0 0 4px;} table.det td.n,table.det th.n{text-align:right;white-space:nowrap;font-family:'IBM Plex Mono',monospace;} table.det tr.tot td{font-weight:700;border-top:1.5px solid #2A217A;} .s{font-size:10px;color:#585E7F;margin-top:8px;}`;
     Audit.registrar({ modulo: 'equilibrio', acao: 'emitiu', entidade: 'documento', entidadeId: 'pe-' + u.ano, rotulo: 'Relatório do Ponto de Equilíbrio', detalhe: per, mudancas: [] });
-    return Documento.pdfDireto('Ponto de Equilíbrio', Documento.montar('Ponto de Equilíbrio', corpo, { paisagem: true, margem: '10mm', css }), `Ponto_Equilibrio_${u.loja ? Documento.rotuloLoja(s.l) : 'Rede'}_${u.periodo === 'mes' ? u.ano + '-' + mm2(u.mes) : u.ano + '_S' + u.semestre}`);
+    return Documento.saida('Ponto de Equilíbrio', Documento.montar('Ponto de Equilíbrio', corpo, { paisagem: true, margem: '10mm', css }), `Ponto_Equilibrio_${u.loja ? Documento.rotuloLoja(s.l) : 'Rede'}_${u.periodo === 'mes' ? u.ano + '-' + mm2(u.mes) : u.ano + '_S' + u.semestre}`);
   },
   /* ---------------- v13.54 · carga do Faturamento Realizado ---------------- */
   /** Grava no rascunho (salvar depois) o realizado do mês para várias lojas, com a origem. */
@@ -17058,6 +17572,7 @@ const ConcMP = {
   v743() { return typeof Recursos !== 'undefined' && Recursos.ativo('ret_lote_v13743'); },
   /** v13.80 · Recebível Diário: o Resumo do Fechamento passa a gravar a abertura por bandeira (e os vencimentos da Credsystem). */
   v780() { return typeof Recursos !== 'undefined' && Recursos.ativo('fcx_recebivel_v1380'); },
+  v787() { return typeof Recursos !== 'undefined' && Recursos.ativo('rd_cartao_v1387'); }, /* v13.87: débito × crédito na abertura por bandeira + prestações no débito por bandeira */
   /** v13.80 · Repasse da Credsystem (private label, sem antecipação em D+1): regra antecipada → D+prazo útil; senão o vencimento
       da parcela no ERP no 1º dia útil; sem vencimento, estimado em 30 dias corridos (1º dia útil). Só leitura do motor (DiasUteis). */
   vencCredsystem(v) {
@@ -17077,7 +17592,7 @@ const ConcMP = {
     const out = bs.sort((a, b) => b.bruto - a.bruto).map((b, i, arr) => {
       const ult = i === arr.length - 1, antecip = ult ? r2(r.custoAntecip - ua) : r2(r.custoAntecip * b[pesoAnt] / somaAnt), pos = ult ? r2(r.custoPos - up) : r2(r.custoPos * b.bruto / somaBr);
       ua = r2(ua + antecip); up = r2(up + pos);
-      const liquido = r2(b.bruto - b.mdr - antecip - pos), x = { bandeira: b.bandeira, bruto: r2(b.bruto), mdr: r2(b.mdr), antecip, pos, liquido };
+      const liquido = r2(b.bruto - b.mdr - antecip - pos), x = { bandeira: b.bandeira, ...(b.modalidade ? { modalidade: b.modalidade } : {}), bruto: r2(b.bruto), mdr: r2(b.mdr), antecip, pos, liquido };
       if (b.venc) { const tot = Object.values(b.venc).reduce((s, v) => s + v, 0) || 1; x.vencimentos = Object.entries(b.venc).sort().map(([data, v]) => ({ data, valor: r2(liquido * v / tot) })); x.vencFonte = b.vencFonte; }
       return x;
     });
@@ -17270,7 +17785,7 @@ const ConcMP = {
     const dia = new Map();
     for (const v of vendas) { const k = `${v.data}|${v.info.lojaId}|${v.info.empresaId}|${v.adquirente}`; const d = dia.get(k) || { data: v.data, lojaId: v.info.lojaId, empresaId: v.info.empresaId, adquirente: v.adquirente, bruto: 0, custoMdr: 0, liqCred: 0 }; d.bruto += v.bruto; d.custoMdr += v.mdrCob; if (v.modalidade === 'credito') d.liqCred += v.liquido; dia.set(k, d); }
     const bandMap = new Map(); /* v13.80: abertura por bandeira (e vencimento da Credsystem) para o Recebível Diário do FCX */
-    if (this.v780()) for (const v of vendas) { const k = `${v.data}|${v.info.lojaId}|${v.info.empresaId}|${v.adquirente}`, mp = bandMap.get(k) || {}, bn = v.bandeira || '—', b = mp[bn] ||= { bandeira: bn, bruto: 0, mdr: 0, liqCred: 0 };
+    if (this.v780()) for (const v of vendas) { const k = `${v.data}|${v.info.lojaId}|${v.info.empresaId}|${v.adquirente}`, mp = bandMap.get(k) || {}, bn = v.bandeira || '—', md = this.v787() ? (v.modalidade === 'debito' ? 'debito' : 'credito') : '', b = mp[md ? md + '|' + bn : bn] ||= { bandeira: bn, ...(md ? { modalidade: md } : {}), bruto: 0, mdr: 0, liqCred: 0 }; /* v13.87: + operação */
       b.bruto += v.bruto; b.mdr += v.mdrCob || 0; if (v.modalidade === 'credito') b.liqCred += v.liquido || 0;
       if (v.adquirente === ADQ_CREDSYSTEM) { const vc = this.vencCredsystem(v); (b.venc ||= {})[vc.data] = (b.venc[vc.data] || 0) + (v.bruto - (v.mdrCob || 0)); b.vencFonte = b.vencFonte === 'estimado' || vc.fonte === 'estimado' ? 'estimado' : vc.fonte; }
       bandMap.set(k, mp); }
@@ -17293,9 +17808,15 @@ const ConcMP = {
     const resumo = dias.map(d => { const custo = r2(d.custoMdr + d.custoAntecip + d.custoPos); return { ...d, custo, liquido: r2(d.bruto - custo), brutoLote: 0 }; });
     if (bandMap.size) resumo.forEach(x => { const b = this.abrirBandeiras(x, bandMap.get(`${x.data}|${x.lojaId}|${x.empresaId}|${x.adquirente}`)); if (b) x.bandeiras = b; }); /* v13.80 */
     /* v13.73 · prestações (LOTE): fora das vendas; Bruto LOTE informado à parte no Resumo e enviado à Conciliação Credsystem */
-    const loteMap = new Map(); if (det) erp.linhas.filter(e => e.tipo === 'prestacao').forEach(e => { const A = this.canonAdq(e.adqNome || e.operadora), pixPag = /PIX/i.test(e.operadora), k = `${e.data}|${e.lojaId || '?' + e.loja}|${A}|${pixPag}`; const x = loteMap.get(k) || { data: e.data, lojaId: e.lojaId && Repo.get('lojas', e.lojaId) ? e.lojaId : '', lojaTxt: e.loja, adquirente: A, pixPag, n: 0, bruto: 0, mdr: 0, liquido: 0 }; x.n++; x.bruto = r2(x.bruto + e.bruto); x.mdr = r2(x.mdr + e.mdr); x.liquido = r2(x.liquido + e.liquido); loteMap.set(k, x); });
+    const loteMap = new Map(); if (det) erp.linhas.filter(e => e.tipo === 'prestacao').forEach(e => { const A = this.canonAdq(e.adqNome || e.operadora), pixPag = /PIX/i.test(e.operadora), k = `${e.data}|${e.lojaId || '?' + e.loja}|${A}|${pixPag}`; const x = loteMap.get(k) || { data: e.data, lojaId: e.lojaId && Repo.get('lojas', e.lojaId) ? e.lojaId : '', lojaTxt: e.loja, adquirente: A, pixPag, n: 0, bruto: 0, mdr: 0, liquido: 0 }; x.n++; x.bruto = r2(x.bruto + e.bruto); x.mdr = r2(x.mdr + e.mdr); x.liquido = r2(x.liquido + e.liquido);
+      if (this.v787() && !pixPag) { const bn = e.bandeira || '—', bb = (x.bandeiras ||= {})[bn] ||= { bandeira: bn, n: 0, bruto: 0, mdr: 0, liquido: 0 }; bb.n++; bb.bruto = r2(bb.bruto + e.bruto); bb.mdr = r2(bb.mdr + e.mdr); bb.liquido = r2(bb.liquido + e.liquido); } /* v13.87 */
+      loteMap.set(k, x); });
     const lote = [...loteMap.values()].sort((a, b) => a.data.localeCompare(b.data) || String(a.lojaId).localeCompare(String(b.lojaId)));
     lote.filter(x => x.lojaId).forEach(x => { const r = resumo.find(d => d.data === x.data && d.lojaId === x.lojaId && d.adquirente === x.adquirente); if (r) r.brutoLote = r2(r.brutoLote + x.bruto); else resumo.push({ data: x.data, lojaId: x.lojaId, empresaId: this.empresaLojaAdq(x.lojaId, x.adquirente), adquirente: x.adquirente, bruto: 0, custoMdr: 0, custoAntecip: 0, custoPos: 0, custo: 0, liquido: 0, brutoLote: x.bruto }); });
+    if (this.v787()) lote.filter(x => x.lojaId && x.bandeiras).forEach(x => { /* v13.87: prestações no débito por bandeira, na linha do Resumo (loja × adquirente) */
+      const r = resumo.find(d => d.data === x.data && d.lojaId === x.lojaId && d.adquirente === x.adquirente); if (!r) return; const m = new Map((r.loteBandeiras || []).map(b => [b.bandeira, b]));
+      Object.values(x.bandeiras).forEach(b => { const y = m.get(b.bandeira) || { bandeira: b.bandeira, n: 0, bruto: 0, mdr: 0, liquido: 0 }; y.n += b.n; y.bruto = r2(y.bruto + b.bruto); y.mdr = r2(y.mdr + b.mdr); y.liquido = r2(y.liquido + b.liquido); m.set(b.bandeira, y); });
+      r.loteBandeiras = [...m.values()].sort((a, b) => b.bruto - a.bruto); });
     /* v13.73 · Pix no POS: venda Pix com a taxa de Gerenciar dados do FCX */
     const pixMap = new Map(), pixTaxas = this._cz?.pixTaxas || {}; pixLin.forEach(e => { const lj = e.lojaId && Repo.get('lojas', e.lojaId) ? e.lojaId : ''; if (!lj) { lojasSemCad.add(e.loja); return; } const k = `${e.data}|${lj}`; const x = pixMap.get(k) || { data: e.data, lojaId: lj, n: 0, bruto: 0 }; x.n++; x.bruto = r2(x.bruto + e.bruto); pixMap.set(k, x); });
     const pix = [...pixMap.values()].map(x => { const t = pixTaxas[mes(x.data)] || { taxa: this.PIX_PADRAO, fonte: 'padrão do FCX (0,62%)' }, custo = r2(x.bruto * t.taxa); return { ...x, taxa: t.taxa, fonte: t.fonte, custo, liquido: r2(x.bruto - custo) }; }).sort((a, b) => a.data.localeCompare(b.data) || a.lojaId.localeCompare(b.lojaId));
@@ -17310,7 +17831,7 @@ const ConcMP = {
   },
   async gravarCruzamento() {
     const m = this._czRes; if (!m || !this.podeImportar()) return;
-    const linhas = m.resumo.filter(x => x.data && x.lojaId).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: x.empresaId, adquirente: x.adquirente, bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custoMdr, custoAntecip: x.custoAntecip, custoPos: x.custoPos, ...(m.det ? { brutoLote: x.brutoLote || 0 } : {}), ...(x.bandeiras ? { bandeiras: x.bandeiras } : {}), origem: m.comAdq ? 'cruzamento' : 'erp-sistema', arquivo: m.arquivos.join(' + ') }));
+    const linhas = m.resumo.filter(x => x.data && x.lojaId).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: x.empresaId, adquirente: x.adquirente, bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custoMdr, custoAntecip: x.custoAntecip, custoPos: x.custoPos, ...(m.det ? { brutoLote: x.brutoLote || 0 } : {}), ...(x.bandeiras ? { bandeiras: x.bandeiras } : {}), ...(x.loteBandeiras ? { loteBandeiras: x.loteBandeiras } : {}), origem: m.comAdq ? 'cruzamento' : 'erp-sistema', arquivo: m.arquivos.join(' + ') }));
     const pix = (m.pix || []).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: '', adquirente: 'PIX - POS', bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custo, custoAntecip: 0, custoPos: 0, origem: 'erp-pix-pos', taxa: x.taxa, arquivo: m.arquivos.join(' + ') }));
     if (!linhas.length && !pix.length) return UI.toast('Nada a gravar: nenhuma venda com loja/EC cadastrado.');
     const n = linhas.length ? await this.gravarLinhas('credito', linhas) : 0, np = pix.length ? await this.gravarLinhas('pix', pix) : 0;
@@ -17859,7 +18380,7 @@ const MODULOS = [
   { id: 'fcx', num: 'Módulo 4', titulo: 'FCX · Fluxo de Caixa', curto: 'FCX', icon: 'caixa', perm: 'fcx.ver',
     desc: 'Projeção diária de caixa, orçamento, painel analítico e a DFC: extratos OFX cruzados com as premissas do FCX (realizado × previsto).',
     stat: () => 'receitas 2025 · saídas 2026' },
-  { id: 'contabil', num: 'Módulo 12', titulo: 'Contabilidade', curto: 'Contabilidade', icon: 'livro', perm: 'contabil.ver', ver: () => Recursos.ativo('contabil_v1386') && Auth.can('contabil.ver'), // v13.86
+  { id: 'contabil', num: 'Módulo 12', titulo: 'Contabilidade', curto: 'Contabilidade', icon: 'livro', perm: 'contabil.ver', ver: () => Recursos.ativo('contabil_v1386') && Auth.can('contabil.ver') && !Acesso.loja(), // v13.86 · v13.88: Loja não abre (o servidor recusa)
     desc: 'Plano de contas único (sintéticas e analíticas com classificação automática), partidas dobradas com estorno, LALUR, DRE no modelo atual e na Reforma (IBS/CBS/IS) e os relatórios contábeis. O FCX lê o plano de contas daqui.',
     stat: () => ModContabil.stat() },
   { id: 'retaguarda', num: 'Módulo 5', titulo: 'Retaguarda Financeira', curto: 'Retaguarda', icon: 'retaguarda', perm: 'retaguarda.ver',
@@ -17909,11 +18430,36 @@ const NAV_SUB = {
   conciliacao: { itens: () => ConcMP.abas(), ir: v => { ConcMP.ui.aba = v; }, atual: () => ConcMP.ui.aba }, // v13.69 · v13.72: abas dinâmicas
   credsystem: { itens: () => [['campanhas', 'Cadastro de Campanhas'], ['metas', 'Cadastro de Metas'], ['dashboard', 'Dashboard de Metas'], ['importacoes', 'Importações']], ir: v => { Credsystem.ui.aba = v; }, atual: () => Credsystem.ui.aba },
 };
+/* v13.89 · submenus novos (só com o recurso rel_v1389) */
+NAV_SUB.solicitacoes = { ok: () => Documento.v89(), itens: () => [['lista', 'Solicitações'], ['relatorio', 'Relatório por período']], ir: v => { Solicitacoes.ui.vista = v; }, atual: () => Solicitacoes.ui.vista || 'lista' };
+NAV_SUB.viagens = { ok: () => Documento.v89() && Viagens.podeResumo(), itens: () => [['pedidos', 'Pedidos e prestações'], ['resumo', 'Resumo Operacional']], ir: v => { Viagens.ui.aba = v; }, atual: () => Viagens.ui.aba || 'pedidos' };
+const navSubOk = id => !!NAV_SUB[id] && (!NAV_SUB[id].ok || NAV_SUB[id].ok());
 /** Submenu em cascata: um painel ao lado do menu, aberto ao passar o mouse (ou pelo teclado) num módulo com abas. */
+/**
+ * v13.88 · CHECAGEM ÚNICA DE ACESSO — menu lateral, roteador e telas usam a mesma regra.
+ *   temAcesso('contratos')            → o módulo/tela abre para quem está logado?
+ *   temAcesso('fcx', 'modificar')     → nível da matriz (Ler / Modificar / Excluir) no módulo
+ *   temAcesso('fcx.dfc.ver')          → uma permissão específica
+ */
+const ROTA_MATRIZ = { pessoal: 'pdi', menu: 'visao', conciliacao: 'retaguarda' };
+window.Documento = Documento; /* v13.89: o Módulo Contábil (iframe) usa a mesma pré-visualização */
+const acessoTela = t => !!t && !!(t.ver ? t.ver() : Auth.can(t.perm)) && Acesso.rotaOk(t.id);
+function temAcesso(modulo, acao = 'ler') {
+  if (!Auth.id) return false;
+  const k = String(modulo || '').trim(), a = PermNorm.nivelDe(acao) || 'ler';
+  if (k.includes('.')) return Auth.can(k);
+  const tela = [...MODULOS, ...ADMIN].find(m => m.id === k);
+  if (a === 'ler' && tela) return acessoTela(tela);
+  if (Auth.perfil === 'GESTOR') return true;
+  const mod = MATRIZ_MODULOS.find(m => m.id === (ROTA_MATRIZ[k] || k)); if (!mod) return false;
+  const lista = a === 'excluir' ? mod.excluir : a === 'modificar' ? mod.modificar : mod.ler;
+  return lista.some(p => Auth.can(p));
+}
+window.temAcesso = temAcesso;
 const NavCascata = {
   _t: null,
   abrir(bt) {
-    const id = bt.dataset.r, sub = NAV_SUB[id], fly = $('#sbFly'); if (!sub || !fly || window.matchMedia('(max-width:900px)').matches) return this.fechar(true);
+    const id = bt.dataset.r, sub = navSubOk(id) ? NAV_SUB[id] : null, fly = $('#sbFly'); if (!sub || !fly || window.matchMedia('(max-width:900px)').matches) return this.fechar(true);
     clearTimeout(this._t); const m = [...MODULOS, ...ADMIN].find(x => x.id === id), at = App.rota === id ? sub.atual() : '';
     fly.innerHTML = `<div class="sb-fly-tit">${esc(m?.titulo || '')}</div>${sub.itens().filter(([k]) => Acesso.tela(id, k)).map(([k, r]) => `<span role="menuitem" tabindex="0" class="sb-fly-it ${k === at ? 'on' : ''}" data-a="nav-sub" data-r="${id}" data-v="${k}">${esc(r)}</span>`).join('')}`;
     const r = bt.getBoundingClientRect(), aberto = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sb-w-aberto')) || $('#mainnav').getBoundingClientRect().right;
@@ -17942,7 +18488,7 @@ document.addEventListener('keydown', e => {
 const App = {
   rota: 'menu', _raf: null, navAberto: false,
   /** v13.13: um módulo pode ter regra própria de visibilidade (ex.: Liberação Remota também para gestores diretos). */
-  pode(m) { return (m.ver ? m.ver() : Auth.can(m.perm)) && Acesso.rotaOk(m.id); }, // v13.83: + sub-permissões (telas) da Gestão de Acessos
+  pode(m) { return acessoTela(m); }, // v13.83: + sub-permissões (telas) · v13.88: mesma checagem de temAcesso()
   agendarRender() { if (this._raf) return; this._raf = requestAnimationFrame(() => { this._raf = null; this.render(); }); },
   ir(rota) {
     if (!Sessao.ativa) return Sessao.render(); // sem acesso validado: só a tela de entrada
@@ -18004,7 +18550,7 @@ const App = {
     const todos = [{ id: 'menu', titulo: 'Início', icon: 'inicio' }, ...MODULOS, ...ADMIN], porId = new Map(todos.map(m => [m.id, m]));
     const usados = new Set(NAV_GRUPOS.flatMap(g => g.ids)), grupos = NAV_GRUPOS.map(g => ({ ...g, ids: [...g.ids] }));
     todos.forEach(m => { if (!usados.has(m.id)) grupos[m.id && ADMIN.some(a => a.id === m.id) ? 2 : 0].ids.push(m.id); }); // módulo novo cai no grupo certo
-    const bt = m => `<button class="${this.rota === m.id ? 'on' : ''}" data-a="nav" data-r="${m.id}" ${NAV_SUB[m.id] ? 'data-sub="1" aria-haspopup="menu"' : ''} ${this.rota === m.id ? 'aria-current="page"' : ''} title="${esc(m.titulo)}" aria-label="${esc(m.titulo)}">${ICON[m.icon] || ''}<span class="nav-longo">${esc(m.titulo)}</span><span class="nav-curto" aria-hidden="true">${esc(m.curto || m.titulo)}</span>${NAV_SUB[m.id] ? '<i class="sb-seta" aria-hidden="true">›</i>' : ''}</button>`;
+    const bt = m => `<button class="${this.rota === m.id ? 'on' : ''}" data-a="nav" data-r="${m.id}" ${navSubOk(m.id) ? 'data-sub="1" aria-haspopup="menu"' : ''} ${this.rota === m.id ? 'aria-current="page"' : ''} title="${esc(m.titulo)}" aria-label="${esc(m.titulo)}">${ICON[m.icon] || ''}<span class="nav-longo">${esc(m.titulo)}</span><span class="nav-curto" aria-hidden="true">${esc(m.curto || m.titulo)}</span>${NAV_SUB[m.id] ? '<i class="sb-seta" aria-hidden="true">›</i>' : ''}</button>`;
     const menu = grupos.map(g => { const ms = g.ids.map(id => porId.get(id)).filter(m => m && (m.id === 'menu' || this.pode(m))); return ms.length ? `<div class="sb-grupo" role="presentation"><span>${esc(g.titulo)}</span></div>${ms.map(bt).join('')}` : ''; }).join('');
     const seletor = podeSimular ? `<select data-a="perfil-sim" class="perfil-sel" aria-label="Visualizar como perfil">
           <option value="GESTOR" ${Auth.perfil === 'GESTOR' ? 'selected' : ''}>MASTER</option><option value="OPERACIONAL" ${Auth.perfil === 'OPERACIONAL' ? 'selected' : ''}>OPERACIONAL</option></select>`
@@ -18399,10 +18945,16 @@ window.PainelFCX = {
     try {
       const d = await Cloud.adapter.get('conc_fechamento/' + dia.slice(0, 7) + '_credito'), ls = (d?.linhas || []).filter(l => l.data === dia && (!l.mod || l.mod === 'credito'));
       const cs = l => String(l.adquirente || '').toUpperCase() === ADQ_CREDSYSTEM, terc = ls.filter(l => !cs(l)), cred = ls.filter(cs); /* v13.80: Credsystem não entra no cartão do dia */
-      const soma = (k, arr = terc) => r2(arr.reduce((a, l) => a + (Number(l[k]) || 0), 0)), porAdq = {}, porBand = new Map(), add = (mapa, adq, b, sem) => { const k = adq + '|' + b.bandeira, x = mapa.get(k) || { adquirente: adq, bandeira: b.bandeira, bruto: 0, mdr: 0, antecip: 0, pos: 0, liquido: 0, semBandeira: !!sem }; ['bruto', 'mdr', 'antecip', 'pos', 'liquido'].forEach(c => { x[c] = r2(x[c] + (Number(b[c]) || 0)); }); mapa.set(k, x); };
+      const soma = (k, arr = terc) => r2(arr.reduce((a, l) => a + (Number(l[k]) || 0), 0)), porAdq = {}, porBand = new Map(), add = (mapa, adq, b, sem) => { const k = adq + '|' + (b.modalidade || '') + '|' + b.bandeira, x = mapa.get(k) || { adquirente: adq, bandeira: b.bandeira, modalidade: b.modalidade || null, bruto: 0, mdr: 0, antecip: 0, pos: 0, liquido: 0, semBandeira: !!sem }; ['bruto', 'mdr', 'antecip', 'pos', 'liquido'].forEach(c => { x[c] = r2(x[c] + (Number(b[c]) || 0)); }); mapa.set(k, x); };
       const linhaBand = l => (l.bandeiras && l.bandeiras.length ? l.bandeiras : [{ bandeira: '—', bruto: l.bruto, mdr: l.custoMdr, antecip: l.custoAntecip, pos: l.custoPos, liquido: l.liquido, vencimentos: null, _sem: true }]);
       terc.forEach(l => { const k = l.adquirente || '—'; porAdq[k] = r2((porAdq[k] || 0) + (Number(l.liquido) || 0)); linhaBand(l).forEach(b => add(porBand, k, b, b._sem)); });
       out.cartao = { linhas: terc.length, bruto: soma('bruto'), liquido: soma('liquido'), mdr: soma('custoMdr'), antecip: soma('custoAntecip'), pos: soma('custoPos'), porAdquirente: porAdq, porBandeira: [...porBand.values()].sort((a, b) => a.adquirente.localeCompare(b.adquirente) || b.bruto - a.bruto), semBandeira: [...porBand.values()].some(x => x.semBandeira) };
+      if (Recursos.ativo('rd_cartao_v1387')) { /* v13.87 · prestações recebidas no cartão de débito, por adquirente × bandeira, líquidas do MDR */
+        const pb = new Map(); terc.forEach(l => (l.loteBandeiras || []).forEach(b => { const k = (l.adquirente || '—') + '|' + b.bandeira, x = pb.get(k) || { adquirente: l.adquirente || '—', bandeira: b.bandeira, n: 0, bruto: 0, mdr: 0, liquido: 0, mdrEstimado: false }; x.n += Number(b.n) || 0; x.bruto = r2(x.bruto + (Number(b.bruto) || 0)); x.mdr = r2(x.mdr + (Number(b.mdr) || 0)); pb.set(k, x); }));
+        const itensP = [...pb.values()].map(x => { if (!x.mdr && x.bruto) { const ref = out.cartao.porBandeira.find(v => v.adquirente === x.adquirente && v.bandeira === x.bandeira && v.modalidade === 'debito' && v.bruto > 0); if (ref) { x.mdr = r2(x.bruto * ref.mdr / ref.bruto); x.mdrEstimado = true; } } x.liquido = r2(x.bruto - x.mdr); return x; }) /* sem taxa no ERP: MDR % das vendas no débito da mesma adquirente e bandeira */
+          .sort((a, b) => a.adquirente.localeCompare(b.adquirente) || b.bruto - a.bruto);
+        const sp = k => r2(itensP.reduce((a, x) => a + x[k], 0)); out.prestacaoCartao = { detalhado: itensP.length > 0, bruto: sp('bruto'), mdr: sp('mdr'), liquido: sp('liquido'), porBandeira: itensP, mdrEstimado: itensP.some(x => x.mdrEstimado) };
+      }
       const itens = []; cred.forEach(l => linhaBand(l).forEach(b => { const venc = b.vencimentos && b.vencimentos.length ? b.vencimentos : null; itens.push({ dataVenda: l.data, lojaId: l.lojaId, bandeira: b.bandeira, bruto: r2(b.bruto), mdr: r2(b.mdr), antecip: r2(b.antecip), pos: r2(b.pos), liquido: r2(b.liquido), vencimentos: venc, vencFonte: venc ? (b.vencFonte || 'vencimento') : 'sem', semBandeira: !!b._sem }); }));
       out.credsystem = { linhas: cred.length, bruto: soma('bruto', cred), mdr: soma('custoMdr', cred), liquido: soma('liquido', cred), itens };
       if (!d) out.avisos.push(`Cartão: o fechamento de ${dia.slice(5, 7)}/${dia.slice(0, 4)} ainda não foi gravado na Auditoria de Adquirentes (Conciliação e Cruzamento › Gravar).`);

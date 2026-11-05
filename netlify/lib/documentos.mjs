@@ -2,6 +2,7 @@
 import { q, tx } from './db.mjs';
 import { ErroHttp } from './http.mjs';
 import { NIVEL, exigido, validarCaminho, partes, ehUsuarios, lojaPodeGravar } from './regras.mjs';
+import { acessoPorMatriz } from './permissoes.mjs';
 
 export const LIMITE_DOC = 5.5 * 1024 * 1024;   // bytes de JSON por documento
 export const LIMITE_PAGINA = 3.5 * 1024 * 1024; // bytes de JSON por página de listagem (resposta da função ≤ 6 MB)
@@ -10,12 +11,12 @@ const PROTEGIDOS_USUARIO = ['perfil', 'permissoes', 'ativo', 'funcionarioId', 'e
 export function podeLer(sess, caminho) {
   if (!sess) return false;
   if (sess.trocaPendente) return caminho === sess.caminho;
-  return sess.nivel >= exigido(caminho, 'r', sess.uid);
+  return sess.nivel >= exigido(caminho, 'r', sess.uid) || acessoPorMatriz(sess, caminho, 'r'); // v13.88: + coleções liberadas pela matriz
 }
 export function podeGravar(sess, caminho) {
   if (!sess) return false;
   if (sess.trocaPendente || (ehUsuarios(caminho) && sess.nivel < NIVEL.admin)) return caminho === sess.caminho; // só o próprio login
-  return sess.nivel >= exigido(caminho, 'w', sess.uid);
+  return sess.nivel >= exigido(caminho, 'w', sess.uid) || acessoPorMatriz(sess, caminho, 'w'); // v13.88
 }
 
 /** Documento como o painel espera: { id, ...dados } — sem a senha para quem não é Master. */

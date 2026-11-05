@@ -398,7 +398,20 @@ const acoes = {
     R.carregando = true; render();
     try { R.dados = await api('GET', `/relatorios/${R.tipo}?${p}`); } finally { R.carregando = false; render(); }
   },
-  'rl-imprimir'() { window.print(); },
+  'rl-imprimir'() {
+    const R = S.rl, D = PAI && PAI.Documento, el = $('#relatorio');
+    let novo = false; try { novo = !!(D && PAI.Recursos && PAI.Recursos.ativo('rel_v1389')); } catch (e) { novo = false; }
+    if (!novo || !el) { window.print(); return; }
+    const tit = (RELS.find(x => x[0] === R.tipo) || [R.tipo, 'Relatório'])[1], br = d => d ? String(d).split('-').reverse().join('/') : '';
+    const css = `.tbl{overflow:visible;border:0;max-height:none} table{border-collapse:collapse;width:100%;font-size:9.5pt} th,td{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top} th{background:#f2f2f2;font-size:8.5pt;color:#333}
+      td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} tr.sint td{font-weight:700} tr.tot td{font-weight:700;border-top:2px solid #999} tr.sub td{font-weight:600}
+      .pill{display:inline-block;font-size:8pt;font-weight:700;padding:1px 6px;border:1px solid #bbb;border-radius:10px} .hint,.muted{color:#555;font-size:8.5pt} .mono{font-family:ui-monospace,Menlo,monospace;font-size:8.5pt}
+      .ind1{padding-left:14px}.ind2{padding-left:26px}.ind3{padding-left:38px}.ind4{padding-left:50px}.ind5{padding-left:62px}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px} .cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0} .cmp div{border:1px solid #ccc;border-radius:6px;padding:6px} .cmp b{display:block;font-size:12pt}
+      .rel-cab{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px} .no-print,button{display:none!important} h2{font-size:12pt;margin:0 0 6px} h3{font-size:10.5pt;margin:10px 0 4px}`;
+    const html = D.montar(tit, D.cabecalho(tit, `Módulo Contábil · ${br(R.de)} a ${br(R.ate)}`) + el.innerHTML, { paisagem: ['balancete', 'diario', 'razao', 'dmpl', 'balanco'].includes(R.tipo), margem: '12mm 10mm', css });
+    D.previa(tit, html, `${tit.replace(/[^\wÀ-ú]+/g, '_')}_${R.de || ''}_a_${R.ate || ''}`);
+  },
   async 'pp-salvar'() {
     const n = id => lerValor($(id).value) / 100, d = { regime: ($('[name="pp-regime"]:checked') || {}).value, dreModelo: ($('[name="pp-dre"]:checked') || {}).value, lc224: $('#pp-lc224').checked, contaResultado: $('#pp-res').value,
       presumido: { irpjComercio: n('#pp-irpjComercio'), csllComercio: n('#pp-csllComercio'), irpjServicos: n('#pp-irpjServicos'), csllServicos: n('#pp-csllServicos') }, reforma: { ano: Number($('#pp-ano').value), cbs: n('#pp-cbs'), ibs: n('#pp-ibs'), is: n('#pp-is') } };

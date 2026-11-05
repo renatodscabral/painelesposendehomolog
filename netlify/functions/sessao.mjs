@@ -4,6 +4,7 @@
    DELETE                        → encerra a sessão
    v13.76: cada ambiente é um site com banco próprio (sem prefixo amb/…). Na Homologação e na RC, o Master que ainda
    não existe no banco local é herdado do site da Produção (mesmo CPF e senha), pela chave entre ambientes. */
+import { normalizarPerfil } from '../lib/permissoes.mjs'; /* v13.88 */
 import { q, tx, faxina } from '../lib/db.mjs';
 import { json, erro, rota, cookieSessao, cookieApagar, ipDe, ErroHttp } from '../lib/http.mjs';
 import { confere, soDigitos } from '../lib/senha.mjs';
@@ -62,7 +63,7 @@ export default rota(async (req, context) => {
   }
   await q('DELETE FROM tentativas_login WHERE chave = $1', ['cpf:' + cpf]);
   const sit = situacao(achado.u, achado.f); if (sit !== 'ok') return erro(403, 'Acesso bloqueado.', { motivo: sit });
-  if (soMaster() && achado.u.perfil !== 'MASTER') return erro(403, `${ROTULO[AMB]}: acesso restrito ao Master.`, { motivo: 'restrito' });
+  if (soMaster() && normalizarPerfil(achado.u.perfil) !== 'MASTER') return erro(403, `${ROTULO[AMB]}: acesso restrito ao Master.`, { motivo: 'restrito' });
   const trocar = !!achado.u.trocarSenha || soDigitos(senha) === cpf; // 1º acesso, senha redefinida ou senha ainda igual ao CPF
   const token = await criarSessao({ usuarioCaminho: achado.caminho, ambiente: AMB, trocaPendente: trocar, ip, agente: req.headers.get('user-agent') });
   faxina();

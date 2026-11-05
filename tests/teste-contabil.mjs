@@ -12,6 +12,8 @@ async function login(cpf) { const r = await fetch(U + '/api/sessao', { method: '
 const api = ck => async (met, rota, corpo) => { const r = await fetch(U + '/api/contabil' + rota, { method: met, headers: { cookie: ck, 'content-type': 'application/json', 'x-painel': '1' }, body: corpo ? JSON.stringify(corpo) : undefined }); let j = null; try { j = await r.json(); } catch { } return { s: r.status, j }; };
 
 await usuario('usr-master-ct', 'MASTER', '52998224725');
+/* v13.88: o servidor aplica a matriz com os recursos do ambiente — aqui (Produção) o Módulo Contábil já liberado */
+await sql(`INSERT INTO documentos (caminho, colecao, doc_id, dados) VALUES ('config/recursos', 'config', 'recursos', $1) ON CONFLICT (caminho) DO UPDATE SET dados = EXCLUDED.dados`, [JSON.stringify({ contabil_v1386: { ativo: true } })]);
 await usuario('usr-op-ler', 'OPERACIONAL', '11144477735', { contabil: 'ler' });
 await usuario('usr-op-sem', 'OPERACIONAL', '39053344705', {});
 await usuario('usr-loja-ct', 'LOJA', '12345678909', { contabil: 'excluir' });
