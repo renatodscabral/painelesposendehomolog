@@ -194,8 +194,117 @@ tbody tr:hover{background:#FAFAFD;}
 .btn[disabled]{opacity:.45;pointer-events:none;}
 tfoot td{border-top:1.5px solid var(--line);background:#FAFAFD;position:sticky;bottom:0;}
 
+/* v13.78 · Recebível Diário · v13.79: capa tabular, R$ com centavos, colunas fixas e A4 paisagem */
+.landing-card.recebivel .stripe{background:linear-gradient(var(--green),#4C9A6E);}
+.landing.landing-4.com-rd{grid-template-columns:repeat(5,1fr);}
+@media(max-width:1300px){.landing.landing-4.com-rd{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:720px){.landing.landing-4.com-rd{grid-template-columns:1fr;}}
+.rd-relatorio{font-size:12px;}
+.rd-cab{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:2px solid var(--brand);padding-bottom:6px;margin-bottom:10px;}
+.rd-cab h1{margin:1px 0;font-size:16px;color:var(--brand);font-weight:700;} .rd-eyebrow{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;}
+.rd-sub{font-size:11px;color:var(--ink-soft);} .rd-logo{height:28px;background:var(--brand);padding:3px 7px;border-radius:5px;}
+.rd-pagina h3{font-size:12px;margin:12px 0 5px;color:var(--brand);font-weight:700;} .rd-pagina h3 .rd-nota{font-weight:400;}
+.rd-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+@media(max-width:1000px){.rd-grid-2{grid-template-columns:1fr;}}
+.rd-tab{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;}
+.rd-tab th{font-size:9.5px;padding:5px 6px;border-bottom:1.5px solid #bbb;white-space:normal;vertical-align:bottom;}
+.rd-tab td{padding:4px 6px;border-bottom:1px solid #ddd;vertical-align:top;}
+.rd-tab td.num,.rd-tab th.num{text-align:right;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+.rd-tab th.num{font-family:inherit;}
+.rd-zebra tbody tr:nth-child(even) td{background:#F6F7FB;}
+.rd-tab tr.rd-total td{font-weight:700;background:#ECEEF6 !important;border-top:1.5px solid #bbb;}
+.rd-tab tr.rd-total-geral td{background:#E2E6F3 !important;}
+.rd-quebra{white-space:normal !important;word-wrap:break-word;overflow-wrap:anywhere;}
+.rd-detalhe td{font-size:11.5px;line-height:1.35;} .rd-detalhe td.num{padding-right:12px;}
+.rd-nota{font-size:10px;color:var(--ink-soft);font-weight:400;} .rd-linha{margin:3px 0 0;} .rd-forte{font-weight:700;}
+.rd-vazio{text-align:center;color:var(--ink-soft);padding:10px !important;}
+.rd-farol{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:12px;}
+.rd-farol.ok{background:var(--green-soft);color:var(--green);} .rd-farol.neg{background:var(--red-soft);color:var(--red);}
+.rd-luz{width:9px;height:9px;border-radius:50%;display:inline-block;background:currentColor;}
+.rd-avisos{background:var(--gold-soft,#FBF3E2);border:1px solid #EAD6A8;border-radius:8px;padding:6px 10px;font-size:11px;margin-bottom:8px;}
+.rd-criterios{margin-top:10px;font-size:9.5px;color:var(--ink-soft);line-height:1.4;}
+/* v13.80 */ .rd-tab tr.rd-sub td{font-size:11px;color:var(--ink-soft);} .rd-tab tr.rd-sub td:first-child{padding-left:20px;} .rd-tab tr.rd-grupo td{font-weight:600;}
+.rd-tab tr.rd-hoje td{background:var(--green-soft) !important;font-weight:700;} .rd-graf{position:relative;margin-top:8px;} .rd-graf-ent{height:150px;} .rd-graf-sem{height:250px;margin-top:12px;}
+.rd-graf-img{display:block;max-width:100%;margin:0 auto;}
+/* v13.82 · formulário: rótulos e campos na mesma linha de base, mesma altura; moeda à direita */
+.rd-campos{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 16px;align-items:end;}
+.rd-campos .field{display:flex;flex-direction:column;justify-content:flex-end;margin:0;min-width:0;}
+.rd-campos .field label{min-height:2.7em;display:flex;align-items:flex-end;line-height:1.3;margin:0 0 6px;}
+.rd-campos .field input{height:42px;box-sizing:border-box;margin:0;padding:0 12px;width:100%;}
+.rd-campos .field input.rd-moeda{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+@media(max-width:900px){.rd-campos{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:560px){.rd-campos{grid-template-columns:1fr;}}
+/* v13.81 · capa executiva (Entradas × Saídas lado a lado) */
+.rd-capa{font-size:12.5px;} .rd-capa .rd-cab h1{font-size:16px;} .rd-capa .rd-sub,.rd-capa .rd-eyebrow{font-size:11.5px;}
+.rd-capa h3{font-size:14px;margin:0 0 2px;} .rd-bloco-sub{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+.rd-kpis{display:flex;justify-content:space-between;gap:12px;margin:2px 0 12px;}
+.rd-kpi{flex:1 1 0;border:1px solid #DDE1EC;border-radius:8px;padding:7px 12px;background:#FAFBFD;}
+.rd-kpi-rot{font-size:12px;color:var(--ink-soft);font-weight:600;} .rd-kpi-val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;}
+.rd-kpi-prev{font-size:12px;color:var(--ink-soft);text-align:right;font-variant-numeric:tabular-nums;}
+.rd-capa-blocos{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.rd-bloco{flex:0 0 calc(50% - 8px);min-width:0;box-sizing:border-box;}
+.rd-capa .rd-tab{font-size:12px;} .rd-capa .rd-tab th{font-size:12px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--ink-soft);}
+.rd-capa .rd-tab td.num{text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;} .rd-capa .rd-tab th.num{text-align:right;}
+.rd-capa .rd-tab tr.rd-sub td{font-size:12px;} .rd-capa .rd-tab tr.rd-sub td:first-child{padding-left:20px;}
+.rd-capa .rd-agrup{margin-bottom:10px;} .rd-capa .rd-bloco-sai h3:not(:first-child){font-size:12.5px;margin:6px 0 4px;color:var(--ink);}
+.rd-capa .rd-criterios{font-size:10.5px;}
+@media(max-width:1000px){ .rd-capa-blocos,.rd-kpis{flex-direction:column;} .rd-bloco{flex-basis:auto;width:100%;} }
+
+/* v13.82 · documento de impressão/PDF do Recebível Diário: as mesmas regras do @media print valendo também na tela
+   (a prévia e o “Baixar PDF” do painel desenham em modo tela) — assim a medição das folhas e o PDF saem iguais à impressão */
+.rd-impressao .rd-pagina{box-shadow:none !important; border:none !important; padding:0 !important; margin:0 !important; border-radius:0;}
+.rd-impressao .rd-relatorio{font-size:11px; width:100%;}
+.rd-impressao .rd-grid-2{grid-template-columns:1fr 1fr !important; gap:14px;}
+.rd-impressao .rd-tab{width:100% !important; font-size:11px;}
+.rd-impressao .rd-tab th{position:static !important; font-size:8.5px;}
+.rd-impressao .rd-tab td{padding:3px 5px;}
+.rd-impressao .rd-detalhe td{font-size:11px;}
+.rd-impressao .rd-tab tr{break-inside:avoid;}
+.rd-impressao .rd-tab thead{display:table-header-group;}
+.rd-impressao .rd-pagina h3{margin:8px 0 4px; font-size:11.5px;}
+.rd-impressao .rd-cab h1{font-size:15px;}
+.rd-impressao .rd-criterios{font-size:8.5px; margin-top:6px;}
+.rd-impressao .rd-graf-ent{height:112px;}
+.rd-impressao .rd-graf-sem{height:230px;}
+.rd-impressao .rd-graf-img{max-height:100%;}
+.rd-impressao .rd-tab tr.rd-sub td{padding:1px 5px; font-size:10px;}
+.rd-impressao .rd-tab tr.rd-sub td:first-child{padding-left:18px; white-space:nowrap;}
+.rd-impressao .rd-capa .rd-capa-blocos{display:flex !important; flex-direction:row !important; justify-content:space-between; gap:14px;}
+.rd-impressao .rd-capa .rd-kpis{display:flex !important; flex-direction:row !important;}
+.rd-impressao .rd-capa .rd-bloco{flex:0 0 calc(50% - 7px) !important; width:auto !important;}
+.rd-impressao .rd-capa .rd-tab{font-size:12px;}
+.rd-impressao .rd-capa .rd-tab th{font-size:12px;}
+.rd-impressao .rd-capa .rd-tab td{padding:3px 6px;}
+.rd-impressao .rd-capa .rd-tab tr.rd-sub td{font-size:12px; padding:2px 6px;}
+.rd-impressao .rd-capa .rd-tab tr.rd-sub td:first-child{padding-left:20px; white-space:normal;}
+.rd-impressao .rd-capa .rd-graf-ent{height:130px;}
+.rd-impressao .rd-capa h3{font-size:14px; margin:0 0 2px;}
+.rd-impressao .rd-capa .rd-cab h1{font-size:16px;}
+.rd-impressao .rd-capa .rd-criterios{font-size:10px;}
+.rd-impressao{ font-size:11px; color:var(--ink); background:#fff; }
+.rd-impressao .rd-pagina{ break-inside:auto !important; page-break-inside:auto !important; background:#fff; }
+.rd-impressao .rd-tab tr, .rd-impressao .rd-kpi, .rd-impressao .rd-graf, .rd-impressao .rd-cab{ break-inside:avoid; page-break-inside:avoid; }
+.rd-impressao .rd-tab thead{ display:table-header-group; }
+.rd-impressao .rd-form, .rd-impressao .rd-carga, .rd-impressao .backlink, .rd-impressao button, .rd-impressao input, .rd-impressao .no-print{ display:none !important; }
+.rd-cont{ font-weight:400; color:var(--ink-soft); font-size:.85em; }
+@media print{
+  .rd-pagina{ box-shadow:none !important; border:none !important; padding:0 !important; margin:0 !important; border-radius:0; }
+  .rd-relatorio{ font-size:11px; width:100%; }
+  .rd-grid-2{ grid-template-columns:1fr 1fr !important; gap:14px; }
+  .rd-tab{ width:100% !important; font-size:11px; } .rd-tab th{ position:static !important; font-size:8.5px; } .rd-tab td{ padding:3px 5px; }
+  .rd-detalhe td{ font-size:11px; } .rd-tab tr{ break-inside:avoid; } .rd-tab thead{ display:table-header-group; }
+  .rd-pagina h3{ margin:8px 0 4px; font-size:11.5px; } .rd-cab h1{ font-size:15px; } .rd-criterios{ font-size:8.5px; margin-top:6px; }
+  .rd-graf-ent{ height:112px; } .rd-graf-sem{ height:230px; } .rd-graf-img{ max-height:100%; }
+  .rd-tab tr.rd-sub td{ padding:1px 5px; font-size:10px; } .rd-tab tr.rd-sub td:first-child{ padding-left:18px; white-space:nowrap; }
+  .rd-capa .rd-capa-blocos{ display:flex !important; flex-direction:row !important; justify-content:space-between; gap:14px; } .rd-capa .rd-kpis{ display:flex !important; flex-direction:row !important; }
+  .rd-capa .rd-bloco{ flex:0 0 calc(50% - 7px) !important; width:auto !important; } .rd-capa .rd-tab{ font-size:12px; } .rd-capa .rd-tab th{ font-size:12px; } .rd-capa .rd-tab td{ padding:3px 6px; }
+  .rd-capa .rd-tab tr.rd-sub td{ font-size:12px; padding:2px 6px; } .rd-capa .rd-tab tr.rd-sub td:first-child{ padding-left:20px; white-space:normal; } .rd-capa .rd-graf-ent{ height:130px; } .rd-capa h3{ font-size:14px; margin:0 0 2px; } .rd-capa .rd-cab h1{ font-size:16px; } .rd-capa .rd-criterios{ font-size:10px; } /* v13.81 */
+}
 @media print{
   .no-print, .topbar, .tabs, .toast{ display:none !important; }
+  .rd-form, .rd-campos, .rd-carga, .backlink, .rd-form button, .rd-form input, .rd-form .hint{ display:none !important; } /* v13.82 */
+  .rd-relatorio .rd-pagina{ break-inside:auto !important; break-before:page; page-break-before:always; } .rd-relatorio .rd-pagina:first-child{ break-before:auto; page-break-before:auto; }
+  .rd-relatorio tr{ break-inside:avoid; page-break-inside:avoid; }
   body{ background:#fff; }
   #app{ max-width:100%; padding:0; }
   .panel{ box-shadow:none; border:1px solid #ccc; break-inside:avoid; margin-bottom:14px; }
@@ -335,6 +444,9 @@ const state = {
   monthMeta:{},            // {'YYYY-MM': {metaComercial, redutorPct}}                — Parâmetro 1
   weightsByMonth:{},       // {'YYYY-MM': {dia: pesoDecimal}}                          — Parâmetro 2
   weeksByMonth:{},         // {'YYYY-MM': {dia: númeroDaSemana}}                       — Parâmetro 2 (v13.77: semana informada)
+  recebivelDiario:{},      // {'YYYY-MM-DD': {dinheiro, pix, saldoAbertura}}           — v13.78: Recebível Diário
+  cargaSaidas:null,        // {em, arquivo, linhas, modo}                             — v13.78: última carga de Entradas e Saídas
+  recebiveisCredsystem:{}, // {'venda|loja|bandeira|venc': {dataVenda, lojaId, bandeira, vencimento, valor, bruto, mdr, fonte}} — v13.80: Recebível Futuro Credsystem
   prestacaoModalidadePct:{}, // {'YYYY-MM-DD': {dinheiro,pix,debito}}                  — Parâmetro 3
   monthParams:{},          // {'YYYY-MM': {methods:{id:{participacao,taxa,prazo,geraCaixa}}}} — Meios de Pagamento
   saidas:[],               // [{id,date,conta,centro,tipo,valor,fornecedor,obs}]
@@ -369,6 +481,9 @@ async function resetarDadosOperacionais(){
   state.monthMeta = {};
   state.weightsByMonth = {};
   state.weeksByMonth = {};
+  state.recebivelDiario = {};
+  state.cargaSaidas = null;
+  state.recebiveisCredsystem = {};
   state.prestacaoModalidadePct = {};
   state.monthParams = {};
   state.saidas = [];
@@ -382,6 +497,9 @@ async function resetarDadosOperacionais(){
       window.storage.set('esp2:monthMeta', JSON.stringify(state.monthMeta), true),
       window.storage.set('esp2:weightsByMonth', JSON.stringify(state.weightsByMonth), true),
       window.storage.set('esp2:weeksByMonth', JSON.stringify(state.weeksByMonth), true),
+      window.storage.set('esp2:recebivelDiario', JSON.stringify({}), true),
+      window.storage.set('esp2:cargaSaidas', JSON.stringify(null), true),
+      window.storage.set('esp2:recebiveisCredsystem', JSON.stringify({}), true),
       window.storage.set('esp2:prestacaoModalidadePct', JSON.stringify(state.prestacaoModalidadePct), true),
       window.storage.set('esp2:monthParams', JSON.stringify(state.monthParams), true),
       window.storage.set('esp2:saidas', JSON.stringify(state.saidas), true),
@@ -457,6 +575,9 @@ async function loadAll(){
   state.monthMeta = await loadKey('esp2:monthMeta', ()=>({}));
   state.weightsByMonth = await loadKey('esp2:weightsByMonth', ()=>({}));
   state.weeksByMonth = await loadKey('esp2:weeksByMonth', ()=>({})); // v13.77
+  state.recebivelDiario = await loadKey('esp2:recebivelDiario', ()=>({})); // v13.78
+  state.cargaSaidas = await loadKey('esp2:cargaSaidas', ()=>null); // v13.78
+  state.recebiveisCredsystem = await loadKey('esp2:recebiveisCredsystem', ()=>({})); // v13.80
   state.prestacaoModalidadePct = await loadKey('esp2:prestacaoModalidadePct', ()=>({}));
   state.monthParams = await loadKey('esp2:monthParams', ()=>({}));
   state.saidas = await loadKey('esp2:saidas', ()=>[]);
@@ -497,6 +618,8 @@ async function persistAll(){
     await window.storage.set('esp2:monthMeta', JSON.stringify(state.monthMeta), true);
     await window.storage.set('esp2:weightsByMonth', JSON.stringify(state.weightsByMonth), true);
     await window.storage.set('esp2:weeksByMonth', JSON.stringify(state.weeksByMonth||{}), true); // v13.77
+    if(state.recebivelDiario && Object.keys(state.recebivelDiario).length) await window.storage.set('esp2:recebivelDiario', JSON.stringify(state.recebivelDiario), true); // v13.78
+    if(state.recebiveisCredsystem && Object.keys(state.recebiveisCredsystem).length) await window.storage.set('esp2:recebiveisCredsystem', JSON.stringify(state.recebiveisCredsystem), true); // v13.80
     await window.storage.set('esp2:prestacaoModalidadePct', JSON.stringify(state.prestacaoModalidadePct), true);
     await window.storage.set('esp2:monthParams', JSON.stringify(state.monthParams), true);
     await window.storage.set('esp2:saidas', JSON.stringify(state.saidas), true);
@@ -839,6 +962,8 @@ function render(){
   else if(state.screen==='orcamento') html += renderOrcamentoScreen();
   else if(state.screen==='manage') html += renderManageScreen();
   else if(state.screen==='analise') html += PainelAnalitico.render();   // ← Painel analítico
+  else if(state.screen==='recebivel' && fcxV1378()) html += renderRecebivelScreen(); // v13.78
+  else if(state.screen==='recebivel') html += renderLanding();
   app.innerHTML = html;
   afterRender();
 }
@@ -852,7 +977,8 @@ function goto(screen,tab){ state.screen=screen; if(tab) state.tab=tab; render();
 window.goto = goto;
 
 function renderLanding(){
-  return `<div class="landing landing-4">
+  const rd = fcxV1378(); // v13.78
+  return `<div class="landing landing-4${rd?' com-rd':''}">
     <div class="landing-card view" onclick="goto('view')">
       <div class="stripe"></div>
       <div class="eyebrow">Consulta</div>
@@ -874,6 +1000,13 @@ function renderLanding(){
       <p>KPIs, Receitas × Despesas, distribuição por categoria e fornecedor, e consulta filtrável das saídas.</p>
       <span class="btn secondary">Abrir painel →</span>
     </div>
+    ${rd ? `<div class="landing-card recebivel" onclick="goto('recebivel')">
+      <div class="stripe"></div>
+      <div class="eyebrow">Diretoria</div>
+      <h3>Recebível Diário</h3>
+      <p>Contas a pagar e receber do dia: previsto × realizado, vendas por meio, prestação, semanas seguintes com farol e saídas detalhadas — pronto para PDF em paisagem.</p>
+      <span class="btn secondary">Abrir relatório →</span>
+    </div>` : ''}
     <div class="landing-card manage" onclick="goto('manage')">
       <div class="stripe"></div>
       <div class="eyebrow">Manutenção</div>
@@ -891,6 +1024,7 @@ function afterRender(){
   if(state.screen==='manage' && state.tab==='saidas') renderSaidasPagina();
   if(state.screen==='view') drawChart();
   if(state.screen==='analise') PainelAnalitico.afterRender();   // ← Painel analítico
+  if(state.screen==='recebivel' && fcxV1378()) drawRecebivelCharts(); // v13.78
 }
 
 /* =========================================================
@@ -1222,6 +1356,390 @@ const ROTULOS_SALDO = {
     ctx.restore();
   }
 };
+
+/* =========================================================
+   v13.78 · RECEBÍVEL DIÁRIO (relatório de Contas a Pagar e Receber para a diretoria — layout paisagem)
+   Recurso liberado pela Homologação do Painel (fcx_recebivel_v1378).
+   Fontes:
+     • Vendas do dia anterior em Dinheiro e PIX: informadas no formulário (por data do relatório);
+     • Cartão: Auditoria de Adquirentes › Resumo do Fechamento (líquido = bruto − MDR − antecipação − POS), pelo painel;
+     • Prestação: Retaguarda › Conciliação dos recebimentos (Dinheiro, PIX e LOTE), pelo painel;
+     • Previsto, semanas seguintes e saídas: o próprio FCX (Parâmetros, Meios de Pagamento e Saídas).
+   Crítica de carga: só gera com o arquivo de Entradas e Saídas do dia importado em Gerenciar dados › Saídas.
+   v13.79: capa só com tabelas (sem gráficos), R$ com centavos em todas as células, LOTE só do arquivo (sem o cartão
+   digitado), detalhamento com colunas fixas e quebra de linha, A4 paisagem.
+   v13.80: cartão aberto por adquirente e bandeira (bruto, MDR, antecipação, POS, líquido); Credsystem (private label) fora
+   do caixa do dia e guardada como Recebível Futuro até o vencimento; prestação "Débito"; Resumo Consolidado de Entradas
+   com gráfico; gráfico de barras da previsão semanal (o mesmo da visão do FCX).
+   ========================================================= */
+function fcxV1378(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_recebivel_v1378')); }catch(e){ return false; } }
+/** v13.79: formato monetário oficial com centavos (R$ 1.000,00) em todas as células do relatório. */
+const BRL2 = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2});
+const RD_METODOS_CARTAO = ['credito','debito'];
+
+function rdHoje(){ return toISO(new Date()); }
+function rdUi(){ return (state._rd ||= { data: rdHoje(), gerado: false, carregando: false, painel: null, erro: '' }); }
+function rdForm(dataISO){ return (state.recebivelDiario && state.recebivelDiario[dataISO]) || {}; }
+function rdDiaAnterior(dataISO){ return toISO(addDays(fromISO(dataISO), -1)); }
+async function saveRecebivel(){ await window.storage.set('esp2:recebivelDiario', JSON.stringify(state.recebivelDiario||{}), true); }
+
+function setRdData(v){ const u = rdUi(); if(!v) return; u.data = v; u.gerado = false; u.painel = null; u.erro = ''; render(); } window.setRdData = setRdData;
+function updateRdCampo(campo, v){
+  const u = rdUi(); state.recebivelDiario ||= {}; const f = (state.recebivelDiario[u.data] ||= {});
+  if(v==='' || v==null) delete f[campo]; else f[campo] = Number(String(v).replace(',', '.')) || 0;
+  f.atualizadoEm = new Date().toISOString(); scheduleAutosave();
+}
+window.updateRdCampo = updateRdCampo;
+
+/** Crítica de carga: o arquivo de Entradas e Saídas precisa ter sido importado no dia do relatório (ou depois). */
+function rdCritica(dataISO){
+  const c = state.cargaSaidas;
+  if(!c || !c.em) return { ok:false, msg:'Nenhum arquivo de Entradas e Saídas foi importado ainda em Gerenciar dados › Saídas.' };
+  const dia = toISO(new Date(c.em));
+  if(dia < dataISO) return { ok:false, msg:`O último arquivo de Entradas e Saídas foi importado em ${fmtDate(dia)} (${c.arquivo||'arquivo'}). Importe o arquivo mais recente do dia ${fmtDate(dataISO)} em Gerenciar dados › Saídas.` };
+  return { ok:true, msg:`Carga de ${fmtDate(dia)} às ${new Date(c.em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${c.arquivo||'arquivo'} · ${c.linhas||0} lançamento(s)` };
+}
+
+async function gerarRecebivel(){
+  const u = rdUi(), crit = rdCritica(u.data);
+  if(!crit.ok){ u.gerado = false; u.erro = ''; render(); showToast('Relatório bloqueado: importe o arquivo de Entradas e Saídas do dia'); return; }
+  u.carregando = true; u.erro = ''; render();
+  try{
+    const P = window.__embed ? window.parent : null;
+    u.painel = P && P.PainelFCX ? await P.PainelFCX.recebiveis(rdDiaAnterior(u.data)) : { cartao:null, prestacao:null, avisos:['Abra o FCX pelo Painel de Gestão para ler o cartão (Auditoria de Adquirentes) e a prestação (Retaguarda).'] };
+    u.gerado = true;
+    await rdGuardarCredsystem(u.painel && u.painel.credsystem); // v13.80
+  }catch(e){ u.erro = 'Não consegui ler os dados do painel: '+(e && e.message || e); }
+  u.carregando = false; render();
+}
+window.gerarRecebivel = gerarRecebivel;
+
+/** v13.80 · Venda a crédito da Credsystem (private label, sem antecipação em D+1) vira "Recebível Futuro Credsystem":
+    um registro por venda × loja × bandeira × vencimento, que só entra como entrada no Recebível Diário do dia do vencimento. */
+function rdVencEstimado(dataVenda){ return toISO(nextBusinessDay(addDays(fromISO(dataVenda), 30))); }
+async function rdGuardarCredsystem(cs){
+  if(!cs || !cs.itens || !cs.itens.length) return 0;
+  state.recebiveisCredsystem ||= {}; let n = 0; const agora = new Date().toISOString();
+  cs.itens.forEach(it=>{
+    const vencs = it.vencimentos && it.vencimentos.length ? it.vencimentos : [{ data: rdVencEstimado(it.dataVenda), valor: it.liquido }];
+    const totV = vencs.reduce((a,v)=>a+(Number(v.valor)||0),0) || 1;
+    vencs.forEach(v=>{
+      const k = [it.dataVenda, it.lojaId, it.bandeira, v.data].join('|'), ant = state.recebiveisCredsystem[k];
+      state.recebiveisCredsystem[k] = { dataVenda: it.dataVenda, lojaId: it.lojaId, bandeira: it.bandeira, vencimento: v.data, valor: Math.round((Number(v.valor)||0)*100)/100,
+        bruto: Math.round(it.bruto*(Number(v.valor)||0)/totV*100)/100, mdr: Math.round(it.mdr*(Number(v.valor)||0)/totV*100)/100, fonte: it.vencimentos && it.vencimentos.length ? (it.vencFonte||'vencimento') : 'estimado', registradoEm: ant ? ant.registradoEm : agora, atualizadoEm: agora };
+      n++;
+    });
+  });
+  try{ await window.storage.set('esp2:recebiveisCredsystem', JSON.stringify(state.recebiveisCredsystem), true); }catch(e){ scheduleAutosave(); }
+  return n;
+}
+function rdCredsystemVencendo(dataISO){ return Object.values(state.recebiveisCredsystem||{}).filter(r=>r.vencimento===dataISO); }
+function rdCredsystemAgenda(dataISO, dias=45){
+  const fim = toISO(addDays(fromISO(dataISO), dias)), m = {};
+  Object.values(state.recebiveisCredsystem||{}).filter(r=>r.vencimento>=dataISO && r.vencimento<=fim).forEach(r=>{ const g = (m[r.vencimento] ||= { data:r.vencimento, valor:0, n:0, vendas:new Set(), estimado:false }); g.valor += r.valor; g.n++; g.vendas.add(r.dataVenda); if(r.fonte==='estimado') g.estimado = true; });
+  return Object.values(m).sort((a,b)=>a.data<b.data?-1:1);
+}
+
+/** v13.82 · Máscara de moeda (R$ 1.000,00) nos campos do Recebível Diário: agrupa os milhares enquanto digita (a vírgula abre os
+    centavos) e completa ",00" ao sair do campo. Só o Saldo de abertura aceita sinal negativo. O valor gravado é sempre número. */
+function rdMoedaTxt(v){ return (v===''||v==null||isNaN(Number(v))) ? '' : BRL2(Number(v)); }
+function rdParseMoeda(txt){
+  const s = String(txt||'').replace(/[^\d,\-]/g,''), neg = s.includes('-'), [ip, ...r] = s.replace(/-/g,'').split(',');
+  const i = ip.replace(/^0+(?=\d)/,''), dc = r.join('').slice(0,2); if(!i && !dc) return null;
+  const n = Number((i||'0') + '.' + (dc||'0')); return neg ? -n : n;
+}
+function rdMascara(el, campo){
+  const antes = el.value, pos = el.selectionStart==null ? antes.length : el.selectionStart, depois = antes.slice(pos).replace(/[^\d,]/g,'').length;
+  const s = antes.replace(/[^\d,\-]/g,''), neg = campo==='saldoAbertura' && s.includes('-');
+  const [ip0, ...r] = s.replace(/-/g,'').split(','), virg = r.length>0, dc = r.join('').slice(0,2), ip = ip0.replace(/^0+(?=\d)/,'');
+  const grp = ip ? ip.replace(/\B(?=(\d{3})+(?!\d))/g,'.') : (virg ? '0' : '');
+  const txt = (grp || virg) ? (neg?'-':'') + 'R$ ' + grp + (virg ? ','+dc : '') : (neg ? '-' : '');
+  el.value = txt;
+  let k = txt.length, c = 0; while(k>0 && c<depois){ k--; if(/[\d,]/.test(txt[k])) c++; }
+  try{ if(document.activeElement===el) el.setSelectionRange(k,k); }catch(e){}
+  updateRdCampo(campo, rdParseMoeda(txt));
+}
+function rdMascaraFim(el, campo){ const v = rdParseMoeda(el.value); el.value = rdMoedaTxt(v); updateRdCampo(campo, v); }
+window.rdMascara = rdMascara; window.rdMascaraFim = rdMascaraFim;
+
+/** v13.82 · Impressão / PDF do Recebível Diário em documento próprio: só as páginas do relatório (sem formulário, botões nem
+    alertas), na ordem Capa → Semanas → Detalhamentos, cada página começando em folha nova. Cada página é medida numa
+    folha A4 paisagem; o que não cabe vai para a folha seguinte — tabelas longas são divididas em linhas inteiras, com o
+    cabeçalho repetido e "(continuação)" no título. Vale para "Imprimir" e para "Baixar PDF" da prévia do painel. */
+const RD_FOLHA = { largura: 1047, altura: 680 };   // A4 paisagem com margens de 9/10 mm, em px de tela (96 dpi), com folga
+function rdPaginarImpressao(){
+  const rel = document.querySelector('.rd-relatorio'); if(!rel) return [];
+  const caixa = document.createElement('div'); caixa.className = 'rd-impressao'; caixa.setAttribute('aria-hidden','true');
+  caixa.style.cssText = `position:absolute;left:-30000px;top:0;width:${RD_FOLHA.largura}px;`;
+  document.body.appendChild(caixa);
+  const folhas = [];
+  try{
+    [...rel.children].filter(x=>x.classList.contains('rd-pagina')).forEach(sec=>{
+      const src = sec.cloneNode(true), cvs = [...sec.querySelectorAll('canvas')];
+      [...src.querySelectorAll('canvas')].forEach((cv,i)=>{ const img = document.createElement('img'); try{ img.src = cvs[i].toDataURL('image/png'); }catch(e){} img.className = 'rd-graf-img'; img.alt = cv.getAttribute('aria-label')||''; cv.replaceWith(img); });
+      const imgs0 = [...sec.querySelectorAll('img')];   // logo e demais imagens: embutidas (data:) para não virarem tarja escura fora do FCX
+      [...src.querySelectorAll('img:not(.rd-graf-img)')].forEach((im,i)=>{ const o = imgs0[i]; if(!o || /^data:/.test(o.getAttribute('src')||'')) return;
+        try{ if(!o.naturalWidth) throw 0; const c = document.createElement('canvas'); c.width = o.naturalWidth; c.height = o.naturalHeight; c.getContext('2d').drawImage(o, 0, 0); im.setAttribute('src', c.toDataURL('image/png')); }
+        catch(e){ if(o.src) im.setAttribute('src', o.src); } });
+      const cab = [...src.children].find(x=>x.classList.contains('rd-cab'));
+      const nova = () => { const f = src.cloneNode(false); f.classList.add('pagina'); if(cab) f.appendChild(cab.cloneNode(true)); caixa.appendChild(f); folhas.push(f); return f; };
+      let folha = nova(); const cabe = () => folha.offsetHeight <= RD_FOLHA.altura, soCab = () => folha.children.length === (cab?1:0);
+      const blocos = [...src.children].filter(x=>x!==cab);
+      for(let i=0; i<blocos.length; i++){
+        const grupo = [blocos[i]]; while(grupo[grupo.length-1].tagName==='H3' && i+1<blocos.length){ i++; grupo.push(blocos[i]); } // título junto com o que vem depois
+        const vazia = soCab(); grupo.forEach(x=>folha.appendChild(x));
+        if(cabe()) continue;
+        const tab = grupo[grupo.length-1], tit = grupo.find(x=>x.tagName==='H3');
+        if(tab.tagName==='TABLE' && tab.tBodies[0] && tab.tBodies[0].rows.length>1){
+          const linhas = [...tab.tBodies[0].rows]; linhas.forEach(tr=>tr.remove()); let corpo = tab.tBodies[0], n = 0;
+          for(const tr of linhas){
+            corpo.appendChild(tr);
+            if(cabe()) { n++; continue; }
+            tr.remove();
+            if(n===0 && !vazia){ grupo.forEach(x=>x.remove()); folha = nova(); grupo.forEach(x=>folha.appendChild(x)); corpo.appendChild(tr); n = 1; continue; }
+            folha = nova();
+            if(tit){ const h = tit.cloneNode(true); const sp = document.createElement('span'); sp.className = 'rd-cont'; sp.textContent = ' (continuação)'; h.appendChild(sp); folha.appendChild(h); }
+            const t2 = tab.cloneNode(false); [...tab.children].filter(c=>c.tagName!=='TBODY').forEach(c=>t2.appendChild(c.cloneNode(true)));
+            corpo = document.createElement('tbody'); t2.appendChild(corpo); folha.appendChild(t2); corpo.appendChild(tr); n = 1;
+          }
+        } else if(!vazia){ grupo.forEach(x=>x.remove()); folha = nova(); grupo.forEach(x=>folha.appendChild(x)); }
+      }
+    });
+    return folhas.map(f=>f.outerHTML);
+  } finally { caixa.remove(); }
+}
+function rdDocumentoImpressao(){
+  const u = rdUi(), estilos = [...document.querySelectorAll('link[rel="stylesheet"], style')].filter(n=>n.id!=='rdPaisagem').map(n=>n.outerHTML).join('\n');
+  const css = `@page { size: A4 landscape; margin: 9mm 10mm; }
+    html, body { background:#fff !important; margin:0; padding:0; }
+    body.rd-doc { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .rd-impressao .rd-pagina { break-before:page; page-break-before:always; break-after:auto; page-break-after:auto; }
+    .rd-impressao .rd-pagina:first-child { break-before:auto; page-break-before:auto; }
+    @media screen { body.rd-doc { padding:18px 22px; } .rd-impressao .rd-pagina { margin-bottom:34px !important; } }`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Recebível Diário · ${fmtDate(u.data)}</title>${estilos}<style>${css}</style></head><body class="rd-doc"><div class="rd-impressao">${rdPaginarImpressao().join('\n')}</div></body></html>`;
+}
+function imprimirRecebivel(){
+  const u = rdUi(); if(!document.querySelector('.rd-relatorio')) return;
+  const html = rdDocumentoImpressao(), nome = 'Recebivel_Diario_' + u.data;
+  const P = window.__embed ? window.parent : null;
+  if(P && P.PainelFCX && P.PainelFCX.imprimirDocumento) return P.PainelFCX.imprimirDocumento('Recebível Diário · ' + fmtDate(u.data), html, nome);
+  const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;left:-10000px;top:0;width:297mm;height:210mm;border:0;'; document.body.appendChild(f);
+  f.contentDocument.open(); f.contentDocument.write(html); f.contentDocument.close();
+  setTimeout(()=>{ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(()=>f.remove(), 3000); }, 700);
+}
+window.imprimirRecebivel = imprimirRecebivel; window.rdDocumentoImpressao = rdDocumentoImpressao;
+
+/** v13.82 · Detalhamento das saídas: 1º fornecedor (A–Z, sem diferenciar acentos/maiúsculas; sem fornecedor no fim), 2º valor líquido (maior → menor). */
+function rdOrdenarSaidas(lista){
+  const nome = s => String(s.fornecedor||'').trim();
+  return [...lista].sort((a,b)=>{ const na = nome(a), nb = nome(b); if(!na !== !nb) return na ? -1 : 1; return na.localeCompare(nb, 'pt-BR', { sensitivity:'base', numeric:true }) || (b.liquido - a.liquido); });
+}
+/** Meta do FCX para as vendas de um dia (líquida da taxa de cada meio) e a prestação prevista. */
+function rdMetaDoDia(iso){
+  const mk = monthKey(iso), metaCaixa = metaCaixaDoMes(mk), peso = Number(pesosDoMes(mk)[fromISO(iso).getDate()])||0, metaDia = peso*metaCaixa;
+  const methods = (state.monthParams[mk] && state.monthParams[mk].methods) || {};
+  const liq = id => { const mp = methods[id]; return mp ? metaDia*(Number(mp.participacao)||0)*(1-(Number(mp.taxa)||0)) : 0; };
+  const prest = prestacaoExtraPorModalidade(iso, metaDia);
+  return { metaDia, dinheiro: liq('dinheiro'), pix: liq('pix'), cartao: RD_METODOS_CARTAO.reduce((a,id)=>a+liq(id),0), prestacao: prest.total||0,
+    prestDin: prest.dinheiro||0, prestPix: prest.pix||0, prestLote: prest.debito||0 }; // v13.79: prestação prevista por modalidade (débito na maquininha = LOTE)
+}
+/** Contas autorizadas / a pagar no dia (Efetivo ou Pago), com a data de pagamento já levada ao dia útil, como no FCX. */
+function rdSaidasDoDia(iso){
+  return state.saidas.filter(s=>s.tipo!=='previsto' && toISO(nextBusinessDay(fromISO(s.date)))===iso)
+    .map(s=>({ ...s, liquido: Number(s.valorLiquido!=null ? s.valorLiquido : s.valor)||0 }))
+    .sort((a,b)=> a.date<b.date?-1 : a.date>b.date?1 : String(a.fornecedor||'').localeCompare(String(b.fornecedor||'')));
+}
+/** Saídas agrupadas (valor, quantidade), da maior para a menor; acima de `max` grupos, o resto vira "Outros". */
+function rdAgrupar(lista, chave, max=12){
+  const m = {}; lista.forEach(s=>{ const k = (s[chave]||'').toString().trim() || '(não informado)'; const g = (m[k] ||= [k, 0, 0]); g[1] += s.liquido; g[2]++; });
+  let arr = Object.values(m).sort((a,b)=>b[1]-a[1]);
+  if(arr.length>max){ const resto = arr.slice(max-1); arr = arr.slice(0,max-1).concat([['Outros ('+resto.length+')', resto.reduce((a,x)=>a+x[1],0), resto.reduce((a,x)=>a+x[2],0)]]); }
+  return arr;
+}
+/** Semanas seguintes (como na visão semanal do FCX): Vendas + Prestação, Previsão de Caixa, Saídas e Caixa Final. */
+function rdSemanas(dataISO, abertura){
+  const fim = toISO(addDays(fromISO(dataISO), 41));
+  const agg = buildAggregated(dataISO, fim, 'semana', '', '', 'conta', false);
+  let caixa = Number(abertura)||0;
+  return agg.slice(0, 6).map(b=>{
+    const vendas = Object.entries(b.detalheEntradas).filter(([k])=>k.startsWith('pgto:')||k.startsWith('prestacao_entrada:')).reduce((a,[,v])=>a+v,0);
+    const previsao = caixa + vendas, saidas = b.saidas, final = previsao - saidas;
+    const linha = { label: b.label, inicial: caixa, vendas, previsao, saidas, final }; caixa = final; return linha;
+  });
+}
+function rdFarol(v){ return `<span class="rd-farol ${v>=0?'ok':'neg'}" title="${v>=0?'Saldo positivo':'Saldo negativo'}"><span class="rd-luz"></span>${v>=0?'Positivo':'Negativo'}</span>`; }
+const rdVar = (real, prev) => { const d = real-prev; return `<td class="num ${d>=0?'pos':'neg'}">${d>0?'+':''}${BRL2(d)}</td>`; };
+const rdPct = (v, t) => t>0 ? PCT(v/t) : '—';
+const rdTabAgrupada = (titulo, grupos, total) => `
+  <h3>${titulo}</h3>
+  <table class="rd-tab rd-zebra rd-agrup"><colgroup><col><col style="width:44px"><col style="width:118px"><col style="width:62px"></colgroup>
+  <thead><tr><th>${titulo.includes('forma') ? 'Forma de pagamento' : 'Conta contábil'}</th><th class="num">Qtd.</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
+  <tbody>${grupos.length ? grupos.map(([k,v,n])=>`<tr><td class="rd-quebra">${k}</td><td class="num">${n}</td><td class="num">${BRL2(v)}</td><td class="num">${rdPct(v,total)}</td></tr>`).join('') : '<tr><td colspan="4" class="rd-vazio">Nenhuma conta autorizada / a pagar neste dia.</td></tr>'}
+  <tr class="rd-total"><td>Total</td><td class="num">${grupos.reduce((a,x)=>a+x[2],0)}</td><td class="num">${BRL2(total)}</td><td class="num">${total>0?'100%':'—'}</td></tr></tbody></table>`;
+
+function renderRecebivelScreen(){
+  const u = rdUi(), d = u.data, ant = rdDiaAnterior(d), f = rdForm(d), crit = rdCritica(d);
+  const form = `
+  <div class="panel rd-form no-print">
+    <div class="row-flex" style="margin-bottom:10px;">
+      <div><h2 style="margin-bottom:2px;">Recebível Diário</h2><div class="desc" style="margin:0;">Relatório diário de Contas a Pagar e Receber para a diretoria (A4 paisagem).</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="gerarRecebivel()" ${u.carregando?'disabled':''}>${u.carregando?'Gerando…':'Gerar relatório'}</button>
+        <button class="btn secondary" onclick="imprimirRecebivel()" ${u.gerado && crit.ok?'':'disabled'}>🖨️ Imprimir / Exportar PDF</button>
+      </div>
+    </div>
+    <div class="grid-4 rd-campos">
+      <div class="field"><label for="rdData">Data do relatório</label><input id="rdData" type="date" value="${d}" onchange="setRdData(this.value)"></div>
+      <div class="field"><label for="rdDin">Vendas em Dinheiro · ${fmtDate(ant)}</label><input id="rdDin" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.dinheiro)}" oninput="rdMascara(this,'dinheiro')" onblur="rdMascaraFim(this,'dinheiro')" placeholder="R$ 0,00"></div>
+      <div class="field"><label for="rdPix">Vendas em PIX · ${fmtDate(ant)}</label><input id="rdPix" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.pix)}" oninput="rdMascara(this,'pix')" onblur="rdMascaraFim(this,'pix')" placeholder="R$ 0,00"></div>
+      <div class="field"><label for="rdSaldo">Saldo bancário de abertura · opcional</label><input id="rdSaldo" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.saldoAbertura)}" oninput="rdMascara(this,'saldoAbertura')" onblur="rdMascaraFim(this,'saldoAbertura')" placeholder="R$ 0,00"></div>
+    </div>
+    <div class="hint">Cartão: Auditoria de Adquirentes › Resumo do Fechamento de ${fmtDate(ant)} (líquido de MDR, antecipação e POS). Prestação: Retaguarda › Conciliação dos recebimentos de ${fmtDate(ant)} (Dinheiro, PIX e Débito do arquivo). Credsystem: guardada como Recebível Futuro e somada só no dia do vencimento.</div>
+    <div class="rd-carga ${crit.ok?'ok':'bloq'}" style="margin-top:12px;padding:10px 14px;border-radius:10px;border:1px solid ${crit.ok?'#BFE0CE':'#EAC5BF'};background:${crit.ok?'var(--green-soft)':'var(--red-soft)'};">
+      <b style="color:${crit.ok?'var(--green)':'var(--red)'}">${crit.ok?'✓ Carga do dia conferida':'⚠ Crítica de carga — relatório bloqueado'}</b>
+      <div style="font-size:13px;margin-top:3px;">${crit.msg}</div>
+      ${crit.ok?'':`<button class="btn small" style="margin-top:8px;" onclick="goto('manage','saidas')">Ir para Gerenciar dados › Saídas</button>`}
+    </div>
+    ${u.erro?`<div class="hint" style="color:var(--red);margin-top:8px;">${u.erro}</div>`:''}
+  </div>`;
+  if(!u.gerado || !crit.ok) return `<button class="backlink no-print" onclick="goto('landing')">← Início</button>${form}${!crit.ok?'':'<div class="empty">Informe as vendas do dia anterior e clique em “Gerar relatório”.</div>'}`;
+
+  /* ---------- números ---------- */
+  const pn = u.painel || {}, cart = pn.cartao || { liquido:0, bruto:0, linhas:0 }, pr = pn.prestacao || { din:0, pix:0, lote:0, lojas:0 }, csy = pn.credsystem || { itens:[], bruto:0, mdr:0, liquido:0 };
+  const din = Number(f.dinheiro)||0, pix = Number(f.pix)||0, cartao = Number(cart.liquido)||0, vendas = din+pix+cartao;
+  const pDin = Number(pr.din)||0, pPix = Number(pr.pix)||0, pLote = Number(pr.lote)||0, prest = pDin+pPix+pLote;
+  const credHoje = rdCredsystemVencendo(d), credHojeV = credHoje.reduce((a,r)=>a+r.valor,0), entradas = vendas+prest+credHojeV; // v13.80: Credsystem só no vencimento
+  const bands = cart.porBandeira || [], grupos = {}; bands.forEach(b=>{ (grupos[b.adquirente] ||= []).push(b); });
+  const meta = rdMetaDoDia(ant), metaVendas = meta.dinheiro+meta.pix+meta.cartao, metaEntradas = metaVendas+meta.prestacao;
+  const lista = rdSaidasDoDia(d), saidas = lista.reduce((a,s)=>a+s.liquido,0);
+  const prevSaidas = (buildCashBook(d, d, '', '', 'conta', false)[d] || {saidasTotal:0}).saidasTotal;
+  const semanas = rdSemanas(d, f.saldoAbertura);
+  const titulo = `<div class="rd-cab"><div><div class="rd-eyebrow">Relatório para a diretoria</div><h1>Recebível Diário · ${fmtDate(d)}</h1><div class="rd-sub">Vendas e recebimentos de ${fmtDate(ant)} · contas a pagar de ${fmtDate(d)} · gerado em ${new Date().toLocaleString('pt-BR')}</div></div><img src="${LOGO_SRC}" alt="" class="rd-logo"></div>`;
+  const avisos = (pn.avisos||[]).length ? `<div class="rd-avisos">${pn.avisos.map(a=>`<div>⚠ ${a}</div>`).join('')}</div>` : '';
+  const COLS5 = '<colgroup><col><col style="width:21%"><col style="width:11%"><col style="width:21%"><col style="width:20%"></colgroup>';
+
+  /* v13.81 · capa executiva: um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento × Saídas do dia, lado a lado */
+  const tDin = din+pDin, tPix = pix+pPix, vCart = cartao+credHojeV, tCart = vCart+pLote;
+  const adqs = Object.entries(cart.porAdquirente||{}).filter(([,v])=>Math.abs(Number(v)||0)>0.004).sort((a,b)=>b[1]-a[1]);
+  const kpi = (rot, real, prev, cls, fav) => `<div class="rd-kpi"><div class="rd-kpi-rot">${rot}</div><div class="rd-kpi-val ${cls}">${BRL2(real)}</div><div class="rd-kpi-prev">Previsto FCX ${BRL2(prev)} · <b class="${fav>=0?'pos':'neg'}">${fav>0?'+':''}${BRL2(fav)}</b></div></div>`;
+  const linhaC = (rot, v, pr, cls='') => `<tr${cls?` class="${cls}"`:''}><td>${rot}</td><td class="num">${v==null?'—':BRL2(v)}</td><td class="num">${pr==null?'—':BRL2(pr)}</td><td class="num">${BRL2((v||0)+(pr||0))}</td><td class="num">${rdPct((v||0)+(pr||0), entradas)}</td></tr>`;
+  const capa = `
+  <section class="rd-pagina panel rd-capa">
+    ${titulo}${avisos}
+    <div class="rd-kpis">
+      ${kpi('Entradas do dia', entradas, metaEntradas, 'pos', entradas-metaEntradas)}
+      ${kpi('Saídas do dia', saidas, prevSaidas, 'neg', prevSaidas-saidas)}
+      ${kpi('Saldo do dia', entradas-saidas, metaEntradas-prevSaidas, entradas-saidas>=0?'pos':'neg', (entradas-saidas)-(metaEntradas-prevSaidas))}
+    </div>
+    <div class="rd-capa-blocos">
+      <div class="rd-bloco rd-bloco-ent">
+        <h3>Consolidado de Entradas (Vendas + Prestações)</h3>
+        <div class="rd-bloco-sub">Vendas de ${fmtDate(ant)} e prestações recebidas · entram em ${fmtDate(d)}</div>
+        <table class="rd-tab rd-zebra rd-consolidado"><colgroup><col><col style="width:18%"><col style="width:16%"><col style="width:19%"><col style="width:10%"></colgroup>
+        <thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
+          ${linhaC('Total em Dinheiro', din, pDin, 'rd-grupo')}
+          ${linhaC('Total em PIX', pix, pPix, 'rd-grupo')}
+          ${linhaC('Total em Cartão', vCart, pLote, 'rd-grupo')}
+          ${adqs.map(([a,v])=>linhaC(a, v, null, 'rd-sub')).join('')}
+          ${credHojeV ? linhaC('CREDSYSTEM (vence hoje)', credHojeV, null, 'rd-sub') : ''}
+          ${pLote ? linhaC('Débito (LOTE) da prestação', null, pLote, 'rd-sub') : ''}
+          <tr class="rd-total rd-total-geral"><td>Total Geral de Entradas do Dia</td><td class="num">${BRL2(vendas+credHojeV)}</td><td class="num">${BRL2(prest)}</td><td class="num">${BRL2(entradas)}</td><td class="num">${entradas>0?'100%':'—'}</td></tr>
+        </tbody></table>
+        <div class="rd-graf rd-graf-ent"><canvas id="rdGrafEntradas" role="img" aria-label="Entradas por meio de pagamento × saídas do dia"></canvas></div>
+        <div class="rd-nota rd-linha">Cartão líquido de MDR, antecipação e POS; abertura por bandeira e Credsystem (Recebível Futuro) na página 3.</div>
+      </div>
+      <div class="rd-bloco rd-bloco-sai">
+        <h3>Saídas do dia</h3>
+        <div class="rd-bloco-sub">Contas autorizadas / a pagar em ${fmtDate(d)} · detalhamento a partir da página 4</div>
+        ${rdTabAgrupada('Por conta contábil', rdAgrupar(lista, 'conta', 8), saidas)}
+        ${rdTabAgrupada('Por forma de pagamento', rdAgrupar(lista, 'formaPagamento', 6), saidas)}
+      </div>
+    </div>
+    <div class="rd-criterios">Previsto = meta do FCX para as vendas e a prestação de ${fmtDate(ant)} e saídas projetadas para ${fmtDate(d)}; variação positiva = favorável. ${crit.msg}.</div>
+  </section>`;
+
+  const subt = (adq, arr) => { const t = k => arr.reduce((a,b)=>a+(Number(b[k])||0),0); return `<tr class="rd-total"><td colspan="2">Subtotal ${adq}</td><td class="num">${BRL2(t('bruto'))}</td><td class="num neg">${BRL2(t('mdr'))}</td><td class="num">${rdPct(t('mdr'), t('bruto'))}</td><td class="num neg">${BRL2(t('antecip'))}</td><td class="num neg">${BRL2(t('pos'))}</td><td class="num pos">${BRL2(t('liquido'))}</td></tr>`; };
+  const linhasCartao = Object.entries(grupos).map(([adq, arr])=>arr.map(b=>`<tr><td>${adq}</td><td>${b.bandeira||'—'}</td><td class="num">${BRL2(b.bruto)}</td><td class="num neg">${BRL2(b.mdr)}</td><td class="num">${rdPct(b.mdr, b.bruto)}</td><td class="num neg">${BRL2(b.antecip)}</td><td class="num neg">${BRL2(b.pos)}</td><td class="num pos">${BRL2(b.liquido)}</td></tr>`).join('') + (arr.length>1 ? subt(adq, arr) : '')).join('');
+  const csItens = csy.itens || [], csAgenda = rdCredsystemAgenda(d);
+  const pagCartao = `
+  <section class="rd-pagina panel">
+    ${titulo}
+    <h3>Vendas em cartão de ${fmtDate(ant)} por adquirente e bandeira <span class="rd-nota">Auditoria de Adquirentes › Resumo do Fechamento</span></h3>
+    <table class="rd-tab rd-zebra rd-cartao"><colgroup><col style="width:14%"><col style="width:16%"><col style="width:13%"><col style="width:12%"><col style="width:8%"><col style="width:12%"><col style="width:11%"><col style="width:14%"></colgroup>
+    <thead><tr><th>Adquirente</th><th>Bandeira</th><th class="num">Valor bruto vendido</th><th class="num">(−) MDR / taxa</th><th class="num">MDR %</th><th class="num">(−) Antecipação</th><th class="num">(−) Aluguel POS</th><th class="num">(=) Líquido de entrada</th></tr></thead>
+    <tbody>${linhasCartao || '<tr><td colspan="8" class="rd-vazio">Nenhuma venda em cartão no Resumo do Fechamento do dia anterior.</td></tr>'}
+    <tr class="rd-total rd-total-geral"><td colspan="2">Total cartão (entra hoje)</td><td class="num">${BRL2(cart.bruto)}</td><td class="num neg">${BRL2(cart.mdr)}</td><td class="num">${rdPct(cart.mdr, cart.bruto)}</td><td class="num neg">${BRL2(cart.antecip)}</td><td class="num neg">${BRL2(cart.pos)}</td><td class="num pos">${BRL2(cartao)}</td></tr></tbody></table>
+    <div class="rd-criterios">Antecipação e aluguel de POS são os mesmos valores gravados no Resumo do Fechamento, distribuídos entre as bandeiras de cada loja × adquirente (antecipação pelo líquido a crédito; POS pelo bruto). Líquido = bruto − MDR − antecipação − POS.${cart.semBandeira ? ' Linhas sem bandeira: conciliação gravada antes da v13.80 — regrave para abrir.' : ''}</div>
+    <div class="rd-grid-2">
+      <div>
+        <h3>Credsystem (private label) · vendas a crédito de ${fmtDate(ant)} <span class="rd-nota">não entram no caixa de hoje</span></h3>
+        <table class="rd-tab rd-zebra rd-credsystem"><colgroup><col><col style="width:16%"><col style="width:15%"><col style="width:9%"><col style="width:16%"><col style="width:19%"></colgroup>
+        <thead><tr><th>Bandeira</th><th class="num">Valor bruto</th><th class="num">(−) MDR / taxa</th><th class="num">Taxa %</th><th class="num">(=) Líquido</th><th>Vencimento</th></tr></thead>
+        <tbody>${csItens.length ? csItens.map(it=>`<tr><td>${it.bandeira||'—'}</td><td class="num">${BRL2(it.bruto)}</td><td class="num neg">${BRL2(it.mdr)}</td><td class="num">${rdPct(it.mdr, it.bruto)}</td><td class="num">${BRL2(it.liquido)}</td><td class="rd-quebra">${(it.vencimentos && it.vencimentos.length ? it.vencimentos.map(v=>fmtDate(v.data)).join(', ') : fmtDate(rdVencEstimado(it.dataVenda))+' (estimado)')}${it.vencFonte==='estimado' ? ' (estimado)' : ''}</td></tr>`).join('') : '<tr><td colspan="6" class="rd-vazio">Nenhuma venda Credsystem no dia anterior.</td></tr>'}
+        <tr class="rd-total"><td>Total · Recebível Futuro</td><td class="num">${BRL2(csy.bruto)}</td><td class="num neg">${BRL2(csy.mdr)}</td><td class="num">${rdPct(csy.mdr, csy.bruto)}</td><td class="num">${BRL2(csy.liquido)}</td><td></td></tr></tbody></table>
+      </div>
+      <div>
+        <h3>Agenda do Recebível Futuro Credsystem <span class="rd-nota">próximos 45 dias</span></h3>
+        <table class="rd-tab rd-zebra rd-agenda"><colgroup><col style="width:24%"><col><col style="width:26%"></colgroup>
+        <thead><tr><th>Vencimento</th><th>Vendas de origem</th><th class="num">Valor a receber</th></tr></thead>
+        <tbody>${csAgenda.length ? csAgenda.map(g=>`<tr${g.data===d?' class="rd-hoje"':''}><td>${fmtDate(g.data)}${g.data===d?' · hoje':''}${g.estimado?' <span class="rd-nota">estimado</span>':''}</td><td class="rd-quebra">${[...g.vendas].sort().map(fmtDate).join(', ')} · ${g.n} registro(s)</td><td class="num">${BRL2(g.valor)}</td></tr>`).join('') : '<tr><td colspan="3" class="rd-vazio">Nenhum recebível Credsystem a vencer.</td></tr>'}
+        <tr class="rd-total"><td colspan="2">Total a receber</td><td class="num">${BRL2(csAgenda.reduce((a,g)=>a+g.valor,0))}</td></tr></tbody></table>
+        <div class="rd-criterios">A Credsystem não é antecipada em D+1: cada venda fica guardada no FCX como Recebível Futuro e só entra como entrada no Recebível Diário do dia do vencimento (vencimento da parcela no ERP no 1º dia útil; sem vencimento, estimado em 30 dias).</div>
+      </div>
+    </div>
+  </section>`;
+
+  const semRows = semanas.map(s=>`<tr><td>${s.label}</td><td class="num">${BRL2(s.inicial)}</td><td class="num pos">${BRL2(s.vendas)}</td><td class="num">${BRL2(s.previsao)}</td><td class="num neg">${BRL2(s.saidas)}</td><td class="num rd-forte ${s.final>=0?'pos':'neg'}">${BRL2(s.final)}</td><td>${rdFarol(s.final)}</td></tr>`).join('');
+  const pagSemanas = `
+  <section class="rd-pagina panel">
+    ${titulo}
+    <h3>Previsão das semanas seguintes</h3>
+    <table class="rd-tab rd-zebra rd-semanas"><colgroup><col><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:110px"></colgroup>
+    <thead><tr><th>Semana</th><th class="num">Caixa inicial</th><th class="num">Vendas + Prestação</th><th class="num">Previsão de Caixa</th><th class="num">Saídas Operacionais</th><th class="num">Caixa Final</th><th>Farol de Caixa</th></tr></thead><tbody>${semRows || '<tr><td colspan="7" class="rd-vazio">Sem projeção no FCX para as próximas semanas.</td></tr>'}</tbody></table>
+    <div class="rd-graf rd-graf-sem"><canvas id="rdGrafSemanas" role="img" aria-label="Entradas, saídas e saldo acumulado das semanas seguintes"></canvas></div>
+    <div class="rd-criterios">Mesma base da visão semanal do FCX (semanas do Parâmetro 2). Previsão de Caixa = caixa inicial + vendas e prestação líquidas da semana; Caixa Final = Previsão de Caixa − saídas (operacionais e repasse de prestação). A 1ª semana começa no saldo bancário de abertura informado${f.saldoAbertura!=null?` (${BRL2(f.saldoAbertura)})`:' (R$ 0,00 se não informado)'}.</div>
+  </section>`;
+
+  const listaDet = rdOrdenarSaidas(lista); // v13.82
+  const detRows = listaDet.map(s=>`<tr><td>${fmtDate(s.date)}</td><td class="rd-quebra">${s.fornecedor||'—'}</td><td class="num">${BRL2(s.liquido)}</td><td class="rd-quebra rd-desc">${[s.item, s.obs].filter(Boolean).join(' · ')||'—'}</td><td class="rd-quebra">${s.conta}</td><td class="rd-quebra">${s.formaPagamento||'—'}</td><td class="rd-quebra">${s.centro}</td></tr>`).join('');
+  const pagDet = `
+  <section class="rd-pagina panel">
+    ${titulo}
+    <h3>Detalhamento das saídas · contas autorizadas / a pagar em ${fmtDate(d)}</h3>
+    <table class="rd-tab rd-detalhe"><colgroup><col style="width:8%"><col style="width:14%"><col style="width:12%"><col style="width:24%"><col style="width:17%"><col style="width:11%"><col style="width:14%"></colgroup>
+    <thead><tr><th>Vencimento</th><th>Fornecedor</th><th class="num">Valor Líquido</th><th>Descrição / Item</th><th>Conta Contábil</th><th>Forma de Pagamento</th><th>Centro de Custo</th></tr></thead>
+    <tbody>${detRows || '<tr><td colspan="7" class="rd-vazio">Nenhuma conta autorizada / a pagar neste dia.</td></tr>'}
+    <tr class="rd-total rd-total-det"><td colspan="2">Total · ${lista.length} conta(s)</td><td class="num">${BRL2(saidas)}</td><td colspan="4"></td></tr></tbody></table>
+  </section>`;
+
+  state._rdGraf = { entradas: { din: tDin, pix: tPix, cartao: tCart, saidas }, semanas }; // v13.81: totais por meio (vendas + prestações)
+  return `<button class="backlink no-print" onclick="goto('landing')">← Início</button>${form}<div class="rd-relatorio">${capa}${pagSemanas}${pagCartao}${pagDet}</div>`;
+}
+
+/** v13.80 · Gráficos do relatório: composição Entradas × Saídas do dia (barras empilhadas, compacto) e a previsão semanal no
+    mesmo formato do gráfico da visão do FCX (barras de entradas e saídas + linha do saldo acumulado com os valores em R$). */
+function drawRecebivelCharts(){
+  (window._rdCharts||[]).forEach(c=>{ try{ c.destroy(); }catch(e){} }); window._rdCharts = [];
+  const g = state._rdGraf; if(!g || typeof Chart==='undefined') return;
+  const fonte = { family:'Inter', size:10.5 }, eixo = { ticks:{ font:fonte, callback:v=>BRL(v), maxRotation:0, autoSkip:true, maxTicksLimit:6 }, grid:{ color:'#ECEEF4' } };
+  const ce = document.getElementById('rdGrafEntradas');
+  if(ce){ const e = g.entradas, serie = (label, cor, valE, valS) => ({ label, data:[valE, valS], backgroundColor:cor, borderColor:'#fff', borderWidth:1, barThickness:20, stack:'s' });
+    window._rdCharts.push(new Chart(ce, { type:'bar', data:{ labels:['Entradas','Saídas'], datasets:[
+        serie('Dinheiro','#2F6F4E', e.din, 0), serie('PIX','#3E8E8A', e.pix, 0), serie('Cartão','#1B2362', e.cartao, 0), serie('Saídas','#B4453A', 0, e.saidas) ] },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:false, layout:{ padding:{ right:6 } },
+        plugins:{ legend:{ position:'bottom', labels:{ font:fonte, boxWidth:10, padding:6, filter:(it, d)=>d.datasets[it.datasetIndex].data.some(v=>v>0) } }, tooltip:{ callbacks:{ label:c=>c.dataset.label+': '+BRL2(c.raw) } } },
+        scales:{ x:{ ...eixo, stacked:true, beginAtZero:true }, y:{ stacked:true, ticks:{ font:{ ...fonte, weight:'600' } }, grid:{ display:false } } } } })); }
+  const cs = document.getElementById('rdGrafSemanas');
+  if(cs && g.semanas.length){
+    window._rdCharts.push(new Chart(cs, { data:{ labels:g.semanas.map(s=>s.label), datasets:[
+        {type:'bar', label:'Entradas', data:g.semanas.map(s=>s.vendas), backgroundColor:'#2F6F4E', borderRadius:4, order:2},
+        {type:'bar', label:'Saídas', data:g.semanas.map(s=>-s.saidas), backgroundColor:'#B4453A', borderRadius:4, order:2},
+        {type:'line', label:'Saldo acumulado', data:g.semanas.map(s=>s.final), borderColor:'#C99A3B', backgroundColor:'#C99A3B', tension:0.25, pointRadius:2, borderWidth:2, order:1} ] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:'index',intersect:false}, layout:{ padding:{ top:26, left:8, right:8 } },
+        plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter'} } }, tooltip:{ callbacks:{ label:c=>c.dataset.label+': '+BRL2(c.raw) } } }, scales:{ y:{ ticks:{ callback:v=>BRL(v) } } } },
+      plugins:[ROTULOS_SALDO] }));
+  }
+}
 
 /* =========================================================
    TELA DE GESTÃO
@@ -1729,6 +2247,9 @@ const SAIDA_COL_MAP = {
   'STATUS':'status','FORNECEDOR':'fornecedor','DESCRICAO':'obs','VALOR':'valor',
   'VENCIMENTO':'date','CONTA CONTABIL':'conta','CENTRO DE CUSTO':'centro',
 };
+/* v13.78 · colunas opcionais lidas para o Recebível Diário (com o recurso liberado) */
+const SAIDA_COL_MAP_RD = { 'FORMA DE PAGAMENTO':'formaPagamento','FORMA PAGAMENTO':'formaPagamento','FORMA DE PGTO':'formaPagamento','FORMA PGTO':'formaPagamento','MEIO DE PAGAMENTO':'formaPagamento','TIPO DE PAGAMENTO':'formaPagamento',
+  'VALOR LIQUIDO':'valorLiquido','ITEM':'item','DESCRICAO/ITEM':'obs','DESCRICAO / ITEM':'obs' };
 function statusToTipo(s){
   const v = normKey(s);
   if(v==='PAGO') return 'pago';
@@ -1738,22 +2259,26 @@ function statusToTipo(s){
 function importSaidasFile(input){
   const file = input.files[0]; if(!file) return;
   readWorkbookFile(file, rows=>{
-    const parsed = [];
+    const parsed = [], rd = fcxV1378(); // v13.78
     rows.forEach(row=>{
       const norm = {};
-      Object.keys(row).forEach(k=>{ const nk=normKey(k); if(SAIDA_COL_MAP[nk]) norm[SAIDA_COL_MAP[nk]]=row[k]; });
+      Object.keys(row).forEach(k=>{ const nk=normKey(k); if(SAIDA_COL_MAP[nk]) norm[SAIDA_COL_MAP[nk]]=row[k]; else if(rd && SAIDA_COL_MAP_RD[nk]) norm[SAIDA_COL_MAP_RD[nk]]=row[k]; });
+      if(rd && norm.valor==null && norm.valorLiquido!=null) norm.valor = norm.valorLiquido; // v13.78: arquivo só com Valor Líquido
       if(norm.valor==null || !norm.date) return;
       const iso = excelDateToISO(norm.date); if(!iso) return;
       const conta = (norm.conta||'(sem conta)').toString().trim();
       const centro = (norm.centro||'(sem centro de custo)').toString().trim();
       if(!state.config.accounts.includes(conta)) state.config.accounts.push(conta);
       if(!state.config.costCenters.includes(centro)) state.config.costCenters.push(centro);
-      parsed.push({id:uid(), date:iso, conta, centro, tipo:statusToTipo(norm.status), valor:Number(norm.valor)||0, fornecedor:(norm.fornecedor||'').toString().trim(), obs:(norm.obs||'').toString().trim()});
+      const extra = rd ? { ...(norm.formaPagamento!=null && String(norm.formaPagamento).trim() ? {formaPagamento:String(norm.formaPagamento).trim()} : {}), ...(norm.valorLiquido!=null && norm.valorLiquido!=='' ? {valorLiquido:Number(norm.valorLiquido)||0} : {}), ...(norm.item!=null && String(norm.item).trim() ? {item:String(norm.item).trim()} : {}) } : {}; // v13.78
+      parsed.push({id:uid(), date:iso, conta, centro, tipo:statusToTipo(norm.status), valor:Number(norm.valor)||0, fornecedor:(norm.fornecedor||'').toString().trim(), obs:(norm.obs||'').toString().trim(), ...extra});
     });
     if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo'); return; }
     const mode = state._saidasImportMode || 'append';
     if(mode==='replace') state.saidas = parsed; else state.saidas = state.saidas.concat(parsed);
-    Promise.all([saveSaidas(), saveConfig()]).then(render);
+    const grava = [saveSaidas(), saveConfig()];
+    if(rd){ state.cargaSaidas = { em: new Date().toISOString(), arquivo: file.name, linhas: parsed.length, modo: mode }; grava.push(window.storage.set('esp2:cargaSaidas', JSON.stringify(state.cargaSaidas), true)); } // v13.78: crítica de carga do Recebível Diário
+    Promise.all(grava).then(render);
   });
 }
 window.importSaidasFile = importSaidasFile;
@@ -2036,6 +2561,8 @@ function exportarBackup(){
     monthMeta: state.monthMeta,
     weightsByMonth: state.weightsByMonth,
     weeksByMonth: state.weeksByMonth||{},
+    recebivelDiario: state.recebivelDiario||{},
+    recebiveisCredsystem: state.recebiveisCredsystem||{},
     prestacaoModalidadePct: state.prestacaoModalidadePct,
     monthParams: state.monthParams,
     saidas: state.saidas,
@@ -2067,6 +2594,8 @@ function importarBackupFile(input){
       if(backup.monthMeta) state.monthMeta = backup.monthMeta;
       if(backup.weightsByMonth) state.weightsByMonth = backup.weightsByMonth;
       if(backup.weeksByMonth) state.weeksByMonth = backup.weeksByMonth;
+      if(backup.recebivelDiario) state.recebivelDiario = backup.recebivelDiario;
+      if(backup.recebiveisCredsystem) state.recebiveisCredsystem = backup.recebiveisCredsystem;
       if(backup.prestacaoModalidadePct) state.prestacaoModalidadePct = backup.prestacaoModalidadePct;
       if(backup.monthParams) state.monthParams = backup.monthParams;
       if(backup.saidas) state.saidas = backup.saidas;

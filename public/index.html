@@ -3354,7 +3354,7 @@ const GestaoAmbientes = {
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a RC).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -16819,6 +16819,34 @@ const ConcMP = {
   v741() { return typeof Recursos !== 'undefined' && Recursos.ativo('conc_lote_v13741'); },
   v742() { return typeof Recursos !== 'undefined' && Recursos.ativo('conc_leitura_v13742'); },
   v743() { return typeof Recursos !== 'undefined' && Recursos.ativo('ret_lote_v13743'); },
+  /** v13.80 · Recebível Diário: o Resumo do Fechamento passa a gravar a abertura por bandeira (e os vencimentos da Credsystem). */
+  v780() { return typeof Recursos !== 'undefined' && Recursos.ativo('fcx_recebivel_v1380'); },
+  /** v13.80 · Repasse da Credsystem (private label, sem antecipação em D+1): regra antecipada → D+prazo útil; senão o vencimento
+      da parcela no ERP no 1º dia útil; sem vencimento, estimado em 30 dias corridos (1º dia útil). Só leitura do motor (DiasUteis). */
+  vencCredsystem(v) {
+    try {
+      const op = AdqTaxas.operadora([v.adquirente, v.bandeira].filter(Boolean).join(' ')), rg = AdqTaxas.regra(op.adq, op.bandeira, v.info?.empresaId);
+      if (rg && rg.antecipado) return { data: DiasUteis.somar(v.data, rg.prazoRepasse || 1), fonte: 'regra' };
+    } catch { /* sem regra: segue para o vencimento */ }
+    if (v.venc && /^\d{4}-\d{2}-\d{2}/.test(v.venc)) return { data: DiasUteis.proximo(String(v.venc).slice(0, 10)), fonte: 'vencimento' };
+    const d = new Date(v.data + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + 30); return { data: DiasUteis.proximo(d.toISOString().slice(0, 10)), fonte: 'estimado' };
+  },
+  /** v13.80 · Abre uma linha do Resumo (dia × loja × empresa × adquirente) por bandeira: MDR de cada venda; antecipação pelo
+      líquido a crédito e POS pelo bruto, nas mesmas proporções do rateio da linha (os totais batem com a linha gravada). */
+  abrirBandeiras(r, mapa) {
+    const r2 = v => this.r2(v), bs = Object.values(mapa || {}); if (!bs.length) return null;
+    const pesoAnt = bs.some(b => b.liqCred > 0) ? 'liqCred' : 'bruto', somaAnt = bs.reduce((s, b) => s + b[pesoAnt], 0) || 1, somaBr = bs.reduce((s, b) => s + b.bruto, 0) || 1;
+    let ua = 0, up = 0;
+    const out = bs.sort((a, b) => b.bruto - a.bruto).map((b, i, arr) => {
+      const ult = i === arr.length - 1, antecip = ult ? r2(r.custoAntecip - ua) : r2(r.custoAntecip * b[pesoAnt] / somaAnt), pos = ult ? r2(r.custoPos - up) : r2(r.custoPos * b.bruto / somaBr);
+      ua = r2(ua + antecip); up = r2(up + pos);
+      const liquido = r2(b.bruto - b.mdr - antecip - pos), x = { bandeira: b.bandeira, bruto: r2(b.bruto), mdr: r2(b.mdr), antecip, pos, liquido };
+      if (b.venc) { const tot = Object.values(b.venc).reduce((s, v) => s + v, 0) || 1; x.vencimentos = Object.entries(b.venc).sort().map(([data, v]) => ({ data, valor: r2(liquido * v / tot) })); x.vencFonte = b.vencFonte; }
+      return x;
+    });
+    const dm = r2(r.custoMdr - out.reduce((s, x) => s + x.mdr, 0)); if (Math.abs(dm) > 0.004) { out[0].mdr = r2(out[0].mdr + dm); out[0].liquido = r2(out[0].liquido - dm); } // arredondamento
+    return out;
+  },
   CLASSES_ERP: [['debito', 'Débito'], ['lote', 'LOTE (prestação)'], ['credito', 'Crédito'], ['parcelado', 'Parcelado (PAR)'], ['pix', 'Pix'], ['outro', 'Complemento não reconhecido']],
   /** v13.74.2 · Débito = COMPLEMENTO com DEBITO ou DOCUMENTO LOTE · Crédito = COMPLEMENTO CREDITO ou parcelado (PAR 1/02…). Nada é descartado: o que não se encaixa fica como crédito, sinalizado. */
   classeErp(comp, doc, opTxt) {
@@ -17004,6 +17032,11 @@ const ConcMP = {
     /* 4 · Resumo do Fechamento: dia × loja × empresa × adquirente, com antecipação e POS do mês rateados pelo bruto */
     const dia = new Map();
     for (const v of vendas) { const k = `${v.data}|${v.info.lojaId}|${v.info.empresaId}|${v.adquirente}`; const d = dia.get(k) || { data: v.data, lojaId: v.info.lojaId, empresaId: v.info.empresaId, adquirente: v.adquirente, bruto: 0, custoMdr: 0, liqCred: 0 }; d.bruto += v.bruto; d.custoMdr += v.mdrCob; if (v.modalidade === 'credito') d.liqCred += v.liquido; dia.set(k, d); }
+    const bandMap = new Map(); /* v13.80: abertura por bandeira (e vencimento da Credsystem) para o Recebível Diário do FCX */
+    if (this.v780()) for (const v of vendas) { const k = `${v.data}|${v.info.lojaId}|${v.info.empresaId}|${v.adquirente}`, mp = bandMap.get(k) || {}, bn = v.bandeira || '—', b = mp[bn] ||= { bandeira: bn, bruto: 0, mdr: 0, liqCred: 0 };
+      b.bruto += v.bruto; b.mdr += v.mdrCob || 0; if (v.modalidade === 'credito') b.liqCred += v.liquido || 0;
+      if (v.adquirente === ADQ_CREDSYSTEM) { const vc = this.vencCredsystem(v); (b.venc ||= {})[vc.data] = (b.venc[vc.data] || 0) + (v.bruto - (v.mdrCob || 0)); b.vencFonte = b.vencFonte === 'estimado' || vc.fonte === 'estimado' ? 'estimado' : vc.fonte; }
+      bandMap.set(k, mp); }
     const dias = [...dia.values()].map(d => ({ ...d, bruto: r2(d.bruto), custoMdr: r2(d.custoMdr), custoAntecip: 0, custoPos: 0 }));
     const ratear = (alvos0, total, campo, peso = 'bruto') => { if (!alvos0.length || !total) return; let alvos = alvos0; if (peso !== 'bruto') { const c = alvos0.filter(d => d[peso] > 0); if (c.length) alvos = c; else peso = 'bruto'; } const soma = alvos.reduce((s, d) => s + d[peso], 0) || 1; let usado = 0; alvos.forEach((d, i) => { const v = i === alvos.length - 1 ? r2(total - usado) : r2(total * d[peso] / soma); d[campo] = r2(d[campo] + v); usado = r2(usado + v); }); };
     const feitos = new Set();
@@ -17021,6 +17054,7 @@ const ConcMP = {
     });
     [...new Set(dias.map(d => `${d.lojaId}|${mes(d.data)}|${d.adquirente}`))].filter(k => !feitos.has(k)).forEach(k => { const [lojaId, m, adq] = k.split('|'), pos = this.custoPos(lojaId, adq); if (pos.total) ratear(dias.filter(d => d.lojaId === lojaId && d.adquirente === adq && mes(d.data) === m), pos.total, 'custoPos'); });
     const resumo = dias.map(d => { const custo = r2(d.custoMdr + d.custoAntecip + d.custoPos); return { ...d, custo, liquido: r2(d.bruto - custo), brutoLote: 0 }; });
+    if (bandMap.size) resumo.forEach(x => { const b = this.abrirBandeiras(x, bandMap.get(`${x.data}|${x.lojaId}|${x.empresaId}|${x.adquirente}`)); if (b) x.bandeiras = b; }); /* v13.80 */
     /* v13.73 · prestações (LOTE): fora das vendas; Bruto LOTE informado à parte no Resumo e enviado à Conciliação Credsystem */
     const loteMap = new Map(); if (det) erp.linhas.filter(e => e.tipo === 'prestacao').forEach(e => { const A = this.canonAdq(e.adqNome || e.operadora), pixPag = /PIX/i.test(e.operadora), k = `${e.data}|${e.lojaId || '?' + e.loja}|${A}|${pixPag}`; const x = loteMap.get(k) || { data: e.data, lojaId: e.lojaId && Repo.get('lojas', e.lojaId) ? e.lojaId : '', lojaTxt: e.loja, adquirente: A, pixPag, n: 0, bruto: 0, mdr: 0, liquido: 0 }; x.n++; x.bruto = r2(x.bruto + e.bruto); x.mdr = r2(x.mdr + e.mdr); x.liquido = r2(x.liquido + e.liquido); loteMap.set(k, x); });
     const lote = [...loteMap.values()].sort((a, b) => a.data.localeCompare(b.data) || String(a.lojaId).localeCompare(String(b.lojaId)));
@@ -17039,7 +17073,7 @@ const ConcMP = {
   },
   async gravarCruzamento() {
     const m = this._czRes; if (!m || !this.podeImportar()) return;
-    const linhas = m.resumo.filter(x => x.data && x.lojaId).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: x.empresaId, adquirente: x.adquirente, bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custoMdr, custoAntecip: x.custoAntecip, custoPos: x.custoPos, ...(m.det ? { brutoLote: x.brutoLote || 0 } : {}), origem: m.comAdq ? 'cruzamento' : 'erp-sistema', arquivo: m.arquivos.join(' + ') }));
+    const linhas = m.resumo.filter(x => x.data && x.lojaId).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: x.empresaId, adquirente: x.adquirente, bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custoMdr, custoAntecip: x.custoAntecip, custoPos: x.custoPos, ...(m.det ? { brutoLote: x.brutoLote || 0 } : {}), ...(x.bandeiras ? { bandeiras: x.bandeiras } : {}), origem: m.comAdq ? 'cruzamento' : 'erp-sistema', arquivo: m.arquivos.join(' + ') }));
     const pix = (m.pix || []).map(x => ({ data: x.data, lojaId: x.lojaId, empresaId: '', adquirente: 'PIX - POS', bruto: x.bruto, liquido: x.liquido, custo: x.custo, custoMdr: x.custo, custoAntecip: 0, custoPos: 0, origem: 'erp-pix-pos', taxa: x.taxa, arquivo: m.arquivos.join(' + ') }));
     if (!linhas.length && !pix.length) return UI.toast('Nada a gravar: nenhuma venda com loja/EC cadastrado.');
     const n = linhas.length ? await this.gravarLinhas('credito', linhas) : 0, np = pix.length ? await this.gravarLinhas('pix', pix) : 0;
@@ -17962,6 +17996,34 @@ const Tema = {
 };
 window.Tema = Tema;
 window.Recursos = Recursos; /* v13.77: o FCX (iframe) consulta os recursos liberados (fcx_semanas_v1377) */
+/* v13.78 · ponte de leitura para o Recebível Diário do FCX (iframe): cartão do Resumo do Fechamento (Auditoria de
+   Adquirentes) e prestação da Conciliação dos recebimentos (Retaguarda) do dia — só leitura, pelo banco do ambiente. */
+window.PainelFCX = {
+  /** v13.82 · o Recebível Diário monta o próprio documento de impressão (só as páginas do relatório) e abre a prévia do painel. */
+  imprimirDocumento(titulo, html, nome) { Documento.previa(titulo, html, nome); },
+  async recebiveis(dia) {
+    const r2 = v => Math.round((Number(v) || 0) * 100) / 100, out = { dia, cartao: null, prestacao: null, avisos: [] };
+    const motivo = e => (e?.status === 403 || /permiss|denied/i.test(String(e?.code || e?.message || '')) ? 'seu acesso não lê este dado (restrito ao Master/editor)' : (e?.message || String(e)));
+    try {
+      const d = await Cloud.adapter.get('conc_fechamento/' + dia.slice(0, 7) + '_credito'), ls = (d?.linhas || []).filter(l => l.data === dia && (!l.mod || l.mod === 'credito'));
+      const cs = l => String(l.adquirente || '').toUpperCase() === ADQ_CREDSYSTEM, terc = ls.filter(l => !cs(l)), cred = ls.filter(cs); /* v13.80: Credsystem não entra no cartão do dia */
+      const soma = (k, arr = terc) => r2(arr.reduce((a, l) => a + (Number(l[k]) || 0), 0)), porAdq = {}, porBand = new Map(), add = (mapa, adq, b, sem) => { const k = adq + '|' + b.bandeira, x = mapa.get(k) || { adquirente: adq, bandeira: b.bandeira, bruto: 0, mdr: 0, antecip: 0, pos: 0, liquido: 0, semBandeira: !!sem }; ['bruto', 'mdr', 'antecip', 'pos', 'liquido'].forEach(c => { x[c] = r2(x[c] + (Number(b[c]) || 0)); }); mapa.set(k, x); };
+      const linhaBand = l => (l.bandeiras && l.bandeiras.length ? l.bandeiras : [{ bandeira: '—', bruto: l.bruto, mdr: l.custoMdr, antecip: l.custoAntecip, pos: l.custoPos, liquido: l.liquido, vencimentos: null, _sem: true }]);
+      terc.forEach(l => { const k = l.adquirente || '—'; porAdq[k] = r2((porAdq[k] || 0) + (Number(l.liquido) || 0)); linhaBand(l).forEach(b => add(porBand, k, b, b._sem)); });
+      out.cartao = { linhas: terc.length, bruto: soma('bruto'), liquido: soma('liquido'), mdr: soma('custoMdr'), antecip: soma('custoAntecip'), pos: soma('custoPos'), porAdquirente: porAdq, porBandeira: [...porBand.values()].sort((a, b) => a.adquirente.localeCompare(b.adquirente) || b.bruto - a.bruto), semBandeira: [...porBand.values()].some(x => x.semBandeira) };
+      const itens = []; cred.forEach(l => linhaBand(l).forEach(b => { const venc = b.vencimentos && b.vencimentos.length ? b.vencimentos : null; itens.push({ dataVenda: l.data, lojaId: l.lojaId, bandeira: b.bandeira, bruto: r2(b.bruto), mdr: r2(b.mdr), antecip: r2(b.antecip), pos: r2(b.pos), liquido: r2(b.liquido), vencimentos: venc, vencFonte: venc ? (b.vencFonte || 'vencimento') : 'sem', semBandeira: !!b._sem }); }));
+      out.credsystem = { linhas: cred.length, bruto: soma('bruto', cred), mdr: soma('custoMdr', cred), liquido: soma('liquido', cred), itens };
+      if (!d) out.avisos.push(`Cartão: o fechamento de ${dia.slice(5, 7)}/${dia.slice(0, 4)} ainda não foi gravado na Auditoria de Adquirentes (Conciliação e Cruzamento › Gravar).`);
+      else if (!ls.length) out.avisos.push(`Cartão: nenhuma venda de ${dia.split('-').reverse().join('/')} no Resumo do Fechamento.`);
+    } catch (e) { out.avisos.push('Cartão: ' + motivo(e) + '.'); }
+    try {
+      const c = await Cloud.adapter.get('credsystem/' + dia), ls = c?.linhas || [], soma = f => r2(ls.reduce((a, l) => a + f(l), 0));
+      out.prestacao = { lojas: ls.length, din: soma(l => Number(l.din) || 0), pix: soma(l => (Number(l.pix) || 0) + (Number(l.pixLote) || 0)), lote: soma(l => Number(l.cartLote) || 0) }; /* v13.79: LOTE só do arquivo (sem o Cartão digitado à mão) */
+      if (!c) out.avisos.push(`Prestação: a Conciliação dos recebimentos de ${dia.split('-').reverse().join('/')} ainda não foi importada na Retaguarda.`);
+    } catch (e) { out.avisos.push('Prestação: ' + motivo(e) + '.'); }
+    return out;
+  },
+};
 Tema.aplicar(Tema.atual());
 (async function iniciar() {
   $('#main').innerHTML = '<div class="panel" style="margin-top:30px"><p class="muted" style="margin:0">Conectando ao Painel de Gestão…</p></div>';
