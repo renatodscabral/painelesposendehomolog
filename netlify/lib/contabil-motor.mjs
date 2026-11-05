@@ -387,3 +387,98 @@ export function apuracaoLucro(regime, { lair, receitaBrutaComercio = 0, receitaB
   return { regime: 'real', lair, adicoesIRPJ: adIR, exclusoesIRPJ: exIR, lucroAjustado: ajIR, compensacaoIRPJ: Math.round(compIR), lucroReal: Math.round(lr), baseCSLL: Math.round(bcs), compensacaoCSLL: Math.round(compCS), irpj, csll, total: irpj + csll,
     prejuizoFiscal: ajIR < 0 ? -ajIR : 0, notas: ['LALUR Parte A: LAIR + adições − exclusões = lucro ajustado; compensação de prejuízos fiscais limitada a 30% do lucro ajustado (Parte B).', 'IRPJ 15% + adicional de 10% sobre o lucro real acima de R$ 20.000/mês; CSLL 9%.'] };
 }
+
+/* ---------------------------------------------------------------- v13.86 · Parte 2: de-para FCX → plano de contas
+   O FCX usa os rótulos do ERP ("4.10.09 – (-) Energia Elétrica"): o painel analítico e a DFC agrupam por esses códigos,
+   então o rótulo continua o mesmo no FCX — o que muda é que a LISTA vem do Módulo Contábil (somente leitura no FCX) e cada
+   rótulo aponta para uma conta do plano único. Regra: prefixo do código do ERP (o mais longo vence) + nome; sem regra,
+   classificação automática pelo nome e vizinhança no plano (fica "pendente" para revisão). */
+export const LIMIAR_AUTOMATICO = 0.75;
+/** Contas analíticas que completam o plano padrão para o que o FCX usa (criadas uma vez, pelo nome, debaixo da mãe). */
+export const NOVAS_CONTAS_FCX = {
+  viagens: { pai: '5.3.3', nome: 'Viagens e Estadias', dre: 'dga', dva: 'insumos' },
+  seguros: { pai: '5.3.3', nome: 'Seguros', dre: 'dga', dva: 'insumos' },
+  manutencao: { pai: '5.3.3', nome: 'Manutenção e Reparos', dre: 'dga', dva: 'insumos' },
+  fretes: { pai: '5.2.1', nome: 'Fretes sobre Vendas', dre: 'dv', dva: 'insumos' },
+  brindes: { pai: '5.4.1', nome: 'Brindes, Doações e Bonificações', dre: 'odo', dva: 'insumos' },
+  partes: { pai: '1.2.1.01', nome: 'Créditos com Partes Relacionadas', dre: null, dva: null },
+};
+/** [prefixo do código do ERP, regra no nome (ou null), conta de destino (ou 'novo:<chave>'), confiança]. Mesma faixa: as com regra primeiro. */
+const DE_PARA_ERP = [
+  ['1.01.07', null, '4.2.1.01', 0.8], ['1.01', null, '4.1.1.01', 0.9], ['1.02', null, '4.1.1.02', 0.9], ['1.03', null, '4.2.1.01', 0.92], ['1.04', null, '4.1.1.01', 0.88], ['1', null, '4.1.1.01', 0.6],
+  ['2.01', null, '1.1.3.01.001', 0.85], ['2.02', null, '1.1.3.01.001', 0.85], ['2.04', null, '1.1.3.01.001', 0.8],
+  ['2.03', /icms/, '1.1.2.02.001', 0.8], ['2.03', null, '5.1.1.01', 0.88],
+  ['2.05', /\bibs\b/, '4.2.3.01', 0.95], ['2.05', /\bcbs\b/, '4.2.3.02', 0.95], ['2.05', /seletivo/, '4.2.3.03', 0.95],
+  ['2.05', /\bpis a pagar/, '2.1.3.01.002', 0.82], ['2.05', /cofins a pagar/, '2.1.3.01.003', 0.82], ['2.05', /icms (normal|fronteira)/, '2.1.3.01.001', 0.8], ['2.05', /simples/, '4.2.2.01', 0.5],
+  ['2.05', /cofins/, '4.2.2.03', 0.95], ['2.05', /\bpis\b/, '4.2.2.02', 0.95], ['2.05', /icms|difal/, '4.2.2.01', 0.93], ['2.05', null, '4.2.2.01', 0.6],
+  ['2.06', /\bibs\b/, '1.1.2.02.004', 0.95], ['2.06', /\bcbs\b/, '1.1.2.02.005', 0.95], ['2.06', /icms.?st\b/, '5.1.1.01', 0.75], ['2.06', /\bpis\b/, '1.1.2.02.002', 0.9], ['2.06', /cofins/, '1.1.2.02.003', 0.9], ['2.06', /icms|difal/, '1.1.2.02.001', 0.85],
+  ['2.07', null, '5.2.1.03', 0.93],
+  ['2.10', /\bpis\b/, '4.2.2.02', 0.85], ['2.10', /cofins/, '4.2.2.03', 0.85], ['2.10', /icms/, '4.2.2.01', 0.85],
+  ['2.11', null, '4.2.1.01', 0.85], ['2.12', null, '5.3.1.01', 0.78], ['2.14.01', null, '1.1.2.03.001', 0.9], ['2.14', null, '1.1.2.03.001', 0.6],
+  ['2.18.01', null, '5.2.1.04', 0.85], ['2.18', null, '5.4.1.01', 0.78], ['2.19', null, '5.2.1.01', 0.92], ['2', null, '5.1.1.01', 0.45],
+  ['4.01', /ferias|13/, '5.3.1.02', 0.9], ['4.01', /saude/, '5.3.1.05', 0.8], ['4.01', null, '5.3.1.01', 0.9],
+  ['4.02', /reparcelamento/, '2.2.1.02.001', 0.8], ['4.02', /fgts/, '5.3.1.04', 0.93], ['4.02', /inss|sistema s|\brat\b/, '5.3.1.03', 0.9], ['4.02', /irrf/, '5.3.1.01', 0.6], ['4.02', /icms/, '5.3.3.05', 0.55], ['4.02', null, '5.3.1.05', 0.7],
+  ['4.03', /deposito judicial/, '1.2.1.01.001', 0.9], ['4.03', null, '5.3.1.01', 0.78], ['4.04', null, '5.3.1.05', 0.8], ['4.05', null, '5.3.1.05', 0.8],
+  ['4.06', /uniforme|seguranca/, '5.3.3.02', 0.82], ['4.06', null, '5.3.1.05', 0.92], ['4.07', null, '5.3.1.01', 0.8], ['4.08', null, '5.3.3.05', 0.85], ['4.09', null, '5.3.3.03', 0.93],
+  ['4.10', /energia/, '5.3.2.03', 0.96], ['4.10', /agua/, '5.3.2.04', 0.95], ['4.10', /condominio|fundo de promocao/, '5.3.2.02', 0.93], ['4.10', /iptu|alvara|bombeiros|tpei|\bcim\b/, '5.3.3.05', 0.88], ['4.10', /outras receitas/, '4.3.1.01', 0.55], ['4.10', null, '5.3.2.01', 0.9],
+  ['4.11', null, '5.3.3.01', 0.8], ['4.12', null, '5.3.3.01', 0.82], ['4.13', null, '5.3.3.02', 0.85], ['4.15', null, '5.3.3.02', 0.88],
+  ['4.18', null, 'novo:viagens', 0.9], ['4.22', null, '5.3.3.01', 0.82], ['4.23', null, 'novo:seguros', 0.92], ['4.26', /obras|reforma/, '1.2.3.01.005', 0.75], ['4.26', null, 'novo:manutencao', 0.9],
+  ['4.33', /confraterniza/, '5.3.1.05', 0.7], ['4.33', null, '5.2.1.02', 0.92], ['4.38', /informatica/, '5.3.3.03', 0.85], ['4.38', null, '5.3.3.01', 0.9],
+  ['4.39', /multa/, '5.4.1.02', 0.9], ['4.39', /brinde|doac|bonifica/, 'novo:brindes', 0.88], ['4.39', /desconto/, '4.2.1.01', 0.75], ['4.39', null, '5.4.1.01', 0.6],
+  ['4.40', null, '4.4.1.02', 0.85], ['4.46', null, '5.4.1.02', 0.92], ['4.47', null, 'novo:fretes', 0.85], ['4', null, '5.3.3.01', 0.45],
+  ['6.01', null, '4.4.1.01', 0.85], ['6.02', null, '4.4.1.01', 0.92], ['6.03', null, '4.3.1.01', 0.6], ['6.06', null, '4.4.1.02', 0.78], ['6.07', null, '4.3.1.02', 0.82], ['6.08', null, '1.1.2.01.003', 0.85],
+  ['6.09', null, '1.1.1.02.001', 0.5], ['6.10', null, '1.1.2.03.001', 0.82], ['6.11', null, '4.3.1.01', 0.85], ['6', null, '4.3.1.01', 0.45],
+  ['7.01.02', null, '5.2.1.02', 0.65], ['7.01.03', null, '5.4.1.02', 0.88], ['7.01.04', null, '5.5.1.02', 0.93], ['7.01.05', null, '2.1.5.01.004', 0.9], ['7.01.06', null, '1.1.1.01.001', 0.7], ['7.01.07', null, 'novo:partes', 0.7], ['7.01', null, '5.5.1.03', 0.88],
+  ['7.11', null, '2.2.1.02.001', 0.88],
+  ['7.19', /irpj/, '2.1.3.02.001', 0.85], ['7.19', /csll/, '2.1.3.02.002', 0.85], ['7.19', /irrf/, '5.3.2.01', 0.6], ['7.19', /\biss\b/, '2.1.3.01.004', 0.85], ['7.19', /\bpis\b/, '2.1.3.01.002', 0.82], ['7.19', /cofins/, '2.1.3.01.003', 0.82], ['7.19', /juros/, '5.5.1.01', 0.9], ['7.19', null, '5.5.1.03', 0.85],
+  ['7.20', /aluguel/, '5.3.2.01', 0.75], ['7.20', /instala|obra/, '1.2.3.01.005', 0.85], ['7.20', /maq/, '1.2.3.01.002', 0.9], ['7.20', /moveis/, '1.2.3.01.001', 0.92], ['7.20', /veiculo/, '1.2.3.01.004', 0.92], ['7.20', null, '1.2.3.01.002', 0.55],
+  ['7', null, '5.4.1.01', 0.4], ['99', null, '5.3.3.04', 0.92],
+].map(([p, re, destino, conf], ordem) => ({ p, re, destino, conf, ordem, n: p.split('.').length })).sort((a, b) => b.n - a.n || a.ordem - b.ordem);
+/** Agrupadores (cabeçalhos) do ERP → conta sintética correspondente. */
+const AGRUPADOR_ERP = [['1.01', '4.1.1'], ['1.02', '4.1.1'], ['1.03', '4.2.1'], ['1', '4.1'], ['2.03', '5.1.1'], ['2.05', '4.2.2'], ['2.06', '1.1.2.02'], ['2.07', '5.2.1'], ['2.10', '4.2.2'], ['2.11', '4.2.1'], ['2.14', '1.1.2.03'],
+  ['2.18', '5.4.1'], ['2.19', '5.2.1'], ['2', '5.1'], ['4.01', '5.3.1'], ['4.02', '5.3.1'], ['4.03', '5.3.1'], ['4.06', '5.3.1'], ['4.10', '5.3.2'], ['4.33', '5.2.1'], ['4.39', '5.4.1'], ['4.46', '5.4.1'], ['4', '5.3'],
+  ['6.07', '4.3.1'], ['6', '4.3'], ['7.01', '5.5.1'], ['7.11', '2.2.1.02'], ['7.19', '5.5.1'], ['7.20', '1.2.3.01'], ['7', '5.4'], ['99', '5.3.3']].sort((a, b) => b[0].split('.').length - a[0].split('.').length);
+/** Contas que o Módulo Contábil oferece ao FCX além das que ele já usava: Reforma Tributária (IBS, CBS e Imposto Seletivo). */
+export const COMPLEMENTO_FCX = [
+  ['2.05.10 – (-) IBS sobre Vendas', '4.2.3.01'], ['2.05.11 – (-) CBS sobre Vendas', '4.2.3.02'], ['2.05.12 – (-) Imposto Seletivo sobre Vendas', '4.2.3.03'],
+  ['2.06.06 – (+) IBS sobre Compra de Mercadorias', '1.1.2.02.004'], ['2.06.07 – (+) CBS sobre Compra de Mercadorias', '1.1.2.02.005'],
+];
+const casa = (cod, p) => cod === p || cod.startsWith(p + '.');
+/** "4.10.09 – (-) Energia Elétrica" → { codigo: '4.10.09', nome: 'Energia Elétrica' } (sem código: codigo null). */
+export function rotuloFCX(r) {
+  const s = String(r ?? '').trim(), m = s.match(/^(\d{1,3}(?:\.\d{1,4})*)\s*[–—-]\s*(.+)$/);
+  const limpar = x => x.replace(/^\(\s*[+-]\s*\)\s*/, '').trim();
+  return m ? { rotulo: s, codigo: m[1], nome: limpar(m[2]) } : { rotulo: s, codigo: null, nome: limpar(s) };
+}
+/**
+ * Mapeia rótulos do FCX para o plano: devolve [{ chave, erpCodigo, erpNome, agrupador, destino, conf, motivo, status }].
+ * destino = código de conta existente ou 'novo:<chave de NOVAS_CONTAS_FCX>'. usadas: rótulos com lançamentos no FCX
+ * (um cabeçalho do ERP com saídas lançadas nele é tratado como conta de movimento).
+ */
+export function mapearFCX(rotulos, contas, { usadas = [] } = {}) {
+  const lista = [...new Set(rotulos.map(x => String(x ?? '').trim()).filter(Boolean))], usa = new Set(usadas), partes = lista.map(rotuloFCX);
+  const codigos = partes.map(p => p.codigo).filter(Boolean), porCodigo = new Map(contas.map(c => [c.codigo, c]));
+  const analiticas = contas.filter(c => c.tipo === 'A' && c.ativa !== false);
+  const viz = (nome, pai) => { let best = null; for (const c of analiticas) { if (pai && !casa(c.codigo, pai)) continue; const s = jaccard(nome, c.nome); if (!best || s > best.s) best = { c, s }; } return best; };
+  return partes.map(p => {
+    const agrupador = !!p.codigo && !usa.has(p.rotulo) && codigos.some(c => c !== p.codigo && c.startsWith(p.codigo + '.'));
+    const base = { chave: p.rotulo, erpCodigo: p.codigo, erpNome: p.nome, agrupador };
+    let destino = null, conf = 0, motivo = '';
+    if (agrupador) {
+      const a = AGRUPADOR_ERP.find(([px]) => casa(p.codigo, px)); destino = a ? a[1] : null; conf = a ? 0.9 : 0;
+      motivo = a ? `agrupador do ERP ${p.codigo} → sintética ${a[1]}` : 'agrupador do ERP sem correspondência';
+    } else {
+      const n = normalizar(p.nome), r = p.codigo ? DE_PARA_ERP.find(e => casa(p.codigo, e.p) && (!e.re || e.re.test(n))) : null;
+      if (r && (r.destino.startsWith('novo:') || porCodigo.get(r.destino)?.tipo === 'A')) { destino = r.destino; conf = r.conf; motivo = `faixa ${r.p} do ERP${r.re ? ' + nome' : ''} → ${r.destino.startsWith('novo:') ? 'nova conta "' + NOVAS_CONTAS_FCX[r.destino.slice(5)].nome + '"' : r.destino + ' · ' + porCodigo.get(r.destino).nome}`; }
+      else {
+        let ia = null; try { ia = classificar(p.nome, contas); } catch { /* nome curto */ }
+        const v = (ia?.pai && viz(p.nome, ia.pai)) || viz(p.nome);
+        if (v?.c) { destino = v.c.codigo; conf = Math.min(0.6, Math.max(0.3, (ia?.confianca || 0.3) * 0.6 + v.s * 0.4)); motivo = `sem faixa do ERP: classificação pelo nome${ia ? ` (${ia.grupoNome})` : ''} → ${v.c.codigo} · ${v.c.nome} — revise`; }
+        else motivo = 'sem correspondência — escolha a conta';
+      }
+    }
+    return { ...base, destino, conf: Math.round(conf * 100) / 100, motivo, status: destino && conf >= LIMIAR_AUTOMATICO ? 'automatico' : 'pendente' };
+  });
+}
+export const cmpRotuloFCX = (a, b) => { const x = rotuloFCX(a).codigo, y = rotuloFCX(b).codigo; if (x && y) return cmpCodigoErp(x, y) || a.localeCompare(b, 'pt-BR'); if (x) return -1; if (y) return 1; return a.localeCompare(b, 'pt-BR'); };
+function cmpCodigoErp(a, b) { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++) { if (x[i] === undefined) return -1; if (y[i] === undefined) return 1; if (x[i] !== y[i]) return x[i] - y[i]; } return 0; }

@@ -458,6 +458,10 @@ table.cz td.fav{color:var(--ok);} table.cz td.desf{color:var(--bad);}
 body.fcx-on #main{padding-bottom:0;}
 .fcx-host{padding-top:0!important;}
 .fcx-host[hidden]{display:none!important;}
+/* v13.86 · Módulo Contábil (iframe fixo, como o FCX) */
+body.ct-on #main{padding-bottom:0;}
+.ct-frame{background:var(--bg);}
+.ct-aviso{max-width:760px;}
 
 /* v7 — Módulo 2: radar de ações renovatórias e leitor de contratos com IA */
 .alerta-renov{display:flex;gap:14px;align-items:flex-start;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:12px;padding:12px 16px;margin-bottom:14px;}
@@ -1501,6 +1505,7 @@ details.cmp-leitura summary{cursor:pointer;font-size:13px;}
 <header id="topbar" class="topbar"></header>
 <main class="wrap" id="main"></main>
 <div class="wrap fcx-host" id="fcxHost" hidden></div>
+<div class="wrap fcx-host ct-host" id="contabilHost" hidden></div>
 <div id="modais"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -1932,6 +1937,7 @@ const PERMISSOES = {
     'pessoal.ver', 'pessoal.editar', 'pessoal.excluir', 'pessoal.salario.ver', 'pessoal.salario.editar', 'pessoal.parametros',
     'pdi.ver', 'pdi.avaliar', 'lojas.ver', 'lojas.editar', 'lojas.excluir', 'lojas.contrato.editar',
     'lojas.arquivos', 'lojas.importar', 'ia.resumo', 'fcx.ver',
+    'contabil.ver', 'contabil.lancar', 'contabil.plano', 'contabil.estornar', 'contabil.parametros', // v13.86: Módulo Contábil (no servidor: /api/contabil)
     'lojas.contratos.ver', 'lojas.contratos.editar',   // contratos de locação + radar (só GESTOR)
     'retaguarda.ver', 'retaguarda.credsystem.importar', 'retaguarda.credsystem.editar', 'retaguarda.faltas.lancar',
     'retaguarda.faltas.status', 'retaguarda.faltas.excluir', 'retaguarda.caixas.editar',
@@ -1970,6 +1976,7 @@ const MATRIZ_MODULOS = [
   { id: 'viagens', curto: 'Viagens', rotulo: 'Adiantamento de viagens (financeiro)', num: 'Módulo 8', ler: ['viagens.ver'], modificar: ['viagens.pagar'], excluir: ['viagens.excluir'] },
   { id: 'solicitacoes', curto: 'Solicitações', rotulo: 'Solicitações Operacionais (Modificar = pedir · Excluir = atender e excluir)', num: 'Módulo 10', ler: ['solicitacoes.ver'], modificar: ['solicitacoes.lancar'], excluir: ['solicitacoes.atender', 'solicitacoes.excluir'],
     extras: [['solicitacoes.todas', 'Acessar todas as lojas', 'Vê e gerencia as solicitações de todas as filiais, independentemente do perfil e da lotação']] }, // v13.60 · v13.61: + "Acessar todas as lojas" 
+  { id: 'contabil', curto: 'Contábil', rotulo: 'Contabilidade · Módulo Contábil (plano de contas, lançamentos, relatórios e de-para do FCX)', num: 'Módulo 12', ler: ['contabil.ver'], modificar: ['contabil.lancar', 'contabil.plano'], excluir: ['contabil.estornar', 'contabil.parametros'], rec: 'contabil_v1386' }, /* v13.86 */
   { id: 'visao', curto: 'Visão', rotulo: 'Visão / Dashboard (Tela Inicial com o Resumo do Recebível do Dia)', num: 'Início', ler: ['visao.dashboard'], modificar: [], excluir: [], v1383: true }, // v13.83
 ];
 /* v13.83 · "Pode solicitar viagem": opção da linha do Módulo 8 que vale sozinha (não exige Ler, que é "ver todos os pedidos") */
@@ -2007,6 +2014,7 @@ const PERM_ROTULO = {
   'credsystem.editar': 'Metas e campanhas · editar', 'credsystem.excluir': 'Metas e campanhas · excluir', 'rh.importar': 'Importar Base Ativa e cadastrar colaboradores',
   'viagens.pagar': 'Financeiro: lançar, pagar e analisar prestações', 'viagens.excluir': 'Excluir pedidos de viagem',
   'solicitacoes.lancar': 'Abrir solicitações (pedir)', 'solicitacoes.atender': 'Atender solicitações', 'solicitacoes.excluir': 'Excluir solicitações',
+  'contabil.lancar': 'Lançar em partidas dobradas', 'contabil.plano': 'Plano de contas e de-para do FCX', 'contabil.estornar': 'Estornar lançamentos e encerrar o exercício', 'contabil.parametros': 'Parâmetros tributários, LALUR e fechamento de período', /* v13.86 */
 };
 
 const NIVEIS_ACESSO = ['', 'ler', 'modificar', 'excluir'];
@@ -2014,10 +2022,12 @@ const NIVEIS_ACESSO = ['', 'ler', 'modificar', 'excluir'];
 const MATRIZ_PADRAO = { pdi: 'ler', lojas: 'modificar', contratos: '', fcx: 'ler', retaguarda: 'modificar', credsystem: '', rh: '', viagens: '', solicitacoes: 'modificar' }; // viagens '': cada um vê as próprias (e o gestor, a equipe)
 /** Permissões que o banco do claude.ai só libera a quem tem "Pode editar" no compartilhamento do painel (regras admin). */
 const PERM_SO_EDITOR = ['pe.', 'pessoal.salario.', 'pessoal.parametros', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.matriz', 'retaguarda.ieo.lancar', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo', 'auditoria.', 'backup.', 'acessos.'];
+/** v13.86 · linha da matriz visível? (v13.83: linhas novas só com o recurso; rec: recurso próprio da linha) */
+const matrizOk = (m, v83) => (!m.v1383 || v83) && (!m.rec || Recursos.ativo(m.rec));
 function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
   const out = new Set(), v83 = Acesso.ativo(), loja = perfil === 'LOJA', sub = (v83 && m.sub) || {};
   for (const mod of MATRIZ_MODULOS) {
-    if (mod.v1383 && !v83) continue; // v13.83: linha nova só com o recurso liberado
+    if (!matrizOk(mod, v83)) continue; // v13.83: linha nova só com o recurso liberado · v13.86: + recurso da linha
     let n = NIVEIS_ACESSO.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); // v13.60: usuários antigos já podem pedir (Solicitações)
     (mod.extras || []).forEach(([k, , , livre]) => { if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); }); // v13.61: opções extras da linha do módulo · v13.83: "livre" vale sem nível
     if (n <= 0) continue;
@@ -2063,7 +2073,7 @@ const Auth = {
   can(perm) {
     if (!this.id) return false;
     if (String(perm).startsWith('pdi.')) return this.perfil === 'GESTOR' && this.podeEditarNuvem; // v13.38: PDI só do Master; o banco só entrega a coleção pdi ao nível admin
-    if (this.usuario && this.usuario.perfil !== 'MASTER' && this._v83 !== Acesso.ativo()) this.recalcular(); // v13.83: recurso liberado depois do login (config/recursos chega depois)
+    if (this.usuario && this.usuario.perfil !== 'MASTER' && this._v83 !== this.chaveRec()) this.recalcular(); // v13.83: recurso liberado depois do login (config/recursos chega depois)
     const lista = this.matriz[this.perfil] || [];
     if (!lista.some(p => p === '*' || p === perm || (p.endsWith('.*') && perm.startsWith(p.slice(0, -1))))
       && !(this.PERM_SUPERVISOR.includes(perm) && this.perfil !== 'GESTOR' && !this.loja && this.ehSupervisor())) return false; // v13.83: perfil Loja não ganha o bônus de supervisor
@@ -2086,7 +2096,8 @@ const Auth = {
     this.recalcular();
   },
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
-  recalcular() { const u = this.usuario; if (!u) return; this._v83 = Acesso.ativo(); this.matriz = { ...this.matriz, OPERACIONAL: u.perfil === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
+  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
+  recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: u.perfil === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
   loja: false,
   limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
 };
@@ -2935,6 +2946,7 @@ const Receita = {
 
 /* ============================== 7. UI ============================== */
 const ICON = {
+  livro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5Z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/><path d="M9 10.5h6"/><path d="M12 13.5v-.01"/></svg>', // v13.86
   pacote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 7.5 8.5-4 8.5 4v9l-8.5 4-8.5-4Z"/><path d="m3.5 7.5 8.5 4 8.5-4"/><path d="M12 11.5v9"/><path d="m7.8 5.5 8.5 4"/></svg>', // v13.60 · Solicitações Operacionais
   equilibrio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M7 20h10"/><path d="M5 7h14"/><path d="m5 7-3 6a3 3 0 0 0 6 0Z"/><path d="m19 7-3 6a3 3 0 0 0 6 0Z"/></svg>', // v13.50
   pessoas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.4.2 4.2 1.8 4.8 4.8"/></svg>',
@@ -3512,7 +3524,7 @@ const GestaoAmbientes = {
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a RC).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -13159,6 +13171,7 @@ const Sessao = {
     try { Retaguarda.liberarAdq?.(); Contratos.pararVigia?.(); } catch { }
     Repo._unsubs.forEach(x => { try { x(); } catch { } }); Repo._unsubs = []; Repo.cols = {}; Repo.prontas.clear(); Repo.rev++;
     try { const h = $('#fcxHost'); if (h) { h.innerHTML = ''; h.hidden = true; } FCX._cache = null; FCX._cacheProm = null; } catch { }
+    try { const h = $('#contabilHost'); if (h) { h.innerHTML = ''; h.hidden = true; } ModContabil._st = null; document.body.classList.remove('ct-on'); } catch { } /* v13.86 */
     const mod = $('#modais'); if (mod) mod.innerHTML = ''; document.body.classList.remove('modal-aberto', 'nav-open', 'fcx-on');
     Auth.limpar(); App.rota = 'menu';
     try { history.replaceState(null, '', location.pathname); } catch { }
@@ -13266,7 +13279,7 @@ const Acessos = {
     if (u.perfil === 'MASTER') return '<span class="pill navy">Acesso total</span>';
     const p = u.permissoes || {}, v83 = Acesso.ativo(), sub = (v83 && p.sub) || {};
     const rec = m => { const s = sub[m.id]; if (!s || !p[m.id]) return ''; const nt = Acesso.telas(m.id).length; return [s.telas ? ` · ${s.telas.length}/${nt} telas` : '', s.acoes ? ` · ${s.acoes.length} ações` : ''].join(''); }; // v13.83
-    return `<div class="acc-chips">${MATRIZ_MODULOS.filter(m => !m.v1383 || v83).map(m => `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${rec(m)}${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
+    return `<div class="acc-chips">${MATRIZ_MODULOS.filter(m => matrizOk(m, v83)).map(m => `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${rec(m)}${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
   },
   /** v13.12 · Abre a Gestão de Acessos já na pessoa (vindo do cadastro do RH): com usuário → Permissões; sem → destaque para ativar. */
   irPara(fid) {
@@ -13344,7 +13357,7 @@ const Acessos = {
       const nT = ts.filter(onT).length, nA = acs.filter(p => !fora.has(p) && (!s.acoes || s.acoes.includes(p))).length;
       return `<tr class="acc-sub" data-sub-mod="${m.id}"><td colspan="4"><details ${abertos.has(m.id) ? 'open' : ''}><summary>Telas e ações${ts.length ? ` · <b>${nT}/${ts.length} telas</b>` : ''}${acs.length ? ` · <b>${nA}/${acs.length} ações</b>` : ''}</summary><div class="acc-sub-g">${telasH}${acH}</div></details></td></tr>`;
     };
-    const mods = MATRIZ_MODULOS.filter(m => !m.v1383 || v83);
+    const mods = MATRIZ_MODULOS.filter(m => matrizOk(m, v83));
     return `<div class="tbl-wrap"><table class="nolabel acc-matriz"><thead><tr><th>Módulo</th><th>Ler</th><th>Modificar</th><th>Excluir</th></tr></thead><tbody>
       ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre]) => { const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
         if (livre && !v83) return '';
@@ -13360,7 +13373,7 @@ const Acessos = {
   lerMatriz(m) {
     const out = {}, v83 = Acesso.ativo(), sub = {};
     MATRIZ_MODULOS.forEach(mod => {
-      if (mod.v1383 && !v83) return;
+      if (!matrizOk(mod, v83)) return;
       out[mod.id] = ['excluir', 'modificar', 'ler'].find(v => $(`[data-mod="${mod.id}"][data-niv="${v}"]`, m)?.checked) || '';
       (mod.extras || []).forEach(([k, , , livre]) => { if ((out[mod.id] || (livre && v83)) && $(`[data-extra="${k}"]`, m)?.checked) out[k] = true; }); // v13.61: + opções extras
       if (!v83 || !out[mod.id]) return; /* v13.83: sub-permissões — só grava o recorte (tudo marcado = sem recorte) */
@@ -17782,6 +17795,47 @@ window.Rodape = Rodape;
 /* =====================================================================
    APP — menu global, roteamento, auditoria, backup e inicialização
    ===================================================================== */
+/* =====================================================================
+   v13.86 · MÓDULO 12 — CONTABILIDADE (Módulo Contábil)
+   A tela mora em contabilidade.html, num iframe de contêiner fixo (#contabilHost, como o FCX), e fala direto com
+   /api/contabil — mesma origem, então a sessão do painel vale lá. As regras contábeis ficam no servidor e no banco
+   (partidas dobradas, lançamentos intangíveis, estorno ligado ao original). Só existe na versão Netlify (Postgres).
+   O plano de contas do FCX passa a vir daqui (de-para FCX → plano único): o FCX só consulta.
+   ===================================================================== */
+const ModContabil = {
+  _st: null, _stP: null, abaInicial: null,
+  netlify: () => !!Cloud.base?.netlify,
+  stat() {
+    if (!this.netlify()) return 'disponível na versão Netlify';
+    const s = this._st; if (!s) { this.status().catch(() => { }); return '…'; }
+    if (!s.plano?.criado) return 'plano de contas ainda não criado';
+    return `${s.plano.analiticas} contas analíticas · ${s.lancamentos.total} lançamento(s)${s.depara?.pendente ? ` · ${s.depara.pendente} conta(s) do FCX a revisar` : ''}`;
+  },
+  status() {
+    if (this._stP) return this._stP;
+    this._stP = Cloud.base._req('GET', '/api/contabil').then(j => { this._st = j; if (App.rota === 'menu') App.agendarRender(); return j; });
+    this._stP.catch(() => { }).finally(() => setTimeout(() => { this._stP = null; }, 60000));
+    return this._stP;
+  },
+  render() {
+    const cab = `<div class="page-head"><div><h1>Contabilidade</h1><p>Plano de contas único, lançamentos em partidas dobradas, relatórios contábeis e parâmetros tributários (Lucro Real com LALUR ou Lucro Presumido; DRE no modelo atual ou na Reforma). O FCX lê o plano de contas daqui, em modo consulta.</p></div>`;
+    if (!this.netlify()) return cab + `</div><div class="panel ct-aviso"><h2>Disponível na versão Netlify do painel</h2><p style="margin:6px 0 0">O Módulo Contábil grava num banco PostgreSQL com travas próprias (partidas dobradas, lançamentos que não se alteram nem se excluem, estorno ligado ao original e cadeia de conferência). Por isso ele funciona só na versão publicada no Netlify. Aqui, o FCX mostra o plano de contas em modo consulta.</p></div>`;
+    return cab + `<div class="row" style="gap:8px"><a class="btn sec sm" href="contabilidade.html" target="_blank" rel="noopener">Abrir em nova aba</a></div></div>`;
+  },
+  /** Mostra/oculta o contêiner fixo conforme a rota. Chamado a cada App.render(). */
+  sincronizar() {
+    const vis = App.rota === 'contabil' && this.netlify() && !!Sessao.ativa, host = $('#contabilHost');
+    document.body.classList.toggle('ct-on', vis); if (host) host.hidden = !vis;
+    if (vis) this.montar();
+  },
+  montar() {
+    const host = $('#contabilHost'); if (!host || $('#ctFrame')) return;
+    host.innerHTML = `<iframe id="ctFrame" class="fcx-frame ct-frame" title="Módulo Contábil" src="contabilidade.html?embed=1"></iframe>`;
+  },
+  frame() { try { return $('#ctFrame')?.contentWindow || null; } catch { return null; } },
+};
+window.ModContabil = ModContabil;
+
 const MODULOS = [
   { id: 'pessoal', num: 'Módulo 1', titulo: 'Gestão de Pessoal', icon: 'pessoas', perm: 'pessoal.ver',
     desc: 'Equipe, jornada, banco de horas, férias e o PDI com matriz de competências e parecer para o colaborador.',
@@ -17805,6 +17859,9 @@ const MODULOS = [
   { id: 'fcx', num: 'Módulo 4', titulo: 'FCX · Fluxo de Caixa', curto: 'FCX', icon: 'caixa', perm: 'fcx.ver',
     desc: 'Projeção diária de caixa, orçamento, painel analítico e a DFC: extratos OFX cruzados com as premissas do FCX (realizado × previsto).',
     stat: () => 'receitas 2025 · saídas 2026' },
+  { id: 'contabil', num: 'Módulo 12', titulo: 'Contabilidade', curto: 'Contabilidade', icon: 'livro', perm: 'contabil.ver', ver: () => Recursos.ativo('contabil_v1386') && Auth.can('contabil.ver'), // v13.86
+    desc: 'Plano de contas único (sintéticas e analíticas com classificação automática), partidas dobradas com estorno, LALUR, DRE no modelo atual e na Reforma (IBS/CBS/IS) e os relatórios contábeis. O FCX lê o plano de contas daqui.',
+    stat: () => ModContabil.stat() },
   { id: 'retaguarda', num: 'Módulo 5', titulo: 'Retaguarda Financeira', curto: 'Retaguarda', icon: 'retaguarda', perm: 'retaguarda.ver',
     desc: 'Operação das lojas: conciliação Credsystem, faltas de caixa, IEO com alerta por WhatsApp e auditoria de taxas e repasses das adquirentes.',
     stat: () => { if (!Repo.prontas.has('credsystem') || !Repo.prontas.has('faltas')) return '…'; const r = Retaguarda.rankingIEO(Retaguarda.mesAtual()).ranking, v = r.filter(x => x.zona === 'vermelha').length; return v ? `${v} loja${v > 1 ? 's' : ''} em zona vermelha` : `IEO médio ${Fmt.num(r.reduce((a, x) => a + x.pontos, 0) / (r.length || 1), 1)}`; } },
@@ -17840,7 +17897,7 @@ const ADMIN = [
  */
 const NAV_GRUPOS = [
   { titulo: 'Pessoas & Operação', ids: ['menu', 'pessoal', 'rh', 'lojas', 'contratos', 'solicitacoes'] },
-  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
+  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
   { titulo: 'Sistema & Segurança', ids: ['liberacao', 'acessos', 'auditoria', 'backup'] },
 ];
 const NAV_SUB = {
@@ -17916,7 +17973,7 @@ const App = {
     const main = $('#main');
     const ativo = document.activeElement, idAtivo = ativo && ativo.id, sel = ativo && 'selectionStart' in ativo ? [ativo.selectionStart, ativo.selectionEnd] : null;
     const crumbs = this.rota === 'menu' ? '' : `<div class="crumbs"><button data-a="nav" data-r="menu">Painel de Gestão</button><span>/</span><span>${esc(([...MODULOS, ...ADMIN].find(m => m.id === this.rota) || {}).titulo || '')}</span></div>`;
-    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
+    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
     Acesso.ajustarAba(this.rota); // v13.83: aba não liberada → primeira liberada
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
     main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
@@ -17933,6 +17990,7 @@ const App = {
     Liberacao.checarNovos();
     if (idAtivo) { const el = document.getElementById(idAtivo); if (el && el !== document.activeElement) { el.focus(); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch { } } }
     FCX.sincronizar(); // o iframe do FCX vive fora de #main e não é recriado
+    ModContabil.sincronizar(); // v13.86: idem para o Módulo Contábil
     Rodape.atualizar(); // v13.20: rodapé "centro de comando"
   },
   /** Barra superior + navegação global. No celular/tablet (≤ 900px) a navegação vira gaveta (hambúrguer). */
@@ -18307,6 +18365,32 @@ window.Recursos = Recursos; /* v13.77: o FCX (iframe) consulta os recursos liber
 /* v13.78 · ponte de leitura para o Recebível Diário do FCX (iframe): cartão do Resumo do Fechamento (Auditoria de
    Adquirentes) e prestação da Conciliação dos recebimentos (Retaguarda) do dia — só leitura, pelo banco do ambiente. */
 window.PainelFCX = {
+  /** v13.86 · plano de contas do FCX: lista somente leitura vinda do Módulo Contábil (de-para FCX → plano único). */
+  async planoContas() {
+    if (!Recursos.ativo('contabil_v1386')) return { ok: false, motivo: 'recurso' };
+    if (!Cloud.base?.netlify) return { ok: false, motivo: 'netlify' };
+    try { const j = await Cloud.base._req('GET', '/api/contabil/fcx-contas'); const m = MODULOS.find(x => x.id === 'contabil'); return { ok: true, ...j, podeAbrir: !!(m && App.pode(m)) }; }
+    catch (e) { return { ok: false, motivo: e.status === 403 ? 'acesso' : 'erro', erro: e.message }; }
+  },
+  /** v13.86 · contas que o FCX passou a usar (importação de planilha) e o plano ainda não conhece: ficam para revisão no Contábil. */
+  async registrarContasFCX(contas) {
+    if (!Recursos.ativo('contabil_v1386') || !Cloud.base?.netlify || !contas || !contas.length) return { registradas: 0 };
+    try { const r = await Cloud.base._req('POST', '/api/contabil/fcx-contas', { contas }); ModContabil._st = null; return r; } catch (e) { return { registradas: 0, erro: e.message }; }
+  },
+  abrirContabil(aba) {
+    const m = MODULOS.find(x => x.id === 'contabil'); if (!m || !App.pode(m)) return UI.toast('Seu acesso não abre o Módulo Contábil (Gestão de Acessos › Contabilidade).');
+    ModContabil.abaInicial = aba || 'depara'; App.ir('contabil');
+    const w = ModContabil.frame(); if (w) try { w.postMessage({ tipo: 'ct-aba', aba: ModContabil.abaInicial }, location.origin); } catch { }
+  },
+  /** v13.86 · para a importação no Módulo Contábil: as contas do FCX e as que têm saídas ou orçamento lançados. */
+  async contasFCX() {
+    if (!Auth.can('fcx.ver')) throw new Error('Seu acesso não lê o FCX.');
+    FCX.montar(); for (let t = 0; t < 300 && !FCX.api(); t++) await sleep(100);
+    const api = FCX.api(); if (!api) throw new Error('O FCX não carregou. Abra o FCX uma vez e tente de novo.');
+    return { contas: api.contas(), usadas: api.contasUsadas ? api.contasUsadas() : [] };
+  },
+  /** v13.86 · o Contábil mudou o de-para: o FCX relê a lista. */
+  planoAlterado() { ModContabil._st = null; try { const w = $('#fcxFrame')?.contentWindow; if (w && w.fcx1386Plano) w.fcx1386Plano(); } catch { } },
   /** v13.82 · o Recebível Diário monta o próprio documento de impressão (só as páginas do relatório) e abre a prévia do painel. */
   imprimirDocumento(titulo, html, nome) { Documento.previa(titulo, html, nome); },
   async recebiveis(dia) {

@@ -18,7 +18,16 @@
    POST   /api/contabil/encerramento                  { ano } → zera as contas de resultado contra Lucros ou Prejuízos Acumulados
    GET    /api/contabil/relatorios/<tipo>?de=&ate=&modelo=atual|reforma&ano=&conta=
           tipo: diario | razao | balancete | dre | balanco | dmpl | dra | dva | lalur
-   GET    /api/contabil/integridade                   → confere a cadeia de hashes e o equilíbrio de todos os lançamentos */
+   GET    /api/contabil/integridade                   → confere a cadeia de hashes e o equilíbrio de todos os lançamentos
+   v13.86 · Parte 2 — o plano de contas do FCX passa a ser lido daqui (de-para FCX → plano único):
+   POST   /api/contabil/importar-fcx                  { contas: [rótulos do FCX], usadas?: [rótulos com saídas/orçamento], remapear? }
+                                                        → cria o plano padrão se o banco não tem plano, mapeia cada rótulo (regra do ERP + IA),
+                                                          cria as poucas contas que faltam e acrescenta as contas da Reforma (IBS/CBS/IS) para o FCX
+   GET    /api/contabil/depara                        → o de-para inteiro, com o resumo (automáticos, revisados, pendentes)
+   POST   /api/contabil/depara                        { rotulo, conta? } → nova conta para o FCX, criada no Módulo Contábil
+   PUT    /api/contabil/depara                        { itens: [{ chave, conta?, status?, ativa? }] } → revisão (conta escolhida = "revisado")
+   GET    /api/contabil/fcx-contas                    → lista somente leitura para o FCX (quem lê o FCX lê esta lista)
+   POST   /api/contabil/fcx-contas                    { contas: [rótulos] } → rótulos que o FCX usa e o plano ainda não conhece (ficam para revisão) */
 import { createHash, randomUUID } from 'node:crypto';
 import { q, tx } from '../lib/db.mjs';
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
@@ -134,16 +143,63 @@ async function relatorio(tipo, url, params) {
 const NAO_MOEDA = new Set(['nivel', 'ano', 'meses', 'cbs', 'ibs', 'is', 'pisCofins', 'icmsIss', 'irpjC', 'csllC', 'irpjS', 'csllS', 'grupo', 'numero', 'ok', 'confere', 'teste']);
 function emReais(o, k) { if (typeof o === 'number') return NAO_MOEDA.has(k) ? o : M.reais(o); if (Array.isArray(o)) return o.map(x => emReais(x, k)); if (o && typeof o === 'object') return Object.fromEntries(Object.entries(o).map(([kk, v]) => [kk, emReais(v, kk)])); return o; }
 
+/* ---------------------------------------------------------------- v13.86 · de-para FCX → plano de contas */
+const deparaDb = r => ({ chave: r.chave, erpCodigo: r.erp_codigo, erpNome: r.erp_nome, agrupador: r.agrupador, conta: r.conta, contaNome: r.conta_nome || null, status: r.status, confianca: r.confianca == null ? null : Number(r.confianca), motivo: r.motivo, fonte: r.fonte, ativa: r.ativa, atualizadoEm: r.atualizado_em, atualizadoPor: r.atualizado_por });
+async function lerDepara(t = q) { return (await t(`SELECT d.*, c.nome AS conta_nome FROM contab_depara d LEFT JOIN contab_contas c ON c.codigo = d.conta WHERE d.origem = 'fcx'`)).map(deparaDb).sort((a, b) => M.cmpRotuloFCX(a.chave, b.chave)); }
+const resumoDepara = l => ({ total: l.length, automatico: l.filter(x => x.status === 'automatico').length, revisado: l.filter(x => x.status === 'revisado').length, pendente: l.filter(x => x.status === 'pendente').length, agrupadores: l.filter(x => x.agrupador).length, doContabil: l.filter(x => x.fonte === 'contabil').length, inativas: l.filter(x => !x.ativa).length });
+/** Nível do usuário no FCX (0 nenhum · 1 ler · 2 modificar · 3 excluir); o Master tem tudo. */
+function nivelFcx(sess) { if (!sess || sess.trocaPendente) return 0; if (sess.nivel >= NIVEL.admin) return 3; const n = ['', 'ler', 'modificar', 'excluir'].indexOf(sess.usuario?.permissoes?.fcx || ''); return sess.perfil === 'OPERACIONAL' ? Math.max(1, n) : Math.max(0, n); }
+/** 'novo:<k>' → conta analítica do complemento (criada uma vez, pelo nome, debaixo da mãe). podeCriar=false: só procura. */
+async function contaNova(t, k, contas, uid, podeCriar) {
+  const n = M.NOVAS_CONTAS_FCX[k]; if (!n) return null;
+  const ja = contas.find(c => c.pai === n.pai && M.normalizar(c.nome) === M.normalizar(n.nome)); if (ja) return { codigo: ja.codigo, criada: false };
+  if (!podeCriar || !contas.some(c => c.codigo === n.pai && c.tipo === 'S')) return null;
+  const codigo = M.proximoCodigo(n.pai, contas), c = M.validarConta({ codigo, nome: n.nome, tipo: 'A', dre: n.dre, dva: n.dva }, contas);
+  await t(`INSERT INTO contab_contas (codigo, nome, grupo, natureza, tipo, pai, nivel, redutora, dre, dva, tributos, modelo_tributario, ia, criado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+    [c.codigo, c.nome, c.grupo, c.natureza, c.tipo, c.pai, c.nivel, c.redutora, c.dre, c.dva, c.tributos, c.modeloTributario, JSON.stringify({ origem: 'de-para FCX', motivos: ['complemento do plano padrão para contas que o FCX já usava'] }), uid]);
+  contas.push({ ...c, ativa: true }); return { codigo, criada: true };
+}
+/** Mapeia e grava rótulos do FCX. Revisados nunca mudam; já mapeados só mudam com remapear. */
+async function gravarDepara(t, rotulos, { usadas = [], uid, podeCriar = false, remapear = false, fonte = 'fcx', conta: contaFixa } = {}) {
+  const contas = await lerContas(t), existentes = new Map((await t(`SELECT chave, status FROM contab_depara WHERE origem = 'fcx'`)).map(r => [r.chave, r.status]));
+  const alvo = new Set(rotulos.map(x => String(x ?? '').trim()).filter(x => x && x.length <= 200)), mapa = M.mapearFCX([...new Set([...existentes.keys(), ...alvo])], contas, { usadas });
+  let novos = 0, atualizados = 0; const criadas = [];
+  for (const m of mapa) {
+    if (!alvo.has(m.chave)) continue;
+    const st = existentes.get(m.chave); if (st && (st === 'revisado' || !remapear)) continue;
+    let conta = contaFixa || m.destino, status = contaFixa ? 'revisado' : m.status, motivo = contaFixa ? 'conta escolhida no Módulo Contábil' : m.motivo;
+    if (conta?.startsWith('novo:')) { const r = await contaNova(t, conta.slice(5), contas, uid, podeCriar); if (r?.criada) criadas.push(r.codigo); conta = r?.codigo || null; if (!conta) { status = 'pendente'; motivo += ' (a conta nova é criada por quem gerencia o plano de contas)'; } }
+    const c = conta && contas.find(x => x.codigo === conta); if (conta && (!c || (c.tipo === 'S') !== m.agrupador)) { conta = null; status = 'pendente'; }
+    await t(`INSERT INTO contab_depara (origem, chave, erp_codigo, erp_nome, agrupador, conta, status, confianca, motivo, fonte, criado_por, atualizado_por) VALUES ('fcx',$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10)
+      ON CONFLICT (origem, chave) DO UPDATE SET erp_codigo = EXCLUDED.erp_codigo, erp_nome = EXCLUDED.erp_nome, agrupador = EXCLUDED.agrupador, conta = EXCLUDED.conta, status = EXCLUDED.status, confianca = EXCLUDED.confianca, motivo = EXCLUDED.motivo, atualizado_por = EXCLUDED.atualizado_por`,
+      [m.chave, m.erpCodigo, m.erpNome, m.agrupador, conta, status, contaFixa ? 1 : m.conf, motivo.slice(0, 400), fonte, uid]);
+    if (st) atualizados++; else novos++;
+  }
+  return { novos, atualizados, criadas };
+}
+
 /* ---------------------------------------------------------------- rota */
 async function corpo(req) { const t = await req.text(); if (t.length > 2 * 1024 * 1024) throw new ErroHttp(413, 'Requisição grande demais.'); try { return t ? JSON.parse(t) : {}; } catch { throw new ErroHttp(400, 'Corpo inválido.'); } }
 const pgErro = e => { const m = String(e?.message || ''); if (e?.code === 'P0001' || m.startsWith('CONTAB:')) return new ErroHttp(422, m.replace(/^CONTAB:\s*/, '')); if (e?.code === '23505') return new ErroHttp(409, /estorno_de/.test(m + (e.constraint || '')) ? 'Este lançamento já foi estornado.' : 'Registro duplicado (código ou nome já existe nesta conta-mãe).'); if (e?.code === '23503') return new ErroHttp(409, 'A conta está em uso (lançamentos ou contas filhas) — inative em vez de excluir.'); if (e?.code === '23514') return new ErroHttp(422, 'Dados fora das regras do plano de contas (' + (e.constraint || 'verificação') + ').'); return e; };
 
 export default rota(async req => {
   const url = new URL(req.url), sess = await sessaoDe(req); if (!sess) return erro(401, 'Sessão encerrada. Faça login de novo.');
-  const perms = permissoesContabil(sess); exigir(perms, 'contabil.ver');
-  const partes = url.pathname.replace(/\/+$/, '').split('/').slice(3), [r0, r1] = partes, met = req.method;
+  const perms = permissoesContabil(sess), partes = url.pathname.replace(/\/+$/, '').split('/').slice(3), [r0, r1] = partes, met = req.method;
   try {
-    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, parametros: await lerParametros(), permissoes: [...perms] }); }
+    /* ---- v13.86 · lista do FCX (somente leitura no FCX): quem lê o FCX lê a lista; quem grava no FCX registra contas novas para revisão ---- */
+    if (r0 === 'fcx-contas') {
+      const nf = nivelFcx(sess); if (!nf && !perms.has('contabil.ver')) throw new ErroHttp(403, 'Seu acesso não lê o FCX.');
+      if (met === 'GET') { const l = await lerDepara(); return json(200, { contas: l.filter(x => x.ativa).map(x => ({ rotulo: x.chave, conta: x.conta, contaNome: x.contaNome, status: x.status, agrupador: x.agrupador, fonte: x.fonte })), inativas: l.filter(x => !x.ativa).map(x => x.chave), resumo: resumoDepara(l), podeGerir: perms.has('contabil.plano') }); }
+      if (met === 'POST') {
+        if (!perms.has('contabil.plano') && !(nf >= 2 && sess.perfil !== 'LOJA')) throw new ErroHttp(403, 'Seu acesso ao FCX é somente leitura.');
+        const d = await corpo(req), rot = (Array.isArray(d.contas) ? d.contas : []).slice(0, 2000);
+        const [n] = await q('SELECT count(*)::int AS n FROM contab_contas'); if (!n.n) return json(200, { registradas: 0, semPlano: true });
+        const r = await tx(t => gravarDepara(t, rot, { usadas: rot, uid: sess.uid, podeCriar: perms.has('contabil.plano') }));
+        return json(200, { registradas: r.novos, criadas: r.criadas });
+      }
+    }
+    exigir(perms, 'contabil.ver');
+    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
 
     /* ---- plano de contas ---- */
     if (r0 === 'contas') {
@@ -167,6 +223,48 @@ export default rota(async req => {
         return json(200, { conta: (await lerContas()).find(x => x.codigo === codigo) });
       }
       if (met === 'DELETE') { const [u] = await q('SELECT EXISTS (SELECT 1 FROM contab_partidas WHERE conta = $1) AS mov, EXISTS (SELECT 1 FROM contab_contas WHERE pai = $1) AS fil', [codigo]); if (u.mov || u.fil) throw new ErroHttp(409, u.mov ? 'A conta já tem lançamentos: não pode ser excluída (inative-a).' : 'A conta tem contas filhas: exclua ou mova as filhas antes.'); await q('DELETE FROM contab_contas WHERE codigo = $1', [codigo]); return json(200, { ok: true }); }
+    }
+    /* ---- v13.86 · importação do FCX e revisão do de-para ---- */
+    if (r0 === 'importar-fcx' && met === 'POST') {
+      exigir(perms, 'contabil.plano');
+      const d = await corpo(req), rot = (Array.isArray(d.contas) ? d.contas : []).slice(0, 5000), usadas = (Array.isArray(d.usadas) ? d.usadas : []).slice(0, 5000);
+      if (!rot.length && !usadas.length) throw new ErroHttp(422, 'Nenhuma conta do FCX recebida: abra o FCX ao menos uma vez e tente de novo.');
+      const r = await tx(async t => {
+        const [n] = await t('SELECT count(*)::int AS n FROM contab_contas'); let planoCriado = 0;
+        if (!n.n) { for (const c of M.PLANO_PADRAO) await t(`INSERT INTO contab_contas (codigo, nome, grupo, natureza, tipo, pai, nivel, redutora, dre, dva, tributos, modelo_tributario, criado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`, [c.codigo, c.nome, c.grupo, c.natureza, c.tipo, c.pai, c.nivel, c.redutora, c.dre, c.dva, c.tributos, c.modeloTributario, sess.uid]); planoCriado = M.PLANO_PADRAO.length; }
+        const g = await gravarDepara(t, [...rot, ...usadas], { usadas, uid: sess.uid, podeCriar: true, remapear: !!d.remapear });
+        const contas = new Map((await lerContas(t)).map(c => [c.codigo, c])); let complemento = 0;
+        for (const [rotulo, conta] of M.COMPLEMENTO_FCX) { if (contas.get(conta)?.tipo !== 'A') continue; const p = M.rotuloFCX(rotulo);
+          const ins = await t(`INSERT INTO contab_depara (origem, chave, erp_codigo, erp_nome, agrupador, conta, status, confianca, motivo, fonte, criado_por, atualizado_por) VALUES ('fcx',$1,$2,$3,false,$4,'automatico',1,$5,'contabil',$6,$6) ON CONFLICT (origem, chave) DO NOTHING RETURNING chave`,
+            [rotulo, p.codigo, p.nome, conta, 'Reforma Tributária (LC 214/2025): conta oferecida ao FCX pelo Módulo Contábil', sess.uid]); complemento += ins.length; }
+        return { planoCriado, ...g, complemento };
+      });
+      const l = await lerDepara(); return json(200, { ...r, resumo: resumoDepara(l) });
+    }
+    if (r0 === 'depara') {
+      if (met === 'GET') { const l = await lerDepara(); return json(200, { itens: l, resumo: resumoDepara(l) }); }
+      exigir(perms, 'contabil.plano');
+      if (met === 'POST') {
+        const d = await corpo(req), rotulo = String(d.rotulo || '').trim().replace(/\s+/g, ' '); if (rotulo.length < 3 || rotulo.length > 200) throw new ErroHttp(422, 'Informe o nome da conta do FCX (de 3 a 200 caracteres), de preferência com o código do ERP: "4.10.17 – (-) Nova despesa".');
+        if ((await q(`SELECT 1 FROM contab_depara WHERE origem = 'fcx' AND chave = $1`, [rotulo])).length) throw new ErroHttp(409, 'Esta conta já está na lista do FCX.');
+        if (d.conta) { const c = (await lerContas()).find(x => x.codigo === d.conta); if (!c || c.tipo !== 'A' || !c.ativa) throw new ErroHttp(422, 'Escolha uma conta analítica ativa do plano.'); }
+        await tx(t => gravarDepara(t, [rotulo], { usadas: [rotulo], uid: sess.uid, podeCriar: true, fonte: 'contabil', conta: d.conta || undefined }));
+        return json(201, { item: (await lerDepara()).find(x => x.chave === rotulo) });
+      }
+      if (met === 'PUT') {
+        const d = await corpo(req), itens = Array.isArray(d.itens) ? d.itens : [d], contas = new Map((await lerContas()).map(c => [c.codigo, c])), atual = new Map((await lerDepara()).map(x => [x.chave, x]));
+        if (!itens.length || itens.length > 2000) throw new ErroHttp(422, 'Informe de 1 a 2000 itens.');
+        await tx(async t => { for (const it of itens) {
+          const a = atual.get(String(it.chave || '')); if (!a) throw new ErroHttp(404, `Conta do FCX não encontrada: ${it.chave}`);
+          const conta = it.conta === undefined ? a.conta : it.conta || null, c = conta ? contas.get(conta) : null;
+          if (conta && (!c || !c.ativa)) throw new ErroHttp(422, `Conta ${conta} não existe ou está inativa.`);
+          if (c && (c.tipo === 'S') !== a.agrupador) throw new ErroHttp(422, a.agrupador ? `"${a.chave}" é um agrupador do ERP: aponte para uma conta sintética.` : `"${a.chave}" recebe lançamentos: aponte para uma conta analítica (${conta} é sintética).`);
+          const status = it.status === 'pendente' ? 'pendente' : conta ? 'revisado' : 'pendente';
+          await t(`UPDATE contab_depara SET conta = $2, status = $3, ativa = $4, confianca = CASE WHEN $3 = 'revisado' THEN 1 ELSE confianca END, motivo = CASE WHEN $3 = 'revisado' AND (conta IS DISTINCT FROM $2 OR status <> 'revisado') THEN 'revisado no Módulo Contábil' ELSE motivo END, atualizado_por = $5 WHERE origem = 'fcx' AND chave = $1`,
+            [a.chave, conta, status, it.ativa === undefined ? a.ativa : !!it.ativa, sess.uid]);
+        } });
+        const l = await lerDepara(), ch = new Set(itens.map(i => String(i.chave))); return json(200, { itens: l.filter(x => ch.has(x.chave)), resumo: resumoDepara(l) });
+      }
     }
     if (r0 === 'classificar' && met === 'POST') { const d = await corpo(req); return json(200, { sugestao: M.classificar(d.nome, await lerContas(), { pai: d.pai }) }); }
     if (r0 === 'plano-padrao' && met === 'POST') {

@@ -568,7 +568,7 @@ function seedIfEmpty(){
   if(state.config.costCenters.length===0) state.config.costCenters = SEED.costCenters.slice();
   if(!state.config.accounts.includes(CONTA_REPASSE)) state.config.accounts.push(CONTA_REPASSE);
   // catálogo oficial de plano de contas / centros de custo — mescla (nunca remove)
-  CATALOGO_OFICIAL.contas.forEach(c=>{ if(!state.config.accounts.includes(c)) state.config.accounts.push(c); });
+  if(!(fcxV1386() && state.config.planoContabil)) CATALOGO_OFICIAL.contas.forEach(c=>{ if(!state.config.accounts.includes(c)) state.config.accounts.push(c); }); // v13.86: com o plano do Módulo Contábil, a lista vem de lá
   CATALOGO_OFICIAL.centros.forEach(c=>{ if(!state.config.costCenters.includes(c)) state.config.costCenters.push(c); });
   // saídas
   if(state.saidas.length===0){
@@ -1505,6 +1505,7 @@ const ROTULOS_SALDO = {
    do caixa do dia e guardada como Recebível Futuro até o vencimento; prestação "Débito"; Resumo Consolidado de Entradas
    com gráfico; gráfico de barras da previsão semanal (o mesmo da visão do FCX).
    ========================================================= */
+function fcxV1386(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('contabil_v1386')); }catch(e){ return false; } } // v13.86: plano de contas lido do Módulo Contábil (somente leitura)
 function fcxV1385(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_periodo_v1385')); }catch(e){ return false; } } // v13.85: período por calendário + detalhamento diário em agrupadores
 function fcxV1378(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_recebivel_v1378')); }catch(e){ return false; } }
 /** v13.79: formato monetário oficial com centavos (R$ 1.000,00) em todas as células do relatório. */
@@ -1884,7 +1885,7 @@ const MANAGE_TABS = [
   {id:'vendas', label:'Vendas Históricas'},
   {id:'saidas', label:'Saídas'},
   {id:'orcamento', label:'Orçamento de Caixa'},
-  {id:'contas', label:'Contas & Centros de Custo'},
+  {id:'contas', label:'Contas & Centros de Custo'}, /* v13.86: com o Módulo Contábil, o plano é só consulta */
   {id:'backup', label:'Backup'},
 ];
 function setManageTab(id){ state.tab=id; render(); } window.setManageTab=setManageTab;
@@ -2402,7 +2403,7 @@ function importSaidasFile(input){
       const iso = excelDateToISO(norm.date); if(!iso) return;
       const conta = (norm.conta||'(sem conta)').toString().trim();
       const centro = (norm.centro||'(sem centro de custo)').toString().trim();
-      if(!state.config.accounts.includes(conta)) state.config.accounts.push(conta);
+      if(!state.config.accounts.includes(conta)){ state.config.accounts.push(conta); fcx1386Nova(conta); } // v13.86: conta nova → revisão no Módulo Contábil
       if(!state.config.costCenters.includes(centro)) state.config.costCenters.push(centro);
       const extra = rd ? { ...(norm.formaPagamento!=null && String(norm.formaPagamento).trim() ? {formaPagamento:String(norm.formaPagamento).trim()} : {}), ...(norm.valorLiquido!=null && norm.valorLiquido!=='' ? {valorLiquido:Number(norm.valorLiquido)||0} : {}), ...(norm.item!=null && String(norm.item).trim() ? {item:String(norm.item).trim()} : {}) } : {}; // v13.78
       parsed.push({id:uid(), date:iso, conta, centro, tipo:statusToTipo(norm.status), valor:Number(norm.valor)||0, fornecedor:(norm.fornecedor||'').toString().trim(), obs:(norm.obs||'').toString().trim(), ...extra});
@@ -2560,13 +2561,14 @@ function paginaSaidas(d){
 window.paginaSaidas = paginaSaidas;
 
 /* ---------- CONTAS & CENTROS DE CUSTO ---------- */
-function updateAccountName(idx, val){ state.config.accounts[idx]=val; scheduleAutosave(); }
+function updateAccountName(idx, val){ if(fcxV1386()) return fcx1386Aviso(); state.config.accounts[idx]=val; scheduleAutosave(); }
 window.updateAccountName = updateAccountName;
 function updateCentroName(idx, val){ state.config.costCenters[idx]=val; scheduleAutosave(); }
 window.updateCentroName = updateCentroName;
-function addAccount(){ state.config.accounts.push('Nova conta'); scheduleAutosave(); render(); } window.addAccount=addAccount;
+function addAccount(){ if(fcxV1386()) return fcx1386Aviso(); state.config.accounts.push('Nova conta'); scheduleAutosave(); render(); } window.addAccount=addAccount;
 function addCentro(){ state.config.costCenters.push('Novo centro de custo'); scheduleAutosave(); render(); } window.addCentro=addCentro;
 async function removeAccountIdx(idx){
+  if(fcxV1386()) return fcx1386Aviso(); // v13.86
   const nome = state.config.accounts[idx];
   if(state.saidas.some(s=>s.conta===nome) && !confirm('Existem saídas lançadas nesta conta. Remover mesmo assim?')) return;
   state.config.accounts.splice(idx,1); await saveConfig(); render();
@@ -2604,7 +2606,7 @@ function importOrcamentoFile(input){
       if(!mk) return;
       const conta = String(norm.conta).trim();
       const centro = norm.centro? String(norm.centro).trim() : '';
-      if(!state.config.accounts.includes(conta)) state.config.accounts.push(conta);
+      if(!state.config.accounts.includes(conta)){ state.config.accounts.push(conta); fcx1386Nova(conta); } // v13.86: conta nova → revisão no Módulo Contábil
       if(centro && !state.config.costCenters.includes(centro)) state.config.costCenters.push(centro);
       const entry = ensureOrcEntry(mk, conta, centro);
       entry.importado = Number(norm.valor)||0;
@@ -2767,7 +2769,99 @@ function renderTabBackup(){
   </div>`;
 }
 
+/* =========================================================
+   v13.86 · PLANO DE CONTAS LIDO DO MÓDULO CONTÁBIL (somente leitura no FCX)
+   A lista de contas do FCX vem do de-para do Módulo Contábil (cada rótulo do ERP aponta para uma conta do plano
+   único). Na abertura, o cadastro antigo é limpo: ficam as contas do Contábil + as que têm saídas ou orçamento
+   lançados (essas, se o Contábil não conhece, vão para revisão lá). Os rótulos não mudam: o painel analítico e a
+   DFC continuam agrupando pelos mesmos códigos.
+   ========================================================= */
+const fcxEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function fcx1386Aviso(){ showToast('O plano de contas é gerido no Módulo Contábil: aqui no FCX ele é só consulta.'); }
+function fcxContasUsadas(){
+  const u = new Set();
+  (state.saidas || []).forEach(x => { if(x && x.conta) u.add(x.conta); });
+  Object.values(state.orcamento || {}).forEach(m => Object.values(m || {}).forEach(e => { if(e && e.conta) u.add(e.conta); }));
+  u.add(CONTA_REPASSE);
+  return [...u];
+}
+const fcx1386Fila = new Set(), fcx1386Enviadas = new Set(); let fcx1386T = null;
+function fcx1386Nova(...contas){
+  if(!fcxV1386()) return;
+  contas.forEach(c => { if(c && !fcx1386Enviadas.has(c)) fcx1386Fila.add(c); });
+  if(!fcx1386Fila.size) return;
+  clearTimeout(fcx1386T);
+  fcx1386T = setTimeout(async () => {
+    const lote = [...fcx1386Fila]; fcx1386Fila.clear(); lote.forEach(c => fcx1386Enviadas.add(c));
+    try{ const r = await window.parent.PainelFCX.registrarContasFCX(lote); if(r && r.registradas) await fcx1386Plano(); }catch(e){ /* fica para a próxima abertura */ }
+  }, 1500);
+}
+async function fcx1386Plano(){
+  if(!fcxV1386() || !state.loaded) return;
+  let r;
+  try{ r = await window.parent.PainelFCX.planoContas(); }catch(e){ r = { ok:false, motivo:'erro', erro:String((e && e.message) || e) }; }
+  state._plano = r;
+  if(r && r.ok && r.contas && r.contas.length){
+    const lista = r.contas.map(c => c.rotulo), conhecidas = new Set(lista.concat(r.inativas || [])), usadas = fcxContasUsadas();
+    const nova = lista.concat(usadas.filter(c => !lista.includes(c)));
+    const sobra = state.config.accounts.filter(a => !nova.includes(a)).length;
+    if(JSON.stringify(nova) !== JSON.stringify(state.config.accounts) || !state.config.planoContabil){
+      state.config.accounts = nova;
+      state.config.planoContabil = { em: new Date().toISOString(), removidas: sobra + ((state.config.planoContabil && state.config.planoContabil.removidas) || 0) };
+      try{ await window.storage.set('esp2:config', JSON.stringify(state.config), true); }catch(e){ /* acesso de leitura: a lista do Contábil vale nesta sessão */ }
+    }
+    const faltam = usadas.filter(c => !conhecidas.has(c)); if(faltam.length) fcx1386Nova(...faltam);
+  }
+  if(state.screen === 'manage' && state.tab === 'contas') render();
+}
+window.fcx1386Plano = fcx1386Plano;
+function fcx1386Filtrar(v){
+  const q = String(v || '').toLowerCase().trim();
+  let n = 0; document.querySelectorAll('#fcxPlanoBody tr').forEach(tr => { const ok = !q || tr.dataset.busca.includes(q); tr.style.display = ok ? '' : 'none'; if(ok) n++; });
+  const c = document.getElementById('fcxPlanoN'); if(c) c.textContent = n;
+}
+window.fcx1386Filtrar = fcx1386Filtrar;
+function fcx1386Abrir(){ try{ window.parent.PainelFCX.abrirContabil('depara'); }catch(e){ fcx1386Aviso(); } }
+window.fcx1386Abrir = fcx1386Abrir;
+function fcx1386Atualizar(){ state._plano = null; render(); fcx1386Plano(); }
+window.fcx1386Atualizar = fcx1386Atualizar;
+function renderPlanoContabil1386(){
+  const pl = state._plano, mapa = new Map(((pl && pl.ok && pl.contas) || []).map(c => [c.rotulo, c]));
+  const ST = { automatico:['green','Automático'], revisado:['blue','Revisado'], pendente:['gold','Pendente de revisão'] };
+  const linhas = state.config.accounts.map(a => {
+    const c = mapa.get(a), st = !c ? ['grey', pl && pl.ok && pl.contas.length ? 'Aguardando o Contábil' : 'Só no FCX'] : c.agrupador ? ['grey','Agrupador'] : ST[c.status] || ST.pendente;
+    const cont = c && c.conta ? `<span style="font-variant-numeric:tabular-nums;font-weight:600">${fcxEsc(c.conta)}</span> · ${fcxEsc(c.contaNome || '')}` : '<span style="color:var(--ink-soft)">—</span>';
+    return `<tr data-busca="${fcxEsc((a + ' ' + (c ? (c.conta || '') + ' ' + (c.contaNome || '') : '')).toLowerCase())}"><td>${fcxEsc(a)}</td><td>${cont}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;
+  }).join('');
+  let nota;
+  if(!pl) nota = 'Carregando o plano de contas do Módulo Contábil…';
+  else if(pl.ok && pl.contas && pl.contas.length){ const r = pl.resumo || {}; nota = `O plano de contas é gerido no <b>Módulo Contábil</b>: aqui é só consulta. ${pl.contas.length} contas do FCX ligadas ao plano único${r.pendente ? ` · <b>${r.pendente}</b> pendente(s) de revisão no Contábil` : ''}. Contas novas que chegarem por importação de planilha entram na lista e vão para revisão lá.`; }
+  else if(pl.ok) nota = 'O Módulo Contábil ainda não importou as contas do FCX. Quem gerencia o plano de contas faz isso em <b>Contabilidade › De-para do FCX › Importar contas do FCX</b>. Até lá, a lista abaixo é a atual do FCX (só consulta).';
+  else if(pl.motivo === 'netlify') nota = 'O plano de contas é gerido no <b>Módulo Contábil</b>, que roda na versão Netlify do painel. Nesta versão a lista é só consulta; contas novas entram pelas importações de planilha.';
+  else if(pl.motivo === 'acesso') nota = 'O plano de contas é gerido no Módulo Contábil e o seu acesso não lê a lista de lá: abaixo, a lista atual do FCX (só consulta).';
+  else nota = `Não foi possível ler o plano do Módulo Contábil agora (${fcxEsc(pl.erro || 'erro')}). Abaixo, a lista atual do FCX (só consulta).`;
+  const abrir = pl && pl.ok && pl.podeAbrir ? '<button class="btn small" onclick="fcx1386Abrir()">Abrir no Módulo Contábil</button>' : '';
+  return `<div class="panel" id="fcxPlanoContabil">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><h2>Plano de contas <span class="badge grey" style="vertical-align:middle">Somente leitura</span></h2></div>
+      <div class="row-flex" style="gap:8px">${abrir}<button class="btn secondary small" onclick="fcx1386Atualizar()">Atualizar lista</button></div></div>
+      <p class="desc" role="note">${nota}</p>
+      <div class="row-flex" style="gap:10px;align-items:center;margin-bottom:10px"><input type="text" role="searchbox" id="fcxPlanoBusca" placeholder="Buscar conta do FCX ou conta contábil…" aria-label="Buscar no plano de contas" oninput="fcx1386Filtrar(this.value)" style="max-width:360px"><span class="desc" style="margin:0"><b id="fcxPlanoN">${state.config.accounts.length}</b> conta(s)</span></div>
+      <div class="scroll-table"><table><thead><tr><th>Conta do FCX</th><th>Conta contábil (plano único)</th><th>Situação</th></tr></thead><tbody id="fcxPlanoBody">${linhas}</tbody></table></div>
+    </div>`;
+}
 function renderTabContas(){
+  if(fcxV1386()){ // v13.86: plano em modo consulta; centros de custo continuam editáveis aqui
+    if(state._plano === undefined) setTimeout(fcx1386Plano, 0);
+    const cenRows = state.config.costCenters.map((c,i)=>`<tr><td><input type="text" value="${fcxEsc(c)}" oninput="updateCentroName(${i},this.value)"></td><td><button class="btn danger" onclick="removeCentroIdx(${i})">Remover</button></td></tr>`).join('');
+    return `${renderPlanoContabil1386()}
+    <div class="panel">
+      <h2>Centros de custo</h2>
+      <p class="desc">Os centros de custo continuam sendo cadastrados aqui no FCX.</p>
+      <div class="scroll-table"><table><thead><tr><th>Centro de custo</th><th></th></tr></thead><tbody>${cenRows}</tbody></table></div>
+      <div class="row-flex" style="margin-top:12px;"><button class="btn secondary small" onclick="addCentro()">+ adicionar centro de custo</button></div>
+    </div>
+    <div class="savebar"><button class="btn" onclick="handleSaveContas()">Salvar centros de custo</button></div>`;
+  }
   const accRows = state.config.accounts.map((a,i)=>`<tr><td><input type="text" value="${a}" oninput="updateAccountName(${i},this.value)"></td><td><button class="btn danger" onclick="removeAccountIdx(${i})">Remover</button></td></tr>`).join('');
   const cenRows = state.config.costCenters.map((c,i)=>`<tr><td><input type="text" value="${c}" oninput="updateCentroName(${i},this.value)"></td><td><button class="btn danger" onclick="removeCentroIdx(${i})">Remover</button></td></tr>`).join('');
   return `
@@ -2800,13 +2894,14 @@ window.FCXAPI = {
   /* Módulo 2 · Motor de Aluguel */
   vendasPrevistas: mk => Number((state.monthMeta[mk] || {}).metaComercial) || 0,   // meta comercial (vendas brutas) do mês
   contas: () => state.config.accounts.slice(),
+  contasUsadas: () => fcxContasUsadas(), // v13.86: para a importação no Módulo Contábil
   centros: () => state.config.costCenters.slice(),
   /** Grava/atualiza/remove linhas de saída vindas do Painel (ids fixos) e salva; devolve quantas mudaram. */
   sincronizarSaidas(upserts, remover){
     let n = 0;
     (remover || []).forEach(id => { const i = state.saidas.findIndex(s => s.id === id); if(i >= 0){ state.saidas.splice(i, 1); n++; } });
     (upserts || []).forEach(s => {
-      if(s.conta && !state.config.accounts.includes(s.conta)) state.config.accounts.push(s.conta);
+      if(s.conta && !state.config.accounts.includes(s.conta)){ state.config.accounts.push(s.conta); fcx1386Nova(s.conta); } // v13.86
       if(s.centro && !state.config.costCenters.includes(s.centro)) state.config.costCenters.push(s.centro);
       const i = state.saidas.findIndex(x => x.id === s.id);
       if(i < 0){ state.saidas.push({...s}); n++; return; }
@@ -2822,6 +2917,7 @@ window.FCXAPI = {
   await loadAll();
   render();
   try{ if(window.parent && window.parent.FCX && window.parent.FCX._pronto) window.parent.FCX._pronto(); }catch(e){}
+  if(fcxV1386()) fcx1386Plano(); // v13.86: lista do Módulo Contábil + limpeza do cadastro antigo
 })();
 </script>
 <script>
