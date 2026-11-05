@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")/.."
 PG="psql -h 127.0.0.1 -p 54329 -U postgres -v ON_ERROR_STOP=1 -q"
 for f in /tmp/srv_*.pid; do [ -f "$f" ] && kill "$(cat "$f")" 2>/dev/null || true; rm -f "$f"; done
-for db in painel_prod painel_hom painel_rc; do $PG -c "DROP DATABASE IF EXISTS $db" -c "CREATE DATABASE $db"; $PG -d $db -f netlify/database/migrations/20261027120000_esquema_inicial.sql; done
+for db in painel_prod painel_hom painel_rc; do $PG -c "DROP DATABASE IF EXISTS $db" -c "CREATE DATABASE $db"; for f in netlify/database/migrations/*_esquema_*.sql; do $PG -d $db -f "$f"; done; done
 $PG -d painel_prod -f tests/semente_ficticia.sql
 export PAINEL_URL_PROD=http://localhost:8891 PAINEL_URL_HOMOLOG=http://localhost:8892 PAINEL_URL_RC=http://localhost:8893 PAINEL_CHAVE_AMBIENTES="${CHAVE:-chave-de-teste-entre-ambientes-0123456789abcdef}"
 PAINEL_AMBIENTE=prod    NETLIFY_DB_URL=postgres://postgres@127.0.0.1:54329/painel_prod setsid nohup node tests/servidor-local.mjs 8891 > /tmp/srv_prod.log 2>&1 & echo $! > /tmp/srv_prod.pid

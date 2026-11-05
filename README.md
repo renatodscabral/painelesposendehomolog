@@ -188,3 +188,45 @@ Nunca edite uma migração já aplicada. Crie uma nova em `netlify/database/migr
 - Até 5,5 MB por registro e 15 MB por arquivo.
 - Listagens vêm em páginas de até 3,5 MB.
 - A leitura por IA de documentos não existe fora do claude.ai.
+
+## Módulo Contábil (v13.86 · Parte 1: backend)
+
+A API fica em `netlify/functions/contabil.mjs`, com o caminho `/api/contabil`. O motor está em `netlify/lib/contabil-motor.mjs` e o esquema em `netlify/database/migrations/20261106120000_esquema_contabil.sql`, que o Netlify DB aplica sozinho no deploy.
+
+**Plano de contas único.** As contas ficam numa árvore sintética/analítica, com códigos como `1.1.1.02.001`. Os grupos são 1 Ativo, 2 Passivo, 3 PL, 4 Receitas e 5 Custos/Despesas.
+- A natureza da conta vem do grupo, e as retificadoras têm a natureza oposta.
+- A conta-mãe precisa ser sintética, e só contas analíticas recebem lançamentos.
+- `POST /api/contabil/plano-padrao` cria o plano padrão do comércio varejista, com 184 contas.
+
+**Classificação automática.** `POST /api/contabil/classificar { nome }` sugere, a partir do nome:
+- grupo, natureza, tipo, conta-mãe e próximo código;
+- linhas da DRE e da DVA;
+- tributos: ICMS/PIS/COFINS/ISS no modelo atual e IBS/CBS/IS na reforma.
+
+As sugestões vêm de regras contábeis com pesos e de contas parecidas que já estão no plano. Quem cria uma conta pode mandar só o nome: o que faltar é preenchido pela classificação.
+
+**Partidas dobradas e intangibilidade.** As travas valem na API e no próprio Postgres:
+- o débito precisa ser igual ao crédito (conferido no COMMIT);
+- `UPDATE`, `DELETE` e `TRUNCATE` de lançamentos e partidas são bloqueados;
+- nenhuma partida pode ser incluída num lançamento já gravado;
+- não se lança em período fechado.
+
+A correção é feita por `POST /api/contabil/lancamentos/estorno`, ligada ao ID do lançamento original, com um único estorno por lançamento. Cada lançamento guarda o hash do anterior, e `GET /api/contabil/integridade` confere a cadeia.
+
+**Relatórios.** `GET /api/contabil/relatorios/<tipo>?de=&ate=` gera diario, razao (`&conta=`), balancete, dre (`&modelo=atual|reforma&anoReforma=`), balanco, dmpl, dra, dva e lalur (`&regime=real|presumido`).
+
+**Parâmetros.** `PUT /api/contabil/parametros` guarda:
+- o regime (`real` com LALUR, ou `presumido`, com a majoração da LC 224/2025 opcional);
+- o toggle da DRE (`dreModelo`) e as alíquotas e o ano da simulação da reforma;
+- a conta do encerramento e a data de fechamento.
+
+`POST /api/contabil/encerramento { ano }` apura o resultado e o leva para Lucros ou Prejuízos Acumulados.
+
+**Acesso.** O Master tem tudo. O Operacional segue a linha `contabil` da Gestão de Acessos:
+- Ler: consultar;
+- Modificar: lançar e mexer no plano;
+- Excluir: estornar, encerrar e alterar os parâmetros.
+
+O perfil Loja não tem acesso.
+
+**Teste.** Com o servidor local rodando sobre o `painel_teste`, rode `node tests/teste-contabil.mjs`. Ele usa dados fictícios e cobre 29 verificações.
