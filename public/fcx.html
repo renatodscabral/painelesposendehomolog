@@ -124,6 +124,28 @@ tbody tr:hover{background:#FAFAFD;}
 .segmented button:hover{color:var(--ink);}
 .segmented button.active{background:var(--panel);color:var(--brand);box-shadow:0 1px 4px rgba(15,19,56,0.14);}
 
+/* v13.85 · período por calendário e detalhamento diário em agrupadores */
+.fcx-filtros{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end;margin-bottom:16px;} .fcx-filtros .field{margin:0;} .fcx-periodo{width:170px;} .fcx-periodo input{height:40px;} .fcx-centro{flex:1;min-width:220px;max-width:320px;}
+.fcx-dias{display:flex;flex-direction:column;gap:12px;}
+.fcx-dia{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel);padding:12px 14px;box-shadow:var(--shadow-xs);}
+.fcx-dia-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-bottom:10px;}
+.fcx-dia-data{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;}  .fcx-sem{background:var(--blue-soft);color:var(--brand);}
+.fcx-dia-saldos{display:flex;gap:18px;flex-wrap:wrap;} .fcx-dia-saldos div{display:flex;flex-direction:column;align-items:flex-end;} .fcx-dia-saldos span{font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);} .fcx-dia-saldos b{font-size:15px;}
+.fcx-acc{border:1px solid var(--line);border-radius:var(--radius-sm);margin-top:8px;overflow:hidden;}
+.fcx-acc.fcx-ent{border-left:4px solid var(--green);} .fcx-acc.fcx-sai{border-left:4px solid var(--red);}
+.fcx-acc > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;min-height:44px;background:var(--bg);}
+.fcx-acc > summary::-webkit-details-marker{display:none;} .fcx-acc > summary:hover{background:var(--bg-2);} .fcx-acc > summary:focus-visible{outline:2px solid var(--brand-light);outline-offset:-2px;}
+.fcx-acc-tit{font-weight:700;font-size:13.5px;} .fcx-acc-tot{margin-left:auto;font-weight:700;font-size:14px;white-space:nowrap;}
+.fcx-chev{flex:none;color:var(--ink-soft);transition:transform .2s ease;} .fcx-acc[open] .fcx-chev{transform:rotate(180deg);}
+.fcx-acc-corpo{padding:8px 12px 10px;border-top:1px solid var(--line);background:var(--panel);}
+.fcx-acc[open] .fcx-acc-corpo{animation:fcxAbre .2s ease-out;} @keyframes fcxAbre{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.fcx-grupo + .fcx-grupo{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+.fcx-lin{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:3px 0;font-size:13px;font-weight:700;} .fcx-lin > span:first-child{min-width:0;overflow-wrap:anywhere;} .fcx-lin .num{white-space:nowrap;}
+.fcx-lin.fcx-sub{font-weight:400;font-size:12.5px;padding-left:14px;} .fcx-lin.fcx-sub > span:first-child{color:var(--ink-soft);}
+@media (prefers-reduced-motion: reduce){.fcx-chev{transition:none;} .fcx-acc[open] .fcx-acc-corpo{animation:none;}}
+@media(max-width:640px){ .fcx-periodo{width:calc(50% - 8px);} .fcx-centro{max-width:none;min-width:100%;} .fcx-saldos .segmented{flex-wrap:wrap;}
+  .fcx-dia{padding:10px;} .fcx-dia-saldos{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;} .fcx-dia-saldos div{align-items:flex-start;} .fcx-dia-saldos b{font-size:14px;} .fcx-acc > summary{padding:10px;} .fcx-acc-tot{font-size:13.5px;} }
+@media print{ .fcx-acc{break-inside:avoid;} .fcx-dia{break-inside:avoid;box-shadow:none;} .fcx-chev{display:none;} }
 .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:0.02em;}
 .badge.green{background:var(--green-soft);color:var(--green);}
 .badge.red{background:var(--red-soft);color:var(--red);}
@@ -1045,7 +1067,35 @@ function setDashTipoSaida(v){ state.dashTipoSaida=v; render(); } window.setDashT
 function setDashSaidaGroupBy(v){ state.dashSaidaGroupBy=v; render(); } window.setDashSaidaGroupBy=setDashSaidaGroupBy;
 function setDashConsiderarVencidos(v){ state.dashConsiderarVencidos=v; render(); } window.setDashConsiderarVencidos=setDashConsiderarVencidos;
 
+/** v13.85 · Período por calendário (Data Inicial / Data Final). Mesmo dia nos dois = só aquele dia; intervalo = dia a dia.
+    Só interface: o motor (buildCashBook / buildAggregated / drawChart) não muda — o gráfico lê este mesmo período. */
+const FCX_MAX_DIAS = 370;
+function fcxPeriodo(){
+  if(!state.dashIni){ const h = new Date(); state.dashIni = toISO(h); state.dashFim = toISO(addDays(h, 13)); }
+  if(!state.dashFim) state.dashFim = state.dashIni;
+  return [state.dashIni, state.dashFim];
+}
+function setDashPeriodo(campo, v){
+  if(!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+  fcxPeriodo();
+  if(campo==='ini'){ state.dashIni = v; if(!state.dashFim || state.dashFim < v) state.dashFim = v; }
+  else { state.dashFim = v; if(!state.dashIni || state.dashIni > v) state.dashIni = v; }
+  const n = Math.round((fromISO(state.dashFim) - fromISO(state.dashIni)) / 864e5) + 1;
+  if(n > FCX_MAX_DIAS){ if(campo==='ini') state.dashFim = toISO(addDays(fromISO(state.dashIni), FCX_MAX_DIAS-1)); else state.dashIni = toISO(addDays(fromISO(state.dashFim), -(FCX_MAX_DIAS-1))); showToast('Período limitado a '+FCX_MAX_DIAS+' dias'); }
+  render();
+}
+window.setDashPeriodo = setDashPeriodo;
+/** Estado aberto/fechado de cada agrupador (dia × entradas/saídas): começa tudo recolhido e sobrevive aos redesenhos. */
+function fcxAccToggle(el){ state._fcxAbertos ||= new Set(); const k = el.dataset.acc; if(el.open) state._fcxAbertos.add(k); else state._fcxAbertos.delete(k); }
+window.fcxAccToggle = fcxAccToggle;
+function fcxImprimirView(){ /* imprime com todos os agrupadores abertos e volta ao estado anterior */
+  const fechados = [...document.querySelectorAll('details.fcx-acc:not([open])')]; fechados.forEach(d=>{ d.open = true; });
+  try{ window.print(); } finally { setTimeout(()=>fechados.forEach(d=>{ d.open = false; }), 50); }
+}
+window.fcxImprimirView = fcxImprimirView;
+
 function computeRangeForView(){
+  if(fcxV1385()) return fcxPeriodo(); // v13.85
   const anchor = fromISO(state.dashAnchor);
   if(state.dashView==='dia') return [toISO(addDays(anchor,-6)), toISO(addDays(anchor,7))];
   const y=anchor.getFullYear(), m=anchor.getMonth();
@@ -1165,6 +1215,7 @@ function renderOrcamentoScreen(){
 }
 
 function renderViewScreen(){
+  if(fcxV1385()) return renderViewScreenV1385(); // v13.85
   const [startISO,endISO] = computeRangeForView();
   const agg = buildAggregated(startISO,endISO,state.dashView,state.dashCentro,state.dashTipoSaida,state.dashSaidaGroupBy,state.dashConsiderarVencidos);
   const totalEntradas = agg.reduce((a,b)=>a+b.entradas,0);
@@ -1308,6 +1359,88 @@ function renderAggTable(agg){
   return `<table><thead><tr><th>Período</th><th style="text-align:right;">Entradas</th><th style="text-align:right;">Saídas</th><th style="text-align:right;">${fcxV1377() ? 'Saldo do período' : 'Saldo do dia'}</th><th style="text-align:right;">Acumulado</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+/** v13.85 · Tela de visualização com o período por calendário e o detalhamento diário em agrupadores (Entradas e Saídas). */
+function renderViewScreenV1385(){
+  state.dashView = 'dia'; // granularidade diária (o gráfico e a lista seguem dia a dia)
+  const [startISO,endISO] = fcxPeriodo(), umDia = startISO === endISO;
+  const agg = buildAggregated(startISO,endISO,'dia',state.dashCentro,state.dashTipoSaida,state.dashSaidaGroupBy,state.dashConsiderarVencidos);
+  const totalEntradas = agg.reduce((a,b)=>a+b.entradas,0), totalSaidas = agg.reduce((a,b)=>a+b.saidas,0), totalSemCaixa = agg.reduce((a,b)=>a+b.semCaixa,0);
+  const saldoFinal = agg.length ? agg[agg.length-1].acumulado : 0;
+  let entradaVendas=0, entradaPrestacao=0, saidaOperacional=0, saidaRepasse=0;
+  agg.forEach(b=>{
+    Object.entries(b.detalheEntradas).forEach(([k,v])=>{ if(k.startsWith('pgto:')) entradaVendas+=v; else if(k.startsWith('prestacao_entrada:')) entradaPrestacao+=v; });
+    Object.entries(b.detalheSaidas).forEach(([k,v])=>{ if(k.startsWith('conta:')) saidaOperacional+=v; else if(k.startsWith('prestacao_repasse:')) saidaRepasse+=v; });
+  });
+  const nDias = agg.length, rangeLabel = umDia ? 'Somente '+fmtDateLongo(startISO).replace(/^./, c=>c.toLowerCase()) : fmtDate(startISO)+' — '+fmtDate(endISO)+' · '+nDias+' dias';
+  const centroOptions = ['<option value="">Todos os centros de custo</option>'].concat(state.config.costCenters.map(c=>`<option value="${c}" ${state.dashCentro===c?'selected':''}>${c}</option>`)).join('');
+  return `
+  <button class="backlink no-print" onclick="goto('landing')">← Início</button>
+  <div class="panel">
+    <div class="row-flex" style="margin-bottom:14px;">
+      <div><h2 style="margin-bottom:2px;">Fluxo de caixa projetado</h2><div class="desc" style="margin:0;">${rangeLabel}</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" class="no-print"><button class="btn secondary small" onclick="fcxImprimirView()">🖨️ Imprimir / PDF</button></div>
+    </div>
+    <div class="fcx-filtros no-print">
+      <div class="field fcx-periodo"><label for="fcxIni">Data Inicial</label><input id="fcxIni" type="date" value="${startISO}" onchange="setDashPeriodo('ini', this.value)"></div>
+      <div class="field fcx-periodo"><label for="fcxFim">Data Final</label><input id="fcxFim" type="date" value="${endISO}" min="${startISO}" onchange="setDashPeriodo('fim', this.value)"></div>
+      <div class="field fcx-centro"><label for="fcxCentro">Filtrar por centro de custo (saídas)</label><select id="fcxCentro" onchange="setDashCentro(this.value)">${centroOptions}</select></div>
+      <div class="field"><label>Detalhar saídas por</label><div class="segmented">
+        <button class="${state.dashSaidaGroupBy==='conta'?'active':''}" onclick="setDashSaidaGroupBy('conta')">Conta Contábil</button>
+        <button class="${state.dashSaidaGroupBy==='descricao'?'active':''}" onclick="setDashSaidaGroupBy('descricao')">Descrição</button></div></div>
+      <div class="field fcx-saldos"><label>Saldos considerando</label><div class="segmented">
+        <button class="${state.dashTipoSaida===''?'active':''}" onclick="setDashTipoSaida('')">Tudo</button>
+        <button class="${state.dashTipoSaida==='efetivo'?'active':''}" onclick="setDashTipoSaida('efetivo')">Apenas a vencer</button>
+        <button class="${state.dashTipoSaida==='previsto'?'active':''}" onclick="setDashTipoSaida('previsto')">Apenas previsão</button>
+        <button class="${state.dashTipoSaida==='pago'?'active':''}" onclick="setDashTipoSaida('pago')">Pagas</button>
+        <button class="${state.dashTipoSaida==='vencido'?'active':''}" onclick="setDashTipoSaida('vencido')">Vencidos</button></div></div>
+    </div>
+    <div class="grid-3" style="margin-bottom:10px;">
+      <div class="stat"><div class="lbl">Entrada de Vendas</div><div class="val pos">${BRL(entradaVendas)}</div></div>
+      <div class="stat"><div class="lbl">Recebimento de Prestação</div><div class="val pos">${BRL(entradaPrestacao)}</div></div>
+      <div class="stat" style="background:var(--green-soft);border-color:#BFE0CE;"><div class="lbl">Total de Entradas</div><div class="val pos">${BRL(totalEntradas)}</div></div>
+    </div>
+    <div class="grid-3" style="margin-bottom:18px;">
+      <div class="stat"><div class="lbl">Saídas Operacionais</div><div class="val neg">${BRL(saidaOperacional)}</div></div>
+      <div class="stat"><div class="lbl">Repasse de Prestação</div><div class="val neg">${BRL(saidaRepasse)}</div></div>
+      <div class="stat" style="background:var(--red-soft);border-color:#EAC5BF;"><div class="lbl">Total de Saídas</div><div class="val neg">${BRL(totalSaidas)}</div></div>
+    </div>
+    <div class="stat" style="max-width:280px;margin-bottom:18px;"><div class="lbl">${umDia ? 'Saldo do dia' : 'Saldo acumulado no período'}</div><div class="val" style="color:${saldoFinal>=0?'var(--green)':'var(--red)'}">${BRL(saldoFinal)}</div></div>
+    ${totalSemCaixa? `<div class="hint" style="margin-bottom:14px;">+ ${BRL(totalSemCaixa)} em vendas via Crediário/Crédito Cliente no período — não geram entrada de caixa direta, apenas indicador de venda.</div>`:''}
+    <div class="row-flex no-print" style="margin-bottom:6px;justify-content:flex-end;"><div class="segmented">
+      <button class="${state.dashChartMode==='completo'?'active':''}" onclick="setDashChartMode('completo')">Gráfico completo</button>
+      <button class="${state.dashChartMode==='saldo'?'active':''}" onclick="setDashChartMode('saldo')">Apenas saldo</button></div></div>
+    <div class="chart-wrap"><canvas id="cashChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2 style="margin-bottom:4px;">Detalhamento diário</h2>
+    <div class="desc" style="margin:0 0 14px;">Clique em Entradas ou Saídas de cada dia para ver as linhas do detalhamento.</div>
+    ${agg.length ? `<div class="fcx-dias">${agg.map(fcxDiaHTML).join('')}</div>` : '<div class="empty">Sem dados projetados para este período.</div>'}
+  </div>`;
+}
+function fmtDateLongo(iso){ const d = fromISO(iso); return ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'][d.getDay()]+', '+fmtDate(iso); }
+/** Um dia: cabeçalho (data, saldo do dia e acumulado) + agrupador de Entradas + agrupador de Saídas (recolhidos). */
+function fcxDiaHTML(b){
+  const ab = state._fcxAbertos || new Set(), iso = b.key;
+  const linhas = (obj, cls) => Object.entries(obj).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>b[1]-a[1]);
+  const lin = (rot, v, cls, sub) => `<div class="fcx-lin${sub?' fcx-sub':''}"><span>${rot}</span><span class="num ${cls}">${BRL(v)}</span></div>`;
+  const grupo = (titulo, itens, cls) => { if(!itens.length) return ''; const t = itens.reduce((a,[,v])=>a+v,0); return `<div class="fcx-grupo">${lin(titulo, t, cls)}${itens.map(([k,v])=>lin(labelForKey(k), v, cls, true)).join('')}</div>`; };
+  const ent = linhas(b.detalheEntradas), sai = linhas(b.detalheSaidas);
+  const entV = ent.filter(([k])=>k.startsWith('pgto:')), entP = ent.filter(([k])=>k.startsWith('prestacao_entrada:')), entO = ent.filter(([k])=>!k.startsWith('pgto:') && !k.startsWith('prestacao_entrada:'));
+  const saiC = sai.filter(([k])=>k.startsWith('conta:')), saiR = sai.filter(([k])=>k.startsWith('prestacao_repasse:')), saiO = sai.filter(([k])=>!k.startsWith('conta:') && !k.startsWith('prestacao_repasse:'));
+  const chev = '<svg class="fcx-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const acc = (tipo, rot, total, cls, corpo) => `<details class="fcx-acc fcx-${tipo}" data-acc="${iso}:${tipo}" ontoggle="fcxAccToggle(this)" ${ab.has(iso+':'+tipo)?'open':''}>
+      <summary><span class="fcx-acc-tit">${rot}</span><span class="fcx-acc-tot num ${cls}">${BRL(total)}</span>${chev}</summary>
+      <div class="fcx-acc-corpo">${corpo}</div></details>`;
+  const corpoEnt = ent.length ? grupo('Vendas', entV, 'pos') + grupo('Prestação prevista', entP, 'pos') + grupo('Outras entradas', entO, 'pos') : '<div class="hint">Sem entradas neste dia.</div>';
+  const corpoSai = sai.length ? grupo('Contas a pagar e saídas operacionais', saiC, 'neg') + grupo('Repasse de prestação', saiR, 'neg') + grupo('Outras saídas', saiO, 'neg') : '<div class="hint">Sem saídas neste dia.</div>';
+  return `<section class="fcx-dia" data-dia="${iso}">
+    <header class="fcx-dia-cab"><div class="fcx-dia-data"><b>${fmtDateLongo(iso)}</b>${fcxV1377() ? `<span class="badge fcx-sem">Semana ${semanaDoDia(iso)}</span>` : ''}</div>
+      <div class="fcx-dia-saldos"><div><span>Saldo do Dia</span><b class="num" style="color:${b.saldo>=0?'var(--green)':'var(--red)'}">${BRL(b.saldo)}</b></div><div><span>Acumulado</span><b class="num" style="color:${b.acumulado>=0?'var(--green)':'var(--red)'}">${BRL(b.acumulado)}</b></div></div></header>
+    ${acc('ent', 'Entradas', b.entradas, 'pos', corpoEnt)}
+    ${acc('sai', 'Saídas', b.saidas, 'neg', corpoSai)}
+  </section>`;
+}
+
 function drawChart(){
   const canvas = document.getElementById('cashChart');
   if(!canvas) return;
@@ -1372,6 +1505,7 @@ const ROTULOS_SALDO = {
    do caixa do dia e guardada como Recebível Futuro até o vencimento; prestação "Débito"; Resumo Consolidado de Entradas
    com gráfico; gráfico de barras da previsão semanal (o mesmo da visão do FCX).
    ========================================================= */
+function fcxV1385(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_periodo_v1385')); }catch(e){ return false; } } // v13.85: período por calendário + detalhamento diário em agrupadores
 function fcxV1378(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_recebivel_v1378')); }catch(e){ return false; } }
 /** v13.79: formato monetário oficial com centavos (R$ 1.000,00) em todas as células do relatório. */
 const BRL2 = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2});

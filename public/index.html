@@ -18,7 +18,7 @@
   --navy:#1B2362; --navy-deep:#11163F; --navy-2:#27307A; --navy-soft:#E8EAF6;
   --accent:#3F5BD8; --accent-soft:#E6EBFD;
   --bg:#F2F3F8; --panel:#FFFFFF; --panel-2:#F8F9FC; --line:#E2E4EE; --line-soft:#ECEEF5;
-  --ink:#151934; --ink-soft:#585E7F; --ink-faint:#8E93AE;
+  --ink:#151934; --ink-soft:#585E7F; --ink-faint:#616787; /* v13.83.1: era #8E93AE (3,0:1) — agora ≥ 4,6:1 em todas as superfícies (WCAG AA) */
   --ok:#1D7A4E; --ok-soft:#E1F3E9; --warn:#9A6408; --warn-soft:#FCF0D6; --bad:#B63A2F; --bad-soft:#FBE7E4;
   --heat-0:#EEF0F8; --heat-1:#D9DEF5; --heat-2:#B3BDEB; --heat-3:#7F8FDB; --heat-4:#4A5CC4; --heat-5:#1B2362;
   --heat-ink-dark:#151934; --heat-ink-light:#FFFFFF;
@@ -35,7 +35,7 @@
     color-scheme:dark;
     --navy-soft:#232A5E; --accent:#7E93F5; --accent-soft:#252D63;
     --bg:#0C0F24; --panel:#151936; --panel-2:#1A1F40; --line:#2A3060; --line-soft:#222853;
-    --ink:#ECEEF8; --ink-soft:#A9AECB; --ink-faint:#767C9F;
+    --ink:#ECEEF8; --ink-soft:#A9AECB; --ink-faint:#949AB9; /* v13.83.1: era #767C9F (3,2:1) */
     --ok:#5CCB93; --ok-soft:#173828; --warn:#E6B45A; --warn-soft:#3A2C12; --bad:#F08A7E; --bad-soft:#3D1D1A;
     --heat-0:#1C2146; --heat-1:#26306A; --heat-2:#34438F; --heat-3:#4D61C0; --heat-4:#7489E8; --heat-5:#B7C3FF;
     --heat-ink-dark:#0C0F24; --heat-ink-light:#ECEEF8;
@@ -46,7 +46,7 @@
   color-scheme:dark;
   --navy-soft:#232A5E; --accent:#7E93F5; --accent-soft:#252D63;
   --bg:#0C0F24; --panel:#151936; --panel-2:#1A1F40; --line:#2A3060; --line-soft:#222853;
-  --ink:#ECEEF8; --ink-soft:#A9AECB; --ink-faint:#767C9F;
+  --ink:#ECEEF8; --ink-soft:#A9AECB; --ink-faint:#949AB9; /* v13.83.1: era #767C9F (3,2:1) */
   --ok:#5CCB93; --ok-soft:#173828; --warn:#E6B45A; --warn-soft:#3A2C12; --bad:#F08A7E; --bad-soft:#3D1D1A;
   --heat-0:#1C2146; --heat-1:#26306A; --heat-2:#34438F; --heat-3:#4D61C0; --heat-4:#7489E8; --heat-5:#B7C3FF;
   --heat-ink-dark:#0C0F24; --heat-ink-light:#ECEEF8;
@@ -755,7 +755,7 @@ table.cp-ops tfoot td{border-top:1.5px solid var(--ink);font-weight:600;}
   --navy:#0B4F9C; --navy-deep:#083B78; --navy-2:#1A6FD0; --navy-soft:#E3EEFC;
   --accent:#1667D0; --accent-soft:#E2EDFD;
   --bg:#EEF4FC; --panel:#FFFFFF; --panel-2:#F5F9FF; --line:#D3E1F4; --line-soft:#E4EDF9;
-  --ink:#0C1F3D; --ink-soft:#44597A; --ink-faint:#7D8FAD;
+  --ink:#0C1F3D; --ink-soft:#44597A; --ink-faint:#566A8A; /* v13.83.1: era #7D8FAD (2,8:1) */
   --heat-0:#EAF2FD; --heat-1:#CFE2FA; --heat-2:#9EC4F3; --heat-3:#5E9BE6; --heat-4:#1F6FD2; --heat-5:#0B4F9C;
   --shadow-sm:0 1px 2px rgba(11,79,156,.07),0 2px 8px -3px rgba(11,79,156,.12);
   --shadow-md:0 14px 30px -14px rgba(11,79,156,.30),0 2px 6px rgba(11,79,156,.07);
@@ -1123,6 +1123,7 @@ body.rod-on .toast{bottom:calc(var(--rod-h) + 14px + env(safe-area-inset-bottom,
 .vg-docs{border:1px solid var(--warn);background:var(--warn-soft);border-radius:10px;padding:8px 12px 4px;margin:0 0 8px;}
 .vg-docs-t{margin:0 0 6px;font-size:13px;} .vg-docs-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0 10px;}
 .vg-chip-alerta{font-style:normal;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--warn);color:#fff;font-size:11px;font-weight:700;margin-left:4px;}
+:root[data-theme="dark"] .vg-chip-alerta{color:#1B1405;} @media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-theme="diurno"]) .vg-chip-alerta{color:#1B1405;}} /* v13.83.1: branco sobre âmbar claro (1,9:1) → texto escuro (9:1) */
 
 /* v13.29 · o fundo escuro não fecha a janela: um leve "tremor" indica que é preciso usar ✕ ou Cancelar */
 @keyframes modalTreme{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -1198,7 +1199,7 @@ table.oc-tab td.acts .btn{margin:2px 0;}
   --navy:#1E1E24; --navy-deep:#000000; --navy-2:#2C2C34; --navy-soft:#26262E;
   --accent:#5ED3E0; --accent-soft:#0F2A2E;
   --bg:#0A0A0C; --panel:#141418; --panel-2:#1E1E24; --line:#2C2C34; --line-soft:#222228;
-  --ink:#F4F4F5; --ink-soft:#A1A1AA; --ink-faint:#8A8A94;
+  --ink:#F4F4F5; --ink-soft:#A1A1AA; --ink-faint:#8E8E98; /* v13.83.1 */
   --heat-0:#1A1A1F; --heat-1:#2A2A31; --heat-2:#44444D; --heat-3:#7C7C88; --heat-4:#A1A1AA; --heat-5:#E4E4E7;
   --heat-ink-dark:#0A0A0C; --heat-ink-light:#F4F4F5;
   --pal-btn:#E4E4E7; --pal-btn-h:#C9C9D1; --pal-btn-ink:#0A0A0C; --pal-nav-ink:#D4D4D8; --pal-nav-sub:#8A8A94;
@@ -1347,6 +1348,27 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 .ft-informada .check{align-items:flex-start;} .pdi-ocorr .pill{white-space:nowrap;}
 @media (max-width:720px){.dp-div .row.between{flex-direction:column;align-items:flex-start;}}
 /* v13.61 · Gestão de Acessos: opção extra na linha do módulo */
+/* v13.83 · sub-permissões (telas e ações) e prévia do acesso real */
+/* v13.84 · agrupador "Colaboradores sem acesso" */
+.acc-sem{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);margin-top:4px;}
+.acc-sem > summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;padding:11px 14px;font-weight:600;color:var(--ink);border-radius:var(--radius-sm);user-select:none;}
+.acc-sem > summary::-webkit-details-marker{display:none;} .acc-sem > summary:hover{background:var(--accent-soft);} .acc-sem > summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.acc-sem-n{font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:700;padding:1px 9px;border-radius:999px;background:var(--accent-soft);color:var(--ink);border:1px solid var(--line);} .acc-sem-chev{margin-left:auto;color:var(--ink-soft);transition:transform .2s var(--ease);flex:none;} .acc-sem[open] .acc-sem-chev{transform:rotate(180deg);}
+.acc-sem[open] > summary{border-bottom:1px solid var(--line);border-bottom-left-radius:0;border-bottom-right-radius:0;} .acc-sem-corpo{padding:12px 14px 14px;background:var(--panel);border-radius:0 0 var(--radius-sm) var(--radius-sm);}
+@media (prefers-reduced-motion: reduce){.acc-sem-chev{transition:none;}}
+.vg-cpf-msg{display:block;font-size:12px;margin-top:3px;color:var(--ink-soft);} .vg-cpf-msg.ok{color:var(--ok,#1E7B4F);} .vg-cpf-msg.erro{color:var(--bad,#B4453A);font-weight:600;} input.vg-cpf-erro{border-color:var(--bad,#B4453A) !important;} input.vg-cpf-ok{border-color:var(--ok,#1E7B4F) !important;}
+/* v13.83 · Tela Inicial · Resumo do Recebível do Dia */
+.ini-tabs{margin:4px 0 16px;} .rr-cab{margin-bottom:10px;gap:10px;flex-wrap:wrap;} .rr-avisos{margin-bottom:12px;font-size:13px;} .rr-avisos div+div{margin-top:3px;}
+.rr-kpis{margin-bottom:16px;} .rr-kpi{cursor:default;} .rr-blocos > .panel{margin-top:0 !important;} .rr-blocos{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;} .rr-bloco{flex:0 0 calc(50% - 8px);min-width:0;margin:0;}
+@media(max-width:1000px){.rr-blocos{flex-direction:column;} .rr-bloco{flex-basis:auto;width:100%;}}
+.rr-tab{width:100%;font-size:13px;} .rr-tab td.num,.rr-tab th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;} .rr-tab tr.rr-grupo td{font-weight:600;} .rr-tab tr.rr-sub td{color:var(--ink-soft);font-size:12.5px;} .rr-tab tr.rr-sub td:first-child{padding-left:22px;}
+.rr-tab tr.rr-total td{font-weight:700;background:var(--navy-soft);color:var(--ink);} .rr-h3{font-size:13.5px;margin:12px 0 6px;} .rr-bloco h2{margin-bottom:10px;}
+.acc-matriz tr.acc-sub td{padding-top:0;border-top:0;} .acc-sub details{margin:0 0 8px 4px;border:1px dashed var(--line);border-radius:8px;padding:4px 10px;background:var(--panel-2);color:var(--ink);} /* v13.83.1: fundo do tema (antes ficava branco no escuro) */
+.acc-sub summary{cursor:pointer;font-size:12.5px;color:var(--ink-soft);padding:3px 0;} .acc-sub-g .lbl{color:var(--ink-soft);} .acc-sub-g .check{color:var(--ink);} .acc-sub summary b{color:var(--ink);font-weight:600;}
+.acc-sub-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 18px;padding:6px 0 4px;} .acc-sub-g .lbl{grid-column:1/-1;margin:6px 0 0;}
+.acc-sub-g .check{font-size:12.5px;margin:0;} .acc-sub-g .check.off{color:var(--ink-soft);} .acc-cel .acc-na{color:var(--ink-soft);font-size:12px;}
+.acc-previa{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 16px;font-size:12.5px;}
+.acc-previa li{display:flex;gap:6px;align-items:baseline;} .acc-previa .ok{color:var(--ok,#1E7B4F);font-weight:700;} .acc-previa .no{color:var(--bad,#B4453A);font-weight:700;} .acc-previa small{color:var(--ink-soft);}
 .acc-matriz tr.acc-extra td{padding-top:0;border-top:0;} .acc-matriz tr.acc-extra .check{margin:0 0 6px 4px;font-size:13px;} .acc-matriz tr.acc-extra .hint{display:inline;}
 
 /* =====================================================================
@@ -1923,6 +1945,7 @@ const PERMISSOES = {
     'rh.ver', 'rh.importar',                                                 // v13.9: Módulo 7 · RH (importações; parametrizações seguem em pessoal.parametros)
     'viagens.ver', 'viagens.pagar', 'viagens.excluir',                       // v13.21: Módulo 8 · Adiantamento de viagens (ver todos · financeiro · excluir)
     'retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir',       // v13.39: Conta Cofre, Depósitos e Ocorrências Globais (Retaguarda de Loja)
+    'visao.dashboard', 'viagens.solicitar',                                  // v13.83: Visão / Dashboard (Tela Inicial) · Pode solicitar viagem
     'pe.ver', 'pe.editar',                                                   // v13.50: Módulo 9 · Ponto de Equilíbrio (só Master/GESTOR; banco: editores)
     'solicitacoes.ver', 'solicitacoes.lancar', 'solicitacoes.atender', 'solicitacoes.excluir', 'solicitacoes.todas', // v13.60: Módulo 10 · Solicitações Operacionais (v13.61: + todas as lojas)
   ],
@@ -1947,18 +1970,61 @@ const MATRIZ_MODULOS = [
   { id: 'viagens', curto: 'Viagens', rotulo: 'Adiantamento de viagens (financeiro)', num: 'Módulo 8', ler: ['viagens.ver'], modificar: ['viagens.pagar'], excluir: ['viagens.excluir'] },
   { id: 'solicitacoes', curto: 'Solicitações', rotulo: 'Solicitações Operacionais (Modificar = pedir · Excluir = atender e excluir)', num: 'Módulo 10', ler: ['solicitacoes.ver'], modificar: ['solicitacoes.lancar'], excluir: ['solicitacoes.atender', 'solicitacoes.excluir'],
     extras: [['solicitacoes.todas', 'Acessar todas as lojas', 'Vê e gerencia as solicitações de todas as filiais, independentemente do perfil e da lotação']] }, // v13.60 · v13.61: + "Acessar todas as lojas" 
+  { id: 'visao', curto: 'Visão', rotulo: 'Visão / Dashboard (Tela Inicial com o Resumo do Recebível do Dia)', num: 'Início', ler: ['visao.dashboard'], modificar: [], excluir: [], v1383: true }, // v13.83
 ];
+/* v13.83 · "Pode solicitar viagem": opção da linha do Módulo 8 que vale sozinha (não exige Ler, que é "ver todos os pedidos") */
+MATRIZ_MODULOS.find(m => m.id === 'viagens').extras = [['viagens.solicitar', 'Pode solicitar viagem', 'Libera a tela "Nova Solicitação de Viagem" para a própria pessoa e a equipe da loja dela (não exige Ler, que é ver todos os pedidos)', true]];
+
+/**
+ * v13.83 · SUB-PERMISSÕES (telas e ações de cada módulo) — Gestão de Acessos.
+ * TELAS_ROTA: as abas de cada tela do painel, com o módulo da matriz a que pertencem. Cada tela pode "levar" permissões
+ * (perms): desmarcada a tela, essas permissões saem do usuário — assim o que o roteador libera e o que os módulos
+ * conferem com Auth.can() é a mesma coisa. Chave gravada: '<rota>:<aba>' em usuario.permissoes.sub[<módulo>].telas.
+ * Ações: as permissões de Modificar/Excluir de cada módulo, uma a uma (usuario.permissoes.sub[<módulo>].acoes).
+ * Ausente = tudo do nível marcado (usuários antigos não mudam).
+ */
+const TELAS_ROTA = {
+  lojas: { mod: 'lojas', aba: 'lj-aba', ui: () => Lojas.ui, telas: [['dados', 'Dados fiscais e operacionais'], ['contrato', 'Contrato de locação (ficha)'], ['adq', 'Adquirentes e TI'], ['despesas', 'Despesas fixas'], ['seguros', 'Seguros'], ['historico', 'Histórico de problemas']] },
+  contratos: { mod: 'contratos', aba: 'ct-aba', ui: () => Contratos.ui, telas: [['lista', 'Contratos e apólices'], ['ocupacao', 'Projeção de custos de ocupação']] },
+  fcx: { mod: 'fcx', aba: 'fcx-aba', ui: () => FCX.ui, telas: [['fcx', 'FCX · projeção, orçamento e Recebível Diário'], ['dfc', 'DFC · extratos × premissas', ['fcx.dfc.ver', 'fcx.dfc.importar', 'fcx.dfc.contas', 'fcx.dfc.regras']]] },
+  retaguarda: { mod: 'retaguarda', aba: 'rt-aba', ui: () => Retaguarda.ui, telas: [['credsystem', 'Conciliação Credsystem', ['retaguarda.credsystem.importar', 'retaguarda.credsystem.editar']], ['faltas', 'Faltas de Caixa', ['retaguarda.faltas.lancar', 'retaguarda.faltas.status', 'retaguarda.faltas.excluir']], ['cofre', 'Conta Cofre', ['retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir']], ['depositos', 'Depósito de Valores', ['retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir']],
+    ['ocorrencias', 'Ocorrências Globais', ['retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir']], ['pendencias', 'Pendências Credsystem'], ['consumidor', 'Vendas como Consumidor'], ['ieo', 'IEO · Ranking', ['retaguarda.ieo.ver', 'retaguarda.ieo.lancar', 'retaguarda.ieo.matriz', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo']], ['adquirentes', 'Auditoria de Adquirentes (aba antiga)', ['retaguarda.adq.ver', 'retaguarda.adq.importar', 'retaguarda.adq.taxas']]] },
+  conciliacao: { mod: 'retaguarda', aba: 'cmp-aba', ui: () => ConcMP.ui, titulo: 'Conciliação de Meios de Pagamento (Módulo 11)', telas: [['credito', 'Crédito de Terceiros / Auditoria de Adquirentes', ['retaguarda.adq.ver', 'retaguarda.adq.importar', 'retaguarda.adq.taxas']], ['depositos', 'Depósitos'], ['pix', 'Vendas Pix'], ['card', 'Esposende Card'], ['resumo', 'Resumo do Fechamento']] },
+  credsystem: { mod: 'credsystem', aba: 'cs-aba', ui: () => Credsystem.ui, telas: [['campanhas', 'Cadastro de Campanhas'], ['metas', 'Cadastro de Metas'], ['dashboard', 'Dashboard de Metas'], ['importacoes', 'Importações']] },
+  rh: { mod: 'rh', aba: 'rhm-aba', ui: () => ModRH.ui, telas: [['organograma', 'Organograma'], ['cadastro', 'Colaboradores'], ['importacoes', 'Importações de RH', ['rh.importar']]] },
+  menu: { mod: 'visao', aba: 'ini-aba', ui: () => Inicio.ui, titulo: 'Tela Inicial', telas: [['recebivel', 'Resumo do Recebível do Dia'], ['indicadores', 'Indicadores / Cards']] },
+};
+/** Rótulo de cada ação (permissão de Modificar/Excluir) na lista de sub-permissões. */
+const PERM_ROTULO = {
+  'pessoal.editar': 'Editar cadastro, jornada e férias', 'pessoal.excluir': 'Excluir colaborador',
+  'lojas.editar': 'Editar dados da loja', 'lojas.arquivos': 'Anexar arquivos', 'ia.resumo': 'Leitura e resumo por IA', 'lojas.excluir': 'Excluir loja', 'lojas.importar': 'Importar planilha de lojas',
+  'lojas.contratos.editar': 'Cadastrar e editar contratos e apólices', 'lojas.contrato.editar': 'Editar o contrato na ficha da loja', 'lojas.contratos.excluir': 'Inativar contratos e apólices',
+  'fcx.editar': 'Gravar premissas e saídas do FCX', 'fcx.dfc.importar': 'DFC · importar extratos', 'fcx.dfc.contas': 'DFC · contas bancárias', 'fcx.dfc.regras': 'DFC · regras de classificação', 'fcx.excluir': 'Excluir / zerar dados do FCX',
+  'retaguarda.credsystem.importar': 'Credsystem · importar arquivo', 'retaguarda.credsystem.editar': 'Credsystem · editar conciliação', 'retaguarda.faltas.lancar': 'Faltas · lançar', 'retaguarda.faltas.status': 'Faltas · aprovar / mudar status',
+  'retaguarda.caixas.editar': 'Caixas · editar', 'retaguarda.ieo.lancar': 'IEO · lançar ocorrências', 'retaguarda.ieo.matriz': 'IEO · matriz de pontos', 'retaguarda.ieo.fechar': 'IEO · fechar o mês', 'retaguarda.ieo.laudo': 'IEO · laudo',
+  'retaguarda.adq.importar': 'Adquirentes · importar arquivos', 'retaguarda.adq.taxas': 'Adquirentes · taxas contratadas', 'retaguarda.ocorrencias.lancar': 'Cofre, depósitos e ocorrências · lançar',
+  'retaguarda.faltas.excluir': 'Faltas · excluir', 'retaguarda.ocorrencias.excluir': 'Ocorrências · excluir',
+  'credsystem.editar': 'Metas e campanhas · editar', 'credsystem.excluir': 'Metas e campanhas · excluir', 'rh.importar': 'Importar Base Ativa e cadastrar colaboradores',
+  'viagens.pagar': 'Financeiro: lançar, pagar e analisar prestações', 'viagens.excluir': 'Excluir pedidos de viagem',
+  'solicitacoes.lancar': 'Abrir solicitações (pedir)', 'solicitacoes.atender': 'Atender solicitações', 'solicitacoes.excluir': 'Excluir solicitações',
+};
+
 const NIVEIS_ACESSO = ['', 'ler', 'modificar', 'excluir'];
 /** Padrão de um novo usuário OPERACIONAL (equivale ao perfil OPERACIONAL das versões anteriores). */
 const MATRIZ_PADRAO = { pdi: 'ler', lojas: 'modificar', contratos: '', fcx: 'ler', retaguarda: 'modificar', credsystem: '', rh: '', viagens: '', solicitacoes: 'modificar' }; // viagens '': cada um vê as próprias (e o gestor, a equipe)
 /** Permissões que o banco do claude.ai só libera a quem tem "Pode editar" no compartilhamento do painel (regras admin). */
 const PERM_SO_EDITOR = ['pe.', 'pessoal.salario.', 'pessoal.parametros', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.matriz', 'retaguarda.ieo.lancar', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo', 'auditoria.', 'backup.', 'acessos.'];
-function permissoesDaMatriz(m = {}) {
-  const out = new Set();
+function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
+  const out = new Set(), v83 = Acesso.ativo(), loja = perfil === 'LOJA', sub = (v83 && m.sub) || {};
   for (const mod of MATRIZ_MODULOS) {
-    const n = NIVEIS_ACESSO.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); if (n <= 0) continue; // v13.60: usuários antigos já podem pedir (Solicitações)
-    (mod.extras || []).forEach(([k]) => { if (m[k] === true) out.add(k); }); // v13.61: opções extras da linha do módulo (ex.: Acessar todas as lojas)
-    mod.ler.forEach(p => out.add(p)); if (n >= 2) mod.modificar.forEach(p => out.add(p)); if (n >= 3) mod.excluir.forEach(p => out.add(p));
+    if (mod.v1383 && !v83) continue; // v13.83: linha nova só com o recurso liberado
+    let n = NIVEIS_ACESSO.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); // v13.60: usuários antigos já podem pedir (Solicitações)
+    (mod.extras || []).forEach(([k, , , livre]) => { if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); }); // v13.61: opções extras da linha do módulo · v13.83: "livre" vale sem nível
+    if (n <= 0) continue;
+    if (loja) n = mod.id === 'solicitacoes' ? Math.min(n, 2) : 1; // v13.83 · perfil Loja (ponta): só leitura; grava apenas Solicitações (pedir) e a viagem (opção própria)
+    const s = sub[mod.id] || {}, { fora, acoes } = Acesso.recorte(mod.id, s);
+    const pode = (p, acao) => !fora.has(p) && (!acao || !acoes || acoes.has(p));
+    mod.ler.forEach(p => pode(p) && out.add(p)); if (n >= 2) mod.modificar.forEach(p => pode(p, 1) && out.add(p)); if (n >= 3) mod.excluir.forEach(p => pode(p, 1) && out.add(p));
   }
   return [...out];
 }
@@ -1997,9 +2063,10 @@ const Auth = {
   can(perm) {
     if (!this.id) return false;
     if (String(perm).startsWith('pdi.')) return this.perfil === 'GESTOR' && this.podeEditarNuvem; // v13.38: PDI só do Master; o banco só entrega a coleção pdi ao nível admin
+    if (this.usuario && this.usuario.perfil !== 'MASTER' && this._v83 !== Acesso.ativo()) this.recalcular(); // v13.83: recurso liberado depois do login (config/recursos chega depois)
     const lista = this.matriz[this.perfil] || [];
     if (!lista.some(p => p === '*' || p === perm || (p.endsWith('.*') && perm.startsWith(p.slice(0, -1))))
-      && !(this.PERM_SUPERVISOR.includes(perm) && this.perfil !== 'GESTOR' && this.ehSupervisor())) return false;
+      && !(this.PERM_SUPERVISOR.includes(perm) && this.perfil !== 'GESTOR' && !this.loja && this.ehSupervisor())) return false; // v13.83: perfil Loja não ganha o bônus de supervisor
     return this.podeEditarNuvem || !PERM_SO_EDITOR.some(p => p.endsWith('.') ? perm.startsWith(p) : perm === p);
   },
   /** Nomes para o log: usuário do login → funcionário do Módulo 1 (ou Master avulso); ids antigos → conta Claude. */
@@ -2015,11 +2082,100 @@ const Auth = {
   /** Aplica o usuário que acabou de entrar (MASTER = todas as permissões; OPERACIONAL = matriz). */
   aplicarUsuario(u, f) {
     this.id = u.id; this.usuario = u; this.funcionario = f || null; this.nome = f?.nome || u.nome || 'Usuário'; this.simulado = null;
-    this.perfilReal = u.perfil === 'MASTER' ? 'GESTOR' : 'OPERACIONAL';
-    this.matriz = { ...this.matriz, OPERACIONAL: u.perfil === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}) };
+    this.perfilReal = u.perfil === 'MASTER' ? 'GESTOR' : 'OPERACIONAL'; this.loja = u.perfil === 'LOJA'; // v13.83: perfil Loja (ponta) roda como Operacional só leitura
+    this.recalcular();
   },
-  limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.matriz = PERMISSOES; },
+  /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
+  recalcular() { const u = this.usuario; if (!u) return; this._v83 = Acesso.ativo(); this.matriz = { ...this.matriz, OPERACIONAL: u.perfil === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
+  loja: false,
+  limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
 };
+
+/* ==================== v13.83 · ACESSO: sub-permissões, roteador e perfil Loja ==================== */
+const Acesso = {
+  REC: 'acessos_v1383',
+  ativo() { return typeof Recursos !== 'undefined' && typeof Repo !== 'undefined' && Recursos.ativo(this.REC); },
+  loja() { return !!Auth.loja && !Auth.simulado; },
+  modulo(id) { return MATRIZ_MODULOS.find(m => m.id === id); },
+  /** Telas (abas) de um módulo da matriz: [{ id 'rota:aba', rota, aba, rot, perms, grupo }]. */
+  telas(modId) { const out = []; for (const [rota, c] of Object.entries(TELAS_ROTA)) if (c.mod === modId) c.telas.forEach(([aba, rot, perms]) => out.push({ id: rota + ':' + aba, rota, aba, rot, perms: perms || [], grupo: c.titulo || '' })); return out; },
+  /** Recorte de um módulo pelas sub-permissões gravadas: permissões que saem (telas desmarcadas) e ações permitidas (null = todas). */
+  recorte(modId, s = {}) {
+    const ts = this.telas(modId), on = s.telas ? new Set(s.telas) : null, fora = new Set();
+    if (on) { const ficam = new Set(ts.filter(t => on.has(t.id)).flatMap(t => t.perms)); ts.filter(t => !on.has(t.id)).forEach(t => t.perms.forEach(p => { if (!ficam.has(p)) fora.add(p); })); }
+    return { fora, acoes: s.acoes ? new Set(s.acoes) : null };
+  },
+  sub(modId) { const u = Auth.usuario; return (u && u.perfil !== 'MASTER' && u.permissoes?.sub?.[modId]) || null; },
+  /** A aba de uma tela está liberada para quem está logado? (Master, recurso desligado ou aba sem cadastro: sim.) */
+  tela(rota, aba) {
+    if (!this.ativo() || Auth.perfil === 'GESTOR' || !aba) return true;
+    const c = TELAS_ROTA[rota]; if (!c || !c.telas.some(([k]) => k === aba)) return true;
+    const s = this.sub(c.mod); return !s?.telas || s.telas.includes(rota + ':' + aba);
+  },
+  abasLiberadas(rota) { const c = TELAS_ROTA[rota]; return c ? c.telas.map(([k]) => k).filter(k => this.tela(rota, k)) : null; },
+  /** A rota tem pelo menos uma aba liberada? (rotas sem abas cadastradas: sim) */
+  rotaOk(rota) { const l = this.abasLiberadas(rota); return !l || l.length > 0; },
+  /** Antes de desenhar: se a aba atual da tela não está liberada, vai para a primeira liberada. */
+  ajustarAba(rota) {
+    const c = TELAS_ROTA[rota], l = this.abasLiberadas(rota); if (!c || !l || !l.length) return;
+    try { const ui = c.ui(); if (ui && ui.aba && !l.includes(ui.aba) && c.telas.some(([k]) => k === ui.aba)) ui.aba = l[0]; } catch { /* módulo ainda não carregado */ }
+  },
+  /** Depois de desenhar: some com os botões de abas (e atalhos para elas) que a pessoa não pode abrir. */
+  filtrarDom(raiz, rota) {
+    const c = TELAS_ROTA[rota]; if (!c || !this.ativo() || Auth.perfil === 'GESTOR') return;
+    raiz.querySelectorAll(`[data-a="${c.aba}"][data-v]`).forEach(b => { if (!this.tela(rota, b.dataset.v)) b.remove(); });
+  },
+  /** Por que um módulo não abre para quem está logado (mensagem para o usuário e para a prévia da Gestão de Acessos). */
+  motivo(m) {
+    if (!m) return '';
+    if (m.id === 'equilibrio') return 'O Ponto de Equilíbrio é exclusivo do Master.';
+    if (m.id === 'conciliacao' && typeof ConcMP !== 'undefined' && !ConcMP.ativo()) return 'A Conciliação de Meios de Pagamento ainda não foi liberada neste ambiente.';
+    const ed = PERM_SO_EDITOR.some(p => p.endsWith('.') ? String(m.perm).startsWith(p) : m.perm === p);
+    if (m.perm && this._temNaMatriz(m.perm) && ed && !Auth.podeEditarNuvem) return `${m.titulo}: a matriz libera, mas estes dados só são entregues a quem ${Cloud.base?.netlify ? 'é Master neste site' : 'tem “Pode editar” no compartilhamento do painel (claude.ai)'}.`;
+    if (!this.rotaOk(m.id)) return `${m.titulo}: nenhuma tela deste módulo está marcada nas suas sub-permissões (Gestão de Acessos).`;
+    return `Seu acesso não inclui ${m.titulo} (Gestão de Acessos › Permissões).`;
+  },
+  _temNaMatriz(perm) { const l = Auth.matriz[Auth.perfil] || []; return l.includes('*') || l.includes(perm); },
+  /** Prévia da Gestão de Acessos: o que o usuário vai abrir de fato com a matriz marcada (ok / motivo). */
+  previa(perm, perfil) {
+    if (perfil === 'MASTER') return [{ ok: true, t: 'Acesso total (todos os módulos, inclusive Gestão de Acessos, Auditoria e Backup)' }];
+    const g = new Set(permissoesDaMatriz(perm, perfil)), out = [], s = perm.sub || {};
+    const telasOk = rota => { const c = TELAS_ROTA[rota]; if (!c) return null; const st = s[c.mod]?.telas; return c.telas.filter(([k]) => !st || st.includes(rota + ':' + k)).map(([, r]) => r); };
+    for (const m of MODULOS) {
+      let ok = m.perm ? g.has(m.perm) : false, nota = '';
+      if (m.id === 'viagens') { ok = true; nota = g.has('viagens.ver') ? 'todos os pedidos' : 'os próprios pedidos e os da equipe'; if (g.has('viagens.solicitar') || g.has('viagens.pagar')) nota += ' · Nova Solicitação de Viagem'; }
+      if (m.id === 'equilibrio') { ok = false; nota = 'exclusivo do Master'; }
+      if (m.id === 'conciliacao' && typeof ConcMP !== 'undefined' && !ConcMP.ativo()) { ok = false; nota = 'ainda não liberado neste ambiente'; }
+      const ts = telasOk(m.id); if (ok && ts && !ts.length) { ok = false; nota = 'nenhuma tela marcada'; } else if (ok && ts && ts.length < TELAS_ROTA[m.id].telas.length) nota = ts.join(', ');
+      const ed = ok && PERM_SO_EDITOR.some(p => p.endsWith('.') ? String(m.perm).startsWith(p) : m.perm === p);
+      if (!ok && !nota && !g.has(m.perm)) continue;
+      out.push({ ok, t: m.titulo, nota, ed });
+    }
+    if (g.has('visao.dashboard')) { const ts = telasOk('menu'); out.unshift({ ok: !ts || ts.length > 0, t: 'Tela Inicial · Visão / Dashboard', nota: ts ? ts.join(' + ') : '' }); }
+    return out;
+  },
+  /** v13.83 · Perfil Loja (ponta): trava de gravação no Repo — só a solicitação de viagem (com a opção), as Solicitações
+      Operacionais, os documentos do RH pedidos na viagem e o próprio login gravam. O resto é somente leitura. */
+  DOCS_VIAGEM: ['cpf', 'rg', 'nascimento', 'docsAtualizadosEm', 'docsOrigem', 'atualizadoEm', 'atualizadoPor', 'criadoEm', 'criadoPor'],
+  podeGravar(col, id, dados, antes, meta = {}, op = 'set') {
+    if (!this.loja()) return true;
+    if (op === 'remove') return false;
+    if (col === 'usuarios') return id === Auth.id;
+    if (col === Solicitacoes.COL) return Auth.can('solicitacoes.lancar');
+    if (!Auth.can('viagens.solicitar')) return false;
+    if (col === Viagens.COL) return !antes && dados?.status === 'aguardando_aprovacao' && dados?.solicitadoPor === Auth.id;
+    if (col === Liberacao.COL) return !antes && dados?.tipo === 'viagem';
+    if (col === 'funcionarios' && meta.docsViagem && antes) { const ks = new Set([...Object.keys(antes), ...Object.keys(dados || {})]); return [...ks].every(k => k === 'id' || this.DOCS_VIAGEM.includes(k) || JSON.stringify(antes[k]) === JSON.stringify(dados[k])); }
+    return false;
+  },
+  checarGravacao(col, id, dados, antes, meta, op) {
+    if (this.podeGravar(col, id, dados, antes, meta, op)) return;
+    const e = new Error('Perfil Loja: acesso somente leitura. Aqui você só grava a Nova Solicitação de Viagem e as Solicitações Operacionais.'); e.code = 'loja-somente-leitura';
+    if (!meta?.silencioso && Date.now() - (this._avisou || 0) > 4000) { this._avisou = Date.now(); UI.toast(e.message); }
+    throw e;
+  },
+};
+window.Acesso = Acesso;
 
 /* ============================== 4. AUDIT ============================== */
 /*
@@ -2134,6 +2290,7 @@ const Repo = {
   async recarregar(col) { const docs = await Cloud.adapter.list(col); this.cols[col] = new Map(docs.map(d => [d.id, this.norm(col, d)])); this._bump(col); this.prontas.add(col); return docs.length; },
   get(col, id) { return (this.cols[col] || new Map()).get(id) || null; },
   async salvar(col, id, dados, meta = {}) {
+    Acesso.checarGravacao(col, id, dados, this.get(col, id), meta, 'set'); // v13.83: perfil Loja (ponta) só grava o que é dele
     if (typeof Seguranca !== 'undefined') meta = await Seguranca.antesDeSalvar(col, id, dados, meta); // v13.67: cópia do estado anterior (Reverter Ação)
     const antes = this.get(col, id) || (meta.antes ?? null);
     const doc = this.norm(col, { ...clone(dados), atualizadoEm: new Date().toISOString(), atualizadoPor: Auth.id }); // v13.43: loja grava o código de 2 dígitos
@@ -2150,6 +2307,7 @@ const Repo = {
   },
   async excluir(col, id, meta = {}) {
     const antes = this.get(col, id);
+    Acesso.checarGravacao(col, id, null, antes, meta, 'remove'); // v13.83
     if (typeof Seguranca !== 'undefined') meta = await Seguranca.antesDeExcluir(col, id, antes, meta); // v13.67: trava de alto risco + cópia para Reverter Ação
     Sync.ocupado(true);
     await Cloud.adapter.remove(col + '/' + id);
@@ -3354,7 +3512,7 @@ const GestaoAmbientes = {
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a RC).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -13106,12 +13264,13 @@ const Acessos = {
   nivelTxt: { '': '—', ler: 'Ler', modificar: 'Modificar', excluir: 'Excluir' },
   resumoMatriz(u) {
     if (u.perfil === 'MASTER') return '<span class="pill navy">Acesso total</span>';
-    const p = u.permissoes || {};
-    return `<div class="acc-chips">${MATRIZ_MODULOS.map(m => `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
+    const p = u.permissoes || {}, v83 = Acesso.ativo(), sub = (v83 && p.sub) || {};
+    const rec = m => { const s = sub[m.id]; if (!s || !p[m.id]) return ''; const nt = Acesso.telas(m.id).length; return [s.telas ? ` · ${s.telas.length}/${nt} telas` : '', s.acoes ? ` · ${s.acoes.length} ações` : ''].join(''); }; // v13.83
+    return `<div class="acc-chips">${MATRIZ_MODULOS.filter(m => !m.v1383 || v83).map(m => `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${rec(m)}${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
   },
   /** v13.12 · Abre a Gestão de Acessos já na pessoa (vindo do cadastro do RH): com usuário → Permissões; sem → destaque para ativar. */
   irPara(fid) {
-    const u = this.todos().find(x => x.funcionarioId === fid); this.ui.foco = fid; this.ui.buscaSem = '';
+    const u = this.todos().find(x => x.funcionarioId === fid); this.ui.foco = fid; this.ui.buscaSem = ''; if (!u) this.ui.semAberto = true; // v13.84
     App.ir('acessos'); if (u) setTimeout(() => this.abrirPermissoes(u.id), 60); else setTimeout(() => $('#accFoco')?.scrollIntoView({ block: 'center' }), 60);
   },
   /** Todos os colaboradores não desligados do cadastro (Base Ativa e cadastro manual do RH) que ainda não têm usuário. */
@@ -13133,6 +13292,7 @@ const Acessos = {
     const uq = this.ui, qs = RH.chave(uq.buscaSem), foco = uq.foco && Repo.get('funcionarios', uq.foco), focoSem = foco && sem.some(f => f.id === foco.id);
     const lista2 = sem.filter(f => (!uq.origemSem || (uq.origemSem === 'manual' ? f.origem !== 'base-ativa' : f.origem === 'base-ativa')) && (!qs || RH.chave([f.nome, f.matricula, Pessoal.cargoNome(f), Pessoal.lotacaoNome(f)].join(' ')).includes(qs)))
       .sort((a, b) => (a.origem === 'base-ativa') - (b.origem === 'base-ativa') || (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+    const v84 = Recursos.ativo('acessos_v1384'), aberto = !v84 || !!uq.semAberto; /* v13.84: "Colaboradores sem acesso" recolhido por padrão */
     const manuais = sem.filter(f => f.origem !== 'base-ativa').length, linhaSem = f => { const ok = CPF.valido(f.cpf);
       return `<tr ${f.id === uq.foco ? 'class="acc-foco-tr"' : ''}><td><div class="cell-main">${esc(f.nome)}</div><div class="cell-sub">${esc([Pessoal.cargoNome(f), Pessoal.lotacaoNome(f)].filter(x => x && x !== '—').join(' · '))}</div></td>
         <td>${f.origem === 'base-ativa' ? '<span class="pill neutral">Base Ativa</span>' : '<span class="pill info">Manual (RH)</span>'}</td><td class="mono">${ok ? CPF.mascarar(f.cpf) : '<span class="pill warn">sem CPF</span>'}</td><td>${esc(f.status || 'Ativo')}</td>
@@ -13140,10 +13300,11 @@ const Acessos = {
     const destaque = foco ? (focoSem ? `<div class="panel acc-foco" id="accFoco" style="margin-bottom:16px"><div class="row between"><div><span class="lbl" style="margin:0">Vindo do cadastro do RH</span><h2 style="margin-top:2px">${esc(foco.nome)}</h2><p class="sub" style="margin:2px 0 0">${esc([Pessoal.cargoNome(foco), Pessoal.lotacaoNome(foco)].filter(x => x && x !== '—').join(' · '))} · ${CPF.valido(foco.cpf) ? 'login e senha inicial = CPF ' + CPF.mascarar(foco.cpf) + ' (troca obrigatória no 1º acesso)' : '<b>sem CPF válido</b>: cadastre o CPF para liberar o login'}</p></div>
         <div class="row" style="gap:8px">${CPF.valido(foco.cpf) ? `<button class="btn" data-a="acc-ativar" data-f="${foco.id}">Ativar acesso e definir permissões</button>` : `<button class="btn sec" data-a="acc-cpf" data-f="${foco.id}">Cadastrar CPF</button>`}<button class="btn ghost sm" data-a="acc-foco-limpar">Fechar</button></div></div></div>` : '') : '';
     const ativar = `${destaque}<div class="panel" style="margin-bottom:16px"><h2>Colaboradores sem acesso</h2><p class="sub">Todos os colaboradores não desligados do cadastro — vindos da Base Ativa ou criados à mão no RH (diretoria e retaguarda aparecem primeiro). Ao ativar, o usuário nasce como Operacional com a matriz padrão; ajuste em “Permissões”.</p>
+      ${v84 ? `<details class="acc-sem" id="accSem" ${aberto ? 'open' : ''}><summary class="acc-sem-sum" aria-controls="accSemCorpo"><span class="acc-sem-tit" data-acc-sem-tit>${aberto ? 'Ocultar' : 'Exibir'} Colaboradores sem Acesso</span><span class="acc-sem-n" aria-label="${Fmt.num(sem.length)} colaboradores sem acesso">${Fmt.num(sem.length)}</span><svg class="acc-sem-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="acc-sem-corpo" id="accSemCorpo">` : ''}${v84 && !aberto ? '' : `
       <div class="toolbar"><div class="field grow"><label class="lbl" for="accBuscaSem">Buscar</label><input id="accBuscaSem" type="search" value="${esc(uq.buscaSem)}" data-a="acc-busca-sem" placeholder="Nome, matrícula, cargo, lotação…"></div>
         <div class="field"><label class="lbl" for="accOrigSem">Origem</label><select id="accOrigSem" data-a="acc-origem-sem"><option value="">Todas (${sem.length})</option><option value="manual" ${uq.origemSem === 'manual' ? 'selected' : ''}>Cadastro manual do RH (${manuais})</option><option value="base" ${uq.origemSem === 'base' ? 'selected' : ''}>Base Ativa (${sem.length - manuais})</option></select></div></div>
       ${lista2.length ? `<div class="tbl-wrap"><table><thead><tr><th>Colaborador</th><th>Origem</th><th>CPF</th><th>Situação no RH</th><th></th></tr></thead><tbody>${lista2.slice(0, uq.pag).map(linhaSem).join('')}</tbody></table></div>
-        ${lista2.length > uq.pag ? `<div class="row" style="margin-top:8px"><span class="hint">Mostrando ${uq.pag} de ${Fmt.num(lista2.length)}.</span><button class="btn ghost sm" data-a="acc-mais">Mostrar mais</button></div>` : ''}` : `<div class="empty" style="padding:16px">${sem.length ? 'Ninguém com esse filtro.' : 'Todos os colaboradores ativos já têm acesso.'}</div>`}</div>`;
+        ${lista2.length > uq.pag ? `<div class="row" style="margin-top:8px"><span class="hint">Mostrando ${uq.pag} de ${Fmt.num(lista2.length)}.</span><button class="btn ghost sm" data-a="acc-mais">Mostrar mais</button></div>` : ''}` : `<div class="empty" style="padding:16px">${sem.length ? 'Ninguém com esse filtro.' : 'Todos os colaboradores ativos já têm acesso.'}</div>`}`}${v84 ? '</div></details>' : ''}</div>`; /* v13.84: lista dentro do agrupador (só é montada quando aberto) */
     const q = RH.chave(this.ui.busca), filtrados = lista.filter(u => (!this.ui.situacao || this.situacao(u).k === this.ui.situacao) && (!q || RH.chave(this.nomeDe(u)).includes(q))).sort((a, b) => this.nomeDe(a).localeCompare(this.nomeDe(b)));
     const tabela = `<div class="panel"><h2>Usuários</h2><div class="toolbar"><div class="field grow"><label class="lbl" for="accBusca">Buscar</label><input id="accBusca" type="search" value="${esc(this.ui.busca)}" data-a="acc-busca" placeholder="Nome"></div>
         <div class="field"><label class="lbl" for="accSit">Situação</label><select id="accSit" data-a="acc-filtro"><option value="">Todas</option>${[['ativo', 'Ativos'], ['pendente', 'Aguardando 1º acesso'], ['desligado', 'Bloqueados pelo RH'], ['desativado', 'Desativados']].map(([v, l]) => `<option value="${v}" ${this.ui.situacao === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
@@ -13151,30 +13312,73 @@ const Acessos = {
         const f = this.funcionario(u.funcionarioId), s = this.situacao(u), eu = u.id === Auth.id;
         return `<tr class="${['desligado', 'desativado'].includes(s.k) ? 'muted' : ''}"><td><div class="cell-main">${esc(this.nomeDe(u))}${eu ? ' <span class="hint">(você)</span>' : ''}</div><div class="cell-sub">${f ? esc([Pessoal.cargoNome?.(f), f.status || 'Ativo'].filter(Boolean).join(' · ')) : 'Master da configuração inicial'}</div></td>
           <td class="mono">${CPF.mascarar(Sessao.cpfDe(u, f))}</td>
-          <td><span class="pill ${u.perfil === 'MASTER' ? 'navy' : 'neutral'}">${u.perfil === 'MASTER' ? 'Master' : 'Operacional'}</span></td><td>${this.resumoMatriz(u)}</td>
+          <td><span class="pill ${u.perfil === 'MASTER' ? 'navy' : u.perfil === 'LOJA' ? 'info' : 'neutral'}">${u.perfil === 'MASTER' ? 'Master' : u.perfil === 'LOJA' ? 'Loja (ponta)' : 'Operacional'}</span></td><td>${this.resumoMatriz(u)}</td>
           <td><span class="pill ${s.cls}">${esc(s.txt)}</span></td><td class="mono">${u.ultimoAcesso ? Fmt.dataHora(u.ultimoAcesso) : '<span class="hint">nunca</span>'}</td>
           <td class="acts"><button class="btn sec sm" data-a="acc-editar" data-id="${u.id}">Permissões</button><button class="btn ghost sm" data-a="acc-reset" data-id="${u.id}">Resetar senha</button>
             ${eu ? '' : `<button class="btn ${u.ativo === false ? 'sec' : 'ghost'} sm" data-a="acc-ativo" data-id="${u.id}">${u.ativo === false ? 'Reativar' : 'Desativar'}</button><button class="iconbtn" data-a="acc-remover" data-id="${u.id}" aria-label="Remover usuário">${ICON.lixo}</button>`}</td></tr>`;
       }).join('') || '<tr><td colspan="7"><div class="empty">Nenhum usuário com esse filtro.</div></td></tr>'}</tbody></table></div></div>`;
     return head + kpis + ativar + tabela;
   },
-  afterRender() { },
+  /** v13.84 · abrir/fechar o agrupador guarda o estado (a busca e os filtros redesenham a tela sem fechá-lo); a lista só é montada aberta. */
+  afterRender() {
+    const d = $('#accSem'); if (!d || d._ligado) return; d._ligado = true;
+    d.addEventListener('toggle', () => { if (!!this.ui.semAberto === d.open) return; const foco = d.querySelector('summary') === document.activeElement; this.ui.semAberto = d.open; App.render(); if (foco) $('#accSem > summary')?.focus({ preventScroll: true }); }); // o foco do teclado continua no título
+  },
 
   /* ---------------- matriz Ler / Modificar / Excluir ---------------- */
-  matrizHTML(perm = {}, master = false) {
-    const cel = (m, n) => { const nv = NIVEIS_ACESSO.indexOf(perm[m.id] || ''), i = NIVEIS_ACESSO.indexOf(n);
+  matrizHTML(perm = {}, master = false, perfil = 'OPERACIONAL', abertos = new Set()) {
+    const v83 = Acesso.ativo(), loja = v83 && perfil === 'LOJA', sub = perm.sub || {};
+    const teto = m => loja ? (m.id === 'solicitacoes' ? 2 : 1) : 3; // v13.83 · perfil Loja: só Ler (Solicitações: até Modificar = pedir)
+    const cel = (m, n) => { const nv = Math.min(NIVEIS_ACESSO.indexOf(perm[m.id] || ''), v83 && !master ? teto(m) : 3), i = NIVEIS_ACESSO.indexOf(n);
+      if (v83 && !master && (i > teto(m) || (n !== 'ler' && !m[n].length))) return `<td class="acc-cel"><span class="acc-na" title="${loja && i > teto(m) ? 'Perfil Loja: somente leitura' : 'Não se aplica a este módulo'}">—</span></td>`;
       return `<td class="acc-cel"><input type="checkbox" data-mod="${m.id}" data-niv="${n}" aria-label="${esc(m.rotulo)}: ${this.nivelTxt[n]}" ${master || nv >= i ? 'checked' : ''} ${master || nv > i ? 'disabled' : ''}></td>`; };
+    /* v13.83 · telas e ações do módulo (sub-permissões) */
+    const subRow = m => {
+      const n = Math.min(NIVEIS_ACESSO.indexOf(perm[m.id] || ''), teto(m)); if (!v83 || master || n <= 0) return '';
+      const s = sub[m.id] || {}, ts = Acesso.telas(m.id), acs = [...new Set([...(n >= 2 ? m.modificar : []), ...(n >= 3 ? m.excluir : [])])];
+      if (!ts.length && !acs.length) return '';
+      const onT = t => !s.telas || s.telas.includes(t.id), fora = new Set(ts.filter(t => !onT(t)).flatMap(t => t.perms).filter(p => !ts.some(t => onT(t) && t.perms.includes(p))));
+      const grupos = [...new Set(ts.map(t => t.grupo))];
+      const telasH = grupos.map(g => `<span class="lbl">Telas${g ? ' · ' + esc(g) : ''}</span>${ts.filter(t => t.grupo === g).map(t => `<label class="check"><input type="checkbox" data-tela="${esc(t.id)}" data-tela-mod="${m.id}" ${onT(t) ? 'checked' : ''}> ${esc(t.rot)}</label>`).join('')}`).join('');
+      const acH = acs.length ? `<span class="lbl">Ações (${n >= 3 ? 'Modificar e Excluir' : 'Modificar'})</span>${acs.map(p => { const off = fora.has(p); return `<label class="check ${off ? 'off' : ''}"><input type="checkbox" data-acao="${esc(p)}" data-acao-mod="${m.id}" ${!off && (!s.acoes || s.acoes.includes(p)) ? 'checked' : ''} ${off ? 'disabled' : ''}> ${esc(PERM_ROTULO[p] || p)}${off ? ' <span class="hint">(tela desmarcada)</span>' : ''}</label>`; }).join('')}` : '';
+      const nT = ts.filter(onT).length, nA = acs.filter(p => !fora.has(p) && (!s.acoes || s.acoes.includes(p))).length;
+      return `<tr class="acc-sub" data-sub-mod="${m.id}"><td colspan="4"><details ${abertos.has(m.id) ? 'open' : ''}><summary>Telas e ações${ts.length ? ` · <b>${nT}/${ts.length} telas</b>` : ''}${acs.length ? ` · <b>${nA}/${acs.length} ações</b>` : ''}</summary><div class="acc-sub-g">${telasH}${acH}</div></details></td></tr>`;
+    };
+    const mods = MATRIZ_MODULOS.filter(m => !m.v1383 || v83);
     return `<div class="tbl-wrap"><table class="nolabel acc-matriz"><thead><tr><th>Módulo</th><th>Ler</th><th>Modificar</th><th>Excluir</th></tr></thead><tbody>
-      ${MATRIZ_MODULOS.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica]) => { const sem = !master && !perm[m.id]; /* v13.61 */
-        return `<tr class="acc-extra"><td colspan="4"><label class="check"><input type="checkbox" data-extra="${k}" data-mod-extra="${m.id}" ${master || (perm[k] === true && !sem) ? 'checked' : ''} ${master || sem ? 'disabled' : ''}> <b>${esc(rot)}</b> <span class="hint">${esc(dica)}${sem ? ' · marque ao menos “Ler” no módulo' : ''}</span></label></td></tr>`; }).join('')}`).join('')}</tbody></table></div>
-      <p class="hint" style="margin-top:6px">Modificar inclui Ler; Excluir inclui Modificar e Ler. ${master ? 'Master tem acesso total, inclusive à Gestão de Acessos, Auditoria e Backup.' : 'Salários, parâmetros de RH, Auditoria, Backup e Gestão de Acessos ficam só com o Master.'}</p>`;
+      ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre]) => { const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
+        if (livre && !v83) return '';
+        return `<tr class="acc-extra"><td colspan="4"><label class="check"><input type="checkbox" data-extra="${k}" data-mod-extra="${m.id}" ${master || (perm[k] === true && !sem) ? 'checked' : ''} ${master || sem ? 'disabled' : ''}> <b>${esc(rot)}</b> <span class="hint">${esc(dica)}${sem ? ' · marque ao menos “Ler” no módulo' : ''}</span></label></td></tr>`; }).join('')}${subRow(m)}`).join('')}</tbody></table></div>
+      <p class="hint" style="margin-top:6px">Modificar inclui Ler; Excluir inclui Modificar e Ler.${v83 && !master ? ' Em “Telas e ações” escolha exatamente as abas e as ações liberadas em cada módulo: o menu e o roteador do painel só abrem o que estiver marcado.' : ''}${loja ? ' <b>Perfil Loja (ponta):</b> tudo somente leitura; grava apenas as Solicitações Operacionais (Modificar = pedir) e a Nova Solicitação de Viagem (opção “Pode solicitar viagem”).' : ''} ${master ? 'Master tem acesso total, inclusive à Gestão de Acessos, Auditoria e Backup.' : 'Salários, parâmetros de RH, Auditoria, Backup e Gestão de Acessos ficam só com o Master.'}</p>`;
   },
-  lerMatriz(m) { const out = {}; MATRIZ_MODULOS.forEach(mod => { out[mod.id] = ['excluir', 'modificar', 'ler'].find(v => $(`[data-mod="${mod.id}"][data-niv="${v}"]`, m)?.checked) || ''; (mod.extras || []).forEach(([k]) => { if (out[mod.id] && $(`[data-extra="${k}"]`, m)?.checked) out[k] = true; }); }); return out; }, // v13.61: + opções extras
+  /** v13.83 · prévia do acesso real (o que o roteador vai abrir), com o motivo de cada bloqueio. */
+  previaHTML(perm, perfil) {
+    if (!Acesso.ativo()) return '';
+    const l = Acesso.previa(perm, perfil);
+    return `<span class="lbl">O que esta pessoa vai abrir de fato</span><ul class="acc-previa">${l.map(x => `<li><span class="${x.ok ? 'ok' : 'no'}">${x.ok ? '✓' : '✕'}</span><span>${esc(x.t)}${x.nota ? ` <small>· ${esc(x.nota)}</small>` : ''}${x.ed ? ' <small>· no claude.ai, exige “Pode editar” no compartilhamento (no Netlify, só Master)</small>' : ''}</span></li>`).join('') || '<li><span class="no">✕</span><span>Nenhum módulo além da Tela Inicial</span></li>'}</ul>`;
+  },
+  lerMatriz(m) {
+    const out = {}, v83 = Acesso.ativo(), sub = {};
+    MATRIZ_MODULOS.forEach(mod => {
+      if (mod.v1383 && !v83) return;
+      out[mod.id] = ['excluir', 'modificar', 'ler'].find(v => $(`[data-mod="${mod.id}"][data-niv="${v}"]`, m)?.checked) || '';
+      (mod.extras || []).forEach(([k, , , livre]) => { if ((out[mod.id] || (livre && v83)) && $(`[data-extra="${k}"]`, m)?.checked) out[k] = true; }); // v13.61: + opções extras
+      if (!v83 || !out[mod.id]) return; /* v13.83: sub-permissões — só grava o recorte (tudo marcado = sem recorte) */
+      const ts = $$(`[data-tela-mod="${mod.id}"]`, m), as = $$(`[data-acao-mod="${mod.id}"]`, m), x = {};
+      if (ts.some(i => !i.checked)) x.telas = ts.filter(i => i.checked).map(i => i.dataset.tela);
+      if (as.some(i => !i.checked && !i.disabled)) x.acoes = as.filter(i => i.checked || i.disabled).map(i => i.dataset.acao);
+      if (x.telas || x.acoes) sub[mod.id] = x;
+    });
+    if (Object.keys(sub).length) out.sub = sub;
+    return out;
+  },
   /** Cascata: marcar um nível marca e trava os de baixo; desmarcar deixa o nível logo abaixo. */
   sincronizarMatriz(m, alvo) {
-    const master = $('[name="perfil"]', m)?.value === 'MASTER', perm = master ? {} : this.lerMatriz(m);
+    const perfil = $('[name="perfil"]', m)?.value || 'OPERACIONAL', master = perfil === 'MASTER', perm = master ? {} : this.lerMatriz(m);
     if (alvo && !alvo.checked && !master) perm[alvo.dataset.mod] = NIVEIS_ACESSO[NIVEIS_ACESSO.indexOf(alvo.dataset.niv) - 1];
-    $('#accMatriz', m).innerHTML = this.matrizHTML(perm, master);
+    const abertos = new Set($$('.acc-sub details[open]', m).map(d => d.closest('[data-sub-mod]').dataset.subMod));
+    $('#accMatriz', m).innerHTML = this.matrizHTML(perm, master, perfil, abertos);
+    const pv = $('#accPrevia', m); if (pv) pv.innerHTML = this.previaHTML(master ? {} : this.lerMatriz(m), perfil);
   },
   /** v13.9 · Opções de visão por hierarquia (Equipe e PDI). */
   opcoesEscopo(u) {
@@ -13186,10 +13390,11 @@ const Acessos = {
     const u = Repo.get(this.COL, id), eu = id === Auth.id;
     UI.modal({
       titulo: 'Permissões · ' + this.nomeDe(u), largo: true,
-      corpo: `<div class="form-grid">${campo('Perfil', 'perfil', u.perfil, { opcoes: [['OPERACIONAL', 'Operacional (matriz por módulo)'], ['MASTER', 'Master (acesso total)']], attrs: eu ? 'disabled' : '' })}
-        <div class="field full"><span class="lbl">Permissões por módulo</span><div id="accMatriz">${this.matrizHTML(u.permissoes || {}, u.perfil === 'MASTER')}</div></div>
+      corpo: `<div class="form-grid">${campo('Perfil', 'perfil', u.perfil, { opcoes: [['OPERACIONAL', 'Operacional (matriz por módulo)'], ...(Acesso.ativo() || u.perfil === 'LOJA' ? [['LOJA', 'Loja (ponta) — leitura + Solicitações e viagem']] : []), ['MASTER', 'Master (acesso total)']], attrs: eu ? 'disabled' : '' })}
+        <div class="field full"><span class="lbl">Permissões por módulo</span><div id="accMatriz">${this.matrizHTML(u.permissoes || {}, u.perfil === 'MASTER', u.perfil)}</div></div>
+        <div class="field full" id="accPrevia">${this.previaHTML(u.perfil === 'MASTER' ? {} : u.permissoes || {}, u.perfil)}</div>
         ${campo('Visão da Equipe e do PDI (Módulo 1)', 'escopo', u.escopo || 'auto', { opcoes: this.opcoesEscopo(u), full: true, dica: 'Automático: Supervisor/Regional vê as lojas da regional (campo Supervisor do Módulo 2); Gerente vê a loja de lotação; os demais veem só o próprio cadastro e os liderados diretos. Master: “Minha equipe” + botão “Ver Base Inteira”.' })}</div>${eu ? '<p class="hint">Você não pode mudar o seu próprio perfil.</p>' : ''}`,
-      aoAbrir: m => m.addEventListener('change', e => { if (e.target.matches('[data-mod]')) this.sincronizarMatriz(m, e.target); if (e.target.name === 'perfil') this.sincronizarMatriz(m); }),
+      aoAbrir: m => m.addEventListener('change', e => { if (e.target.matches('[data-mod]')) this.sincronizarMatriz(m, e.target); else if (e.target.name === 'perfil' || e.target.matches('[data-tela],[data-acao],[data-extra]')) this.sincronizarMatriz(m); }), // v13.83
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar permissões', acao: async m => {
         const perfil = eu ? u.perfil : $('[name="perfil"]', m).value;
         if (u.perfil === 'MASTER' && perfil !== 'MASTER' && this.masters().length <= 1) { UI.toast('Este é o único Master ativo: defina outro Master antes.'); return false; }
@@ -13768,14 +13973,22 @@ const Viagens = {
    * ou quem está lotado (ou é responsável) num departamento "Financeiro" do RH — inclusive os departamentos abaixo dele
    * (ex.: Gestão Financeira › Contas a Pagar). Gestores de loja e colaboradores comuns não lançam pedidos.
    */
-  financeiro() { return this.master() || Auth.can('viagens.pagar') || this.doFinanceiro(); },
+  financeiro() { return this.master() || (!Acesso.loja() && (Auth.can('viagens.pagar') || this.doFinanceiro())); }, // v13.83: perfil Loja nunca é o financeiro
   doFinanceiro() {
     const me = this.eu(); if (!me) return false;
     const f = Repo.get('funcionarios', me.id) || me, deps = Repo.todos('rh_departamentos'), porId = new Map(deps.map(d => [d.id, d]));
     const fin = d => { let x = d, n = 0; while (x && n++ < 20) { if (/FINANC/.test(RH.chave(x.nome))) return true; x = porId.get(x.paiId); } return false; };
     return fin(porId.get(f.departamentoId)) || deps.some(d => d.responsavelId === me.id && fin(d));
   },
-  podeCriar() { return this.financeiro(); },
+  podeCriar() { return this.financeiro() || this.solicitante(); },
+  /** v13.83 · "Pode solicitar viagem" (Gestão de Acessos): abre a Nova Solicitação para si e para a equipe da própria loja. */
+  solicitante() { return Acesso.ativo() && !!Auth.funcionario && Auth.can('viagens.solicitar'); },
+  /** Equipe que o solicitante pode incluir: ele mesmo + quem está lotado na mesma loja (fora de loja: + liderados diretos). */
+  equipeSolicitante() {
+    const me = this.eu(); if (!me) return [];
+    const f = Repo.get('funcionarios', me.id) || me, loja = String(f.lotacao || '').startsWith('loja-') ? f.lotacao : '';
+    return Repo.todos('funcionarios').filter(x => (x.status || 'Ativo') !== 'Desligado' && (x.id === me.id || (loja ? x.lotacao === loja : x.gestorId === me.id)));
+  },
   eu() { return Auth.funcionario || null; },
   podeVer() { return !!Auth.id && (this.verTodos() || this.financeiro() || !!this.eu() || Liberacao.lider()); },
   equipe() { const e = Pessoal.escopo(); return e.ids; },
@@ -13788,17 +14001,28 @@ const Viagens = {
   },
   todos() { return Repo.todos(this.COL).filter(v => this.noAlcance(v)).sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')); },
   /** Para quem a pessoa pode abrir um pedido: ela mesma; o gestor, a equipe; Master/financeiro, todos. */
-  solicitaveis() { return this.podeCriar() ? Repo.todos('funcionarios').filter(f => (f.status || 'Ativo') !== 'Desligado') : []; }, // v13.22: só o financeiro/Master lança, em nome de quem viaja
+  solicitaveis() { return this.financeiro() ? Repo.todos('funcionarios').filter(f => (f.status || 'Ativo') !== 'Desligado') : this.solicitante() ? this.equipeSolicitante() : []; }, // v13.83: + equipe da loja de quem tem "Pode solicitar viagem" // v13.22: só o financeiro/Master lança, em nome de quem viaja
   /** v13.26 · para quem a pessoa pode lançar despesas: no repasse individual, cada participante lança as suas (o Financeiro, as de todos);
    *  no centralizado as notas ficam unificadas na conta de quem recebeu; no único, de quem viajou. */
   lancaveis(v) {
     const ps = this.participantes(v).map(p => p.funcionarioId), me = this.eu();
+    if (Acesso.loja()) return []; // v13.83: perfil Loja só abre a solicitação (a prestação fica com o Financeiro)
     if (this.modo(v) === 'individual') return this.financeiro() ? ps : me && ps.includes(me.id) ? [me.id] : [];
     return this.financeiro() || (me && me.id === v.funcionarioId) ? [v.funcionarioId] : [];
   },
   podeEditarPrestacao(v) { return v.status === 'aguardando_prestacao' && this.lancaveis(v).length > 0; },
   aguardandoPrestacao() { return this.todos().filter(v => v.status === 'aguardando_prestacao'); },
 
+  /** v13.83 · CPF da viagem: máscara 000.000.000-00 enquanto digita e conferência dos dígitos verificadores (RG: só gravado, sem validação). */
+  mascaraCPF(el) {
+    const d = CPF.limpar(el.value).slice(0, 11), pos = el.selectionStart ?? el.value.length, antes = CPF.limpar(el.value.slice(0, pos)).length;
+    const txt = d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+    el.value = txt; let k = 0, n = 0; while (k < txt.length && n < antes) { if (/\d/.test(txt[k])) n++; k++; } try { if (document.activeElement === el) el.setSelectionRange(k, k); } catch { }
+    const ok = d.length === 11 && CPF.valido(d), msg = el.parentElement?.querySelector('.vg-cpf-msg');
+    el.setAttribute('aria-invalid', d.length === 11 && !ok ? 'true' : 'false'); el.classList.toggle('vg-cpf-ok', ok); el.classList.toggle('vg-cpf-erro', d.length === 11 && !ok);
+    if (msg) { msg.textContent = !d.length ? '' : d.length < 11 ? `${11 - d.length} dígito(s) faltando` : ok ? 'CPF válido' : 'CPF inválido: os dígitos verificadores não conferem'; msg.className = 'vg-cpf-msg ' + (ok ? 'ok' : d.length === 11 ? 'erro' : ''); }
+    return ok;
+  },
   /* ---------------- v13.24 · parâmetros de diárias e cálculo automático ---------------- */
   /** Quem altera os valores das diárias: o Master, quem tem "Viagens · Modificar" e a gerência financeira
    *  (responsável por um departamento Financeiro do RH, ou cargo de gerente lotado nele). */
@@ -13914,7 +14138,7 @@ const Viagens = {
       const f = Repo.get('funcionarios', fid); if (!f) continue;
       const falta = DocPessoal.faltantes(f), d = Object.fromEntries(Object.entries(docs).filter(([k, x]) => x && falta.includes(k))); if (!Object.keys(d).length) continue;
       const { id, atualizadoEm, atualizadoPor, criadoEm, criadoPor, ...base } = f;
-      await Repo.salvar('funcionarios', fid, { ...base, ...d, docsAtualizadosEm: new Date().toISOString(), docsOrigem: 'viagens' }, { semAudit: true });
+      await Repo.salvar('funcionarios', fid, { ...base, ...d, docsAtualizadosEm: new Date().toISOString(), docsOrigem: 'viagens' }, { semAudit: true, docsViagem: true }); // v13.83: docsViagem = única gravação no RH aceita do perfil Loja
       await Audit.registrar({ modulo: 'pessoal', acao: 'alterou', entidade: 'funcionarios', entidadeId: fid, rotulo: `${f.nome} · documentos (Adiantamento de Viagens)`, detalhe: 'Dados faltantes para a agência preenchidos na solicitação de viagem',
         mudancas: Object.keys(d).map(k => ({ campo: k, de: '', para: k === 'cpf' ? CPF.mascarar(d[k]) : k === 'rg' ? DocPessoal.rgMascarar(d[k]) : '(preenchida)' })) });
       n++;
@@ -13979,7 +14203,7 @@ const Viagens = {
 
   /* ---------------- 1 · solicitação ---------------- */
   novo(pre = null) {
-    if (!this.podeCriar()) return UI.toast('Só o Financeiro e o Master lançam adiantamentos de viagem.');
+    if (!this.podeCriar()) return UI.toast('Só o Financeiro, o Master e quem tem “Pode solicitar viagem” abrem solicitações de viagem.');
     const ps = this.solicitaveis().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
     if (!ps.length) return UI.toast('Nenhum colaborador ativo no RH.');
     const par = this.params();
@@ -14002,7 +14226,7 @@ const Viagens = {
         <div class="field full vg-part"><label class="lbl" for="vgPart">Colaboradores que vão viajar</label>
           <div class="vg-chips" id="vgChips" aria-live="polite"></div><div id="vgDocs" data-vg-docs></div>
           <div class="vg-ac-in"><input id="vgPart" type="text" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="vgPartLista" placeholder="Buscar no RH por nome, matrícula ou cargo"><div class="vg-ac-lista" id="vgPartLista" role="listbox" hidden></div></div>
-          <span class="hint" style="margin-top:4px">Adicione 1 ou mais pessoas do cadastro do RH. O Financeiro lança o pedido em nome de quem vai viajar.</span></div>
+          <span class="hint" style="margin-top:4px">${this.financeiro() ? 'Adicione 1 ou mais pessoas do cadastro do RH. O Financeiro lança o pedido em nome de quem vai viajar.' : 'Adicione você e/ou colaboradores da sua loja. O pedido vai para aprovação do Master e o Financeiro faz o pagamento.'}</span></div>
         <div class="field full"><label class="lbl" for="f_centroCusto">Centro de Custo</label>${RH.ativos('centros').length ? `<select id="f_centroCusto" name="centroCustoId" required><option value="">Selecione o centro de custo…</option>${RH.ativos('centros').map(c => `<option value="${esc(c.id)}">${esc(RH.rotulo(c))}</option>`).join('')}</select>` : '<input id="f_centroCusto" type="text" name="centroCustoTxt" required placeholder="Ex.: 2.01.001 – Financeiro">'}
           <span class="hint" style="margin-top:4px">${RH.ativos('centros').length ? 'Centros de custo parametrizados no Módulo de RH. Vem sugerido pelo cadastro do primeiro viajante: confira.' : 'Nenhum centro de custo parametrizado no RH: digite o centro de custo (o Master pode cadastrá-los em RH › Parametrizações).'}</span></div>
         ${Trajeto.html()}
@@ -14048,7 +14272,7 @@ const Viagens = {
         const docs = () => {
           const blocos = st.sel.map(id => { const falta = DocPessoal.faltantes(porId.get(id)); if (!falta.length) return ''; const dv = st.docs[id] ||= {};
             return `<div class="vg-docs" data-dc-bloco="${esc(id)}"><p class="vg-docs-t"><b>${esc(nome(id))}</b> · Dados faltantes para a agência:</p><div class="vg-docs-g">${falta.map(k => `<div class="field"><label class="lbl" for="dc_${k}_${esc(id)}">${ROTDOC[k]}</label><input id="dc_${k}_${esc(id)}" data-dc-f="${esc(id)}" data-dc-k="${k}" value="${esc(dv[k] || '')}" required autocomplete="off"
-              ${k === 'nascimento' ? `type="date" max="${Datas.hojeISO()}"` : k === 'cpf' ? 'type="text" inputmode="numeric" placeholder="000.000.000-00"' : 'type="text" placeholder="Ex.: 1.234.567 SDS/PE"'}></div>`).join('')}</div></div>`; }).join('');
+              ${k === 'nascimento' ? `type="date" max="${Datas.hojeISO()}"` : k === 'cpf' ? 'type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" data-cpf-viagem aria-describedby="dcm_' + esc(id) + '"' : 'type="text" placeholder="Ex.: 1.234.567 SDS/PE"'}>${k === 'cpf' ? `<span class="vg-cpf-msg" id="dcm_${esc(id)}" aria-live="polite"></span>` : ''}</div>`).join('')}</div></div>`; }).join('');
           /* v13.31 · alerta preventivo: prestação de contas pendente (não trava o pedido) */
           const pend = st.sel.map(id => ({ id, vs: this.pendentesDe(id) })).filter(x => x.vs.length).map(x => `<div class="vg-pend" role="alert" data-pend="${esc(x.id)}"><b>Aviso:</b> Este colaborador possui prestação de contas pendente. — <b>${esc(nome(x.id))}</b>: ${x.vs.map(v => { const pz = this.politica(v)?.prazoData; return `${esc(Trajeto.rota(v))} (volta ${Fmt.data(v.volta)}${pz ? `, prazo ${Fmt.data(pz)}${pz < Datas.hojeISO() ? ' — vencido' : ''}` : ''})`; }).join('; ')}</div>`).join('');
           $('#vgDocs', m).innerHTML = pend + (blocos ? blocos + '<p class="hint" style="margin:4px 0 0">Obrigatórios para salvar. Ao enviar a solicitação, os documentos são gravados no cadastro oficial do RH — na próxima viagem não serão pedidos de novo.</p>' : '');
@@ -14106,7 +14330,7 @@ const Viagens = {
         lista.addEventListener('mousedown', e => { const o = e.target.closest('.vg-ac-op'); if (o) { e.preventDefault(); add(+o.dataset.i); } });
         inp.addEventListener('blur', () => setTimeout(() => { lista.hidden = true; inp.setAttribute('aria-expanded', 'false'); }, 120));
         m.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; const id = b.dataset.rm; st.sel = st.sel.filter(x => x !== id); if (st.recebedor === id) st.recebedor = ''; if (st.aloc === id) st.aloc = 'dividir'; if (st.sel.length < 2) st.modo = ''; chips(); desenharPag(); });
-        m.addEventListener('input', e => { const t = e.target; if (t.dataset?.pgF) { (st.banco[t.dataset.pgF] ||= {})[t.dataset.pgK] = t.value; } if (t.dataset?.dcF) { (st.docs[t.dataset.dcF] ||= {})[t.dataset.dcK] = t.value; } });
+        m.addEventListener('input', e => { const t = e.target; if (t.dataset?.pgF) { (st.banco[t.dataset.pgF] ||= {})[t.dataset.pgK] = t.value; } if (t.matches?.('[data-cpf-viagem]')) Viagens.mascaraCPF(t); if (t.dataset?.dcF) { (st.docs[t.dataset.dcF] ||= {})[t.dataset.dcK] = t.value; } }); // v13.83: CPF com máscara e dígito verificador
         m.addEventListener('change', e => { const t = e.target; if (t.dataset?.dcF) { (st.docs[t.dataset.dcF] ||= {})[t.dataset.dcK] = t.value; if (t.dataset.dcK === 'cpf' && CPF.valido(t.value)) t.value = CPF.formatar(t.value); } });
         m.addEventListener('change', e => { const t = e.target;
           if (t.name === 'pgModo') { st.modo = t.value; desenharPag(); }
@@ -14152,7 +14376,7 @@ const Viagens = {
           for (const k of falta) {
             const val = String(dv[k] || '').trim();
             if (!val) { UI.toast(`Informe ${k === 'nascimento' ? 'a Data de Nascimento' : 'o ' + ({ rg: 'RG', cpf: 'CPF' })[k]} de ${f.nome} (dado faltante para a agência).`); foco(k); return false; }
-            if (k === 'cpf') { const c = CPF.limpar(val); if (!CPF.valido(c)) { UI.toast(`CPF inválido para ${f.nome}: confira os dígitos.`); foco(k); return false; }
+            if (k === 'cpf') { const c = CPF.limpar(val); if (!/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/.test(val.trim()) || !CPF.valido(c)) { UI.toast(`CPF inválido para ${f.nome}: ${c.length !== 11 ? 'informe os 11 dígitos (000.000.000-00)' : 'os dígitos verificadores não conferem'}.`); foco(k); return false; } // v13.83: máscara + dígito verificador
               if (Repo.todos('funcionarios').some(x => x.id !== f.id && CPF.limpar(x.cpf) === c) || cpfsGrupo.has(c)) { UI.toast(`O CPF informado para ${f.nome} já pertence a outro colaborador do RH.`); foco(k); return false; } cpfsGrupo.add(c); out.cpf = c; }
             if (k === 'rg') out.rg = DocPessoal.rgLimpo(val);
             if (k === 'nascimento') { if (!DocPessoal.nascimentoOk(val)) { UI.toast(`Data de nascimento inválida para ${f.nome} (confira o ano).`); foco(k); return false; } out.nascimento = val; }
@@ -14876,7 +15100,7 @@ const Viagens = {
   render() {
     const pronto = Repo.prontas.has(this.COL) && Repo.prontas.has('funcionarios');
     const head = `<div class="page-head"><div><div class="eyebrow-mod">Módulo 8</div><h1>Adiantamento de Viagens</h1><p>Solicitação, aprovação, pagamento e prestação de contas das viagens a trabalho, com os comprovantes de cada despesa e o saldo calculado automaticamente.</p></div>
-      <div class="row" style="flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="vg-csv-modelo">Baixar Modelo de Solicitação (CSV)</button>${this.financeiro() ? '<button class="btn ghost" data-a="vg-csv-importar">Importar Solicitação (CSV)</button>' : ''}${this.podeCriar() || this.podeParametrizar() ? '<button class="btn ghost" data-a="vg-param">Parâmetros de viagem</button>' : ''}<button class="btn ghost" data-a="vg-resumo-adiant">Gerar Resumo de Adiantamentos</button>${this.podeCriar() ? '<button class="btn" data-a="vg-novo">+ Nova solicitação</button>' : ''}</div></div>`;
+      <div class="row" style="flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="vg-csv-modelo">Baixar Modelo de Solicitação (CSV)</button>${this.financeiro() ? '<button class="btn ghost" data-a="vg-csv-importar">Importar Solicitação (CSV)</button>' : ''}${this.financeiro() || this.podeParametrizar() ? '<button class="btn ghost" data-a="vg-param">Parâmetros de viagem</button>' : ''}<button class="btn ghost" data-a="vg-resumo-adiant">Gerar Resumo de Adiantamentos</button>${this.podeCriar() ? `<button class="btn" data-a="vg-novo">+ ${this.financeiro() ? 'Nova solicitação' : 'Nova Solicitação de Viagem'}</button>` : ''}</div></div>`;
     if (!pronto) return head + '<div class="panel"><p class="muted" style="margin:0">Carregando…</p></div>';
     const u = this.ui, todos = this.todos(), q = RH.chave(u.busca);
     const grupos = { andamento: v => !['concluido', 'recusado'].includes(v.status), prestacao: v => v.status === 'aguardando_prestacao', pagar: v => v.status === 'aprovado_pagamento', concluidos: v => ['concluido', 'recusado'].includes(v.status), todos: () => true };
@@ -14900,7 +15124,7 @@ const Viagens = {
         ${lista.length ? `<div class="tbl-wrap"><table><thead><tr><th>Colaborador</th><th>Trajeto · período</th><th class="num">Valor</th><th>Situação</th><th>Saldo</th></tr></thead><tbody>${linhas}</tbody></table></div>` : '<div class="empty">Nenhuma viagem neste filtro.</div>'}</div>`;
   },
   acao(a, el) {
-    if (a === 'vg-novo') return this.podeCriar() ? this.novo() : UI.toast('Só o Financeiro e o Master lançam adiantamentos de viagem.');
+    if (a === 'vg-novo') return this.podeCriar() ? this.novo() : UI.toast('Só o Financeiro, o Master e quem tem “Pode solicitar viagem” abrem solicitações de viagem.');
     if (a === 'vg-abrir') return this.abrir(el.dataset.id);
     if (a === 'vg-param') return this.parametros();
     if (a === 'vg-csv-modelo') return this.baixarModelo();
@@ -17218,7 +17442,10 @@ ${this.v74() ? `<div class="upl ${a.ofx ? 'ok' : ''}"><span class="lbl">Arquivo 
    Cada indicador leva ao módulo (e à aba) correspondente.
    ===================================================================== */
 const Inicio = {
+  ui: { aba: 'recebivel' }, // v13.83: Visão / Dashboard — 1ª aba ao abrir o sistema
   master() { return Auth.perfil === 'GESTOR'; },
+  /** v13.83 · quem tem "Visão / Dashboard" vê a Tela Inicial em duas abas: Resumo do Recebível do Dia (padrão) e Indicadores. */
+  visao() { return Acesso.ativo() && Auth.can('visao.dashboard'); },
   /** Lojas no alcance de quem está logado: null = todas (Master ou visão sem recorte por loja). */
   lojasDoAlcance() {
     if (this.master()) return null;
@@ -17310,17 +17537,26 @@ const Inicio = {
     return `Olá ${esc(nome)}, hoje é ${esc(dia)}, ${data} e esse é o seu resumo diário.`;
   },
   render() {
+    if (!this.visao()) return this.renderCards();
+    const abas = [['recebivel', 'Resumo do Recebível do Dia'], ['indicadores', 'Indicadores / Cards']].filter(([k]) => Acesso.tela('menu', k));
+    if (!abas.some(([k]) => k === this.ui.aba)) this.ui.aba = abas[0]?.[0] || 'indicadores';
+    const tabs = abas.length > 1 ? `<div class="tabs ini-tabs" role="tablist">${abas.map(([k, r]) => `<button class="${this.ui.aba === k ? 'on' : ''}" role="tab" aria-selected="${this.ui.aba === k}" data-a="ini-aba" data-v="${k}">${r}</button>`).join('')}</div>` : '';
+    return this.ui.aba === 'recebivel' ? `<div class="ini-hello"><h1>${this.saudacao().replace('esse é o seu resumo diário', 'esse é o resumo do recebível do dia')}</h1><p>Consolidado financeiro do dia, calculado agora com os dados do FCX, da Auditoria de Adquirentes e da Retaguarda.</p></div>${tabs}${ResumoRecebivel.html()}` : this.renderCards(tabs);
+  },
+  renderCards(tabs = '') {
     const ks = this.kpis();
     const num = k => k.valor == null ? '<span class="ini-load">…</span>' : k.moeda ? Fmt.brl(k.valor) : Fmt.num(k.valor) + (k.de != null ? `<small>/${Fmt.num(k.de)}</small>` : '');
     const card = k => `<button class="ini-kpi e-${k.estado}" data-a="ini-ir" data-r="${k.ir[0]}" data-v="${k.ir[1] || ''}" ${k.acao ? `data-acao="${k.acao}"` : ''} data-k="${k.id}" aria-label="${esc(k.titulo)}: abrir">
         <div class="ini-top"><span class="ini-ico">${ICON[k.icon] || ''}</span><span class="ini-tit">${esc(k.titulo)}</span><span class="ini-go" aria-hidden="true">→</span></div>
         <div class="ini-v">${num(k)}</div><div class="ini-txt">${esc(k.texto)}</div>${k.sub ? `<div class="ini-sub">${esc(k.sub)}</div>` : ''}</button>`;
     return `<div class="ini-hello"><h1>${this.saudacao()}</h1>
-        <p>${this.master() ? 'Números de toda a empresa.' : `Números da sua visão: ${esc(Pessoal.escopo().rotulo || '')}.`} Clique num indicador para abrir o módulo.</p></div>
+        <p>${this.master() ? 'Números de toda a empresa.' : `Números da sua visão: ${esc(Pessoal.escopo().rotulo || '')}.`} Clique num indicador para abrir o módulo.</p></div>${tabs}
       ${ks.length ? `<div class="ini-grid">${ks.map(card).join('')}</div>` : '<div class="panel"><div class="empty">Nenhum indicador disponível para o seu acesso. Use o menu ao lado para navegar.</div></div>'}
       ${!Cloud.nuvem ? `<div class="note warn" style="margin-top:24px">Modo local: os dados estão sendo salvos apenas neste navegador. Abra o painel pelo link do claude.ai para usar a nuvem compartilhada.</div>` : ''}`;
   },
   acao(a, el) {
+    if (a === 'ini-aba') { this.ui.aba = el.dataset.v; return App.render(); } // v13.83
+    if (a.startsWith('ini-rec')) return ResumoRecebivel.acao(a, el);
     if (a !== 'ini-ir') return;
     const r = el.dataset.r, v = el.dataset.v, s = NAV_SUB[r];
     if (el.dataset.acao === 'pes-meu') { App.ir('pessoal'); return Pessoal.acao('pes-meu', el, {}); }
@@ -17329,6 +17565,76 @@ const Inicio = {
   },
 };
 window.Inicio = Inicio;
+
+/* =====================================================================
+   v13.83 · RESUMO DO RECEBÍVEL DO DIA (Tela Inicial · Visão / Dashboard)
+   Cálculo ao vivo, com as mesmas regras do Recebível Diário do FCX (sem tocar no FCX):
+     • vendas de ontem em Dinheiro e PIX: as digitadas no FCX › Recebível Diário para hoje (se ainda não digitadas, R$ 0,00 e aviso);
+     • cartão líquido por adquirente, prestação (Dinheiro, PIX e Débito do arquivo) e Credsystem: PainelFCX.recebiveis(ontem);
+     • Credsystem: só o Recebível Futuro com vencimento hoje (guardado pelo FCX);
+     • saídas: contas Efetivas/Pagas do arquivo importado no FCX com vencimento hoje (fim de semana/feriado → dia útil seguinte),
+       valendo só quando a carga do arquivo é de hoje (a mesma crítica de carga do relatório).
+   Lê o FCX pelo cache do painel (FCX.storage → banco do painel/IndexedDB no modo local): funciona offline-first.
+   ===================================================================== */
+const ResumoRecebivel = {
+  _r: null, _carregando: false, _erro: '', TTL: 5 * 60e3,
+  hoje() { return Datas.hojeISO(); },
+  ontem(d) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); },
+  async ler(k, padrao) { try { const r = await FCX.storage.get(k); return r && r.value != null ? JSON.parse(r.value) : padrao; } catch { return padrao; } },
+  /** Os números do dia (pura leitura). */
+  async calcular(d = this.hoje()) {
+    const ant = this.ontem(d), r2 = v => Math.round((Number(v) || 0) * 100) / 100;
+    const [form, futuros, saidasFcx, carga] = await Promise.all([this.ler('esp2:recebivelDiario', {}), this.ler('esp2:recebiveisCredsystem', {}), this.ler('esp2:saidas', []), this.ler('esp2:cargaSaidas', null)]);
+    const pn = await window.PainelFCX.recebiveis(ant), f = (form || {})[d] || {}, cart = pn.cartao || {}, pr = pn.prestacao || {};
+    const din = Number(f.dinheiro) || 0, pix = Number(f.pix) || 0, cartao = Number(cart.liquido) || 0, pDin = Number(pr.din) || 0, pPix = Number(pr.pix) || 0, pLote = Number(pr.lote) || 0;
+    const credHoje = Object.values(futuros || {}).filter(x => x.vencimento === d), cred = r2(credHoje.reduce((a, x) => a + (Number(x.valor) || 0), 0));
+    const adqs = Object.entries(cart.porAdquirente || {}).filter(([, v]) => Math.abs(Number(v) || 0) > 0.004).sort((a, b) => b[1] - a[1]);
+    const isoLocal = t => { const x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }, cargaDia = carga && carga.em ? isoLocal(carga.em) : '';
+    const cargaOk = !!cargaDia && cargaDia >= d;
+    const lista = (Array.isArray(saidasFcx) ? saidasFcx : []).filter(s => s && s.tipo !== 'previsto' && s.date && DiasUteis.proximo(String(s.date).slice(0, 10)) === d).map(s => ({ ...s, liquido: Number(s.valorLiquido != null ? s.valorLiquido : s.valor) || 0 }));
+    const agrupar = (k, max) => { const m = {}; lista.forEach(s => { const c = String(s[k] || '').trim() || '(não informado)'; const g = (m[c] ||= [c, 0, 0]); g[1] += s.liquido; g[2]++; }); let a = Object.values(m).sort((x, y) => y[1] - x[1]); if (a.length > max) { const resto = a.slice(max - 1); a = a.slice(0, max - 1).concat([[`Outros (${resto.length})`, resto.reduce((t, x) => t + x[1], 0), resto.reduce((t, x) => t + x[2], 0)]]); } return a; };
+    const tDin = r2(din + pDin), tPix = r2(pix + pPix), vCart = r2(cartao + cred), tCart = r2(vCart + pLote), entradas = r2(tDin + tPix + tCart), saidas = cargaOk ? r2(lista.reduce((a, s) => a + s.liquido, 0)) : null;
+    return { d, ant, em: new Date().toISOString(), informado: f.dinheiro != null || f.pix != null, din, pix, cartao, pDin, pPix, pLote, cred, credN: credHoje.length, adqs, tDin, tPix, vCart, tCart, entradas,
+      saidas, saldo: saidas == null ? null : r2(entradas - saidas), porConta: cargaOk ? agrupar('conta', 6) : [], porForma: cargaOk ? agrupar('formaPagamento', 5) : [], nSaidas: lista.length,
+      carga: carga && carga.em ? { ok: cargaOk, dia: cargaDia, arquivo: carga.arquivo || '', linhas: carga.linhas || 0 } : null, avisos: pn.avisos || [] };
+  },
+  async atualizar(forcar = false) {
+    const d = this.hoje(); if (this._carregando || (!forcar && this._r && this._r.d === d && Date.now() - Date.parse(this._r.em) < this.TTL && this._v === FCX.versao)) return;
+    this._carregando = true; this._erro = ''; this._v = FCX.versao;
+    try { this._r = await this.calcular(d); } catch (e) { this._erro = e?.message || String(e); console.warn('resumo recebível', e); }
+    this._carregando = false; if (App.rota === 'menu') App.agendarRender();
+  },
+  html() {
+    setTimeout(() => this.atualizar(), 0);
+    const r = this._r, B = v => Fmt.brl(v), pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—';
+    if (!r) return `<div class="panel"><p class="muted" style="margin:0">${this._erro ? 'Não foi possível calcular o resumo: ' + esc(this._erro) : 'Calculando o resumo do recebível do dia…'}</p></div>`;
+    const lin = (rot, v, pr, cls = '') => `<tr class="${cls}"><td>${rot}</td><td class="num">${v == null ? '—' : B(v)}</td><td class="num">${pr == null ? '—' : B(pr)}</td><td class="num">${B((v || 0) + (pr || 0))}</td><td class="num">${pct((v || 0) + (pr || 0), r.entradas)}</td></tr>`;
+    const kpi = (t, v, cls, sub) => `<div class="ini-kpi rr-kpi e-${cls}"><div class="ini-top"><span class="ini-tit">${t}</span></div><div class="ini-v">${v == null ? '—' : B(v)}</div><div class="ini-sub">${sub}</div></div>`;
+    const grupo = (tit, g, total) => `<h3 class="rr-h3">${tit}</h3><div class="tbl-wrap"><table class="rr-tab"><thead><tr><th>${tit.includes('forma') ? 'Forma de pagamento' : 'Conta contábil'}</th><th class="num">Qtd.</th><th class="num">Valor</th><th class="num">%</th></tr></thead><tbody>${g.map(([k, v, n]) => `<tr><td>${esc(k)}</td><td class="num">${n}</td><td class="num">${B(v)}</td><td class="num">${pct(v, total)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nenhuma conta a pagar hoje.</td></tr>'}</tbody></table></div>`;
+    const avisos = [...r.avisos, ...(!r.informado ? [`Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
+      ...(!r.carga ? ['Saídas: nenhum arquivo de Entradas e Saídas foi importado no FCX (Gerenciar dados › Saídas).'] : !r.carga.ok ? [`Saídas: o último arquivo de Entradas e Saídas é de ${Fmt.data(r.carga.dia)} — importe o arquivo de hoje no FCX para ver as saídas e o saldo.`] : [])];
+    const podeFcx = Auth.can('fcx.ver') && App.pode(MODULOS.find(m => m.id === 'fcx'));
+    return `<div class="rr">
+      <div class="row between rr-cab"><span class="hint">Vendas e recebimentos de ${Fmt.data(r.ant)} · contas a pagar de ${Fmt.data(r.d)} · calculado às ${new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${r.carga?.ok ? ` · carga ${esc(r.carga.arquivo)}` : ''}</span>
+        <div class="row" style="gap:8px"><button class="btn ghost sm" data-a="ini-rec-atualizar" ${this._carregando ? 'disabled' : ''}>${this._carregando ? 'Atualizando…' : 'Atualizar'}</button>${podeFcx ? '<button class="btn sec sm" data-a="ini-rec-fcx">Abrir o Recebível Diário completo (FCX)</button>' : ''}</div></div>
+      ${avisos.length ? `<div class="note warn rr-avisos">${avisos.map(a => `<div>⚠ ${esc(a)}</div>`).join('')}</div>` : ''}
+      <div class="ini-grid rr-kpis">${kpi('Entradas do dia', r.entradas, 'ok', 'vendas líquidas + prestações + Credsystem do dia')}${kpi('Saídas do dia', r.saidas, r.saidas ? 'bad' : 'info', r.saidas == null ? 'aguardando a carga do dia no FCX' : `${r.nSaidas} conta(s) a pagar hoje`)}${kpi('Saldo do dia', r.saldo, r.saldo == null ? 'info' : r.saldo >= 0 ? 'ok' : 'bad', 'entradas − saídas')}</div>
+      <div class="rr-blocos">
+        <div class="panel rr-bloco"><h2>Consolidado de Entradas (Vendas + Prestações)</h2>
+          <div class="tbl-wrap"><table class="rr-tab rr-cons"><thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
+            ${lin('Total em Dinheiro', r.din, r.pDin, 'rr-grupo')}${lin('Total em PIX', r.pix, r.pPix, 'rr-grupo')}${lin('Total em Cartão', r.vCart, r.pLote, 'rr-grupo')}
+            ${r.adqs.map(([a, v]) => lin(esc(a), v, null, 'rr-sub')).join('')}${r.cred ? lin(`CREDSYSTEM (vence hoje · ${r.credN})`, r.cred, null, 'rr-sub') : ''}${r.pLote ? lin('Débito (LOTE) da prestação', null, r.pLote, 'rr-sub') : ''}
+            <tr class="rr-total"><td>Total Geral de Entradas do Dia</td><td class="num">${B(r.din + r.pix + r.vCart)}</td><td class="num">${B(r.pDin + r.pPix + r.pLote)}</td><td class="num">${B(r.entradas)}</td><td class="num">${r.entradas > 0 ? '100%' : '—'}</td></tr>
+          </tbody></table></div><p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). A Credsystem entra só no dia do vencimento.</p></div>
+        <div class="panel rr-bloco"><h2>Saídas do dia</h2>${r.saidas == null ? '<p class="muted" style="margin:0">As saídas aparecem quando o arquivo de Entradas e Saídas de hoje estiver importado no FCX.</p>' : grupo('Por conta contábil', r.porConta, r.saidas) + grupo('Por forma de pagamento', r.porForma, r.saidas)}</div>
+      </div></div>`;
+  },
+  acao(a) {
+    if (a === 'ini-rec-atualizar') { this.atualizar(true); return App.render(); }
+    if (a === 'ini-rec-fcx') { FCX.ui.aba = 'fcx'; App.ir('fcx'); let n = 0; const t = setInterval(() => { const w = $('#fcxFrame')?.contentWindow; try { if (w && w.FCXAPI && w.FCXAPI.pronto() && w.eval('state').loaded) { clearInterval(t); if (typeof w.goto === 'function') w.goto('recebivel'); } } catch { } if (++n > 150) clearInterval(t); }, 200); }
+  },
+};
+window.ResumoRecebivel = ResumoRecebivel;
 
 /* =====================================================================
    v13.20 · RODAPÉ "CENTRO DE COMANDO" (ticker)
@@ -17552,7 +17858,7 @@ const NavCascata = {
   abrir(bt) {
     const id = bt.dataset.r, sub = NAV_SUB[id], fly = $('#sbFly'); if (!sub || !fly || window.matchMedia('(max-width:900px)').matches) return this.fechar(true);
     clearTimeout(this._t); const m = [...MODULOS, ...ADMIN].find(x => x.id === id), at = App.rota === id ? sub.atual() : '';
-    fly.innerHTML = `<div class="sb-fly-tit">${esc(m?.titulo || '')}</div>${sub.itens().map(([k, r]) => `<span role="menuitem" tabindex="0" class="sb-fly-it ${k === at ? 'on' : ''}" data-a="nav-sub" data-r="${id}" data-v="${k}">${esc(r)}</span>`).join('')}`;
+    fly.innerHTML = `<div class="sb-fly-tit">${esc(m?.titulo || '')}</div>${sub.itens().filter(([k]) => Acesso.tela(id, k)).map(([k, r]) => `<span role="menuitem" tabindex="0" class="sb-fly-it ${k === at ? 'on' : ''}" data-a="nav-sub" data-r="${id}" data-v="${k}">${esc(r)}</span>`).join('')}`;
     const r = bt.getBoundingClientRect(), aberto = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sb-w-aberto')) || $('#mainnav').getBoundingClientRect().right;
     fly.style.left = (aberto + 6) + 'px'; /* o menu termina de abrir nessa largura (a animação ainda pode estar rodando) */ fly.hidden = false; /* v13.60: mede a altura já visível — antes, oculto media 0 e o submenu "pulava" na 2ª passada do mouse */ fly.style.top = Math.max(8, Math.min(r.top, window.innerHeight - fly.offsetHeight - 12)) + 'px'; fly.dataset.r = id;
     $$('#mainnav button[data-sub]').forEach(b => b.classList.toggle('sb-aberto', b === bt)); $('#mainnav').classList.add('sb-fixo'); // menu fica aberto enquanto o submenu estiver aberto
@@ -17579,13 +17885,14 @@ document.addEventListener('keydown', e => {
 const App = {
   rota: 'menu', _raf: null, navAberto: false,
   /** v13.13: um módulo pode ter regra própria de visibilidade (ex.: Liberação Remota também para gestores diretos). */
-  pode(m) { return m.ver ? m.ver() : Auth.can(m.perm); },
+  pode(m) { return (m.ver ? m.ver() : Auth.can(m.perm)) && Acesso.rotaOk(m.id); }, // v13.83: + sub-permissões (telas) da Gestão de Acessos
   agendarRender() { if (this._raf) return; this._raf = requestAnimationFrame(() => { this._raf = null; this.render(); }); },
   ir(rota) {
     if (!Sessao.ativa) return Sessao.render(); // sem acesso validado: só a tela de entrada
     const todos = [...MODULOS, ...ADMIN];
     const m = todos.find(x => x.id === rota);
-    if (m && (!this.pode(m) || m.emBreve)) rota = 'menu';
+    if (m && (!this.pode(m) || m.emBreve)) { if (!m.emBreve && Acesso.ativo() && this._iniciou) UI.toast(Acesso.motivo(m)); rota = 'menu'; } // v13.83: diz por que não abriu
+    this._iniciou = true;
     if (this.rota === 'retaguarda' && rota !== 'retaguarda') Retaguarda.liberarAdq?.(); // saiu da Retaguarda (Módulo 5): libera a memória
     if (this.rota === 'conciliacao' && rota !== 'conciliacao') Retaguarda.liberarAdq?.(); // v13.69: a Auditoria de Adquirentes mora na Conciliação
     if (this.rota === 'contratos' && rota !== 'contratos') Contratos.pararVigia();
@@ -17603,15 +17910,16 @@ const App = {
   },
   render() {
     if (!Sessao.ativa) return Sessao.render();
-    if (!this._saneamento && ['funcionarios', 'lojas'].every(c => Repo.prontas.has(c))) { this._saneamento = true; Sync.reset(); setTimeout(() => BaseAtiva.sanearLotacoes().catch(e => { console.warn('saneamento', e); Sync.reset(); }), 3000); } // v13.44/45: uma vez por sessão, em segundo plano, sem travar a tela
+    if (!this._saneamento && !Acesso.loja() && ['funcionarios', 'lojas'].every(c => Repo.prontas.has(c))) { this._saneamento = true; Sync.reset(); setTimeout(() => BaseAtiva.sanearLotacoes().catch(e => { console.warn('saneamento', e); Sync.reset(); }), 3000); } // v13.44/45: uma vez por sessão, em segundo plano, sem travar a tela
     const tb = this.topbar(); if (tb !== this._tb || !$('#mainnav')) { this._tb = tb; $('#topbar').innerHTML = tb; NavCascata.fechar(true); }
     document.body.classList.add('sb-on'); this.ajustarTopo();
     const main = $('#main');
     const ativo = document.activeElement, idAtivo = ativo && ativo.id, sel = ativo && 'selectionStart' in ativo ? [ativo.selectionStart, ativo.selectionEnd] : null;
     const crumbs = this.rota === 'menu' ? '' : `<div class="crumbs"><button data-a="nav" data-r="menu">Painel de Gestão</button><span>/</span><span>${esc(([...MODULOS, ...ADMIN].find(m => m.id === this.rota) || {}).titulo || '')}</span></div>`;
     const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
+    Acesso.ajustarAba(this.rota); // v13.83: aba não liberada → primeira liberada
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
-    main.innerHTML = crumbs + html;
+    main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
     UI.rotularTabelas(main);
     if (this.rota === 'retaguarda') Retaguarda.afterRender();
     if (this.rota === 'conciliacao') ConcMP.afterRender(); // v13.69
@@ -17642,7 +17950,7 @@ const App = {
     const menu = grupos.map(g => { const ms = g.ids.map(id => porId.get(id)).filter(m => m && (m.id === 'menu' || this.pode(m))); return ms.length ? `<div class="sb-grupo" role="presentation"><span>${esc(g.titulo)}</span></div>${ms.map(bt).join('')}` : ''; }).join('');
     const seletor = podeSimular ? `<select data-a="perfil-sim" class="perfil-sel" aria-label="Visualizar como perfil">
           <option value="GESTOR" ${Auth.perfil === 'GESTOR' ? 'selected' : ''}>MASTER</option><option value="OPERACIONAL" ${Auth.perfil === 'OPERACIONAL' ? 'selected' : ''}>OPERACIONAL</option></select>`
-        : `<span class="perfil-tag ${Auth.perfil}">${Auth.perfil === 'GESTOR' ? 'MASTER' : 'OPERACIONAL'}</span>`;
+        : `<span class="perfil-tag ${Auth.perfil}">${Auth.perfil === 'GESTOR' ? 'MASTER' : Auth.loja ? 'LOJA' : 'OPERACIONAL'}</span>`;
     return `${Marca.faixa()}<div class="topbar-inner">
       <button class="burger" data-a="nav-toggle" aria-label="${this.navAberto ? 'Fechar menu' : 'Abrir menu'}" aria-expanded="${this.navAberto}" aria-controls="mainnav">${this.navAberto ? ICON.fechar : ICON.menu}</button>
       <button class="brand" data-a="nav" data-r="menu" aria-label="Painel de Gestão — início">${Marca.topo()}</button>

@@ -66,6 +66,18 @@ Para gerar a chave, rode `node -e "console.log(require('crypto').randomBytes(32)
 
 Depois de alterar variáveis, faça um novo deploy (*Deploys › Trigger deploy*).
 
+**v13.83 · Perfil Loja (ponta).** O servidor trata o perfil `LOJA` como Operacional na leitura, mas só aceita gravar:
+
+- a viagem nova "Aguardando Aprovação" feita pelo próprio usuário, quando ele tem "Pode solicitar viagem";
+- o pedido dessa viagem na Liberação Remota;
+- CPF, RG e nascimento do RH pedidos na viagem;
+- as Solicitações Operacionais;
+- o próprio login, a auditoria e a presença.
+
+O perfil Loja não exclui nada (regras em `netlify/lib/regras.mjs`, função `lojaPodeGravar`).
+
+Para testar um usuário Loja no site da Homologação, defina `PAINEL_SO_MASTER=0` nele, porque por padrão só o Master entra na Homologação.
+
 **O que cada parte faz:**
 
 - **Seletor de ambiente.** A tela de login e o menu interno (botão do ambiente, no topo: *Trocar ambiente*) mostram Esposende (Produção), Esposende (Homologação) e RC Consultoria (White-Label). Ao escolher outro ambiente, o navegador vai para o endereço daquele site. Cada site tem o seu login, e as sessões convivem no mesmo navegador.

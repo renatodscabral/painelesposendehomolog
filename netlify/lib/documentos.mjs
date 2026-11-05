@@ -1,7 +1,7 @@
 /* Leitura e gravação de documentos com as regras de acesso aplicadas no servidor. */
 import { q, tx } from './db.mjs';
 import { ErroHttp } from './http.mjs';
-import { NIVEL, exigido, validarCaminho, partes, ehUsuarios } from './regras.mjs';
+import { NIVEL, exigido, validarCaminho, partes, ehUsuarios, lojaPodeGravar } from './regras.mjs';
 
 export const LIMITE_DOC = 5.5 * 1024 * 1024;   // bytes de JSON por documento
 export const LIMITE_PAGINA = 3.5 * 1024 * 1024; // bytes de JSON por página de listagem (resposta da função ≤ 6 MB)
@@ -55,6 +55,10 @@ export async function gravar(t, sess, caminho, dados) {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) throw new ErroHttp(400, 'O documento precisa ser um objeto.');
   if (!podeGravar(sess, caminho)) throw new ErroHttp(sess ? 403 : 401, sess ? 'Sem permissão para gravar este registro.' : 'Faça login.');
   let d = { ...dados }; delete d.id;
+  if (sess.perfil === 'LOJA') { /* v13.83: perfil Loja só grava o que é dele */
+    const [ex] = await t('SELECT dados FROM documentos WHERE caminho = $1', [caminho]);
+    if (!lojaPodeGravar(sess, caminho, 'set', ex?.dados || null, d)) throw new ErroHttp(403, 'Perfil Loja: acesso somente leitura (grava só a Nova Solicitação de Viagem e as Solicitações Operacionais).');
+  }
   if (ehUsuarios(caminho)) {
     const [ex] = await t('SELECT dados FROM documentos WHERE caminho = $1', [caminho]), atual = ex?.dados || null;
     if (!('senha' in d) && atual?.senha) d.senha = atual.senha; // leituras sem a senha não a apagam ao regravar
@@ -77,7 +81,7 @@ export async function gravar(t, sess, caminho, dados) {
 
 export async function remover(t, sess, caminho) {
   checarDoc(caminho);
-  if (!sess || (ehUsuarios(caminho) && sess.nivel < NIVEL.admin) || !podeGravar(sess, caminho)) throw new ErroHttp(sess ? 403 : 401, sess ? 'Sem permissão para excluir este registro.' : 'Faça login.');
+  if (!sess || (ehUsuarios(caminho) && sess.nivel < NIVEL.admin) || !podeGravar(sess, caminho) || !lojaPodeGravar(sess, caminho, 'remove')) throw new ErroHttp(sess ? 403 : 401, sess ? 'Sem permissão para excluir este registro.' : 'Faça login.'); // v13.83: Loja não exclui
   const r = await t('DELETE FROM documentos WHERE caminho = $1 RETURNING colecao', [caminho]);
   if (r.length) await t('INSERT INTO mudancas (caminho, colecao, op, por) VALUES ($1, $2, $3, $4)', [caminho, r[0].colecao, 'remove', sess.uid]);
 }

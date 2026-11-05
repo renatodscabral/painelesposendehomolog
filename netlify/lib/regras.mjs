@@ -15,7 +15,26 @@ export const REGRAS = {
   lojas_faturamento: ['interact', 'admin'], cred_pendencias: ['admin', 'admin'], ec_taxas: ['admin', 'admin'], conc_fechamento: ['admin', 'admin'],
 };
 export const NIVEL = { nenhum: 0, view: 1, interact: 2, admin: 3 };
-export const nivelDoPerfil = perfil => (perfil === 'MASTER' ? NIVEL.admin : perfil === 'OPERACIONAL' ? NIVEL.interact : NIVEL.nenhum);
+export const nivelDoPerfil = perfil => (perfil === 'MASTER' ? NIVEL.admin : perfil === 'OPERACIONAL' || perfil === 'LOJA' ? NIVEL.interact : NIVEL.nenhum); // v13.83: LOJA lê como Operacional
+
+/* v13.83 · Perfil Loja (ponta): lê como Operacional, mas só grava o que é dele — a Nova Solicitação de Viagem (com
+   "Pode solicitar viagem"), o pedido de aprovação dela na Liberação Remota, os documentos do RH pedidos na viagem
+   (CPF, RG, nascimento), as Solicitações Operacionais, o próprio login, a auditoria e a presença. Nada é excluído. */
+const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
+export const DOCS_VIAGEM = ['cpf', 'rg', 'nascimento', 'docsAtualizadosEm', 'docsOrigem', 'atualizadoEm', 'atualizadoPor', 'criadoEm', 'criadoPor'];
+export function lojaPodeGravar(sess, caminho, op, atual, novo) {
+  if (!sess || sess.perfil !== 'LOJA') return true;
+  if (op === 'remove') return false;
+  const c = semAmb(caminho), s = c.split('/'), perms = sess.usuario?.permissoes || {}, viagem = perms['viagens.solicitar'] === true;
+  if ((s[0] === 'auditoria' || s[0] === 'presenca') && s[1] === sess.uid) return true;
+  if (s[0] === 'usuarios') return s[1] === sess.uid;
+  if (s[0] === 'solicitacoes' && s.length === 2) return perms.solicitacoes !== '' ;
+  if (!viagem) return false;
+  if (c.startsWith('funcionarios/_viagens/pedidos/') && s.length === 4) return !atual && novo?.status === 'aguardando_aprovacao' && novo?.solicitadoPor === sess.uid;
+  if (c.startsWith('funcionarios/_liberacoes/pedidos/') && s.length === 4) return !atual && novo?.tipo === 'viagem';
+  if (s[0] === 'funcionarios' && s.length === 2 && atual) { const ks = new Set([...Object.keys(atual), ...Object.keys(novo || {})]); return [...ks].every(k => DOCS_VIAGEM.includes(k) || JSON.stringify(atual[k]) === JSON.stringify(novo?.[k])); }
+  return false;
+}
 
 /** Nível exigido para ler ('r') ou gravar ('w') um caminho (documento ou coleção). */
 export function exigido(caminho, op, uid) {
