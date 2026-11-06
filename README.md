@@ -402,3 +402,75 @@ A tela nova é `public/contabilidade_v1391.html`. Com o recurso ligado, o painel
 - **Testes:**
   - `tests/teste-contabil-v1391.mjs` (20 verificações);
   - `test1391n` (16 verificações, ponta a ponta dentro do painel).
+
+## v13.92 · Carga de dados de teste do Módulo Contábil (somente no site da Falco)
+Carrega uma base de teste para validar o Diário, o Razão, o Balancete, a DRE, o Balanço e o Radar: os 60 lançamentos de
+`LançamentosIniciais.xlsx` (jan–fev/2025) e mais 10 de março/2025.
+
+**Os lançamentos de março (10):**
+- empréstimo bancário de longo prazo de R$ 600 mil (metade no circulante);
+- compra de matéria-prima com IBS/CBS a recuperar;
+- produção;
+- venda com IBS/CBS;
+- custo da venda;
+- folha de março;
+- depreciação e seguro;
+- 1ª parcela do empréstimo com juros passivos;
+- IRPJ e CSLL do 1º trimestre (Lucro Real trimestral: 15% + adicional de 10% acima de R$ 60 mil e 9%);
+- distribuição de 50% do lucro aos sócios.
+
+**Travas de segurança** (o site do Netlify da Esposende, de Produção ou de Homologação, recusa sempre com 403):
+- **Script:** só roda com `PAINEL_AMBIENTE=falco` (exatamente) no terminal e confere em `/api/saude` que o site informado é o da
+  Falco antes de enviar qualquer coisa.
+- **Servidor (`POST /api/contabil/carga-teste`):** só aceita no site da Falco (`PAINEL_AMBIENTE=falco`; a variável antiga `rc`
+  também identifica a Falco), só para o Master e só com a frase `CARREGAR DADOS DE TESTE NA FALCO`.
+- **Desligar a rota:** `PAINEL_CARGA_TESTE=0` no site da Falco.
+
+**O que a carga faz:**
+- **Plano de contas:** cria as contas da planilha (1.1.01 Caixa, 1.1.02 Bancos, 2.1.01 Fornecedores, 5.1.01 CMV…) e as de março,
+  com a árvore Ativo / Passivo / PL / Receitas / Custos e Despesas, só o que faltar.
+  - Classificação automática: natureza pelo grupo, retificadoras "(-)", linhas da DRE/DVA pelo subgrupo e IBS/CBS/IRPJ/CSLL pelo nome.
+  - Se o plano padrão já existir, as contas novas entram nele; nomes repetidos na mesma conta-mãe ganham o sufixo
+    "— plano de testes", com aviso.
+- **Empresa:** tudo fica em uma empresa fictícia própria, "INDÚSTRIA FICTÍCIA DE TESTES FALCO LTDA" (CNPJ 11.444.777/0001-61).
+  Lançamentos não se apagam (só estorno), por isso a empresa principal não é tocada.
+- **Idempotente:** cada lançamento tem o documento `CARGA-LI-001…060` ou `CARGA-MAR-01…10`; rodar de novo não duplica.
+- **Transação única:** a carga é tudo ou nada. `simular: true` confere tudo e desfaz.
+
+**Como rodar — opção 1, terminal** (Node 20+; não precisa do Netlify CLI, porque o script fala com o site publicado):
+```bash
+PAINEL_AMBIENTE=falco node scripts/seed-contabil-falco.mjs --url https://SEU-SITE-FALCO.netlify.app --planilha "LançamentosIniciais.xlsx" --simular
+PAINEL_AMBIENTE=falco node scripts/seed-contabil-falco.mjs --url https://SEU-SITE-FALCO.netlify.app --planilha "LançamentosIniciais.xlsx"
+```
+- No Windows (PowerShell): `$env:PAINEL_AMBIENTE="falco"; node scripts/seed-contabil-falco.mjs --url … --planilha …`.
+- O script pede o CPF e a senha do Master (ou use `PAINEL_CPF` e `PAINEL_SENHA`) e a frase de confirmação.
+- Sem `--planilha`, o servidor usa a cópia da planilha que já vem no código (`netlify/lib/carga-falco-dados.mjs`).
+- Para regravar essa cópia a partir de outra versão da planilha: `node scripts/seed-contabil-falco.mjs --gerar-dados planilha.xlsx`.
+
+**Como rodar — opção 2, botão oculto:** no site da Falco, entre como Master › Contabilidade › aba Parâmetros ›
+"Carga de dados de teste (somente Falco)". Digite a frase e clique em Executar; a opção "Só simular" confere sem gravar.
+O botão só aparece para o Master no site da Falco. Ao terminar, a empresa de teste fica ativa, no período de 01/01 a 31/03/2025.
+
+**Resultados esperados (1º trimestre/2025):**
+
+| Item | Valor |
+|---|---|
+| Σ débitos = Σ créditos | R$ 8.195.161,46 |
+| Receita bruta | R$ 974.200,00 |
+| Deduções de IBS/CBS | R$ 258.163,00 |
+| Receita líquida | R$ 716.037,00 |
+| CMV | R$ 409.164,00 |
+| LAIR | R$ 41.533,00 |
+| IRPJ | R$ 6.229,95 |
+| CSLL | R$ 3.737,97 |
+| Lucro líquido | R$ 31.565,08 |
+| Lucros distribuídos | R$ 15.782,54 |
+
+- O Balanço de 31/03 fecha.
+- Teste: `tests/teste-carga-falco.mjs` (19 verificações; passe o caminho da planilha para testar o script com o .xlsx).
+
+**Correções que a carga revelou:**
+- **DRE:** uma conta de dedução com dois tributos, como "(-) IBS/CBS s/ Vendas", era somada duas vezes. Agora entra uma vez,
+  numa linha "IBS/CBS (escriturados)".
+- **Radar, disponibilidades, Livro Caixa e DFC:** agora reconhecem planos de contas próprios pelo nome das contas (ex.:
+  1.1.01 Caixa, 1.1.02 Bancos, 1.1.04–06 Estoques), além do plano padrão.

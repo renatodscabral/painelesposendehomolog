@@ -555,7 +555,16 @@ function vEmpresas() {
     <div class="tbl" style="margin-top:10px"><table><thead><tr><th>Razão social</th><th>CNPJ</th><th>Regime</th><th class="num">Capital social</th><th>Sócios</th><th>Contador (CRC)</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div></div>`;
 }
 /* ---------- aba: parâmetros ---------- */
-function vParametros() {
+/* v13.92 · painel oculto: o servidor só informa cargaTeste.disponivel no site da Falco e para o Master */
+function vCarga() {
+  const c = S.st.cargaTeste; if (!c || !c.disponivel) return '';
+  return `<details class="panel" id="cargaTeste"><summary>Carga de dados de teste (somente Falco)</summary>
+    <p class="hint" style="margin-top:8px">Cria o plano de contas da planilha LançamentosIniciais.xlsx, a empresa <b>INDÚSTRIA FICTÍCIA DE TESTES FALCO LTDA</b> (CNPJ 11.444.777/0001-61) e 70 lançamentos de jan–mar/2025 (os 60 da planilha + empréstimo de longo prazo, 1ª parcela com juros, IRPJ/CSLL do trimestre e distribuição de lucros). Lançamentos não se apagam (só estorno): a carga fica isolada nessa empresa. Rodar de novo não duplica.</p>
+    <div class="row"><label class="campo" style="flex:2 1 320px"><span>Digite a frase: ${esc(c.frase)}</span><input id="cg-frase" autocomplete="off"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="cg-simular"> Só simular (não grava)</label><button class="btn" data-a="cg-executar">Executar a carga</button></div>
+    ${S.carga ? `<div class="note" style="margin-top:10px">${S.carga}</div>` : ''}</details>`;
+}
+function vParametros() { return vCarga() + vParametros0(); }
+function vParametros0() {
   const p = S.st.parametros, ed = pode('contabil.parametros'), dis = ed ? '' : 'disabled', P = S.pr;
   const pl = S.contas.filter(c => c.grupo === 3 && c.tipo === 'A');
   return `<div class="grid2"><div class="panel"><h2>Regime e DRE</h2>
@@ -659,6 +668,12 @@ const acoes = {
     if (a.tipo === 'aba') return irAba(a.aba);
   },
   'mdl-fechar'() { fecharModal(); },
+  async 'cg-executar'() {
+    const frase = $('#cg-frase').value.trim(), simular = $('#cg-simular').checked; if (frase !== S.st.cargaTeste.frase) return toast('Digite a frase exatamente como pedida.');
+    toast(simular ? 'Simulando a carga…' : 'Executando a carga de teste…'); const r = await api('POST', '/carga-teste', { confirmar: frase, simular }), T = r.trimestre;
+    S.carga = `${simular ? '<b>Simulação</b> (nada gravado): ' : ''}${r.contasCriadas.length} conta(s) ${simular ? 'seriam criadas' : 'criadas'} · ${r.lancamentos.inseridos} lançamento(s) ${simular ? 'seriam gravados' : 'gravados'}, ${r.lancamentos.ignorados} já existiam · 1º tri/2025: LAIR ${fmt(T.lair)}, IRPJ ${fmt(T.irpj)}, CSLL ${fmt(T.csll)}, lucro líquido ${fmt(T.lucroLiquido)}, lucros distribuídos ${fmt(T.dividendos)}.${r.avisos.length ? '<br>' + r.avisos.map(esc).join('<br>') : ''}`;
+    await carregarBase(); if (!simular) { S.emp = r.empresa.id; try { localStorage.setItem(KEMP, S.emp); } catch (e) { } S.rl.de = S.ls.de = '2025-01-01'; S.rl.ate = S.ls.ate = '2025-03-31'; await aoMudarContexto(); toast('Carga concluída: empresa de teste ativa, período 01/01 a 31/03/2025.'); } else render();
+  },
   'mdl-imprimir'() { const f = $('#mdl iframe'); try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não foi possível imprimir.'); } },
   async 'emp-sel'(el) { S.emp = el.dataset.v; try { localStorage.setItem(KEMP, S.emp); } catch (e) { } toast('Empresa ativa: ' + (empAtual().nomeFantasia || empAtual().razaoSocial)); await aoMudarContexto(); },
   async 'emp-lancar'() { S.empAberto = false; await irAba('lancamentos'); $('#lf-hist') ? $('#lf-hist').focus() : toast('Seu acesso não lança no Módulo Contábil.'); },

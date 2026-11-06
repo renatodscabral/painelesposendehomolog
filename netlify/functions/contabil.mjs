@@ -42,7 +42,10 @@
    GET    /api/contabil/disponibilidades?empresa=&de=&ate=  → Caixa, Bancos, Estoque (entradas/saídas), consolidado e Σ D × Σ C
    GET    /api/contabil/radar?empresa=&de=&ate=       → score 0-100, indicadores, sugestões de ação e correção, parecer
    POST   /api/contabil/radar/corrigir                { tipo: 'retencoes' } → cria as contas de tributos retidos (contabil.plano)
-   GET    /api/contabil/relatorios/<tipo> — novos tipos: caixa (Livro Caixa) · dfc (método direto) · dre51 (DRE no formato do CPC 51) */
+   GET    /api/contabil/relatorios/<tipo> — novos tipos: caixa (Livro Caixa) · dfc (método direto) · dre51 (DRE no formato do CPC 51)
+   v13.92 · carga de dados de TESTE (só no site da Falco, só o Master, com a frase de confirmação):
+   POST   /api/contabil/carga-teste                   { confirmar: 'CARREGAR DADOS DE TESTE NA FALCO', linhas?: [linhas da planilha], simular? }
+                                                        → plano de contas da planilha, empresa fictícia, 60 lançamentos (jan–fev/2025) + 10 de março */
 import { createHash, randomUUID } from 'node:crypto';
 import { q, tx } from '../lib/db.mjs';
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
@@ -52,6 +55,8 @@ import * as M from '../lib/contabil-motor.mjs';
 import { permissoesEfetivas, normalizarPermissoes, tem } from '../lib/permissoes.mjs';
 import { gravar as gravarDoc } from '../lib/documentos.mjs';
 import * as RD from '../lib/contabil-radar.mjs';
+import * as CG from '../lib/carga-falco.mjs';
+import { ambienteAtual } from '../lib/ambiente.mjs';
 
 /* ---------------------------------------------------------------- acesso */
 /* Master: tudo. Operacional: linha "Contabilidade" da Gestão de Acessos (Ler = ver; Modificar = lançar e plano;
@@ -145,7 +150,7 @@ function validarEmpresa(d, atual = {}) {
 /** Radar de Saúde: tudo o que o painel executivo mostra, calculado do banco na hora. */
 async function radar(url, params) {
   const emp = await empresaDe(url), empresa = emp.id, { de, ate, ano, meses } = periodo(url), contas = await lerContas(), E = { empresa };
-  const sal = await saldos(de, ate, E), salAte = await saldos(ate, ate, E), mov = await saldos(de, ate, { semEncerramento: true, empresa });
+  const sal = await saldos(de, ate, E), salAte = await saldos(ate, ate, E), mov = await saldos(de, ate, { semEncerramento: true, empresa }), PP = RD.papeis(contas);
   const ini = new Date(ate.slice(0, 7) + '-01T12:00:00Z'), prevFim = new Date(ini.getTime() - 864e5).toISOString().slice(0, 10), prevIni = prevFim.slice(0, 7) + '-01';
   const movMes = await saldos(ate.slice(0, 7) + '-01', ate, { semEncerramento: true, empresa }), movAnt = await saldos(prevIni, prevFim, { semEncerramento: true, empresa });
   const bal = M.balancete(contas, sal), bp = M.balanco(contas, salAte), dr = M.dre(contas, mov, { modelo: 'atual', reforma: params.reforma });
@@ -158,12 +163,12 @@ async function radar(url, params) {
   const integridade = { lancamentos: ls.length, cadeiaIntegra: !quebras.length, quebras, equilibrados: !deseq.length, desequilibrados: deseq };
   /* conciliação com o FCX: movimentos do Disponível sem documento de origem + contas do FCX pendentes no de-para */
   const [cc] = await q(`SELECT count(DISTINCT l.id)::int AS total, count(DISTINCT l.id) FILTER (WHERE l.doc_ref IS NULL OR l.doc_ref = '')::int AS pend
-      FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta LIKE '1.1.1.%' AND l.origem NOT IN ('estorno', 'encerramento')`, [empresa, de, ate]);
+      FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta = ANY($4) AND l.origem NOT IN ('estorno', 'encerramento')`, [empresa, de, ate, PP.disp]);
   const semDoc = (await q(`SELECT DISTINCT l.numero, l.data::text AS data, l.historico, l.total_centavos FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id
-      WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta LIKE '1.1.1.%' AND (l.doc_ref IS NULL OR l.doc_ref = '') AND l.origem NOT IN ('estorno', 'encerramento') ORDER BY 2 DESC, 1 DESC LIMIT 10`, [empresa, de, ate])).map(r => ({ numero: Number(r.numero), data: r.data, historico: r.historico, total: Number(r.total_centavos) }));
+      WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta = ANY($4) AND (l.doc_ref IS NULL OR l.doc_ref = '') AND l.origem NOT IN ('estorno', 'encerramento') ORDER BY 2 DESC, 1 DESC LIMIT 10`, [empresa, de, ate, PP.disp])).map(r => ({ numero: Number(r.numero), data: r.data, historico: r.historico, total: Number(r.total_centavos) }));
   const dp = resumoDepara(await lerDepara()), conciliacao = { total: cc.total, pendentes: cc.pend, semDocumento: semDoc, deparaPendente: dp.pendente || 0 };
   const invertidas = RD.contasInvertidas(contas, salAte), vs = RD.variacoes(contas, movMes, movAnt), tributos = RD.tributario({ contas, mov, params: { ...params, meses }, ano, regime: emp.regime === 'real' ? 'real' : emp.regime === 'presumido' ? 'presumido' : null });
-  const ind = RD.indicadores(bp, dr), sc = RD.score({ integridade, balancete: bal, balanco: bp, invertidas, conciliacao, variacoes: vs, ind, tributos });
+  const ind = RD.indicadores(bp, dr, { disponivel: RD.somaContas(salAte, PP.disp).saldo, estoques: RD.somaContas(salAte, PP.estoque).saldo, rlp: RD.somaContas(salAte, PP.rlp).saldo }), sc = RD.score({ integridade, balancete: bal, balanco: bp, invertidas, conciliacao, variacoes: vs, ind, tributos });
   const sugestoes = [
     ...(!integridade.cadeiaIntegra ? [{ id: 'cadeia', severidade: 'alta', titulo: 'Quebra na cadeia de conferência', texto: `Lançamento(s) nº ${quebras.join(', ')} não conferem com a cadeia de hashes: houve alteração fora do sistema.`, acao: null }] : []),
     ...(!bp.confere ? [{ id: 'balanco', severidade: 'alta', titulo: 'Balanço não fecha', texto: `Diferença de ${M.fmt(bp.diferenca)} entre o Ativo e o Passivo + PL.`, acao: { tipo: 'relatorio', rel: 'balanco', rotulo: 'Abrir o Balanço' } }] : []),
@@ -176,7 +181,71 @@ async function radar(url, params) {
   const ORD = { alta: 0, media: 1, baixa: 2 }; sugestoes.sort((a, b) => ORD[a.severidade] - ORD[b.severidade]);
   const parecer = RD.parecer({ sc, invertidas, conciliacao, variacoes: vs, tributos, ind, bp });
   return { empresa: emp, de, ate, geradoEm: new Date().toISOString(), score: sc, indicadores: { ...ind, patrimonioLiquido: M.reais(ind.patrimonioLiquido), capitalCirculante: M.reais(ind.capitalCirculante) }, integridade, conciliacao: { ...conciliacao, semDocumento: semDoc.map(x => ({ ...x, total: M.reais(x.total) })) },
-    sugestoes, parecer, resumo: { receitaLiquida: M.reais(dr.rl), lucroLiquido: M.reais(dr.ll), ativo: M.reais(bp.ativo.total), passivo: M.reais(bp.passivo.total), pl: M.reais(bp.patrimonioLiquido.total), balancoConfere: bp.confere, balanceteConfere: bal.confere, disponivel: M.reais(RD.somaGrupo(salAte, '1.1.1').saldo) } };
+    sugestoes, parecer, resumo: { receitaLiquida: M.reais(dr.rl), lucroLiquido: M.reais(dr.ll), ativo: M.reais(bp.ativo.total), passivo: M.reais(bp.passivo.total), pl: M.reais(bp.patrimonioLiquido.total), balancoConfere: bp.confere, balanceteConfere: bal.confere, disponivel: M.reais(RD.somaContas(salAte, PP.disp).saldo) } };
+}
+
+
+/* ---------------------------------------------------------------- v13.92 · carga de dados de teste (só na Falco) */
+/** Trava: o site tem de ser o da Falco (PAINEL_AMBIENTE=falco — o id interno é 'rc') e a carga não pode ter sido desligada. */
+export function cargaPermitida(sess) {
+  const amb = ambienteAtual(), off = String(globalThis.Netlify?.env?.get?.('PAINEL_CARGA_TESTE') ?? process.env.PAINEL_CARGA_TESTE ?? '').trim() === '0';
+  if (amb !== 'rc') return { ok: false, status: 403, motivo: `Carga de teste bloqueada: este site é o ambiente "${amb === 'prod' ? 'esposende (Produção)' : amb === 'homolog' ? 'homologação' : amb}". Ela só roda no site da Falco (PAINEL_AMBIENTE=falco).` };
+  if (off) return { ok: false, status: 403, motivo: 'Carga de teste desligada neste site (PAINEL_CARGA_TESTE=0).' };
+  if (!sess || sess.nivel < NIVEL.admin) return { ok: false, status: 403, motivo: 'Só o Master executa a carga de teste.' };
+  return { ok: true };
+}
+async function cargaTeste(sess, d) {
+  const trava = cargaPermitida(sess); if (!trava.ok) throw new ErroHttp(trava.status, trava.motivo, { trava: true });
+  if (d.confirmar !== CG.FRASE_CONFIRMACAO) throw new ErroHttp(422, `Para confirmar, envie confirmar: "${CG.FRASE_CONFIRMACAO}".`);
+  let linhas; try { linhas = CG.validarLinhas(d.linhas && d.linhas.length ? d.linhas : CG.LINHAS_PLANILHA); } catch (e) { throw new ErroHttp(422, e.message); }
+  const params = await lerParametros(), datas = [...linhas.map(l => l.data), '2025-03-31'].sort();
+  if (params.fechadoAte && datas[0] <= params.fechadoAte) throw new ErroHttp(422, `O período até ${params.fechadoAte.split('-').reverse().join('/')} está fechado no Módulo Contábil: a carga (a partir de ${datas[0].split('-').reverse().join('/')}) não pode ser lançada.`);
+  return tx(async t => {
+    /* 1 · plano de contas: sintéticas da árvore + analíticas da planilha e de março (só o que falta) */
+    let contas = await lerContas(t); const por = new Map(contas.map(c => [c.codigo, c])), criadas = [], avisos = [];
+    const analiticas = new Map(); linhas.forEach(l => [l.debito, l.credito].forEach(x => { if (!analiticas.has(x.codigo)) analiticas.set(x.codigo, x.nome); }));
+    CG.CONTAS_MARCO.forEach(([c, n]) => { if (!analiticas.has(c)) analiticas.set(c, n); });
+    const nomeLivre = (pai, nome) => { const irm = contas.filter(c => (c.pai || '') === (pai || '')).map(c => c.nome.trim().toLowerCase()); return irm.includes(nome.trim().toLowerCase()) ? `${nome} — plano de testes` : nome; };
+    const criar = async def => {
+      const { pai } = M.partesCodigo(def.codigo), d0 = { ...def, nome: nomeLivre(pai, def.nome) }, c = M.validarConta(d0, contas);
+      await t(`INSERT INTO contab_contas (codigo, nome, grupo, natureza, tipo, pai, nivel, redutora, dre, dva, tributos, modelo_tributario, criado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+        [c.codigo, c.nome, c.grupo, c.natureza, c.tipo, c.pai, c.nivel, c.redutora, c.dre, c.dva, c.tributos, c.modeloTributario, sess.uid]);
+      const nova = { ...c, ativa: true }; contas.push(nova); por.set(c.codigo, nova); criadas.push({ codigo: c.codigo, nome: c.nome, tipo: c.tipo }); if (d0.nome !== def.nome) avisos.push(`${c.codigo}: já havia "${def.nome}" na mesma conta-mãe — criada como "${d0.nome}".`);
+    };
+    const garantirMae = async cod => {
+      const { pai } = M.partesCodigo(cod); if (!pai) return; if (!por.has(pai)) { await garantirMae(pai); await criar({ codigo: pai, nome: CG.SINTETICAS[pai] || `Grupo ${pai}`, tipo: 'S', redutora: false }); }
+      else if (por.get(pai).tipo !== 'S') throw new ErroHttp(409, `A conta ${pai} existe como analítica: não pode receber a conta ${cod}.`);
+    };
+    for (const g of ['1', '2', '3', '4', '5']) if (!por.has(g)) await criar({ codigo: g, nome: CG.SINTETICAS[g], tipo: 'S' });
+    for (const cod of [...analiticas.keys()].sort(M.cmpCodigo)) {
+      const atual = por.get(cod);
+      if (atual) { if (atual.tipo !== 'A') throw new ErroHttp(409, `A conta ${cod} existe como sintética: a planilha lança nela.`); if (!atual.ativa) throw new ErroHttp(409, `A conta ${cod} está inativa: reative-a antes da carga.`); continue; }
+      await garantirMae(cod); await criar(CG.classificarConta(cod, analiticas.get(cod)));
+    }
+    contas = await lerContas(t); const mapa = new Map(contas.map(c => [c.codigo, c]));
+    for (const [cod, nome] of analiticas) { const c = mapa.get(cod); if (nome && c && M.normalizar(c.nome) !== M.normalizar(nome) && !criadas.some(x => x.codigo === cod)) avisos.push(`${cod}: a planilha chama a conta de "${nome}", e o plano já tinha "${c.nome}" (mantido).`); }
+    /* 2 · empresa fictícia de teste (por CNPJ) */
+    let [emp] = await t('SELECT id FROM contab_empresas WHERE cnpj = $1', [CG.EMPRESA_TESTE.cnpj]); let empresaCriada = false;
+    if (!emp) { const e = validarEmpresa(CG.EMPRESA_TESTE), id = 'emp_' + randomUUID().slice(0, 8); empresaCriada = true;
+      await t(`INSERT INTO contab_empresas (id, cnpj, razao_social, nome_fantasia, regime, capital_social_centavos, socios, contador, endereco, ativa, criado_por, atualizado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true,$10,$10)`,
+        [id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, sess.uid]); emp = { id }; }
+    /* 3 · lançamentos (idempotente pelo documento CARGA-…: rodar de novo não duplica) */
+    const feitos = new Set((await t(`SELECT doc_ref FROM contab_lancamentos l WHERE empresa_id = $1 AND doc_ref LIKE $2 AND origem <> 'estorno' AND NOT EXISTS (SELECT 1 FROM contab_lancamentos e WHERE e.estorno_de = l.id)`, [emp.id, CG.PREFIXO_DOC + '%'])).map(r => r.doc_ref));
+    const daPlanilha = linhas.map(l => ({ docRef: `${CG.PREFIXO_DOC}LI-${String(l.n).padStart(3, '0')}`, data: l.data, historico: `${l.historico} [planilha nº ${l.n}]`, origem: /^3\./.test(l.credito.codigo) && /integraliza|capital/i.test(l.historico) ? 'aumento_capital' : 'manual',
+      itens: [{ conta: l.debito.codigo, dc: 'D', valor: l.valor }, { conta: l.credito.codigo, dc: 'C', valor: l.valor }] }));
+    const marco = CG.lancamentosMarco(), base = CG.lairDe(contas, [...daPlanilha, ...marco]), irDiv = CG.impostoEDividendos(base.lair), todos = [...daPlanilha, ...marco, ...irDiv.lancamentos];
+    let inseridos = 0, ignorados = 0;
+    for (const l of todos) {
+      if (feitos.has(l.docRef)) { ignorados++; continue; }
+      const v = M.validarLancamento({ data: l.data, historico: l.historico, itens: l.itens.map(i => ({ ...i, valor: M.reais(i.valor) })) }, mapa);
+      if (!d.simular) await gravarLancamento(t, sess, { ...v, origem: l.origem, docRef: l.docRef, empresa: emp.id }); inseridos++;
+    }
+    const tot = todos.reduce((a, l) => a + l.itens.filter(i => i.dc === 'D').reduce((x, i) => x + i.valor, 0), 0);
+    const resumo = { empresa: { id: emp.id, razaoSocial: CG.EMPRESA_TESTE.razaoSocial, cnpj: CG.EMPRESA_TESTE.cnpj, criada: empresaCriada }, contasCriadas: criadas, avisos, lancamentos: { planilha: daPlanilha.length, marco: marco.length + irDiv.lancamentos.length, inseridos, ignorados, totalDebitos: M.reais(tot) },
+      trimestre: { receitaLiquida: M.reais(base.receitaLiquida), lair: M.reais(base.lair), irpj: M.reais(irDiv.irpj), csll: M.reais(irDiv.csll), lucroLiquido: M.reais(base.lair - irDiv.irpj - irDiv.csll), dividendos: M.reais(irDiv.dividendos) }, simulacao: !!d.simular };
+    if (d.simular) throw Object.assign(new Error('simulação'), { simulacao: resumo }); /* desfaz a transação (nada gravado) */
+    return resumo;
+  }).catch(e => { if (e.simulacao) return e.simulacao; throw e; });
 }
 
 /* ---------------------------------------------------------------- relatórios */
@@ -189,7 +258,11 @@ async function relatorio(tipo, url, params) {
   if (tipo === 'diario') { const ls = await lerLancamentos({ de, ate, empresa, limite: url.searchParams.get('limite') || 20000 }), rs = RD.resumoDiario(ls.map(l => ({ itens: l.itens.map(i => ({ dc: i.dc, valor: Math.round(i.valor * 100) })) })));
     return { ...cab, lancamentos: ls.map(l => ({ ...l, formula: RD.formula(l.itens) })), totais: { lancamentos: ls.length, valor: Math.round(ls.reduce((a, l) => a + l.total * 100, 0)) / 100 }, resumo: { ...rs, debitos: M.reais(rs.debitos), creditos: M.reais(rs.creditos), diferenca: M.reais(rs.diferenca) } }; }
   if (tipo === 'razao' || tipo === 'caixa') {
-    const conta = tipo === 'caixa' ? (url.searchParams.get('conta') || '1.1.1.01') : url.searchParams.get('conta'); if (!conta) throw new ErroHttp(400, 'Informe a conta (?conta=1.1.1.01.001).'); const c = contas.find(x => x.codigo === conta); if (!c) throw new ErroHttp(404, 'Conta não encontrada.');
+    let conta = url.searchParams.get('conta');
+    if (tipo === 'caixa' && !conta) { /* v13.92: a conta de caixa do plano (padrão 1.1.1.01 ou a do plano próprio, ex.: 1.1.01); havendo mais de uma, a que tem movimento */
+      const P = RD.papeis(contas), raizes = P.caixa.length ? RD.rotuloCodigos(contas, P.caixa, RD.RE_PAPEL.caixa).replace(/ …$/, '').split(' · ') : ['1.1.1.01'];
+      if (raizes.length > 1) { const sm = await saldos(de, ate, E), mv = r => [...sm].reduce((a, [k, v]) => a + (k === r || k.startsWith(r + '.') ? Math.abs(v.ant) + v.d + v.c : 0), 0); raizes.sort((x, y) => mv(y) - mv(x)); }
+      conta = raizes[0]; } if (!conta) throw new ErroHttp(400, 'Informe a conta (?conta=1.1.1.01.001).'); const c = contas.find(x => x.codigo === conta); if (!c) throw new ErroHttp(404, 'Conta não encontrada.');
     const pref = r => r.conta === conta || r.conta.startsWith(conta + '.');
     const [a] = await q(`SELECT coalesce(sum(CASE p.dc WHEN 'D' THEN p.valor_centavos ELSE -p.valor_centavos END), 0)::bigint AS s FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id WHERE l.data < $1 AND l.empresa_id = $3 AND (p.conta = $2 OR p.conta LIKE $2 || '.%')`, [de, conta, empresa]);
     let saldo = Number(a.s); const linhas = [];
@@ -201,7 +274,7 @@ async function relatorio(tipo, url, params) {
   if (tipo === 'dre') { const { d } = await resultado(); return { ...cab, modelo, ...emReais(d) }; }
   if (tipo === 'balanco') return { ...cab, ...emReais(M.balanco(contas, await saldos(ate, ate, E))) };
   if (tipo === 'dre51') { const { d } = await resultado(); return { ...cab, ...emReais(RD.dreCpc51(d.modelo === 'atual' ? d : M.dre(contas, await saldos(de, ate, { semEncerramento: true, empresa }), { modelo: 'atual' }))) }; }
-  if (tipo === 'dfc') { const ls = await lerLancamentos({ de, ate, empresa, limite: 20000 }), ini = RD.somaGrupo(await saldos(de, de, E), '1.1.1').ant;
+  if (tipo === 'dfc') { const ls = await lerLancamentos({ de, ate, empresa, limite: 20000 }), ini = RD.somaContas(await saldos(de, de, E), RD.papeis(contas).disp).ant;
     const r = RD.dfc(contas, ls.map(l => ({ itens: l.itens.map(i => ({ conta: i.conta, dc: i.dc, valor: Math.round(i.valor * 100) })) })), ini); return { ...cab, ...emReais(r) }; }
   if (tipo === 'dmpl' || tipo === 'dra') {
     const { d } = await resultado(), atual = d.modelo === 'atual' ? d : M.dre(contas, await saldos(de, ate, { semEncerramento: true, empresa }), { modelo: 'atual' });
@@ -397,9 +470,10 @@ export default rota(async req => {
         return json(200, { registradas: r.novos, criadas: r.criadas });
       }
     }
-    if (r0 === 'adiantamentos' && met === 'POST') return await rotaAdiantamentos(req, sess, perms, r1); /* v13.88: Master/financeiro (não exige o Módulo Contábil aberto) */
+    if (r0 === 'adiantamentos' && met === 'POST') return await rotaAdiantamentos(req, sess, perms, r1);
+    if (r0 === 'carga-teste' && met === 'POST') return json(201, await cargaTeste(sess, await corpo(req))); /* v13.92: só Falco + Master + frase */ /* v13.88: Master/financeiro (não exige o Módulo Contábil aberto) */
     exigir(perms, 'contabil.ver');
-    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, empresas: await lerEmpresas(), parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
+    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, empresas: await lerEmpresas(), cargaTeste: { disponivel: cargaPermitida(sess).ok, frase: CG.FRASE_CONFIRMACAO }, parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
 
     /* ---- plano de contas ---- */
     if (r0 === 'contas') {
@@ -561,7 +635,7 @@ export default rota(async req => {
       }
     }
     if (r0 === 'disponibilidades' && met === 'GET') {
-      const emp = await empresaDe(url), { de, ate } = periodo(url), sal = await saldos(de, ate, { empresa: emp.id }), d = RD.disponibilidades(sal);
+      const emp = await empresaDe(url), { de, ate } = periodo(url), sal = await saldos(de, ate, { empresa: emp.id }), d = RD.disponibilidades(sal, await lerContas());
       const [t] = await q(`SELECT count(DISTINCT l.id)::int AS n, coalesce(sum(p.valor_centavos) FILTER (WHERE p.dc = 'D'), 0)::bigint AS d, coalesce(sum(p.valor_centavos) FILTER (WHERE p.dc = 'C'), 0)::bigint AS c
           FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3`, [emp.id, de, ate]);
       const R = x => M.reais(x);

@@ -3,7 +3,31 @@
    invertido (e a correção sugerida), variações desproporcionais, conciliação com o FCX, recomendações tributárias
    (modelo atual × Reforma Tributária, LC 214/2025), indicadores financeiros, DFC (método direto), DRE no formato do CPC 51
    e o score de 0 a 100. Nada aqui grava: as correções voltam como propostas (o usuário confere e grava). */
-import { balancete, balanco, dre, transicao, cmpCodigo, fmt } from './contabil-motor.mjs';
+import { balancete, balanco, dre, transicao, cmpCodigo, fmt, normalizar } from './contabil-motor.mjs';
+
+/* ---------------------------------------------------------------- v13.92 · papéis das contas pelo nome (qualquer plano) */
+/* O plano padrão usa 1.1.1.01 (Caixa), 1.1.1.02 (Bancos), 1.1.3 (Estoques); planos próprios (ex.: 1.1.01 Caixa, 1.1.02 Bancos,
+   1.1.04-06 Estoques) também são reconhecidos — pelo nome da conta e das contas-mãe, dentro do grupo certo. */
+const TRIB_LUCRO_VENDAS = ['ICMS', 'PIS', 'COFINS', 'ISS', 'IPI', 'IBS', 'CBS', 'IS', 'IRPJ', 'CSLL'];
+export function papeis(contas) {
+  const por = new Map(contas.map(c => [c.codigo, c])), cad = c => { const o = []; let x = c; while (x) { o.push(normalizar(x.nome)); x = x.pai ? por.get(x.pai) : null; } return o.join(' | '); };
+  const A = contas.filter(c => c.tipo === 'A'), em = (pref, re, f = () => true) => A.filter(c => (c.codigo === pref || c.codigo.startsWith(pref + '.')) && re.test(cad(c)) && f(c)).map(c => c.codigo);
+  const bancos = em('1.1', /\bbanco|conta movimento|conta corrente/), aplic = em('1.1', /aplicac/, c => !bancos.includes(c.codigo)), caixa = em('1.1', /\bcaixa\b/, c => !bancos.includes(c.codigo) && !aplic.includes(c.codigo) && !/equivalente/.test(normalizar(c.nome)));
+  const disp = [...new Set([...caixa, ...bancos, ...aplic])], estoque = em('1.1', /estoque|mercadorias para revenda|materia prima|produtos acabados|produtos em elaboracao/, c => !disp.includes(c.codigo));
+  const temTrib = c => (c.tributos || []).some(t => TRIB_LUCRO_VENDAS.includes(t));
+  return { caixa, bancos, aplic, disp, estoque,
+    clientes: em('1.1', /client|duplicatas a receber|a receber/, c => !disp.includes(c.codigo) && !/recuper|compens/.test(normalizar(c.nome))),
+    recuperar: em('1', /a recuperar|a compensar/), fornecedores: em('2', /fornecedor/),
+    trabalhistas: em('2.1', /salari|encargo|inss|fgts|ferias|13o|trabalhist/), recolher: A.filter(c => c.grupo === 2 && (temTrib(c) || (/a recolher/.test(normalizar(c.nome)) && !/encargo|inss|fgts/.test(normalizar(c.nome))))).map(c => c.codigo),
+    emprestimos: em('2', /emprestimo|financiamento/), dividendos: em('2', /dividendo|lucros a distribuir/), rlp: em('1.2', /realizavel a longo/), servicos: A.filter(c => c.grupo === 5 && /servicos de terceiros|honorarios|servicos prestados por/.test(normalizar(c.nome))).map(c => c.codigo) };
+}
+/** rótulo dos códigos de um papel: sobe para a conta-mãe enquanto ela também tem o papel (pelo nome), a partir do 3º nível */
+export const RE_PAPEL = { caixa: /\bcaixa\b/, bancos: /\bbanco|conta movimento|conta corrente/, estoque: /estoque|mercadorias para revenda|materia prima|produtos acabados|produtos em elaboracao/ };
+export function rotuloCodigos(contas, cods, re) {
+  if (!cods.length) return '—'; const por = new Map(contas.map(c => [c.codigo, c]));
+  const topo = cod => { let x = por.get(cod); while (re && x && x.pai) { const p = por.get(x.pai); if (!p || p.nivel < 3 || !re.test(normalizar(p.nome))) break; x = p; } return x ? x.codigo : cod; };
+  const u = [...new Set(cods.map(topo))]; return u.slice(0, 3).join(' · ') + (u.length > 3 ? ' …' : '');
+}
 
 /* ---------------------------------------------------------------- disponibilidades (cards do topo) */
 export const DISPONIBILIDADES = [
@@ -12,15 +36,17 @@ export const DISPONIBILIDADES = [
   { id: 'estoque', rotulo: 'Estoque de Mercadorias', conta: '1.1.3', entra: 'Entradas', sai: 'Baixas (CMV)' },
 ];
 /** soma (ant, d, c) de uma conta e de todas as filhas analíticas */
+export function somaContas(saldos, cods) { const set = new Set(cods); let ant = 0, d = 0, c = 0; for (const [k, v] of saldos) if (set.has(k)) { ant += v.ant; d += v.d; c += v.c; } return { ant, d, c, saldo: ant + d - c }; }
 export function somaGrupo(saldos, prefixo) {
   let ant = 0, d = 0, c = 0;
   for (const [k, v] of saldos) if (k === prefixo || k.startsWith(prefixo + '.')) { ant += v.ant; d += v.d; c += v.c; }
   return { ant, d, c, saldo: ant + d - c };
 }
-export function disponibilidades(saldos) {
-  const cards = DISPONIBILIDADES.map(x => ({ ...x, ...somaGrupo(saldos, x.conta) }));
-  const disp = somaGrupo(saldos, '1.1.1'), est = somaGrupo(saldos, '1.1.3');
-  return { cards, disponivel: disp.saldo, estoques: est.saldo, consolidado: disp.saldo + est.saldo, aplicacoes: somaGrupo(saldos, '1.1.1.03').saldo };
+export function disponibilidades(saldos, contas) {
+  const P = contas ? papeis(contas) : null, cods = { caixa: P?.caixa, bancos: P?.bancos, estoque: P?.estoque };
+  const cards = DISPONIBILIDADES.map(x => ({ ...x, ...(cods[x.id] ? { conta: rotuloCodigos(contas, cods[x.id], RE_PAPEL[x.id]), ...somaContas(saldos, cods[x.id]) } : somaGrupo(saldos, x.conta)) }));
+  const disp = P ? somaContas(saldos, P.disp) : somaGrupo(saldos, '1.1.1'), est = P ? somaContas(saldos, P.estoque) : somaGrupo(saldos, '1.1.3');
+  return { cards, disponivel: disp.saldo, estoques: est.saldo, consolidado: disp.saldo + est.saldo, aplicacoes: P ? somaContas(saldos, P.aplic).saldo : somaGrupo(saldos, '1.1.1.03').saldo };
 }
 
 /* ---------------------------------------------------------------- fórmulas de lançamento */
@@ -40,30 +66,43 @@ export function resumoDiario(lancamentos) {
 
 /* ---------------------------------------------------------------- saldo invertido e correção sugerida */
 /* contrapartida da reclassificação, pela conta com o saldo invertido (o usuário confere antes de gravar) */
-const RECLASSIFICA = [
-  ['1.1.1.02', '2.1.4.01.001', 'Saldo bancário negativo é obrigação (cheque especial / conta garantida): reclassifique para Empréstimos Bancários.'],
-  ['1.1.1.01', null, 'Caixa com saldo credor ("estouro de caixa") indica receita não lançada, pagamento lançado em dobro ou entrada lançada em outra conta. Localize o lançamento no Razão; não se reclassifica caixa negativo.'],
-  ['1.1.2.01', '2.1.5.01', 'Clientes com saldo credor costumam ser adiantamentos recebidos: reclassifique para uma conta de obrigação (Contas a Pagar / Adiantamentos de Clientes).'],
-  ['1.1.2.02', '2.1.3.01', 'Tributo a recuperar com saldo credor: o valor é devido — reclassifique para o tributo a recolher correspondente.'],
-  ['1.1.3', '5.1.1.01', 'Estoque credor: baixa de CMV maior que as entradas. Revise o custo das vendas ou registre a entrada de mercadorias que faltou.'],
-  ['2.1.1', '1.1.2.03.001', 'Fornecedores com saldo devedor são adiantamentos a fornecedores (pagamento antes da nota): reclassifique para o Ativo.'],
-  ['2.1.2', '1.1.2.03.002', 'Obrigação trabalhista com saldo devedor: pagamento a maior ou adiantamento — reclassifique para Adiantamentos a Empregados ou corrija a provisão.'],
-  ['2.1.3', '1.1.2.02', 'Tributo a recolher com saldo devedor: recolhimento a maior — reclassifique para tributos a recuperar/compensar.'],
-  ['2.1.4', '1.1.2.03', 'Empréstimo com saldo devedor: amortização a maior ou juros lançados no principal — revise os pagamentos.'],
-  ['2.1.5', '1.1.2.03', 'Conta a pagar com saldo devedor: pagamento antecipado — reclassifique para Outros Créditos.'],
-];
+const MOTIVO = {
+  bancos: 'Saldo bancário negativo é obrigação (cheque especial / conta garantida): reclassifique para Empréstimos Bancários.',
+  caixa: 'Caixa com saldo credor ("estouro de caixa") indica receita não lançada, pagamento lançado em dobro ou entrada lançada em outra conta. Localize o lançamento no Razão; não se reclassifica caixa negativo.',
+  clientes: 'Clientes com saldo credor costumam ser adiantamentos recebidos: reclassifique para uma conta de obrigação (Contas a Pagar / Adiantamentos de Clientes).',
+  recuperar: 'Tributo a recuperar com saldo credor: o valor é devido — reclassifique para o tributo a recolher correspondente.',
+  estoque: 'Estoque credor: baixa de custo maior que as entradas. Revise o custo das vendas ou registre a entrada que faltou.',
+  fornecedores: 'Fornecedores com saldo devedor são adiantamentos a fornecedores (pagamento antes da nota): reclassifique para o Ativo.',
+  trabalhistas: 'Obrigação trabalhista com saldo devedor: pagamento a maior ou adiantamento — reclassifique para Adiantamentos a Empregados ou corrija a provisão.',
+  recolher: 'Tributo a recolher com saldo devedor: recolhimento a maior — reclassifique para tributos a recuperar/compensar.',
+  emprestimos: 'Empréstimo com saldo devedor: amortização a maior ou juros lançados no principal — revise os pagamentos.',
+  outros: 'Obrigação com saldo devedor: pagamento antecipado — reclassifique para Outros Créditos.',
+};
+const PREF_PADRAO = { bancos: '2.1.4.01.001', clientes: '2.1.5.01', recuperar: '2.1.3.01', estoque: '5.1.1.01', fornecedores: '1.1.2.03.001', trabalhistas: '1.1.2.03.002', recolher: '1.1.2.02', emprestimos: '1.1.2.03', outros: '1.1.2.03' };
+function destinoDe(papel, c, contas, P) {
+  if (papel === 'caixa') return null;
+  const A = contas.filter(x => x.tipo === 'A' && x.ativa !== false), cod = PREF_PADRAO[papel], N = x => normalizar(x.nome);
+  const mesmoTrib = x => (c.tributos || []).some(t => (x.tributos || []).includes(t)) || (c.tributos || []).some(t => new RegExp('\\b' + t.toLowerCase() + '\\b').test(N(x)));
+  const pad = cod ? (A.find(x => x.codigo === cod) || A.filter(x => x.codigo.startsWith(cod + '.')).sort((a, b) => cmpCodigo(a.codigo, b.codigo))[0]) : null;
+  if (papel === 'recuperar') return A.find(x => P.recolher.includes(x.codigo) && mesmoTrib(x)) || pad;
+  if (papel === 'recolher') return A.find(x => P.recuperar.includes(x.codigo) && mesmoTrib(x)) || pad;
+  if (pad) return pad;
+  const busca = { bancos: x => x.codigo.startsWith('2.1') && /emprestimo|financiamento/.test(N(x)) && !/longo/.test(N(x)), clientes: x => x.grupo === 2 && /adiantamento.*client/.test(N(x)), estoque: x => x.dre === 'cmv',
+    fornecedores: x => x.codigo.startsWith('1.1') && /adiantamento.*fornecedor/.test(N(x)), trabalhistas: x => x.codigo.startsWith('1.1') && /adiantamento.*(empregad|salari|funcionari)/.test(N(x)), emprestimos: () => false, outros: x => x.codigo.startsWith('1.1') && /outros creditos|adiantamento/.test(N(x)) }[papel];
+  return busca ? A.filter(busca).sort((a, b) => cmpCodigo(a.codigo, b.codigo))[0] || null : null;
+}
 export function contasInvertidas(contas, saldos) {
-  const out = [];
+  const out = [], P = papeis(contas), papelDe = c => c.grupo === 1 ? ['bancos', 'caixa', 'clientes', 'recuperar', 'estoque'].find(k => P[k].includes(c.codigo)) : ['fornecedores', 'trabalhistas', 'recolher', 'emprestimos'].find(k => P[k].includes(c.codigo)) || 'outros';
   for (const c of contas) {
     if (c.tipo !== 'A' || c.grupo > 2 || c.redutora) continue;
     const s = saldos.get(c.codigo); if (!s) continue; const fim = s.ant + s.d - s.c;
     const invertido = c.grupo === 1 ? fim < 0 : fim > 0; if (!invertido || !fim) continue;
-    const r = RECLASSIFICA.find(([p]) => c.codigo === p || c.codigo.startsWith(p + '.')) || [null, null, c.grupo === 1 ? 'Conta do Ativo com saldo credor: confira no Razão se houve lançamento invertido (D↔C).' : 'Conta do Passivo com saldo devedor: confira no Razão se houve lançamento invertido (D↔C).'];
-    const destino = r[1] ? (contas.find(x => x.codigo === r[1] && x.tipo === 'A' && x.ativa) || contas.filter(x => x.tipo === 'A' && x.ativa && x.codigo.startsWith(r[1] + '.')).sort((a, b) => cmpCodigo(a.codigo, b.codigo))[0]) : null;
+    const papel = papelDe(c), destino = papel ? destinoDe(papel, c, contas, P) : null;
+    const motivo = papel ? MOTIVO[papel] : (c.grupo === 1 ? 'Conta do Ativo com saldo credor: confira no Razão se houve lançamento invertido (D↔C).' : 'Conta do Passivo com saldo devedor: confira no Razão se houve lançamento invertido (D↔C).');
     const valor = Math.abs(fim);
     /* proposta: zerar o saldo invertido contra a conta de destino (Ativo credor → D conta / C destino; Passivo devedor → C conta / D destino) */
     const proposta = destino ? { historico: `Reclassificação do saldo ${c.grupo === 1 ? 'credor' : 'devedor'} de ${c.codigo} · ${c.nome}`, itens: c.grupo === 1 ? [{ conta: c.codigo, dc: 'D', valor }, { conta: destino.codigo, dc: 'C', valor }] : [{ conta: destino.codigo, dc: 'D', valor }, { conta: c.codigo, dc: 'C', valor }] } : null;
-    out.push({ conta: c.codigo, nome: c.nome, grupo: c.grupo, saldo: fim, valor, natureza: c.grupo === 1 ? 'credor' : 'devedor', motivo: r[2], destino: destino ? { codigo: destino.codigo, nome: destino.nome } : null, proposta });
+    out.push({ conta: c.codigo, nome: c.nome, grupo: c.grupo, saldo: fim, valor, natureza: c.grupo === 1 ? 'credor' : 'devedor', motivo, destino: destino ? { codigo: destino.codigo, nome: destino.nome } : null, proposta });
   }
   return out.sort((a, b) => b.valor - a.valor);
 }
@@ -91,12 +130,14 @@ export const CONTAS_RETENCOES = [
   ['2.1.3.03.004', 'ISS Retido na Fonte a Recolher', 'A', ['ISS'], 'atual'],
 ];
 export function tributario({ contas, mov, params, ano, regime }) {
-  const out = [], tem = cod => contas.some(c => c.codigo === cod || c.codigo.startsWith(cod + '.')), soma = (pref, k) => { let v = 0; for (const [cod, m] of mov) if (cod === pref || cod.startsWith(pref + '.')) v += k === 'd' ? m.d - m.c : m.c - m.d; return v; };
-  const servicos = soma('5.3.3.01', 'd');
-  if (servicos > 0 && !tem('2.1.3.03')) out.push({ id: 'retencoes', severidade: 'media', titulo: 'Retenções na fonte sem contas próprias',
+  const out = [], P = papeis(contas), tem = cod => contas.some(c => c.codigo === cod || c.codigo.startsWith(cod + '.'));
+  const somaSet = (cods, k) => { const st = new Set(cods); let v = 0; for (const [cod, m] of mov) if (st.has(cod)) v += k === 'd' ? m.d - m.c : m.c - m.d; return v; };
+  const servicos = somaSet(P.servicos, 'd'), temRetencoes = tem('2.1.3.03') || contas.some(c => c.grupo === 2 && /retid/.test(normalizar(c.nome)));
+  if (servicos > 0 && !temRetencoes) out.push({ id: 'retencoes', severidade: 'media', titulo: 'Retenções na fonte sem contas próprias',
     texto: `Há ${fmt(servicos)} em Serviços de Terceiros no período e o plano não tem contas para os tributos retidos. Ao contratar serviços de pessoa jurídica, a empresa pode ter de reter IRRF, PIS/COFINS/CSLL (4,65%, Lei 10.833/2003), INSS (11% na cessão de mão de obra) e ISS (conforme o município). Sem as contas, o valor retido fica misturado com Fornecedores.`,
     acao: { tipo: 'retencoes', rotulo: 'Criar as contas de retenções' } });
-  const tr = transicao(ano, params.reforma || {}), recIBS = soma('2.1.3.01.005', 'c') + soma('4.2.3.01', 'd'), recCBS = soma('2.1.3.01.006', 'c') + soma('4.2.3.02', 'd'), rb = soma('4.1', 'c');
+  const comTrib = t => contas.filter(c => c.tipo === 'A' && (c.tributos || []).includes(t) && (c.grupo === 2 || c.dre === 'ded')).map(c => c.codigo), rbCods = contas.filter(c => c.tipo === 'A' && c.dre === 'rb').map(c => c.codigo);
+  const mvIBS = comTrib('IBS'), mvCBS = comTrib('CBS'), recIBS = somaSet(mvIBS.filter(c => c[0] === '2'), 'c') + somaSet(mvIBS.filter(c => c[0] === '4'), 'd'), recCBS = somaSet(mvCBS.filter(c => c[0] === '2'), 'c') + somaSet(mvCBS.filter(c => c[0] === '4'), 'd'), rb = somaSet(rbCods, 'c');
   if (ano === 2026 && rb > 0 && !recIBS && !recCBS) out.push({ id: 'reforma-teste', severidade: 'media', titulo: '2026: ano-teste da Reforma Tributária sem IBS/CBS escriturados',
     texto: `Em 2026 a LC 214/2025 exige o destaque de CBS (0,9%) e IBS (0,1%) nos documentos fiscais, com compensação contra PIS/COFINS. A receita bruta do período é ${fmt(rb)} e não há IBS/CBS nas contas 2.1.3.01.005/006 nem 4.2.3. Confira a parametrização do emissor de notas e o registro contábil (sem custo adicional quando as obrigações acessórias são cumpridas).`,
     acao: { tipo: 'relatorio', rel: 'dre26', rotulo: 'Ver a DRE (Modelo Atual × Reforma)' } });
@@ -107,9 +148,9 @@ export function tributario({ contas, mov, params, ano, regime }) {
       texto: `Com o mesmo preço de venda, o lucro líquido passaria de ${fmt(atual.ll)} (modelo atual) para ${fmt(ref.ll)} na simulação de ${ref.transicao.ano} (diferença de ${fmt(dif)}). ${ref.transicao.nota} Revise preços, créditos de IBS/CBS nas compras e contratos de longo prazo.`,
       acao: { tipo: 'relatorio', rel: 'dre26', modelo: 'reforma', rotulo: 'Abrir a DRE da Reforma' } });
   }
-  const aRecolher = ['2.1.3.01', '2.1.3.02'].reduce((a, p) => { for (const [cod, m] of mov) if (cod.startsWith(p + '.')) a += -(m.ant + m.d - m.c); return a; }, 0), pagos = [...mov].reduce((x, [cod, m]) => x + (cod.startsWith('2.1.3.') ? m.d : 0), 0);
+  const rec = new Set(P.recolher), aRecolher = [...mov].reduce((a, [cod, m]) => a + (rec.has(cod) ? -(m.ant + m.d - m.c) : 0), 0), pagos = [...mov].reduce((x, [cod, m]) => x + (rec.has(cod) ? m.d : 0), 0);
   if (aRecolher > 0 && pagos <= 0) out.push({ id: 'recolhimento', severidade: 'alta', titulo: 'Tributos a recolher sem pagamento no período',
-    texto: `Há ${fmt(aRecolher)} em tributos a recolher (sobre vendas e sobre o lucro) e nenhum débito de recolhimento nessas contas no período. Confira as guias pagas (DARF, GNRE/ICMS, ISS) e se os pagamentos foram lançados contra o passivo.`, acao: { tipo: 'razao', conta: '2.1.3', rotulo: 'Ver o Razão dos tributos' } });
+    texto: `Há ${fmt(aRecolher)} em tributos a recolher (sobre vendas e sobre o lucro) e nenhum débito de recolhimento nessas contas no período. Confira as guias pagas (DARF, GNRE/ICMS, ISS) e se os pagamentos foram lançados contra o passivo.`, acao: { tipo: 'razao', conta: tem('2.1.3') ? '2.1.3' : P.recolher[0], rotulo: 'Ver o Razão dos tributos' } });
   if ((regime || params.regime) === 'presumido' && rb > 0) {
     const anual = rb / Math.max(1, Number(params.meses || 12)) * 12;
     if (anual > 7800000000) out.push({ id: 'limite-presumido', severidade: 'alta', titulo: 'Receita projetada acima do limite do Lucro Presumido', texto: `A receita bruta projetada para 12 meses (${fmt(Math.round(anual))}) passa de R$ 78 milhões (Lei 9.718/1998, art. 13): a empresa fica obrigada ao Lucro Real no ano seguinte.`, acao: null });
@@ -120,10 +161,10 @@ export function tributario({ contas, mov, params, ano, regime }) {
 
 /* ---------------------------------------------------------------- indicadores */
 const div = (a, b) => (b ? a / b : null);
-export function indicadores(bp, dr) {
-  const ac = bp.ativo.circulante.total, pc = bp.passivo.circulante.total, disp = bp.ativo.circulante.contas.filter(c => c.codigo === '1.1.1').reduce((a, c) => a + c.valor, 0);
-  const estq = bp.ativo.circulante.contas.filter(c => c.codigo === '1.1.3').reduce((a, c) => a + c.valor, 0), pass = bp.passivo.total, pl = bp.patrimonioLiquido.total;
-  return { liquidezCorrente: div(ac, pc), liquidezSeca: div(ac - estq, pc), liquidezImediata: div(disp, pc), liquidezGeral: div(ac + bp.ativo.naoCirculante.contas.filter(c => c.codigo === '1.2.1').reduce((a, c) => a + c.valor, 0), pass),
+export function indicadores(bp, dr, extra = null) {
+  const ac = bp.ativo.circulante.total, pc = bp.passivo.circulante.total, disp = extra ? extra.disponivel : bp.ativo.circulante.contas.filter(c => c.codigo === '1.1.1').reduce((a, c) => a + c.valor, 0);
+  const estq = extra ? extra.estoques : bp.ativo.circulante.contas.filter(c => c.codigo === '1.1.3').reduce((a, c) => a + c.valor, 0), pass = bp.passivo.total, pl = bp.patrimonioLiquido.total, rlp = extra ? extra.rlp : bp.ativo.naoCirculante.contas.filter(c => c.codigo === '1.2.1').reduce((a, c) => a + c.valor, 0);
+  return { liquidezCorrente: div(ac, pc), liquidezSeca: div(ac - estq, pc), liquidezImediata: div(disp, pc), liquidezGeral: div(ac + rlp, pass),
     endividamento: div(pass, bp.ativo.total), composicaoEndividamento: div(pc, pass), margemLiquida: div(dr.ll, dr.rl), margemBruta: div(dr.linhas.find(l => l.chave === 'lb')?.valor || 0, dr.rl), roe: div(dr.ll, pl), patrimonioLiquido: pl, capitalCirculante: ac - pc };
 }
 
@@ -152,20 +193,20 @@ export function score({ integridade, balancete: b, balanco: bp, invertidas, conc
 }
 
 /* ---------------------------------------------------------------- DFC (CPC 03) — método direto pela contrapartida do Disponível */
-const CLASSE = cod => (cod.startsWith('1.2.') ? 'investimento' : cod.startsWith('2.2.') || cod.startsWith('2.1.4.') || cod.startsWith('3.') || cod.startsWith('2.1.5.01.003') ? 'financiamento' : 'operacional');
+const classe = (cod, P) => (cod.startsWith('1.2.') ? 'investimento' : cod.startsWith('2.2.') || cod.startsWith('2.1.4.') || cod.startsWith('3.') || cod.startsWith('2.1.5.01.003') || P.emprestimos.includes(cod) || P.dividendos.includes(cod) ? 'financiamento' : 'operacional');
 const ROT_DFC = { operacional: 'Atividades operacionais', investimento: 'Atividades de investimento', financiamento: 'Atividades de financiamento' };
 export function dfc(contas, lancamentos, caixaInicial) {
-  const nome = new Map(contas.map(c => [c.codigo, c.nome])), pai = cod => { const c = contas.find(x => x.codigo === cod); return c?.pai || cod; };
+  const nome = new Map(contas.map(c => [c.codigo, c.nome])), P = papeis(contas), D = new Set(P.disp), ehDisp = cod => D.has(cod) || cod.startsWith('1.1.1.'), pai = cod => { const c = contas.find(x => x.codigo === cod); return c?.pai && c.nivel > 3 ? c.pai : cod; };
   const grupos = { operacional: new Map(), investimento: new Map(), financiamento: new Map() };
   for (const l of lancamentos) {
-    const disp = l.itens.filter(i => i.conta.startsWith('1.1.1.')), outros = l.itens.filter(i => !i.conta.startsWith('1.1.1.'));
+    const disp = l.itens.filter(i => ehDisp(i.conta)), outros = l.itens.filter(i => !ehDisp(i.conta));
     const liq = disp.reduce((a, i) => a + (i.dc === 'D' ? i.valor : -i.valor), 0); if (!liq || !outros.length) continue; /* transferência entre caixa e bancos não é fluxo */
     const base = outros.reduce((a, i) => a + i.valor, 0);
-    for (const i of outros) { const parte = Math.round(liq * i.valor / base), k = CLASSE(i.conta), chave = pai(i.conta), g = grupos[k]; g.set(chave, (g.get(chave) || 0) + parte); }
+    for (const i of outros) { const parte = Math.round(liq * i.valor / base), k = classe(i.conta, P), chave = pai(i.conta), g = grupos[k]; g.set(chave, (g.get(chave) || 0) + parte); }
   }
   const blocos = Object.entries(grupos).map(([k, m]) => ({ id: k, rotulo: ROT_DFC[k], linhas: [...m.entries()].sort((a, b) => cmpCodigo(a[0], b[0])).map(([cod, v]) => ({ codigo: cod, nome: nome.get(cod) || cod, valor: v })).filter(x => x.valor), total: [...m.values()].reduce((a, v) => a + v, 0) }));
   const variacao = blocos.reduce((a, b) => a + b.total, 0);
-  return { metodo: 'direto', caixaInicial, blocos, variacao, caixaFinal: caixaInicial + variacao, notas: ['Método direto (CPC 03 · Lei 6.404 art. 188): cada movimento do Disponível (1.1.1) é classificado pela contrapartida — Ativo não circulante = investimento; empréstimos, PL e dividendos = financiamento; o restante = operacional. Transferências entre caixa e bancos não são fluxo.'] };
+  return { metodo: 'direto', caixaInicial, blocos, variacao, caixaFinal: caixaInicial + variacao, notas: ['Método direto (CPC 03 · Lei 6.404 art. 188): cada movimento do Disponível (caixa, bancos e aplicações de liquidez imediata) é classificado pela contrapartida — Ativo não circulante = investimento; empréstimos, PL e dividendos = financiamento; o restante = operacional. Transferências entre caixa e bancos não são fluxo.'] };
 }
 
 /* ---------------------------------------------------------------- DRE no formato do CPC 51 (IFRS 18) */

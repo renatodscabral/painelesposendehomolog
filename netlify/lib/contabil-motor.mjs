@@ -283,7 +283,9 @@ export function transicao(ano, aliq = {}) {
 export function dre(contas, mov, { modelo = 'atual', reforma = {} } = {}) {
   const ms = movimentos(contas, mov), soma = (f, k = 'cred') => ms.filter(f).reduce((a, x) => a + x[k], 0);
   const rb = soma(x => x.c.dre === 'rb'), ded = ms.filter(x => x.c.dre === 'ded');
-  const porTrib = t => ded.filter(x => x.c.tributos.includes(t)).reduce((a, x) => a + x.deb, 0), devol = ded.filter(x => !x.c.tributos.length).reduce((a, x) => a + x.deb, 0);
+  /* v13.92: conta de dedução com mais de um tributo (ex.: "(-) IBS/CBS s/ Vendas") entra uma vez só, numa linha própria — antes era somada em cada tributo */
+  const porTrib = t => ded.filter(x => x.c.tributos.length === 1 && x.c.tributos[0] === t).reduce((a, x) => a + x.deb, 0), devol = ded.filter(x => !x.c.tributos.length).reduce((a, x) => a + x.deb, 0);
+  const multi = new Map(); ded.filter(x => x.c.tributos.length > 1).forEach(x => { const k = x.c.tributos.join('/'); multi.set(k, (multi.get(k) || 0) + x.deb); });
   const atuais = Object.fromEntries(TRIBUTOS_ATUAIS.map(t => [t, porTrib(t)])), reformaEsc = Object.fromEntries(TRIBUTOS_REFORMA.map(t => [t, porTrib(t)]));
   const cmv = soma(x => x.c.dre === 'cmv', 'deb'), dv = soma(x => x.c.dre === 'dv', 'deb'), dga = soma(x => x.c.dre === 'dga', 'deb'), oro = soma(x => x.c.dre === 'oro'), odo = soma(x => x.c.dre === 'odo', 'deb');
   const rf = soma(x => x.c.dre === 'rf'), df = soma(x => x.c.dre === 'df', 'deb'), ir = soma(x => x.c.dre === 'ir', 'deb');
@@ -296,7 +298,7 @@ export function dre(contas, mov, { modelo = 'atual', reforma = {} } = {}) {
       L('rop', 'Resultado antes do resultado financeiro', rop, 'total', 0), L('rf', '(+) Receitas financeiras', rf), L('df', '(-) Despesas financeiras', -df),
       L('lair', 'Resultado antes do IRPJ e da CSLL (LAIR)', lair, 'total', 0), L('ir', '(-) IRPJ e CSLL', -ir), L('ll', ll >= 0 ? 'Lucro líquido do período' : 'Prejuízo do período', ll, 'total', 0)] };
   };
-  const dedAtual = [['Devoluções, cancelamentos e abatimentos', devol], ...TRIBUTOS_ATUAIS.filter(t => atuais[t]).map(t => [t, atuais[t]]), ...TRIBUTOS_REFORMA.filter(t => reformaEsc[t]).map(t => [t === 'IS' ? 'Imposto Seletivo (escriturado)' : t + ' (escriturado)', reformaEsc[t]])].filter(([, v]) => v);
+  const dedAtual = [['Devoluções, cancelamentos e abatimentos', devol], ...TRIBUTOS_ATUAIS.filter(t => atuais[t]).map(t => [t, atuais[t]]), ...TRIBUTOS_REFORMA.filter(t => reformaEsc[t]).map(t => [t === 'IS' ? 'Imposto Seletivo (escriturado)' : t + ' (escriturado)', reformaEsc[t]]), ...[...multi].map(([k, v]) => [k + ' (escriturados)', v])].filter(([, v]) => v);
   const atual = montar(dedAtual);
   const tr = transicao(reforma.ano, reforma), aliqIS = Number(reforma.is ?? 0);
   const div = tr.teste ? 1 : 1 + tr.cbs + tr.ibs, baseOp = (rb - devol) / div; // mesmo preço ao consumidor: IBS/CBS "por fora" → valor da operação = receita bruta ÷ (1 + CBS + IBS)
