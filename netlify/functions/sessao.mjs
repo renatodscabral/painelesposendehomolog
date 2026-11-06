@@ -1,5 +1,5 @@
 /* /api/sessao — login por CPF conferido no servidor.
-   GET    ?amb=prod|homolog|rc  → sessão atual (cookie) e se o banco já tem Master
+   GET    ?amb=prod|homolog|falco (ou rc)  → sessão atual (cookie) e se o banco já tem Master
    POST   { cpf, senha, amb }   → confere senha (hash) e situação; abre a sessão (cookie HttpOnly, 12 h)
    DELETE                        → encerra a sessão
    v13.76: cada ambiente é um site com banco próprio (sem prefixo amb/…). Na Homologação e na RC, o Master que ainda
@@ -9,7 +9,7 @@ import { q, tx, faxina } from '../lib/db.mjs';
 import { json, erro, rota, cookieSessao, cookieApagar, ipDe, ErroHttp } from '../lib/http.mjs';
 import { confere, soDigitos } from '../lib/senha.mjs';
 import { criarSessao, sessaoDe } from '../lib/sessao.mjs';
-import { ambienteAtual, soMaster, ROTULO } from '../lib/ambiente.mjs';
+import { ambienteAtual, soMaster, ROTULO, normalizarAmbiente } from '../lib/ambiente.mjs';
 import { chamarAmbiente } from '../lib/inter.mjs';
 import { situacao, funcionarioDe, localizar } from '../lib/usuarios.mjs';
 
@@ -36,7 +36,7 @@ async function contar(chave, janela) { const [r] = await q(`SELECT count(*)::int
 export default rota(async (req, context) => {
   const url = new URL(req.url), AMB = ambienteAtual();
   if (req.method === 'GET') {
-    const pedido = url.searchParams.get('amb') || AMB, configurado = AMB !== 'prod' || await existeMaster(); // Homologação/RC herdam o Master no 1º login
+    const pedido = normalizarAmbiente(url.searchParams.get('amb')) || AMB /* v13.90: falco = rc */, configurado = AMB !== 'prod' || await existeMaster(); // Homologação/RC herdam o Master no 1º login
     const sess = await sessaoDe(req);
     if (!sess || pedido !== AMB) return json(200, { logado: false, configurado, ambiente: AMB });
     const f = await funcionarioDe(sess.usuario), sit = situacao(sess.usuario, f);
@@ -50,7 +50,7 @@ export default rota(async (req, context) => {
   if (req.method !== 'POST') return erro(405, 'Método não permitido.');
 
   let corpo; try { corpo = await req.json(); } catch { throw new ErroHttp(400, 'Corpo inválido.'); }
-  if (corpo?.amb && corpo.amb !== AMB) return erro(409, `Este endereço é o ambiente ${ROTULO[AMB]}.`, { ambiente: AMB });
+  if (corpo?.amb && normalizarAmbiente(corpo.amb) !== AMB) return erro(409, `Este endereço é o ambiente ${ROTULO[AMB]}.`, { ambiente: AMB });
   const cpf = soDigitos(corpo?.cpf), senha = String(corpo?.senha ?? ''), ip = ipDe(req, context);
   if (cpf.length !== 11 || !senha || senha.length > 200) return erro(401, 'CPF ou senha incorretos.');
   if (await contar('cpf:' + cpf, JANELA_CPF) >= MAX_CPF || (ip && await contar('ip:' + ip, JANELA_IP) >= MAX_IP)) return erro(429, 'Muitas tentativas. Aguarde alguns minutos e tente de novo.');

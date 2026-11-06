@@ -4,7 +4,7 @@
    POST /api/inter/docs/lote { ops }                gravar / excluir (política por origem em lib/ambiente.mjs)
    POST /api/inter/master { cpf }                   Master da Produção para herança na Homologação/RC */
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
-import { ambienteAtual, chaveConfere, interPermitido, IDS, chave, estadoChave } from '../lib/ambiente.mjs';
+import { ambienteAtual, chaveConfere, interPermitido, IDS, chave, estadoChave, normalizarAmbiente } from '../lib/ambiente.mjs';
 import { NIVEL } from '../lib/regras.mjs';
 import { lerDoc, listar, executarLote } from '../lib/documentos.mjs';
 import { localizar } from '../lib/usuarios.mjs';
@@ -19,7 +19,7 @@ export default rota(async req => {
     console.error(`[painel][inter] recusado em ${AMB} (origem ${req.headers.get('x-painel-origem') || '?'}): ${motivo}`);
     return erro(403, { chave_curta_no_destino: 'a PAINEL_CHAVE_AMBIENTES deste site tem menos de 16 caracteres', chave_nao_configurada_no_destino: 'a PAINEL_CHAVE_AMBIENTES não está configurada neste site', chave_ausente: 'a chamada chegou sem a chave', chave_diferente: 'a chave enviada é diferente da PAINEL_CHAVE_AMBIENTES deste site' }[motivo], { motivo, ambiente: AMB });
   }
-  const origem = req.headers.get('x-painel-origem') || '', ator = String(req.headers.get('x-painel-ator') || '').replace(/[^\w.:-]/g, '').slice(0, 60);
+  const origem = normalizarAmbiente(req.headers.get('x-painel-origem')) /* v13.90: 'falco' ou 'rc' */, ator = String(req.headers.get('x-painel-ator') || '').replace(/[^\w.:-]/g, '').slice(0, 60);
   if (!IDS.includes(origem) || origem === AMB) return erro(403, 'Origem inválida.');
   const sess = { uid: `ambiente:${origem}${ator ? ':' + ator : ''}`, nivel: NIVEL.admin, trocaPendente: false, caminho: '', tokenHash: '' };
   const url = new URL(req.url), rotaInter = url.pathname.replace(/^\/api\/inter\//, '');

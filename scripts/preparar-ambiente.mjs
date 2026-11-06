@@ -1,33 +1,34 @@
 /* Etapa de build do Netlify: prepara os arquivos estáticos do ambiente deste site.
-   PAINEL_AMBIENTE=rc (RC Consultoria, white-label):
-     • v13.76: troca as logomarcas (painel e FCX) pelas da RC (public/marca-rc/);
+   PAINEL_AMBIENTE=falco (ou rc) — Falco Controladoria e Gestão (antiga RC Consultoria), white-label:
+     • v13.90: troca as logomarcas (painel e FCX) pelas da Falco (public/marca-falco/; antes public/marca-rc/);
      • v13.76: remove do fcx.html os dados de exemplo da Esposende (const SEED: vendas, plano de contas, centros de custo,
        fornecedores e saídas reais), deixando a mesma estrutura vazia — exceção à Regra de Ouro autorizada em 28/10/2026,
-       exclusiva do site da RC. Se o bloco não puder ser removido com segurança, o build FALHA (nada é publicado);
-     • v13.76: marca neutra no FCX da RC (exceção estendida em 28/10/2026): título, rótulos, nome do arquivo de backup
+       exclusiva do site da Falco. Se o bloco não puder ser removido com segurança, o build FALHA (nada é publicado);
+     • v13.76: marca neutra no FCX da Falco (exceção estendida em 28/10/2026): título, rótulos, nome do arquivo de backup
        e o CATALOGO_OFICIAL (centros de custo e plano de contas) sem nomes de lojas, empresas do grupo ou da Esposende.
        Só textos mudam; identificadores internos (ex.: a chave esposende_card) ficam, para não quebrar dados gravados. */
 import fs from 'node:fs';
-const amb = (process.env.PAINEL_AMBIENTE || 'prod').trim();
+const amb = { falco: 'rc' }[(process.env.PAINEL_AMBIENTE || 'prod').trim().toLowerCase()] || (process.env.PAINEL_AMBIENTE || 'prod').trim(); /* v13.90: falco = rc */
+export const NOME = 'Falco Controladoria e Gestão';
 
 export function fcxSemSeed(html) {
   const ini = html.indexOf('const SEED = '); if (ini < 0) throw new Error('fcx.html: bloco const SEED não encontrado');
   const fim = html.indexOf(';\n', ini); if (fim < 0) throw new Error('fcx.html: fim do bloco SEED não encontrado');
   const seed = JSON.parse(html.slice(ini + 'const SEED = '.length, fim)); // se não for o JSON esperado, falha aqui
   const vazio = { methodKeys: seed.methodKeys, salesHistory: [], accounts: [], costCenters: [], fornecedores: [], saidas: [] };
-  const novo = html.slice(0, ini) + 'const SEED = ' + JSON.stringify(vazio) + '; /* RC Consultoria: dados de exemplo da Esposende removidos no build (exceção à Regra de Ouro autorizada em 28/10/2026) */' + html.slice(fim + 1);
+  const novo = html.slice(0, ini) + 'const SEED = ' + JSON.stringify(vazio) + '; /* Falco Controladoria e Gestão: dados de exemplo da Esposende removidos no build (exceção à Regra de Ouro autorizada em 28/10/2026) */' + html.slice(fim + 1);
   if (/Shopping Mana[ií]ra/.test(novo.slice(ini, ini + 2000)) || novo.length > html.length - 100000) throw new Error('fcx.html: remoção do SEED não conferiu');
   return novo;
 }
 
-/* ---------- marca neutra no FCX da RC ---------- */
+/* ---------- marca neutra no FCX da Falco ---------- */
 const TROCAS_FCX = [ // [texto exato, novo texto, ocorrências esperadas]
-  ['<title>Fluxo de Caixa — Esposende LTDA</title>', '<title>Fluxo de Caixa — RC Consultoria</title>', 1],
-  ['ESPOSENDE — SIMULADOR DE FLUXO DE CAIXA (v2)', 'RC CONSULTORIA — SIMULADOR DE FLUXO DE CAIXA (v2)', 1],
-  ['ESPOSENDE — PAINEL ANALÍTICO', 'RC CONSULTORIA — PAINEL ANALÍTICO', 1],
+  ['<title>Fluxo de Caixa — Esposende LTDA</title>', '<title>Fluxo de Caixa — Falco Controladoria e Gestão</title>', 1],
+  ['ESPOSENDE — SIMULADOR DE FLUXO DE CAIXA (v2)', 'FALCO CONTROLADORIA E GESTÃO — SIMULADOR DE FLUXO DE CAIXA (v2)', 1],
+  ['ESPOSENDE — PAINEL ANALÍTICO', 'FALCO CONTROLADORIA E GESTÃO — PAINEL ANALÍTICO', 1],
   ["esposende_card:'Esposende Card (Credsystem)'", "esposende_card:'Cartão Próprio / Private Label'", 1],
-  ['<img src="${LOGO_SRC}" alt="Esposende">', '<img src="${LOGO_SRC}" alt="RC Consultoria">', 1],
-  ["a.download = 'backup-fluxo-caixa-esposende-'", "a.download = 'backup-fluxo-caixa-rc-consultoria-'", 1],
+  ['<img src="${LOGO_SRC}" alt="Esposende">', '<img src="${LOGO_SRC}" alt="Falco Controladoria e Gestão">', 1],
+  ["a.download = 'backup-fluxo-caixa-esposende-'", "a.download = 'backup-fluxo-caixa-falco-'", 1],
 ];
 const GRUPO = { 'DOK': 'EMPRESA DO GRUPO A', 'PAQUETÁ': 'EMPRESA DO GRUPO B', 'MAR ABERTO': 'EMPRESA DO GRUPO C', 'HIPERFOCO': 'EMPRESA DO GRUPO D',
   'BRA BENEFÍCIOS': 'EMPRESA DO GRUPO E', 'SETE MARES': 'EMPRESA DO GRUPO F', 'SRC CONSTRUTORA': 'EMPRESA DO GRUPO G', 'FLORIDA RENT A CAR': 'EMPRESA DO GRUPO H',
@@ -67,12 +68,14 @@ export function fcxMarcaRc(html) {
   h = h.slice(0, ini) + marca + JSON.stringify(cat) + h.slice(fim);
   const resto = h.replace(/esposende_card|isEC|const SEED = [^\n]*/g, '');
   const sobra = resto.match(/esposende|paquet|\bDOK\b|mar aberto|hiperfoco|sete mares|src construtora|florida rent|bra benef|mana[ií]ra|recupera[cç][aã]o judicial|R\.J\./gi);
-  if (sobra) throw new Error('fcx.html da RC ainda cita: ' + [...new Set(sobra)].join(', '));
+  if (sobra) throw new Error('fcx.html da Falco ainda cita: ' + [...new Set(sobra)].join(', '));
   return h;
 }
 
+export const fcxMarcaFalco = fcxMarcaRc;
 if (amb === 'rc') {
-  for (const f of ['logo_branco.png', 'logo_navy.png', 'logo_fcx.png']) fs.copyFileSync('public/marca-rc/' + f, 'public/' + f);
+  const pasta = fs.existsSync('public/marca-falco') ? 'public/marca-falco/' : 'public/marca-rc/';
+  for (const f of ['logo_branco.png', 'logo_navy.png', 'logo_fcx.png']) fs.copyFileSync(pasta + f, 'public/' + f);
   fs.writeFileSync('public/fcx.html', fcxMarcaRc(fcxSemSeed(fs.readFileSync('public/fcx.html', 'utf8'))));
-  console.log('[painel] RC Consultoria: logomarcas white-label, FCX sem dados de exemplo da Esposende e com marca neutra');
+  console.log('[painel] Falco Controladoria e Gestão: logomarcas da Falco (' + pasta + '), FCX sem dados de exemplo da Esposende e com marca neutra');
 } else console.log(`[painel] ambiente ${amb}: arquivos da Esposende (sem alteração)`);

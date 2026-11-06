@@ -33,7 +33,16 @@
                                                         (devolução a receber / reembolso a pagar) e contabiliza o adiantamento e a liquidação
    POST   /api/contabil/adiantamentos/contabilizar    { viagemId } → contabiliza um acerto encerrado sem plano de contas (pendente)
    POST   /api/contabil/adiantamentos/baixar          { viagemId, funcionarioId?, data, forma? } → baixa do título (devolução recebida /
-                                                        reembolso pago): Master ou "Viagens · Modificar" (financeiro) */
+                                                        reembolso pago): Master ou "Viagens · Modificar" (financeiro)
+   v13.91 · multiempresas, disponibilidades, Radar de Saúde e Motor de Crítica (todas as rotas de leitura e de lançamento
+   aceitam ?empresa=<id>; sem ela vale a "Empresa principal" — os lançamentos anteriores à v13.91 ficam nela):
+   GET    /api/contabil/empresas                      → empresas (CNPJ, razão social, regime, capital, QSA e contador/CRC)
+   POST   /api/contabil/empresas                      { cnpj, razaoSocial, nomeFantasia?, regime, capitalSocial?, socios?, contador?, endereco? }
+   PUT    /api/contabil/empresas?id=…                 { … , ativa? } → edita (contabil.parametros)
+   GET    /api/contabil/disponibilidades?empresa=&de=&ate=  → Caixa, Bancos, Estoque (entradas/saídas), consolidado e Σ D × Σ C
+   GET    /api/contabil/radar?empresa=&de=&ate=       → score 0-100, indicadores, sugestões de ação e correção, parecer
+   POST   /api/contabil/radar/corrigir                { tipo: 'retencoes' } → cria as contas de tributos retidos (contabil.plano)
+   GET    /api/contabil/relatorios/<tipo> — novos tipos: caixa (Livro Caixa) · dfc (método direto) · dre51 (DRE no formato do CPC 51) */
 import { createHash, randomUUID } from 'node:crypto';
 import { q, tx } from '../lib/db.mjs';
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
@@ -42,6 +51,7 @@ import { NIVEL } from '../lib/regras.mjs';
 import * as M from '../lib/contabil-motor.mjs';
 import { permissoesEfetivas, normalizarPermissoes, tem } from '../lib/permissoes.mjs';
 import { gravar as gravarDoc } from '../lib/documentos.mjs';
+import * as RD from '../lib/contabil-radar.mjs';
 
 /* ---------------------------------------------------------------- acesso */
 /* Master: tudo. Operacional: linha "Contabilidade" da Gestão de Acessos (Ler = ver; Modificar = lançar e plano;
@@ -74,29 +84,30 @@ function periodo(url) {
   return { de, ate, ano: Number(ate.slice(0, 4)), meses };
 }
 /** Saldos por conta analítica: anterior ao período (D − C) e débitos/créditos do período. semEncerramento: fora os lançamentos de encerramento. */
-async function saldos(de, ate, { semEncerramento = false } = {}) {
+const EMP0 = 'emp_principal'; /* v13.91: empresa dos lançamentos anteriores ao multiempresas */
+async function saldos(de, ate, { semEncerramento = false, empresa = EMP0 } = {}) {
   const r = await q(`SELECT p.conta,
       coalesce(sum(CASE WHEN l.data < $1 THEN CASE p.dc WHEN 'D' THEN p.valor_centavos ELSE -p.valor_centavos END END), 0)::bigint AS ant,
       coalesce(sum(CASE WHEN l.data >= $1 AND p.dc = 'D' THEN p.valor_centavos END), 0)::bigint AS d,
       coalesce(sum(CASE WHEN l.data >= $1 AND p.dc = 'C' THEN p.valor_centavos END), 0)::bigint AS c
     FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id
-    WHERE l.data <= $2 ${semEncerramento ? "AND l.origem <> 'encerramento'" : ''} GROUP BY p.conta`, [de, ate]);
+    WHERE l.data <= $2 AND l.empresa_id = $3 ${semEncerramento ? "AND l.origem <> 'encerramento'" : ''} GROUP BY p.conta`, [de, ate, empresa]);
   return new Map(r.map(x => [x.conta, { ant: Number(x.ant), d: Number(x.d), c: Number(x.c) }]));
 }
 
 /* ---------------------------------------------------------------- lançamentos */
-const hashDe = (anterior, l) => createHash('sha256').update(JSON.stringify([anterior || '', l.id, l.data, l.historico, l.origem, l.docRef || '', l.estornoDe || '', l.total, l.itens.map(i => [i.seq, i.conta, i.dc, i.valor, i.centro || '', i.historico || ''])])).digest('hex');
+const hashDe = (anterior, l) => createHash('sha256').update(JSON.stringify([anterior || '', l.id, l.data, l.historico, l.origem, l.docRef || '', l.estornoDe || '', l.total, l.itens.map(i => [i.seq, i.conta, i.dc, i.valor, i.centro || '', i.historico || '']), ...(l.empresa && l.empresa !== EMP0 ? [l.empresa] : [])])).digest('hex');
 async function gravarLancamento(t, sess, l) {
   await t('SELECT pg_advisory_xact_lock(86001)'); // numeração e cadeia de hashes em série
   const [ult] = await t('SELECT hash FROM contab_lancamentos ORDER BY numero DESC LIMIT 1'), anterior = ult?.hash || null, id = 'lc_' + randomUUID();
   const reg = { ...l, id }, hash = hashDe(anterior, reg);
-  const [ins] = await t(`INSERT INTO contab_lancamentos (id, data, historico, origem, doc_ref, estorno_de, total_centavos, hash_anterior, hash, criado_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING numero`, [id, l.data, l.historico, l.origem, l.docRef || null, l.estornoDe || null, l.total, anterior, hash, sess.uid]);
+  const [ins] = await t(`INSERT INTO contab_lancamentos (id, data, historico, origem, doc_ref, estorno_de, total_centavos, hash_anterior, hash, criado_por, empresa_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING numero`, [id, l.data, l.historico, l.origem, l.docRef || null, l.estornoDe || null, l.total, anterior, hash, sess.uid, l.empresa || EMP0]);
   for (const i of l.itens) await t('INSERT INTO contab_partidas (lancamento_id, seq, conta, dc, valor_centavos, centro, historico) VALUES ($1, $2, $3, $4, $5, $6, $7)', [id, i.seq, i.conta, i.dc, i.valor, i.centro, i.historico]);
   return { id, numero: Number(ins.numero), hash };
 }
-async function lerLancamentos({ de, ate, conta, limite = 2000, ids } = {}) {
-  const cond = [], p = []; if (de) { p.push(de); cond.push(`l.data >= $${p.length}`); } if (ate) { p.push(ate); cond.push(`l.data <= $${p.length}`); }
+async function lerLancamentos({ de, ate, conta, limite = 2000, ids, empresa } = {}) {
+  const cond = [], p = []; if (empresa && !ids) { p.push(empresa); cond.push(`l.empresa_id = $${p.length}`); } if (de) { p.push(de); cond.push(`l.data >= $${p.length}`); } if (ate) { p.push(ate); cond.push(`l.data <= $${p.length}`); }
   if (ids) { p.push(ids); cond.push(`l.id = ANY($${p.length})`); }
   if (conta) { p.push(conta); cond.push(`EXISTS (SELECT 1 FROM contab_partidas x WHERE x.lancamento_id = l.id AND (x.conta = $${p.length} OR x.conta LIKE $${p.length} || '.%'))`); }
   p.push(Math.min(Math.max(Number(limite) || 2000, 1), 20000));
@@ -104,47 +115,114 @@ async function lerLancamentos({ de, ate, conta, limite = 2000, ids } = {}) {
   if (!ls.length) return [];
   const ps = await q(`SELECT p.*, c.nome FROM contab_partidas p JOIN contab_contas c ON c.codigo = p.conta WHERE p.lancamento_id = ANY($1) ORDER BY p.lancamento_id, p.seq`, [ls.map(l => l.id)]), por = new Map();
   ps.forEach(x => (por.get(x.lancamento_id) || por.set(x.lancamento_id, []).get(x.lancamento_id)).push({ seq: x.seq, conta: x.conta, contaNome: x.nome, dc: x.dc, valor: M.reais(x.valor_centavos), centro: x.centro, historico: x.historico }));
-  return ls.map(l => ({ id: l.id, numero: Number(l.numero), data: l.data_txt, historico: l.historico, origem: l.origem, docRef: l.doc_ref, estornoDe: l.estorno_de, estornadoPor: l.estornado_por, total: M.reais(l.total_centavos), hash: l.hash, criadoEm: l.criado_em, criadoPor: l.criado_por, itens: por.get(l.id) || [] }));
+  return ls.map(l => ({ id: l.id, numero: Number(l.numero), data: l.data_txt, historico: l.historico, origem: l.origem, docRef: l.doc_ref, estornoDe: l.estorno_de, estornadoPor: l.estornado_por, total: M.reais(l.total_centavos), empresa: l.empresa_id, hash: l.hash, criadoEm: l.criado_em, criadoPor: l.criado_por, itens: por.get(l.id) || [] }));
+}
+
+/* ---------------------------------------------------------------- v13.91 · empresas */
+const empresaDbx = r => ({ id: r.id, cnpj: r.cnpj, razaoSocial: r.razao_social, nomeFantasia: r.nome_fantasia, regime: r.regime, capitalSocial: M.reais(r.capital_social_centavos), socios: r.socios || [], contador: r.contador || {}, endereco: r.endereco, ativa: r.ativa, principal: r.id === EMP0, atualizadoEm: r.atualizado_em });
+async function lerEmpresas(t = q) { return (await t('SELECT * FROM contab_empresas ORDER BY (id = $1) DESC, razao_social', [EMP0])).map(empresaDbx); }
+async function empresaDe(urlOuId, t = q) {
+  const id = typeof urlOuId === 'string' ? urlOuId : (urlOuId.searchParams.get('empresa') || EMP0);
+  const [r] = await t('SELECT * FROM contab_empresas WHERE id = $1', [String(id)]); if (!r) throw new ErroHttp(404, 'Empresa não encontrada.'); return empresaDbx(r);
+}
+export function cnpjValido(v) {
+  const d = String(v || '').replace(/\D/g, ''); if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const dv = n => { let s = 0, p = n - 7; for (let i = 0; i < n; i++) { s += Number(d[i]) * p--; if (p < 2) p = 9; } const r = s % 11; return r < 2 ? 0 : 11 - r; };
+  return dv(12) === Number(d[12]) && dv(13) === Number(d[13]);
+}
+function validarEmpresa(d, atual = {}) {
+  const x = { ...atual, ...d }, cnpj = x.cnpj == null || x.cnpj === '' ? null : String(x.cnpj).replace(/\D/g, '');
+  if (cnpj !== null && !cnpjValido(cnpj)) throw new ErroHttp(422, 'CNPJ inválido (confira os dígitos verificadores).');
+  if (!atual.principal && !cnpj) throw new ErroHttp(422, 'Informe o CNPJ da empresa.');
+  const razao = String(x.razaoSocial || '').trim(); if (razao.length < 2 || razao.length > 200) throw new ErroHttp(422, 'Informe a razão social.');
+  if (!['simples', 'presumido', 'real', 'mei'].includes(x.regime || 'presumido')) throw new ErroHttp(422, 'Regime tributário: simples, presumido, real ou mei.');
+  const socios = (Array.isArray(x.socios) ? x.socios : []).slice(0, 50).map(s => ({ nome: String(s.nome || '').trim().slice(0, 150), documento: String(s.documento || '').replace(/[^\d*.\-\/]/g, '').slice(0, 20), qualificacao: String(s.qualificacao || 'Sócio').trim().slice(0, 60), participacao: Math.max(0, Math.min(100, Number(String(s.participacao ?? 0).replace(',', '.')) || 0)) })).filter(s => s.nome);
+  if (socios.reduce((a, s2) => a + s2.participacao, 0) > 100.0001) throw new ErroHttp(422, 'A soma das participações dos sócios passa de 100%.');
+  const c = x.contador || {}, contador = { nome: String(c.nome || '').trim().slice(0, 150), crc: String(c.crc || '').trim().toUpperCase().slice(0, 30), uf: String(c.uf || '').trim().toUpperCase().slice(0, 2), email: String(c.email || '').trim().slice(0, 120) };
+  if (contador.crc && !/^[A-Z]{2}[-\s]?\d{3,7}(\/[OPST])?(-\d)?$|^\d{3,7}(\/[OPST])?$/.test(contador.crc)) throw new ErroHttp(422, 'CRC inválido: use o formato UF-000000/O (ex.: PE-012345/O).');
+  return { cnpj, razaoSocial: razao, nomeFantasia: String(x.nomeFantasia || '').trim().slice(0, 150) || null, regime: x.regime || 'presumido', capital: M.centavos(x.capitalSocial ?? 0, { permitirZero: true }), socios, contador, endereco: String(x.endereco || '').trim().slice(0, 300) || null, ativa: x.ativa === undefined ? true : !!x.ativa };
+}
+/** Radar de Saúde: tudo o que o painel executivo mostra, calculado do banco na hora. */
+async function radar(url, params) {
+  const emp = await empresaDe(url), empresa = emp.id, { de, ate, ano, meses } = periodo(url), contas = await lerContas(), E = { empresa };
+  const sal = await saldos(de, ate, E), salAte = await saldos(ate, ate, E), mov = await saldos(de, ate, { semEncerramento: true, empresa });
+  const ini = new Date(ate.slice(0, 7) + '-01T12:00:00Z'), prevFim = new Date(ini.getTime() - 864e5).toISOString().slice(0, 10), prevIni = prevFim.slice(0, 7) + '-01';
+  const movMes = await saldos(ate.slice(0, 7) + '-01', ate, { semEncerramento: true, empresa }), movAnt = await saldos(prevIni, prevFim, { semEncerramento: true, empresa });
+  const bal = M.balancete(contas, sal), bp = M.balanco(contas, salAte), dr = M.dre(contas, mov, { modelo: 'atual', reforma: params.reforma });
+  /* integridade (cadeia inteira) */
+  const ls = await q('SELECT *, data::text AS data_txt FROM contab_lancamentos ORDER BY numero'), ps = await q('SELECT * FROM contab_partidas ORDER BY lancamento_id, seq'), por = new Map(); ps.forEach(p => (por.get(p.lancamento_id) || por.set(p.lancamento_id, []).get(p.lancamento_id)).push(p));
+  let anterior = null; const quebras = [], deseq = [];
+  for (const l of ls) { const it = (por.get(l.id) || []).map(p => ({ seq: p.seq, conta: p.conta, dc: p.dc, valor: Number(p.valor_centavos), centro: p.centro, historico: p.historico }));
+    const h = hashDe(anterior, { id: l.id, data: l.data_txt, historico: l.historico, origem: l.origem, docRef: l.doc_ref, estornoDe: l.estorno_de, total: Number(l.total_centavos), itens: it, empresa: l.empresa_id });
+    if (h !== l.hash || (l.hash_anterior || null) !== anterior) quebras.push(Number(l.numero)); if (it.filter(i => i.dc === 'D').reduce((a, i) => a + i.valor, 0) !== it.filter(i => i.dc === 'C').reduce((a, i) => a + i.valor, 0)) deseq.push(Number(l.numero)); anterior = l.hash; }
+  const integridade = { lancamentos: ls.length, cadeiaIntegra: !quebras.length, quebras, equilibrados: !deseq.length, desequilibrados: deseq };
+  /* conciliação com o FCX: movimentos do Disponível sem documento de origem + contas do FCX pendentes no de-para */
+  const [cc] = await q(`SELECT count(DISTINCT l.id)::int AS total, count(DISTINCT l.id) FILTER (WHERE l.doc_ref IS NULL OR l.doc_ref = '')::int AS pend
+      FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta LIKE '1.1.1.%' AND l.origem NOT IN ('estorno', 'encerramento')`, [empresa, de, ate]);
+  const semDoc = (await q(`SELECT DISTINCT l.numero, l.data::text AS data, l.historico, l.total_centavos FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id
+      WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3 AND p.conta LIKE '1.1.1.%' AND (l.doc_ref IS NULL OR l.doc_ref = '') AND l.origem NOT IN ('estorno', 'encerramento') ORDER BY 2 DESC, 1 DESC LIMIT 10`, [empresa, de, ate])).map(r => ({ numero: Number(r.numero), data: r.data, historico: r.historico, total: Number(r.total_centavos) }));
+  const dp = resumoDepara(await lerDepara()), conciliacao = { total: cc.total, pendentes: cc.pend, semDocumento: semDoc, deparaPendente: dp.pendente || 0 };
+  const invertidas = RD.contasInvertidas(contas, salAte), vs = RD.variacoes(contas, movMes, movAnt), tributos = RD.tributario({ contas, mov, params: { ...params, meses }, ano, regime: emp.regime === 'real' ? 'real' : emp.regime === 'presumido' ? 'presumido' : null });
+  const ind = RD.indicadores(bp, dr), sc = RD.score({ integridade, balancete: bal, balanco: bp, invertidas, conciliacao, variacoes: vs, ind, tributos });
+  const sugestoes = [
+    ...(!integridade.cadeiaIntegra ? [{ id: 'cadeia', severidade: 'alta', titulo: 'Quebra na cadeia de conferência', texto: `Lançamento(s) nº ${quebras.join(', ')} não conferem com a cadeia de hashes: houve alteração fora do sistema.`, acao: null }] : []),
+    ...(!bp.confere ? [{ id: 'balanco', severidade: 'alta', titulo: 'Balanço não fecha', texto: `Diferença de ${M.fmt(bp.diferenca)} entre o Ativo e o Passivo + PL.`, acao: { tipo: 'relatorio', rel: 'balanco', rotulo: 'Abrir o Balanço' } }] : []),
+    ...invertidas.map(x => ({ id: 'inv:' + x.conta, severidade: x.valor >= 100000 ? 'alta' : 'media', titulo: `${x.grupo === 1 ? 'Ativo com saldo credor' : 'Passivo com saldo devedor'}: ${x.conta} · ${x.nome}`, texto: `${M.fmt(x.valor)} ${x.natureza}. ${x.motivo}`, conta: x.conta, acao: x.proposta ? { tipo: 'lancamento', rotulo: `Corrigir: reclassificar contra ${x.destino.codigo}`, proposta: { ...x.proposta, itens: x.proposta.itens.map(i => ({ ...i, valor: M.reais(i.valor) })) } } : { tipo: 'razao', conta: x.conta, rotulo: 'Ver no Razão' } })),
+    ...(conciliacao.pendentes ? [{ id: 'fcx', severidade: conciliacao.pendentes > 5 ? 'media' : 'baixa', titulo: `${conciliacao.pendentes} movimento(s) do Disponível pendentes de conciliação com o FCX`, texto: `De ${conciliacao.total} lançamento(s) em Caixa/Bancos no período, ${conciliacao.pendentes} não têm documento de origem (nº do FCX, extrato ou nota). Sem o vínculo, o saldo contábil não se concilia com o FCX.`, lista: semDoc.map(x => ({ ...x, total: M.reais(x.total) })), acao: { tipo: 'lancamentos', rotulo: 'Ver os lançamentos' } }] : []),
+    ...(dp.pendente ? [{ id: 'depara', severidade: 'baixa', titulo: `${dp.pendente} conta(s) do FCX pendentes no de-para`, texto: 'Contas do FCX sem conta contábil confirmada não geram partidas dobradas na integração.', acao: { tipo: 'aba', aba: 'depara', rotulo: 'Revisar o de-para' } }] : []),
+    ...vs.slice(0, 8).map(x => ({ id: 'var:' + x.conta, severidade: 'baixa', titulo: `Variação ${x.variacao == null ? 'nova no mês' : (x.variacao > 0 ? '+' : '') + Math.round(x.variacao * 100) + '%'}: ${x.conta} · ${x.nome}`, texto: `${M.fmt(x.anterior)} no mês anterior → ${M.fmt(x.atual)} no mês de ${ate.slice(5, 7)}/${ate.slice(0, 4)}. Confira se há lançamento em duplicidade, competência errada ou conta trocada.`, conta: x.conta, acao: { tipo: 'razao', conta: x.conta, rotulo: 'Ver no Razão' } })),
+    ...tributos,
+  ];
+  const ORD = { alta: 0, media: 1, baixa: 2 }; sugestoes.sort((a, b) => ORD[a.severidade] - ORD[b.severidade]);
+  const parecer = RD.parecer({ sc, invertidas, conciliacao, variacoes: vs, tributos, ind, bp });
+  return { empresa: emp, de, ate, geradoEm: new Date().toISOString(), score: sc, indicadores: { ...ind, patrimonioLiquido: M.reais(ind.patrimonioLiquido), capitalCirculante: M.reais(ind.capitalCirculante) }, integridade, conciliacao: { ...conciliacao, semDocumento: semDoc.map(x => ({ ...x, total: M.reais(x.total) })) },
+    sugestoes, parecer, resumo: { receitaLiquida: M.reais(dr.rl), lucroLiquido: M.reais(dr.ll), ativo: M.reais(bp.ativo.total), passivo: M.reais(bp.passivo.total), pl: M.reais(bp.patrimonioLiquido.total), balancoConfere: bp.confere, balanceteConfere: bal.confere, disponivel: M.reais(RD.somaGrupo(salAte, '1.1.1').saldo) } };
 }
 
 /* ---------------------------------------------------------------- relatórios */
 async function relatorio(tipo, url, params) {
+  const empresa = (await empresaDe(url)).id, E = { empresa };
   const { de, ate, ano, meses } = periodo(url), contas = await lerContas(), modelo = url.searchParams.get('modelo') === 'reforma' ? 'reforma' : url.searchParams.get('modelo') === 'atual' ? 'atual' : params.dreModelo;
   const reforma = { ...params.reforma, ...(url.searchParams.get('anoReforma') ? { ano: Number(url.searchParams.get('anoReforma')) } : {}) };
-  const cab = { tipo, de, ate, geradoEm: new Date().toISOString() };
-  const resultado = async () => { const mov = await saldos(de, ate, { semEncerramento: true }); return { mov, d: M.dre(contas, mov, { modelo, reforma }) }; };
-  if (tipo === 'diario') { const ls = await lerLancamentos({ de, ate, limite: url.searchParams.get('limite') || 20000 }); return { ...cab, lancamentos: ls, totais: { lancamentos: ls.length, valor: Math.round(ls.reduce((a, l) => a + l.total * 100, 0)) / 100 } }; }
-  if (tipo === 'razao') {
-    const conta = url.searchParams.get('conta'); if (!conta) throw new ErroHttp(400, 'Informe a conta (?conta=1.1.1.01.001).'); const c = contas.find(x => x.codigo === conta); if (!c) throw new ErroHttp(404, 'Conta não encontrada.');
+  const cab = { tipo, de, ate, empresa, geradoEm: new Date().toISOString() };
+  const resultado = async () => { const mov = await saldos(de, ate, { semEncerramento: true, empresa }); return { mov, d: M.dre(contas, mov, { modelo, reforma }) }; };
+  if (tipo === 'diario') { const ls = await lerLancamentos({ de, ate, empresa, limite: url.searchParams.get('limite') || 20000 }), rs = RD.resumoDiario(ls.map(l => ({ itens: l.itens.map(i => ({ dc: i.dc, valor: Math.round(i.valor * 100) })) })));
+    return { ...cab, lancamentos: ls.map(l => ({ ...l, formula: RD.formula(l.itens) })), totais: { lancamentos: ls.length, valor: Math.round(ls.reduce((a, l) => a + l.total * 100, 0)) / 100 }, resumo: { ...rs, debitos: M.reais(rs.debitos), creditos: M.reais(rs.creditos), diferenca: M.reais(rs.diferenca) } }; }
+  if (tipo === 'razao' || tipo === 'caixa') {
+    const conta = tipo === 'caixa' ? (url.searchParams.get('conta') || '1.1.1.01') : url.searchParams.get('conta'); if (!conta) throw new ErroHttp(400, 'Informe a conta (?conta=1.1.1.01.001).'); const c = contas.find(x => x.codigo === conta); if (!c) throw new ErroHttp(404, 'Conta não encontrada.');
     const pref = r => r.conta === conta || r.conta.startsWith(conta + '.');
-    const [a] = await q(`SELECT coalesce(sum(CASE p.dc WHEN 'D' THEN p.valor_centavos ELSE -p.valor_centavos END), 0)::bigint AS s FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id WHERE l.data < $1 AND (p.conta = $2 OR p.conta LIKE $2 || '.%')`, [de, conta]);
+    const [a] = await q(`SELECT coalesce(sum(CASE p.dc WHEN 'D' THEN p.valor_centavos ELSE -p.valor_centavos END), 0)::bigint AS s FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id WHERE l.data < $1 AND l.empresa_id = $3 AND (p.conta = $2 OR p.conta LIKE $2 || '.%')`, [de, conta, empresa]);
     let saldo = Number(a.s); const linhas = [];
-    for (const l of await lerLancamentos({ de, ate, conta })) for (const i of l.itens.filter(pref)) { const v = Math.round(i.valor * 100); saldo += i.dc === 'D' ? v : -v; linhas.push({ data: l.data, numero: l.numero, lancamentoId: l.id, historico: i.historico || l.historico, conta: i.conta, contrapartidas: l.itens.filter(x => x.dc !== i.dc).map(x => x.conta), debito: i.dc === 'D' ? i.valor : 0, credito: i.dc === 'C' ? i.valor : 0, saldo: M.reais(saldo), dc: saldo >= 0 ? 'D' : 'C' }); }
-    return { ...cab, conta: { codigo: c.codigo, nome: c.nome, natureza: c.natureza }, saldoAnterior: M.reais(Number(a.s)), linhas, saldoFinal: M.reais(saldo) };
+    for (const l of await lerLancamentos({ de, ate, conta, empresa })) for (const i of l.itens.filter(pref)) { const v = Math.round(i.valor * 100); saldo += i.dc === 'D' ? v : -v; linhas.push({ data: l.data, numero: l.numero, lancamentoId: l.id, historico: i.historico || l.historico, conta: i.conta, contrapartidas: l.itens.filter(x => x.dc !== i.dc).map(x => x.conta), debito: i.dc === 'D' ? i.valor : 0, credito: i.dc === 'C' ? i.valor : 0, saldo: M.reais(saldo), dc: saldo >= 0 ? 'D' : 'C' }); }
+    const tot = linhas.reduce((x, l) => ({ d: x.d + Math.round(l.debito * 100), c: x.c + Math.round(l.credito * 100) }), { d: 0, c: 0 });
+    return { ...cab, conta: { codigo: c.codigo, nome: c.nome, natureza: c.natureza }, saldoAnterior: M.reais(Number(a.s)), linhas, saldoFinal: M.reais(saldo), entradas: M.reais(tot.d), saidas: M.reais(tot.c), ...(tipo === 'caixa' ? { responsavel: (await empresaDe(url)).contador } : {}) };
   }
-  if (tipo === 'balancete') { const b = M.balancete(contas, await saldos(de, ate)); return { ...cab, ...b, linhas: b.linhas.map(l => ({ ...l, saldoAnterior: M.reais(l.saldoAnterior), debitos: M.reais(l.debitos), creditos: M.reais(l.creditos), saldoFinal: M.reais(Math.abs(l.saldoFinal)), dc: l.saldoFinal > 0 ? 'D' : l.saldoFinal < 0 ? 'C' : '' })), totais: Object.fromEntries(Object.entries(b.totais).map(([k, v]) => [k, M.reais(v)])) }; }
+  if (tipo === 'balancete') { const b = M.balancete(contas, await saldos(de, ate, E)); return { ...cab, ...b, linhas: b.linhas.map(l => ({ ...l, saldoAnterior: M.reais(l.saldoAnterior), debitos: M.reais(l.debitos), creditos: M.reais(l.creditos), saldoFinal: M.reais(Math.abs(l.saldoFinal)), dc: l.saldoFinal > 0 ? 'D' : l.saldoFinal < 0 ? 'C' : '' })), totais: Object.fromEntries(Object.entries(b.totais).map(([k, v]) => [k, M.reais(v)])) }; }
   if (tipo === 'dre') { const { d } = await resultado(); return { ...cab, modelo, ...emReais(d) }; }
-  if (tipo === 'balanco') return { ...cab, ...emReais(M.balanco(contas, await saldos(ate, ate))) };
+  if (tipo === 'balanco') return { ...cab, ...emReais(M.balanco(contas, await saldos(ate, ate, E))) };
+  if (tipo === 'dre51') { const { d } = await resultado(); return { ...cab, ...emReais(RD.dreCpc51(d.modelo === 'atual' ? d : M.dre(contas, await saldos(de, ate, { semEncerramento: true, empresa }), { modelo: 'atual' }))) }; }
+  if (tipo === 'dfc') { const ls = await lerLancamentos({ de, ate, empresa, limite: 20000 }), ini = RD.somaGrupo(await saldos(de, de, E), '1.1.1').ant;
+    const r = RD.dfc(contas, ls.map(l => ({ itens: l.itens.map(i => ({ conta: i.conta, dc: i.dc, valor: Math.round(i.valor * 100) })) })), ini); return { ...cab, ...emReais(r) }; }
   if (tipo === 'dmpl' || tipo === 'dra') {
-    const { d } = await resultado(), atual = d.modelo === 'atual' ? d : M.dre(contas, await saldos(de, ate, { semEncerramento: true }), { modelo: 'atual' });
-    const encerrado = (await q(`SELECT 1 FROM contab_lancamentos WHERE origem = 'encerramento' AND data BETWEEN $1 AND $2 LIMIT 1`, [de, ate])).length > 0;
+    const { d } = await resultado(), atual = d.modelo === 'atual' ? d : M.dre(contas, await saldos(de, ate, { semEncerramento: true, empresa }), { modelo: 'atual' });
+    const encerrado = (await q(`SELECT 1 FROM contab_lancamentos WHERE origem = 'encerramento' AND data BETWEEN $1 AND $2 AND empresa_id = $3 LIMIT 1`, [de, ate, empresa])).length > 0;
     const mov = await q(`SELECT p.conta, l.origem, coalesce(sum(CASE p.dc WHEN 'D' THEN p.valor_centavos END), 0)::bigint AS d, coalesce(sum(CASE p.dc WHEN 'C' THEN p.valor_centavos END), 0)::bigint AS c
-        FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id WHERE l.data BETWEEN $1 AND $2 AND p.conta LIKE '3%' GROUP BY p.conta, l.origem`, [de, ate]);
+        FROM contab_partidas p JOIN contab_lancamentos l ON l.id = p.lancamento_id WHERE l.data BETWEEN $1 AND $2 AND l.empresa_id = $3 AND p.conta LIKE '3%' GROUP BY p.conta, l.origem`, [de, ate, empresa]);
     const movs = mov.map(m => ({ conta: m.conta, origem: m.origem, d: Number(m.d), c: Number(m.c) }));
     if (tipo === 'dra') { const ora = movs.filter(m => m.conta.startsWith('3.3')).reduce((a, m) => a + m.c - m.d, 0); return { ...cab, ...emReais(M.dra(atual.ll, ora)) }; }
-    const ini = [...(await saldos(de, de)).entries()].filter(([k]) => k.startsWith('3')).map(([k, v]) => [k, v.ant]);
+    const ini = [...(await saldos(de, de, E)).entries()].filter(([k]) => k.startsWith('3')).map(([k, v]) => [k, v.ant]);
     return { ...cab, ...emReais(M.dmpl(contas, ini, movs, encerrado ? 0 : atual.ll)) };
   }
-  if (tipo === 'dva') { const mov = await saldos(de, ate, { semEncerramento: true }), d = M.dre(contas, mov, { modelo: 'atual' }); return { ...cab, ...emReais(M.dva(contas, mov, d.ll)) }; }
+  if (tipo === 'dva') { const mov = await saldos(de, ate, { semEncerramento: true, empresa }), d = M.dre(contas, mov, { modelo: 'atual' }); return { ...cab, ...emReais(M.dva(contas, mov, d.ll)) }; }
   if (tipo === 'lalur') {
     const regime = ['real', 'presumido'].includes(url.searchParams.get('regime')) ? url.searchParams.get('regime') : params.regime;
-    const mov = await saldos(de, ate, { semEncerramento: true }), d = M.dre(contas, mov, { modelo: 'atual' }), soma = f => contas.filter(c => c.tipo === 'A' && f(c)).reduce((a, c) => { const m = mov.get(c.codigo) || { d: 0, c: 0 }; return a + m.c - m.d; }, 0);
+    const mov = await saldos(de, ate, { semEncerramento: true, empresa }), d = M.dre(contas, mov, { modelo: 'atual' }), soma = f => contas.filter(c => c.tipo === 'A' && f(c)).reduce((a, c) => { const m = mov.get(c.codigo) || { d: 0, c: 0 }; return a + m.c - m.d; }, 0);
     const rbS = soma(c => c.dre === 'rb' && c.tributos.includes('ISS')), rbC = soma(c => c.dre === 'rb') - rbS, outras = soma(c => ['rf', 'oro'].includes(c.dre));
     const ajustes = (await q('SELECT tipo, base, valor_centavos FROM contab_lalur WHERE ano = $1', [ano])).map(a => ({ tipo: a.tipo, base: a.base, valor: Number(a.valor_centavos) }));
     const ap = M.apuracaoLucro(regime, { lair: d.lair, receitaBrutaComercio: rbC, receitaBrutaServicos: rbS, outrasReceitas: outras, ajustes, meses, params, ano });
     return { ...cab, ano, ...emReais(ap), irpjCsllEscriturados: M.reais(contas.filter(c => c.tipo === 'A' && c.dre === 'ir').reduce((a, c) => { const m = mov.get(c.codigo) || { d: 0, c: 0 }; return a + m.d - m.c; }, 0)) };
   }
-  throw new ErroHttp(404, 'Relatório desconhecido: use diario, razao, balancete, dre, balanco, dmpl, dra, dva ou lalur.');
+  throw new ErroHttp(404, 'Relatório desconhecido: use diario, caixa, razao, balancete, dre, dre51, balanco, dmpl, dra, dva, dfc ou lalur.');
 }
 /* centavos → reais em todo campo numérico (exceto aliquotas, percentuais, contagens e anos) */
 const NAO_MOEDA = new Set(['nivel', 'ano', 'meses', 'cbs', 'ibs', 'is', 'pisCofins', 'icmsIss', 'irpjC', 'csllC', 'irpjS', 'csllS', 'grupo', 'numero', 'ok', 'confere', 'teste']);
@@ -321,7 +399,7 @@ export default rota(async req => {
     }
     if (r0 === 'adiantamentos' && met === 'POST') return await rotaAdiantamentos(req, sess, perms, r1); /* v13.88: Master/financeiro (não exige o Módulo Contábil aberto) */
     exigir(perms, 'contabil.ver');
-    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
+    if (!r0 && met === 'GET') { const [n] = await q('SELECT count(*)::int AS n, count(*) FILTER (WHERE tipo = \'A\')::int AS a FROM contab_contas'), [l] = await q('SELECT count(*)::int AS n, max(data)::text AS ultima FROM contab_lancamentos'); return json(200, { plano: { contas: n.n, analiticas: n.a, criado: n.n > 0 }, lancamentos: { total: l.n, ultimaData: l.ultima || null }, empresas: await lerEmpresas(), parametros: await lerParametros(), permissoes: [...perms], depara: resumoDepara(await lerDepara()), catalogo: { grupos: M.GRUPOS, dre: M.DRE_LINHAS, dva: M.DVA_LINHAS, tributosAtuais: M.TRIBUTOS_ATUAIS, tributosReforma: M.TRIBUTOS_REFORMA, outrosTributos: ['IRPJ', 'CSLL', 'INSS'] } }); }
 
     /* ---- plano de contas ---- */
     if (r0 === 'contas') {
@@ -399,13 +477,14 @@ export default rota(async req => {
     /* ---- lançamentos ---- */
     if (r0 === 'lancamentos') {
       if (met === 'DELETE' || met === 'PUT' || met === 'PATCH') throw new ErroHttp(405, 'Lançamentos contábeis são intangíveis: não podem ser alterados nem excluídos. Faça um estorno (POST /api/contabil/lancamentos/estorno).');
-      if (met === 'GET') return json(200, { lancamentos: await lerLancamentos({ de: url.searchParams.get('de'), ate: url.searchParams.get('ate'), conta: url.searchParams.get('conta'), limite: url.searchParams.get('limite') }) });
+      if (met === 'GET') return json(200, { lancamentos: await lerLancamentos({ de: url.searchParams.get('de'), ate: url.searchParams.get('ate'), conta: url.searchParams.get('conta'), limite: url.searchParams.get('limite'), empresa: (await empresaDe(url)).id }) });
       if (met === 'POST' && !r1) {
         exigir(perms, 'contabil.lancar');
         const d = await corpo(req), params = await lerParametros(), contas = new Map((await lerContas()).map(c => [c.codigo, c])), l = M.validarLancamento(d, contas);
         if (params.fechadoAte && l.data <= params.fechadoAte) throw new ErroHttp(422, `O período até ${params.fechadoAte.split('-').reverse().join('/')} está fechado.`);
         const origem = ['manual', 'aumento_capital', 'dividendos', 'reserva', 'ajuste_avaliacao', 'integracao'].includes(d.origem) ? d.origem : 'manual';
-        const r = await tx(t => gravarLancamento(t, sess, { ...l, origem, docRef: d.docRef ? String(d.docRef).slice(0, 120) : null }));
+        const emp = await empresaDe(d.empresa || url.searchParams.get('empresa') || EMP0); if (!emp.ativa) throw new ErroHttp(422, 'Empresa inativa: reative-a antes de lançar.');
+        const r = await tx(t => gravarLancamento(t, sess, { ...l, origem, empresa: emp.id, docRef: d.docRef ? String(d.docRef).slice(0, 120) : null }));
         return json(201, { lancamento: (await lerLancamentos({ ids: [r.id] }))[0] });
       }
       if (met === 'POST' && r1 === 'estorno') {
@@ -416,7 +495,7 @@ export default rota(async req => {
         const motivo = String(d.motivo || '').trim(); if (motivo.length < 5) throw new ErroHttp(422, 'Informe o motivo do estorno.');
         const params = await lerParametros(), data = d.data || new Date().toISOString().slice(0, 10); if (params.fechadoAte && data <= params.fechadoAte) throw new ErroHttp(422, 'Data do estorno em período fechado.');
         const itens = orig.itens.map(i => ({ seq: i.seq, conta: i.conta, dc: i.dc === 'D' ? 'C' : 'D', valor: Math.round(i.valor * 100), centro: i.centro, historico: i.historico }));
-        const r = await tx(t => gravarLancamento(t, sess, { data, historico: `Estorno do lançamento nº ${orig.numero} — ${motivo}`.slice(0, 500), origem: 'estorno', estornoDe: orig.id, docRef: orig.docRef, itens, total: Math.round(orig.total * 100) }));
+        const r = await tx(t => gravarLancamento(t, sess, { data, historico: `Estorno do lançamento nº ${orig.numero} — ${motivo}`.slice(0, 500), origem: 'estorno', estornoDe: orig.id, docRef: orig.docRef, empresa: orig.empresa, itens, total: Math.round(orig.total * 100) }));
         return json(201, { estorno: (await lerLancamentos({ ids: [r.id] }))[0], original: orig.id });
       }
     }
@@ -453,21 +532,62 @@ export default rota(async req => {
     if (r0 === 'encerramento' && met === 'POST') {
       exigir(perms, 'contabil.estornar');
       const d = await corpo(req), ano = Number(d.ano); if (!(ano >= 2000 && ano <= 2100)) throw new ErroHttp(422, 'Informe o ano.');
-      if ((await q(`SELECT 1 FROM contab_lancamentos WHERE origem = 'encerramento' AND doc_ref = $1 AND NOT EXISTS (SELECT 1 FROM contab_lancamentos e WHERE e.estorno_de = contab_lancamentos.id)`, ['ENC-' + ano])).length) throw new ErroHttp(409, `O exercício de ${ano} já foi encerrado.`);
+      const emp = await empresaDe(d.empresa || url.searchParams.get('empresa') || EMP0), docEnc = emp.id === EMP0 ? 'ENC-' + ano : `ENC-${ano}-${emp.id}`;
+      if ((await q(`SELECT 1 FROM contab_lancamentos WHERE origem = 'encerramento' AND doc_ref = $1 AND NOT EXISTS (SELECT 1 FROM contab_lancamentos e WHERE e.estorno_de = contab_lancamentos.id)`, [docEnc])).length) throw new ErroHttp(409, `O exercício de ${ano} já foi encerrado.`);
       const params = await lerParametros(), contas = await lerContas(), dest = contas.find(c => c.codigo === params.contaResultado); if (!dest || dest.tipo !== 'A' || dest.grupo !== 3) throw new ErroHttp(422, 'Configure a conta de Lucros ou Prejuízos Acumulados (analítica do PL) nos parâmetros.');
-      const sal = await saldos(`${ano}-12-31`, `${ano}-12-31`), itens = []; let liq = 0;
+      const sal = await saldos(`${ano}-12-31`, `${ano}-12-31`, { empresa: emp.id }), itens = []; let liq = 0;
       for (const c of contas.filter(c => c.tipo === 'A' && c.grupo >= 4)) { const s = sal.get(c.codigo); const v = s ? s.ant + s.d - s.c : 0; if (!v) continue; itens.push({ conta: c.codigo, dc: v > 0 ? 'C' : 'D', valor: Math.abs(v) }); liq += v; }
       if (!itens.length) throw new ErroHttp(422, `Não há saldo nas contas de resultado em 31/12/${ano}.`);
       if (liq) itens.push({ conta: dest.codigo, dc: liq > 0 ? 'D' : 'C', valor: Math.abs(liq) });
-      const tot = itens.filter(i => i.dc === 'D').reduce((a, i) => a + i.valor, 0), r = await tx(t => gravarLancamento(t, sess, { data: `${ano}-12-31`, historico: `Encerramento do exercício de ${ano}: apuração do resultado (${liq < 0 ? 'lucro' : 'prejuízo'} ${M.fmt(Math.abs(liq))}) transferida para ${dest.codigo} · ${dest.nome}`, origem: 'encerramento', docRef: 'ENC-' + ano, total: tot, itens: itens.map((i, k) => ({ ...i, seq: k + 1, centro: null, historico: null })) }));
+      const tot = itens.filter(i => i.dc === 'D').reduce((a, i) => a + i.valor, 0), r = await tx(t => gravarLancamento(t, sess, { data: `${ano}-12-31`, historico: `Encerramento do exercício de ${ano}: apuração do resultado (${liq < 0 ? 'lucro' : 'prejuízo'} ${M.fmt(Math.abs(liq))}) transferida para ${dest.codigo} · ${dest.nome}`, origem: 'encerramento', docRef: docEnc, empresa: emp.id, total: tot, itens: itens.map((i, k) => ({ ...i, seq: k + 1, centro: null, historico: null })) }));
       return json(201, { lancamento: (await lerLancamentos({ ids: [r.id] }))[0], resultado: M.reais(-liq) });
     }
+    /* ---- v13.91 · empresas, disponibilidades e Radar de Saúde ---- */
+    if (r0 === 'empresas') {
+      if (met === 'GET') return json(200, { empresas: await lerEmpresas() });
+      exigir(perms, 'contabil.parametros');
+      if (met === 'POST') {
+        const e = validarEmpresa(await corpo(req)), id = 'emp_' + randomUUID().slice(0, 8);
+        await q(`INSERT INTO contab_empresas (id, cnpj, razao_social, nome_fantasia, regime, capital_social_centavos, socios, contador, endereco, ativa, criado_por, atualizado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)`,
+          [id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid]);
+        return json(201, { empresa: await empresaDe(id) });
+      }
+      if (met === 'PUT') {
+        const atual = await empresaDe(url.searchParams.get('id') || ''), e = validarEmpresa(await corpo(req), atual);
+        if (atual.principal && e.ativa === false) throw new ErroHttp(422, 'A empresa principal não pode ser inativada.');
+        await q(`UPDATE contab_empresas SET cnpj=$2, razao_social=$3, nome_fantasia=$4, regime=$5, capital_social_centavos=$6, socios=$7, contador=$8, endereco=$9, ativa=$10, atualizado_em=now(), atualizado_por=$11 WHERE id=$1`,
+          [atual.id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid]);
+        return json(200, { empresa: await empresaDe(atual.id) });
+      }
+    }
+    if (r0 === 'disponibilidades' && met === 'GET') {
+      const emp = await empresaDe(url), { de, ate } = periodo(url), sal = await saldos(de, ate, { empresa: emp.id }), d = RD.disponibilidades(sal);
+      const [t] = await q(`SELECT count(DISTINCT l.id)::int AS n, coalesce(sum(p.valor_centavos) FILTER (WHERE p.dc = 'D'), 0)::bigint AS d, coalesce(sum(p.valor_centavos) FILTER (WHERE p.dc = 'C'), 0)::bigint AS c
+          FROM contab_lancamentos l JOIN contab_partidas p ON p.lancamento_id = l.id WHERE l.empresa_id = $1 AND l.data BETWEEN $2 AND $3`, [emp.id, de, ate]);
+      const R = x => M.reais(x);
+      return json(200, { empresa: emp, de, ate, cards: d.cards.map(c => ({ id: c.id, rotulo: c.rotulo, conta: c.conta, rotuloEntrada: c.entra, rotuloSaida: c.sai, saldoAnterior: R(c.ant), entradas: R(c.d), saidas: R(c.c), saldo: R(c.saldo) })),
+        disponivel: R(d.disponivel), estoques: R(d.estoques), consolidado: R(d.consolidado), escrituracao: { lancamentos: t.n, debitos: R(Number(t.d)), creditos: R(Number(t.c)), confere: Number(t.d) === Number(t.c) } });
+    }
+    if (r0 === 'radar' && met === 'GET' && !r1) return json(200, await radar(url, await lerParametros()));
+    if (r0 === 'radar' && r1 === 'corrigir' && met === 'POST') {
+      const d = await corpo(req);
+      if (d.tipo !== 'retencoes') throw new ErroHttp(422, 'Correção automática disponível: retencoes (as demais voltam como proposta de lançamento para conferir e gravar).');
+      exigir(perms, 'contabil.plano');
+      const contas = await lerContas(), criadas = [];
+      if (!contas.some(c => c.codigo === '2.1.3')) throw new ErroHttp(422, 'O plano não tem o grupo 2.1.3 (Obrigações Tributárias).');
+      await tx(async t => { for (const [codigo, nome, tipo, tributos, modelo] of RD.CONTAS_RETENCOES) { if (contas.some(c => c.codigo === codigo)) continue;
+        const c = M.validarConta({ codigo, nome, tipo, tributos, ...(modelo ? { modeloTributario: modelo } : {}) }, [...contas, ...criadas]);
+        await t(`INSERT INTO contab_contas (codigo, nome, grupo, natureza, tipo, pai, nivel, redutora, dre, dva, tributos, modelo_tributario, criado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`, [c.codigo, c.nome, c.grupo, c.natureza, c.tipo, c.pai, c.nivel, c.redutora, c.dre, c.dva, c.tributos, c.modeloTributario, sess.uid]);
+        criadas.push(c); } });
+      return json(201, { criadas: criadas.map(c => ({ codigo: c.codigo, nome: c.nome })) });
+    }
+
     /* ---- relatórios e integridade ---- */
     if (r0 === 'relatorios' && met === 'GET') return json(200, await relatorio(r1, url, await lerParametros()));
     if (r0 === 'integridade' && met === 'GET') {
       const ls = await q('SELECT *, data::text AS data_txt FROM contab_lancamentos ORDER BY numero'), ps = await q('SELECT * FROM contab_partidas ORDER BY lancamento_id, seq'), por = new Map(); ps.forEach(p => (por.get(p.lancamento_id) || por.set(p.lancamento_id, []).get(p.lancamento_id)).push(p));
       let anterior = null, quebras = [], desequilibrados = []; for (const l of ls) { const it = (por.get(l.id) || []).map(p => ({ seq: p.seq, conta: p.conta, dc: p.dc, valor: Number(p.valor_centavos), centro: p.centro, historico: p.historico }));
-        const h = hashDe(anterior, { id: l.id, data: l.data_txt, historico: l.historico, origem: l.origem, docRef: l.doc_ref, estornoDe: l.estorno_de, total: Number(l.total_centavos), itens: it });
+        const h = hashDe(anterior, { id: l.id, data: l.data_txt, historico: l.historico, origem: l.origem, docRef: l.doc_ref, estornoDe: l.estorno_de, total: Number(l.total_centavos), itens: it, empresa: l.empresa_id });
         if (h !== l.hash || (l.hash_anterior || null) !== anterior) quebras.push(Number(l.numero)); const dd = it.filter(i => i.dc === 'D').reduce((a, i) => a + i.valor, 0), cc = it.filter(i => i.dc === 'C').reduce((a, i) => a + i.valor, 0); if (dd !== cc) desequilibrados.push(Number(l.numero)); anterior = l.hash; }
       return json(200, { lancamentos: ls.length, cadeiaIntegra: !quebras.length, quebras, equilibrados: !desequilibrados.length, desequilibrados });
     }

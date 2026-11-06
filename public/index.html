@@ -1240,6 +1240,58 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 :root[data-paleta="preto"] .mainnav{box-shadow:1px 0 0 #222228;}
 :root[data-paleta="preto"] .mainnav button.on::before{background:var(--accent);}
 :root[data-paleta="preto"] .tema-sel,:root[data-paleta="rosa"] .tema-sel{background:rgba(255,255,255,.08);}
+/* =====================================================================
+   v13.90 · Temas exclusivos da Falco Controladoria e Gestão (só no ambiente da Falco)
+   Paleta oficial EXTRAÍDA DA LOGOMARCA enviada: azul do fundo #19283f (fundo da plataforma, topo e menu — a logomarca se funde nele),
+   dourado do traço #d5af66 (botões, bordas e destaques; #c19a55 no hover),
+   títulos em ouro suave (#f0d8a8), texto em branco puro e bordas em dourado translúcido (rgba(213,175,102,.2)).
+   Contrastes (WCAG, Imperial): texto ≥ 11:1, secundário ≥ 7,8:1, apagado ≥ 5,3:1, botão dourado 7,2:1.
+   ===================================================================== */
+:root[data-theme="dark"][data-paleta="falco_imperial"]{
+  --navy:#19283f; --navy-deep:#19283f; --navy-2:#19283f; --navy-soft:#22365a;
+  --accent:#d5af66; --accent-soft:#3a3f45;
+  --bg:#19283f; --panel:#1f3150; --panel-2:#253a5c; --line:rgba(213,175,102,.2); --line-soft:rgba(213,175,102,.12);
+  --ink:#ffffff; --ink-soft:#e0d5bd; --ink-faint:#bcb194;
+  --heat-0:#22344f; --heat-1:#3c4148; --heat-2:#6b5b3f; --heat-3:#a3834a; --heat-4:#d5af66; --heat-5:#f0d8a8;
+  --heat-ink-dark:#19283f; --heat-ink-light:#ffffff;
+  --pal-btn:#d5af66; --pal-btn-h:#c19a55; --pal-btn-ink:#19283f; --pal-nav-ink:#f0d8a8; --pal-nav-sub:#c3b38c;
+  --falco-tit:#f0d8a8; --falco-ouro:#d5af66; --falco-borda:rgba(213,175,102,.2);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 14px 30px -14px rgba(0,0,0,.6);
+}
+:root[data-theme="dark"][data-paleta="falco_midnight"]{
+  --navy:#111111; --navy-deep:#000000; --navy-2:#1c1c1c; --navy-soft:#161616;
+  --accent:#d5af66; --accent-soft:#2a2419;
+  --bg:#050505; --panel:#0f0f0f; --panel-2:#171717; --line:rgba(213,175,102,.2); --line-soft:rgba(213,175,102,.11);
+  --ink:#ffffff; --ink-soft:#d6cbb4; --ink-faint:#a99f8a;
+  --heat-0:#171512; --heat-1:#2e281c; --heat-2:#5a4a2c; --heat-3:#a07f3e; --heat-4:#cfa85c; --heat-5:#f0d8a8;
+  --heat-ink-dark:#050505; --heat-ink-light:#ffffff;
+  --pal-btn:#d5af66; --pal-btn-h:#c19a55; --pal-btn-ink:#0a0a0a; --pal-nav-ink:#f0d8a8; --pal-nav-sub:#a99f8a;
+  --falco-tit:#f0d8a8; --falco-ouro:#d5af66; --falco-borda:rgba(213,175,102,.2);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.6); --shadow-md:0 14px 30px -14px rgba(0,0,0,.85);
+}
+:root[data-theme="dark"][data-paleta="falco_slate"]{
+  --navy:#2a3846; --navy-deep:#1f2a36; --navy-2:#364757; --navy-soft:#2f3e4e;
+  --accent:#d4af37; --accent-soft:#3b3f36;
+  --bg:#1c2631; --panel:#253240; --panel-2:#2c3b4b; --line:rgba(212,175,55,.24); --line-soft:rgba(212,175,55,.13);
+  --ink:#ffffff; --ink-soft:#d3d9df; --ink-faint:#aeb7c0;
+  --heat-0:#2a3644; --heat-1:#3d4440; --heat-2:#6a5f38; --heat-3:#a48a35; --heat-4:#d4af37; --heat-5:#f3dc9c;
+  --heat-ink-dark:#1c2631; --heat-ink-light:#ffffff;
+  --pal-btn:#d4af37; --pal-btn-h:#b8952b; --pal-btn-ink:#1c2631; --pal-nav-ink:#f3dc9c; --pal-nav-sub:#b3bcc6;
+  --falco-tit:#f3dc9c; --falco-ouro:#d4af37; --falco-borda:rgba(212,175,55,.24);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 14px 30px -14px rgba(0,0,0,.6);
+}
+:root[data-paleta^="falco_"] h1,:root[data-paleta^="falco_"] h2,:root[data-paleta^="falco_"] h3,:root[data-paleta^="falco_"] .ini-hello h1{color:var(--falco-tit);}
+:root[data-paleta^="falco_"] .eyebrow-mod,:root[data-paleta^="falco_"] .lbl{color:var(--falco-ouro);}
+:root[data-paleta="falco_imperial"] .topbar{background:#19283f;} /* o mesmo azul da logomarca */
+:root[data-paleta^="falco_"] .topbar::after{background:var(--falco-borda);height:1px;}
+:root[data-paleta^="falco_"] .mainnav{box-shadow:1px 0 0 var(--falco-borda);}
+:root[data-paleta^="falco_"] .mainnav button.on::before{background:var(--falco-ouro);}
+:root[data-paleta^="falco_"] .mainnav button.on,:root[data-paleta^="falco_"] .mainnav button.sb-aberto{color:var(--falco-tit);}
+:root[data-paleta^="falco_"] .rodape{border-top:1px solid var(--falco-borda);}
+:root[data-paleta^="falco_"] .tema-sel{background:rgba(213,175,102,.1);border-color:rgba(213,175,102,.45);color:var(--falco-tit);}
+:root[data-paleta^="falco_"] .tema-sel option{background:var(--panel);color:var(--ink);}
+:root[data-paleta^="falco_"] .panel,:root[data-paleta^="falco_"] .kpi,:root[data-paleta^="falco_"] .ini-kpi{border-color:var(--line);}
+:root[data-paleta^="falco_"] a{color:var(--falco-ouro);}
 .arq-par{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center;} /* v13.48.1: Ver documento + Baixar */
 /* v13.48.2 · prévia de anexos (PDF em <object>, páginas em canvas, imagem nativa) */
 .arq-ver object{display:block;border:1px solid var(--line);border-radius:8px;background:#fff;}
@@ -1400,9 +1452,16 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 .amb-chip{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;font:600 11px var(--font-body);letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;}
 .amb-chip:hover{background:rgba(255,255,255,.16);}
 .amb-chip.homolog{background:#FFC21A;border-color:#FFC21A;color:#231A00;}
-.amb-chip.rc{border-color:#4A4A55;background:#17171C;}
-.brand-rc{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:.01em;color:#fff;white-space:nowrap;}
+.amb-chip.rc{border-color:rgba(213,175,102,.55);background:rgba(213,175,102,.12);color:#f0d8a8;}
+.amb-chip.rc:hover{background:rgba(213,175,102,.22);}
+/* v13.90 · marca Falco Controladoria e Gestão */
+.brand-falco{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;}
+.brand-falco .bf-emb{flex:none;width:46px;height:46px;display:block;margin:-4px 0;}
+.brand-falco .bf-nome{font-family:var(--font-body);font-size:17px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#d5af66;}
 .brand-dot{color:#8A8A96;font-weight:700;}
+:root[data-falco] .brand-dot{color:rgba(213,175,102,.7);}
+.login-hero img.lh-falco{height:auto;width:min(240px,62%);align-self:flex-start;margin:-6px 0 -4px -10px;}
+@media (max-width:640px){ .brand-falco .bf-nome{font-size:14px;letter-spacing:.26em;} .brand-falco .bf-emb{width:30px;height:30px;} .login-hero img.lh-falco{width:150px;} }
 .ctx-sel{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin:0 0 18px;padding:12px 14px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);}
 .ctx-sel.so-emp{grid-template-columns:1fr;}
 .ctx-sel .field{margin:0;}
@@ -1415,7 +1474,11 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 .amb-acao{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;}
 .amb-acao .hint{margin:0;flex:1;}
 .amb-acao .btn{align-self:flex-start;}
-:root[data-empresa="rc"] .login-hero{background:linear-gradient(160deg,#000 0%,#121216 60%,#1E1E24 100%);}
+:root[data-empresa="rc"] .login-hero{background:#19283f;border-right:1px solid rgba(213,175,102,.2);}
+:root[data-empresa="rc"] .login-hero::after{border-color:rgba(213,175,102,.08);}
+:root[data-empresa="rc"] .login-hero .lh-eyebrow{color:#d5af66;}
+:root[data-empresa="rc"] .login-hero h2{color:#f0d8a8;}
+:root[data-empresa="rc"] .lh-mods li{color:#ece3cf;} :root[data-empresa="rc"] .lh-mods li::before{background:#d5af66;}
 @media (max-width:520px){.ctx-sel{grid-template-columns:1fr;}}
 
 /* v13.64 · trava do backup diário obrigatório (tela cheia, acima de tudo) */
@@ -1444,7 +1507,7 @@ body.bkd-on .toast{z-index:2147483200;}
 .ver-badge{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:700 11.5px var(--font-mono);letter-spacing:.02em;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;align-self:center;}
 .ver-badge:hover{background:rgba(255,255,255,.18);}
 .ver-badge.homolog{background:#FFC21A;border-color:#FFC21A;color:#231A00;box-shadow:0 0 0 2px rgba(255,194,26,.35);}
-.ver-badge.rc{background:#17171C;border-color:#4A4A55;}
+.ver-badge.rc{background:rgba(213,175,102,.12);border-color:rgba(213,175,102,.55);color:#f0d8a8;}
 .tr-linha{display:flex;align-items:center;gap:10px;}
 .amb-versoes-box{border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 14px;background:var(--panel-2);}
 .ver-tag{display:inline-block;font:700 12px var(--font-mono);padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line);}
@@ -1918,8 +1981,8 @@ const Cloud = {
     this.base = this.caps.db ? new ClaudeDbAdapter(this.caps.db) : (await NetlifyAdapter.detectar()) || new LocalAdapter(); /* v13.75: Netlify Database */
     if (this.base.netlify) { this.caps.assets = this.base.assets(); Auth.isOwner = false; Ambiente.fixarSite(this.base.info); } /* v13.75: arquivos no Postgres e "esqueci a senha do Master" só pelo servidor · v13.76: ambiente e white-label vêm do site */
     if (this.base.tipo === 'local') { try { await SementeLocal.aplicar(this.base); } catch { /* segue sem a semente */ } } /* v13.74.4: Master padrão e cadastros base fora do claude.ai */
-    MasterSync.instrumentar(this.base); // v13.63: gravações em usuarios/* da Produção sincronizam o Master com Homologação e RC
-    this.adapter = Ambiente.adapter(Ambiente.id, this.base); // v13.62: banco do contexto (Produção = raiz; Homologação e RC = prefixos isolados)
+    MasterSync.instrumentar(this.base); // v13.63: gravações em usuarios/* da Produção sincronizam o Master com Homologação e Falco
+    this.adapter = Ambiente.adapter(Ambiente.id, this.base); // v13.62: banco do contexto (Produção = raiz; Homologação e Falco = prefixos isolados)
     return this.adapter;
   },
   get nuvem() { return this.adapter && this.adapter.tipo === 'nuvem'; },
@@ -3288,18 +3351,19 @@ const DiasComerciais = {
    O mesmo código atende três bancos totalmente isolados:
      • Esposende · Produção    → DB_Esposende_Prod     (raiz do banco: os dados de sempre, sem migração)
      • Esposende · Homologação → DB_Esposende_Homolog  (prefixo amb/homolog/)
-     • RC Consultoria          → DB_RC_Consultoria     (prefixo amb/rc/ · white-label, tema preto fixo)
+     • Falco Controladoria e Gestão → DB_Falco_Controladoria (prefixo amb/rc/ · white-label, temas Falco) — v13.90: antiga RC Consultoria;
+       o identificador interno continua 'rc' (prefixo, sessões e registros gravados não mudam).
    O isolamento é feito no adaptador (PrefixAdapter): todo caminho lido/gravado pelo painel recebe o prefixo do
-   ambiente — nenhum módulo sabe em que banco está. Nada gravado em Homologação ou na RC alcança a Produção
+   ambiente — nenhum módulo sabe em que banco está. Nada gravado em Homologação ou na Falco alcança a Produção
    (o único caminho Homologação → Produção é "Liberar Versão em Produção", feito pelo Master no Backup).
-   No banco do claude.ai, a regra "amb" (admin) restringe Homologação e RC a quem pode editar o painel.
+   No banco do claude.ai, a regra "amb" (admin) restringe Homologação e Falco a quem pode editar o painel.
    O contexto é escolhido na tela de entrada; trocar de contexto encerra a sessão (o login é por banco).
    ===================================================================== */
-const EMPRESAS = Object.freeze([Object.freeze(['esposende', 'Esposende']), Object.freeze(['rc', 'RC Consultoria'])]); // v13.63: opções fixas e universais (não dependem do contexto)
+const EMPRESAS = Object.freeze([Object.freeze(['esposende', 'Esposende']), Object.freeze(['rc', 'Falco Controladoria e Gestão'])]); // v13.63: opções fixas e universais (não dependem do contexto)
 const AMBIENTES = [
   { id: 'prod', empresa: 'esposende', ambiente: 'Produção', banco: 'DB_Esposende_Prod', prefixo: '', rotulo: 'Esposende · Produção' },
   { id: 'homolog', empresa: 'esposende', ambiente: 'Homologação', banco: 'DB_Esposende_Homolog', prefixo: 'amb/homolog/', rotulo: 'Esposende · Homologação' },
-  { id: 'rc', empresa: 'rc', ambiente: 'Produção', banco: 'DB_RC_Consultoria', prefixo: 'amb/rc/', rotulo: 'RC Consultoria' },
+  { id: 'rc', empresa: 'rc', ambiente: 'Produção', banco: 'DB_Falco_Controladoria', prefixo: 'amb/rc/', rotulo: 'Falco Controladoria e Gestão' }, /* v13.90: antiga RC Consultoria (id 'rc' mantido) */
 ];
 
 /** Adaptador com namespace: mesmo banco físico, caminhos isolados por prefixo (a paridade coleção/documento é mantida). */
@@ -3316,11 +3380,14 @@ class PrefixAdapter {
 
 const Ambiente = {
   K: 'esp-painel:contexto', lista: AMBIENTES, _id: null,
-  ler() { let v = null; try { v = sessionStorage.getItem(this.K) || localStorage.getItem(this.K); } catch { } return AMBIENTES.some(a => a.id === v) ? v : 'prod'; },
-  def(id) { return AMBIENTES.find(a => a.id === id); },
+  ler() { let v = null; try { v = sessionStorage.getItem(this.K) || localStorage.getItem(this.K); } catch { } v = this.norm(v); return AMBIENTES.some(a => a.id === v) ? v : 'prod'; },
+  /** v13.90 · 'falco' (nome novo) e 'rc' (id gravado) são o mesmo ambiente. */
+  norm(id) { const k = String(id ?? '').trim().toLowerCase(); return k === 'falco' ? 'rc' : k; },
+  def(id) { id = this.norm(id); return AMBIENTES.find(a => a.id === id); },
   get atual() { return this.def(this._id ||= this.ler()); },
   get id() { return this.atual.id; },
   get rc() { return this.atual.empresa === 'rc'; },
+  get falco() { return this.rc; }, /* v13.90 */
   get homolog() { return this.atual.id === 'homolog'; },
   get producao() { return this.atual.id === 'prod'; },
   get empresaNome() { return EMPRESAS.find(e => e[0] === this.atual.empresa)[1]; },
@@ -3331,15 +3398,15 @@ const Ambiente = {
     if (base?.netlify && !base.remoto) return id === this.id ? base : base.remotoDe(id); /* v13.76: cada ambiente é um site com banco próprio (sem prefixo) */
     const a = this.def(id); return a.prefixo ? new PrefixAdapter(base, a) : base;
   },
-  /** Homologação e RC ficam sob a regra "amb" (admin) do banco: só quem pode editar o painel no claude.ai. */
+  /** Homologação e Falco ficam sob a regra "amb" (admin) do banco: só quem pode editar o painel no claude.ai. */
   permitido(id) { return id === 'prod' || !!Auth.podeEditarNuvem || !!Cloud.base?.netlify; },
   /** v13.76 · Netlify: o ambiente é o do site (PAINEL_AMBIENTE) e os demais ambientes são outros endereços. */
-  urls: null, ROT_SITE: { prod: 'Esposende (Produção)', homolog: 'Esposende (Homologação)', rc: 'RC Consultoria (White-Label)' },
-  fixarSite(info) { if (!info) return; if (this.def(info.ambiente)) this.gravar(info.ambiente); this.urls = info.ambientes || {}; this.interligado = !!info.interligado; this.chaveEstado = info.chave || ''; Marca.aplicar(); },
+  urls: null, ROT_SITE: { prod: 'Esposende (Produção)', homolog: 'Esposende (Homologação)', rc: 'Falco Controladoria e Gestão' },
+  fixarSite(info) { if (!info) return; if (this.def(info.ambiente)) this.gravar(this.norm(info.ambiente)); this.urls = Object.fromEntries(Object.entries(info.ambientes || {}).map(([k, v]) => [this.norm(k), v])); this.interligado = !!info.interligado; this.chaveEstado = info.chave || ''; Marca.aplicar(); },
   irPara(id) {
     if (!this.def(id) || id === this.id) return;
     const u = this.urls?.[id]?.url;
-    if (!u) { UI.toast(`${this.ROT_SITE[id]}: o endereço deste ambiente não está configurado neste site (variável PAINEL_URL_${{ prod: 'PROD', homolog: 'HOMOLOG', rc: 'RC' }[id]} no Netlify).`); return Sessao.ativa ? undefined : Sessao.render(); }
+    if (!u) { UI.toast(`${this.ROT_SITE[id]}: o endereço deste ambiente não está configurado neste site (variável PAINEL_URL_${{ prod: 'PROD', homolog: 'HOMOLOG', rc: 'FALCO' }[id]} no Netlify).`); return Sessao.ativa ? undefined : Sessao.render(); }
     $('#main') && UI.toast(`Abrindo ${this.ROT_SITE[id]}…`); location.assign(u + '/');
   },
   seletorSite(travado = false) {
@@ -3359,7 +3426,7 @@ const Ambiente = {
     Marca.aplicar(); Sessao._falhas = 0; Sessao._pendente = null;
     await Sessao.iniciar();
   },
-  /** Seletor de Empresa e Ambiente da tela de entrada (o de Ambiente some na RC: banco próprio, isolado). */
+  /** Seletor de Empresa e Ambiente da tela de entrada (o de Ambiente some na Falco: banco próprio, isolado). */
   seletorLogin(travado = false) {
     if (Cloud.base?.netlify) return this.seletorSite(travado); /* v13.76 */
     const ed = !!Auth.podeEditarNuvem, dis = travado ? 'disabled' : '';
@@ -3369,7 +3436,7 @@ const Ambiente = {
       <p class="hint ctx-banco">Banco: <b>${esc(this.atual.banco)}</b>${this.producao ? '' : ' · isolado da Produção'}</p></div>`;
   },
   /** Chip do topo: mostra o contexto e permite trocar (encerra a sessão). */
-  chip() { return `<button class="amb-chip ${this.id}" data-a="sess-ctx-trocar" title="Banco ${esc(this.atual.banco)} · trocar empresa/ambiente (encerra a sessão)" aria-label="Contexto: ${esc(this.atual.rotulo)}. Trocar empresa ou ambiente">${esc(this.rc ? 'RC Consultoria' : this.atual.ambiente)}</button>`; },
+  chip() { return `<button class="amb-chip ${this.id}" data-a="sess-ctx-trocar" title="Banco ${esc(this.atual.banco)} · trocar empresa/ambiente (encerra a sessão)" aria-label="Contexto: ${esc(this.atual.rotulo)}. Trocar empresa ou ambiente">${esc(this.rc ? 'Falco' : this.atual.ambiente)}</button>`; },
 };
 
 /* ------------------------------ White-label ------------------------------ */
@@ -3385,44 +3452,56 @@ const LOGO_ORIG = { branco: LOGO_BRANCO, navy: LOGO_NAVY };
     } catch { }
   }
 })();
+/* v13.90 · Falco Controladoria e Gestão (antiga RC Consultoria): logomarca OFICIAL enviada pela Falco, usada como está.
+   public/marca-falco/: logo_falco.png (a imagem original, byte a byte), logo_falco_transparente.png (o mesmo desenho sem o fundo azul,
+   para os temas Midnight e Slate), emblema_falco(.png|_transparente.png) (recorte do círculo com o falcão, para o topo e o ícone da aba)
+   e logo_branco/logo_navy/logo_fcx.png (a imagem inteira centrada no próprio azul do fundo, nos tamanhos que o build usa).
+   Cores oficiais extraídas da imagem: azul do fundo #19283f e dourado do traço #d5af66. */
+const FALCO_ARQ = { logo: 'marca-falco/logo_falco.png', logoT: 'marca-falco/logo_falco_transparente.png', emb: 'marca-falco/emblema_falco.png', embT: 'marca-falco/emblema_falco_transparente.png' };
+const FALCO_MEM = { logo: '', logoT: '' }; /* a logomarca em memória (data URL) para documentos impressos e PDFs, como LOGO_ORIG */
+(async () => {
+  for (const k of ['logo', 'logoT']) {
+    try { const r = await fetch(FALCO_ARQ[k]); if (!r.ok) continue; const b = await r.blob(); FALCO_MEM[k] = await new Promise((ok, er) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = er; fr.readAsDataURL(b); });
+      if (typeof Ambiente !== 'undefined' && Ambiente.rc) { if (k === 'logo') LOGO_NAVY = FALCO_MEM.logo; else LOGO_BRANCO = FALCO_MEM.logoT; } } catch { }
+  }
+})();
 const Marca = {
-  NOME_RC: 'RC Consultoria',
-  /** Marca nominativa da RC, desenhada em canvas e exportada como PNG (v13.74.3: sem SVG em data URI, aceito na revisão de compartilhamento). */
-  svg(cor) {
-    const c = document.createElement('canvas'); c.width = 720; c.height = 160; const g = c.getContext('2d'); if (!g) return LOGO_ORIG.navy;
-    g.scale(2, 2); g.strokeStyle = cor; g.fillStyle = cor; g.lineWidth = 4;
-    const x = 2, y = 12, w = 56, h = 56, r = 12; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.stroke();
-    g.textBaseline = 'alphabetic'; g.textAlign = 'center'; g.font = '700 26px Sora, Arial, sans-serif'; g.fillText('RC', 30, 51);
-    g.textAlign = 'left'; g.font = '600 30px Sora, Arial, sans-serif'; g.fillText('Consultoria', 74, 52);
-    return c.toDataURL('image/png');
-  },
-  /** Troca os textos da marca (telas, documentos, nomes de arquivo e instruções da IA) — só na RC. */
+  NOME_RC: 'Falco Controladoria e Gestão', NOME: 'Falco Controladoria e Gestão', CURTO: 'Falco', ARQ: FALCO_ARQ,
+  /** Logomarca para documentos: a imagem oficial (com o fundo azul) — escuro=true devolve a versão sem fundo. */
+  svg(cor) { return this.logo(!/^#1C1C22$/i.test(cor) && !/^#101c2e$/i.test(cor)); },
+  logo(escuro = false) { return (escuro ? FALCO_MEM.logoT : FALCO_MEM.logo) || FALCO_MEM.logo || LOGO_ORIG.navy; },
+  /** Troca os textos da marca (telas, documentos, nomes de arquivo e instruções da IA) — só na Falco.
+      Versões reduzidas (cabeçalho e rodapé: "ERP …", "Painel de Gestão …") usam só "Falco". */
   txt(s) {
     if (!Ambiente.rc || typeof s !== 'string' || !/esposende/i.test(s)) return s;
-    return s.replace(/da Esposende, rede varejista de calçados do Nordeste[^.\n]*\./g, 'de uma empresa cliente da RC Consultoria.')
-      .replace(/Esposende Card/g, 'Cartão Próprio / Private Label').replace(/Cartão Esposende/g, 'Cartão Próprio / Private Label') /* v13.76: nome neutro do cartão próprio na RC */
-      .replace(/Esposende LTDA/g, 'RC Consultoria').replace(/Esposende/g, 'RC Consultoria').replace(/ESPOSENDE/g, 'RC CONSULTORIA').replace(/esposende/g, 'rc_consultoria');
+    return s.replace(/da Esposende, rede varejista de calçados do Nordeste[^.\n]*\./g, 'de uma empresa cliente da Falco Controladoria e Gestão.')
+      .replace(/Esposende Card/g, 'Cartão Próprio / Private Label').replace(/Cartão Esposende/g, 'Cartão Próprio / Private Label') /* v13.76: nome neutro do cartão próprio */
+      .replace(/\b(ERP|Painel de Gestão) Esposende/g, '$1 Falco')
+      .replace(/Esposende LTDA/g, 'Falco Controladoria e Gestão').replace(/Esposende/g, 'Falco Controladoria e Gestão').replace(/ESPOSENDE/g, 'FALCO CONTROLADORIA E GESTÃO').replace(/esposende/g, 'falco');
   },
   aplicar() {
     const rc = Ambiente.rc, r = document.documentElement;
-    LOGO_BRANCO = rc ? this.svg('#FFFFFF') : LOGO_ORIG.branco; LOGO_NAVY = rc ? this.svg('#1C1C22') : LOGO_ORIG.navy;
-    r.setAttribute('data-empresa', Ambiente.atual.empresa); r.setAttribute('data-ambiente', Ambiente.id);
-    document.title = rc ? 'RC Consultoria · Painel de Gestão' : 'Painel de Gestão Esposende' + (Ambiente.homolog ? ' · HOMOLOGAÇÃO' : '');
+    LOGO_BRANCO = rc ? this.logo(true) : LOGO_ORIG.branco; LOGO_NAVY = rc ? this.logo(false) : LOGO_ORIG.navy;
+    r.setAttribute('data-empresa', Ambiente.atual.empresa); r.setAttribute('data-ambiente', Ambiente.id); r.toggleAttribute('data-falco', rc);
+    document.title = rc ? 'Falco Controladoria e Gestão · Painel de Gestão' : 'Painel de Gestão Esposende' + (Ambiente.homolog ? ' · HOMOLOGAÇÃO' : '');
+    try { let l = document.querySelector('link[rel="icon"][data-marca]'); if (rc) { if (!l) { l = document.createElement('link'); l.rel = 'icon'; l.type = 'image/png'; l.setAttribute('data-marca', ''); document.head.appendChild(l); } l.href = FALCO_ARQ.emb; } else l?.remove(); } catch { }
     window.Tema?.aplicar(window.Tema.atual()); // (Tema é definido no app.js: na carga inicial ele mesmo aplica)
     this.observar(rc);
   },
   /** Faixa fixa do ambiente de testes (topo do painel e da tela de entrada). */
   faixa() { return Ambiente.homolog ? `<div class="amb-faixa" role="status"><b>Ambiente de Homologação (Testes)</b><small>${esc(Ambiente.atual.banco)} · nada aqui altera a Produção</small></div>` : ''; },
-  /** Marca do topo: logomarca Esposende ou o texto "RC Consultoria · Painel de Gestão". */
+  /** Marca do topo: logomarca Esposende ou, na Falco, o emblema da logomarca oficial + "Falco · Painel de Gestão" (versão reduzida). */
   topo() {
-    return Ambiente.rc ? `<span class="brand-rc">RC Consultoria</span><span class="brand-dot" aria-hidden="true">·</span><span class="app">Painel de Gestão</span>`
+    return Ambiente.rc ? `<span class="brand-falco"><img class="bf-emb" src="${FALCO_ARQ.embT}" alt="" width="46" height="46"><span class="bf-nome">Falco</span></span><span class="brand-dot" aria-hidden="true">·</span><span class="app">Painel de Gestão</span>`
       : `<img src="${LOGO_BRANCO}" alt="Esposende"><span class="sep"></span><span class="app">Painel de Gestão</span>`;
   },
-  /** Na RC, todo texto "Esposende" que chega à tela vira "RC Consultoria" (o FCX, num iframe próprio, não é tocado). */
+  /** Logomarca da tela de entrada (na Falco: a logomarca oficial, sem o fundo, sobre o tema). */
+  hero() { return Ambiente.rc ? `<img class="lh-falco" src="${FALCO_ARQ.logoT}" alt="Falco Controladoria e Gestão">` : `<img src="${LOGO_BRANCO}" alt="">`; },
+  /** Na Falco, todo texto "Esposende" que chega à tela vira "Falco Controladoria e Gestão" (o FCX, num iframe próprio, não é tocado). */
   observar(on) {
     if (!on) { this._obs?.disconnect(); this._obs = null; return; }
     if (this._obs || !document.body) return;
-    // v13.63: o seletor de Empresa (e tudo marcado com data-marca-fixa) nunca é trocado — antes "Esposende" virava "RC Consultoria" e a lista mostrava a RC duas vezes
+    // v13.63: o seletor de Empresa (e tudo marcado com data-marca-fixa) nunca é trocado — antes "Esposende" virava o nome da white-label e a lista a mostrava duas vezes
     const RE = /esposende/i, ATR = ['title', 'aria-label', 'placeholder', 'alt'], FIXA = '[data-marca-fixa]';
     const livre = el => !el || !el.closest || !el.closest(FIXA);
     const fix = n => {
@@ -3441,6 +3520,7 @@ const Marca = {
   const montar = Documento.montar.bind(Documento), nomeArq = Documento.nomeArquivo.bind(Documento), baixar = Documento.baixarArquivo.bind(Documento), exec = IA.executar.bind(IA);
   Documento.montar = (t, c, o) => {
     let h = Marca.txt(montar(Marca.txt(t), c, o));
+    if (Ambiente.rc) h = h.replace('</style>', '.head img{height:78px;width:auto;border-radius:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style>'); /* v13.90: logomarca oficial da Falco (empilhada) legível no cabeçalho */
     if (Ambiente.homolog) h = h.replace('<body>', '<body><div style="background:#FFC21A;color:#231A00;font:700 11px Arial,sans-serif;letter-spacing:.1em;text-align:center;padding:5px;margin:-8px 0 14px;border-radius:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact">AMBIENTE DE HOMOLOGAÇÃO (TESTES) · DOCUMENTO SEM VALIDADE</div>');
     return h;
   };
@@ -3468,7 +3548,7 @@ const GestaoAmbientes = {
     const linha = a => `<tr class="${a.id === Ambiente.id ? 'atual' : ''}"><td><b>${esc(EMPRESAS.find(e => e[0] === a.empresa)[1])}</b></td><td>${a.empresa === 'rc' ? '— (banco próprio)' : esc(a.ambiente)}</td><td style="font-family:var(--font-mono)">${esc(a.banco)}</td><td>${a.id === Ambiente.id ? '<span class="pill ok">em uso</span>' : ''}</td></tr>`;
     const esp = !Ambiente.rc;
     return `<div class="panel amb-gestao" id="ambGestao"><h2>Gestão de Ambientes</h2>
-      <p class="sub">${Cloud.base?.netlify ? 'Três sites do Netlify, cada um com o seu banco PostgreSQL (Netlify Database): o que é feito em Homologação ou na RC Consultoria nunca alcança a Produção sozinho. As ações abaixo passam de um site ao outro pela chave entre ambientes.' : 'Três bancos isolados no mesmo painel: o que é feito em Homologação ou na RC Consultoria nunca alcança a Produção.'} Só o Master usa estas ações; cada uma pede confirmação dupla e fica no log.</p>
+      <p class="sub">${Cloud.base?.netlify ? 'Três sites do Netlify, cada um com o seu banco PostgreSQL (Netlify Database): o que é feito em Homologação ou na Falco Controladoria e Gestão nunca alcança a Produção sozinho. As ações abaixo passam de um site ao outro pela chave entre ambientes.' : 'Três bancos isolados no mesmo painel: o que é feito em Homologação ou na Falco Controladoria e Gestão nunca alcança a Produção.'} Só o Master usa estas ações; cada uma pede confirmação dupla e fica no log.</p>
       ${Cloud.base?.netlify && !Ambiente.interligado ? `<div class="note warn amb-sem-ligacao" style="margin:0 0 10px">Este site ainda não está interligado aos outros ambientes: ${Ambiente.chaveEstado === 'curta' ? 'a <b>PAINEL_CHAVE_AMBIENTES</b> deste site tem menos de 16 caracteres' : 'configure no Netlify a <b>PAINEL_CHAVE_AMBIENTES</b> (a mesma nos três sites)'} e <b>PAINEL_URL_PROD / PAINEL_URL_HOMOLOG / PAINEL_URL_RC</b>, e faça um novo deploy.</div>` : ''}
       ${Cloud.base?.netlify ? '<p style="margin:0 0 10px"><button class="btn sec sm" data-a="bkp-amb-diag">Testar conexão entre ambientes</button></p>' : ''}
       <div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Empresa</th><th>Ambiente</th><th>Banco</th><th></th></tr></thead><tbody>${AMBIENTES.map(linha).join('')}</tbody></table></div>
@@ -3476,7 +3556,7 @@ const GestaoAmbientes = {
       <div class="amb-acoes">
         ${esp ? `<div class="amb-acao"><b>Clonar Produção → Homologação</b><p class="hint">Apaga a Homologação e copia para ela os dados atuais da Produção — inclusive todos os usuários e senhas ativas (ninguém precisa se recadastrar). A Produção só é lida.</p><button class="btn sec" data-a="bkp-amb-clonar">Clonar Produção → Homologação</button></div>
         <div class="amb-acao"><b>Liberar Versão em Produção</b><p class="hint">Promove a Homologação: leva para a Produção os parâmetros, tabelas e estruturas que você marcar. Cria e atualiza, nunca apaga; antes, baixa uma cópia de segurança da Produção.</p><button class="btn" data-a="bkp-amb-promover">Liberar Versão em Produção (Promover Homologação)</button>${Ambiente.producao && Recursos.pendentes().length ? `<p class="hint" style="margin:6px 0 0">Aguardando liberação (ativo só na Homologação): ${Recursos.pendentes().map(([, r]) => `<b>${esc(r.versao)}</b> · ${esc(r.titulo)}`).join('; ')} — marque <b>Configurações gerais</b> ao liberar.</p>` : ''}</div>` : ''}
-        <div class="amb-acao"><b>Resetar Banco da RC Consultoria</b><p class="hint">Apaga todos os dados do DB_RC_Consultoria; o Master da Produção é herdado na hora (mesmo CPF e senha). A Esposende não é afetada.</p><button class="btn danger" data-a="bkp-amb-reset-rc">Resetar Banco da RC Consultoria</button></div>
+        <div class="amb-acao"><b>Resetar Banco da Falco Controladoria e Gestão</b><p class="hint">Apaga todos os dados do DB_Falco_Controladoria; o Master da Produção é herdado na hora (mesmo CPF e senha). A Esposende não é afetada.</p><button class="btn danger" data-a="bkp-amb-reset-rc">Resetar Banco da Falco Controladoria e Gestão</button></div>
       </div></div>`;
   },
   /** Executa tarefas assíncronas com no máx. `n` simultâneas, com nova tentativa em limite de taxa/indisponibilidade. */
@@ -3532,7 +3612,7 @@ const GestaoAmbientes = {
     const linhas = dif.map(d => `<tr><td><label class="check"><input type="checkbox" name="pm_${esc(d.c)}" ${d.padrao && (d.novos.length + d.alterados.length) ? 'checked' : ''} ${d.novos.length + d.alterados.length ? '' : 'disabled'}><span>${esc(d.rot)}</span></label></td><td class="num"><b>${d.novos.length}</b></td><td class="num"><b>${d.alterados.length}</b></td><td class="num">${d.soProd}</td></tr>`).join('');
     UI.modal({ titulo: 'Liberar Versão em Produção', largo: true,
       corpo: `<p style="margin:0 0 8px">Marque o que a Homologação deve levar para a <b>Produção</b>. Registros novos são criados e os alterados são substituídos pela versão da Homologação; <b>nada é apagado</b> da Produção (o que só existe lá continua como está). Dados operacionais (vendas, faltas, equipe, salários…) nunca são promovidos.</p>
-        <div class="note ${versaoPend ? 'warn' : ''} amb-ver-lib" style="margin:0 0 10px" data-marca-fixa><b>Versão do sistema</b> · Produção <b>${esc(vProd)}</b> → <b>${esc(vHom)}</b> · RC Consultoria <b>${esc(vRc)}</b> → <b>${esc(vHom)}</b>${versaoPend ? ' (liberada junto com esta ação)' : ' · já em paridade'}</div>
+        <div class="note ${versaoPend ? 'warn' : ''} amb-ver-lib" style="margin:0 0 10px" data-marca-fixa><b>Versão do sistema</b> · Produção <b>${esc(vProd)}</b> → <b>${esc(vHom)}</b> · Falco Controladoria e Gestão <b>${esc(vRc)}</b> → <b>${esc(vHom)}</b>${versaoPend ? ' (liberada junto com esta ação)' : ' · já em paridade'}</div>
         <div class="tbl-wrap" style="max-height:340px"><table class="nolabel"><thead><tr><th>Parâmetros / tabelas</th><th class="num">Novos</th><th class="num">Alterados</th><th class="num">Só na Produção (mantidos)</th></tr></thead><tbody>${linhas}</tbody></table></div>
         <p class="hint" style="margin:8px 0 0">Antes de gravar, o painel baixa uma cópia de segurança (.json) das coleções da Produção que serão alteradas — ela pode ser restaurada no "Restaurar backup".</p>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Liberar em Produção', acao: m => {
@@ -3544,7 +3624,7 @@ const GestaoAmbientes = {
   },
   async gravarPromocao(escolhidas, prod, ver = null) {
     const n = escolhidas.reduce((a, d) => a + d.novos.length + d.alterados.length, 0);
-    if (!(await UI.confirmarImpacto('Liberar Versão em Produção', `${ver ? `Versão do sistema: Produção <b>${esc(ver.de)} → ${esc(ver.para)}</b> e RC Consultoria <b>${esc(ver.deRc)} → ${esc(ver.para)}</b>.<br>` : ''}<b>${n} registro(s)</b> de parâmetros serão gravados na <b>Produção</b> (DB_Esposende_Prod)${escolhidas.length ? ': ' + escolhidas.map(d => esc(d.rot)).join(', ') + '. Os valores atuais da Produção nesses registros serão substituídos pelos da Homologação' : ''}.`, { acao: 'alterar', rotulo: 'Liberar em Produção' }))) return;
+    if (!(await UI.confirmarImpacto('Liberar Versão em Produção', `${ver ? `Versão do sistema: Produção <b>${esc(ver.de)} → ${esc(ver.para)}</b> e Falco Controladoria e Gestão <b>${esc(ver.deRc)} → ${esc(ver.para)}</b>.<br>` : ''}<b>${n} registro(s)</b> de parâmetros serão gravados na <b>Produção</b> (DB_Esposende_Prod)${escolhidas.length ? ': ' + escolhidas.map(d => esc(d.rot)).join(', ') + '. Os valores atuais da Produção nesses registros serão substituídos pelos da Homologação' : ''}.`, { acao: 'alterar', rotulo: 'Liberar em Produção' }))) return;
     const cols = Object.fromEntries(escolhidas.map(d => [d.c, d.prodDocs])); if (ver?.recProd) (cols.config ||= []).push(ver.recProd);
     const copia = { app: 'painel-gestao-esposende', versao: 1, ambiente: 'prod', motivo: 'antes da Liberação de Versão (Homologação → Produção)', geradoEm: new Date().toISOString(), geradoPor: Auth.id, colecoes: cols };
     const ok = await Documento.baixarArquivo(`backup_producao_antes_liberacao_${Datas.hojeISO()}.json`, JSON.stringify(copia));
@@ -3556,20 +3636,20 @@ const GestaoAmbientes = {
       const mud = escolhidas.map(d => ({ campo: d.c, de: '', para: `${d.novos.length} novo(s) · ${d.alterados.length} alterado(s)` }));
       await this.registrarLog(prod, { acao: 'promocao', de: 'homolog', para: 'prod', registros: tarefas.length, colecoes: escolhidas.map(d => d.c) });
       Audit.registrar({ modulo: 'backup', acao: 'promoveu', entidade: 'ambiente', entidadeId: 'prod', rotulo: 'Liberar Versão em Produção (Homologação → Produção)', mudancas: mud });
-      if (ver) { // v13.68: versão (recursos de código) liberada em Produção e na RC — ficam em paridade com a Homologação
+      if (ver) { // v13.68: versão (recursos de código) liberada em Produção e na Falco — ficam em paridade com a Homologação
         const agora = new Date().toISOString(), libera = async a => { const atual = await a.get('config/recursos').catch(() => null) || {}, { id: _r, ...d } = atual; Object.entries(Recursos.LISTA).forEach(([k, r]) => { if (!d[k]?.ativo) d[k] = { ...r, ativo: true, liberadoEm: agora, liberadoPor: Auth.id }; }); await a.set('config/recursos', { ...d, _versao: ver.para, _liberadoEm: agora, _liberadoPor: Auth.nome || Auth.id }); };
         await libera(prod); try { await libera(Ambiente.adapter('rc')); } catch { }
-        await this.registrarLog(prod, { acao: 'versao', de: ver.de, para: ver.para }); Audit.registrar({ modulo: 'backup', acao: 'liberou', entidade: 'versao', entidadeId: ver.para, rotulo: `Versão ${ver.para} liberada em Produção e na RC Consultoria`, mudancas: [{ campo: 'Produção', de: ver.de, para: ver.para }, { campo: 'RC Consultoria', de: ver.deRc, para: ver.para }] });
+        await this.registrarLog(prod, { acao: 'versao', de: ver.de, para: ver.para }); Audit.registrar({ modulo: 'backup', acao: 'liberou', entidade: 'versao', entidadeId: ver.para, rotulo: `Versão ${ver.para} liberada em Produção e na Falco Controladoria e Gestão`, mudancas: [{ campo: 'Produção', de: ver.de, para: ver.para }, { campo: 'Falco Controladoria e Gestão', de: ver.deRc, para: ver.para }] });
         if (!Ambiente.homolog && Repo.cols.config) await Repo.recarregar('config').catch(() => { }); Versoes._cache = null;
       }
       if (Ambiente.producao) for (const d of escolhidas) if (Repo.cols[d.c]) await Repo.recarregar(d.c).catch(() => { });
-      UI.toast(`${ver ? `Versão ${ver.para} liberada em Produção e na RC Consultoria` : 'Versão liberada em Produção'}: ${tarefas.length} registro(s) de parâmetros gravados.`); App.agendarRender();
+      UI.toast(`${ver ? `Versão ${ver.para} liberada em Produção e na Falco Controladoria e Gestão` : 'Versão liberada em Produção'}: ${tarefas.length} registro(s) de parâmetros gravados.`); App.agendarRender();
       return tarefas.length;
     } catch (e) { UI.toast('Liberação interrompida: ' + (e.message || e) + '. Use a cópia baixada para voltar, se preciso.'); }
     finally { ld.fechar(); }
   },
 
-  /* 3 · Resetar Banco da RC Consultoria */
+  /* 3 · Resetar Banco da Falco Controladoria e Gestão */
   /** v13.76.1 · Netlify: testa a ligação deste site com os outros dois e mostra a causa exata de cada falha. */
   async diagnostico() {
     const ld = UI.carregando('Testando a conexão entre os ambientes…'); let r;
@@ -3584,19 +3664,19 @@ const GestaoAmbientes = {
   },
   async resetarRC() {
     if (!this.pode()) return;
-    if (!(await UI.confirmarImpacto('Resetar Banco da RC Consultoria', 'Todos os dados do banco <b>DB_RC_Consultoria</b> (lojas, equipe, acessos, lançamentos, log…) serão <b>apagados definitivamente</b> e a RC volta ao estado inicial — só com o usuário Master herdado da Produção (mesmo CPF e senha). Os bancos da Esposende (Produção e Homologação) não são afetados.'))) return;
-    const rc = Ambiente.adapter('rc'), ld = UI.carregando('Resetando o banco da RC Consultoria…');
+    if (!(await UI.confirmarImpacto('Resetar Banco da Falco Controladoria e Gestão', 'Todos os dados do banco <b>DB_Falco_Controladoria</b> (lojas, equipe, acessos, lançamentos, log…) serão <b>apagados definitivamente</b> e a Falco volta ao estado inicial — só com o usuário Master herdado da Produção (mesmo CPF e senha). Os bancos da Esposende (Produção e Homologação) não são afetados.'))) return;
+    const rc = Ambiente.adapter('rc'), ld = UI.carregando('Resetando o banco da Falco Controladoria e Gestão…');
     try {
       const alvos = [];
       const pres = await rc.list('presenca').catch(() => []);
       const cols = [...this.colecoes(), 'presenca', ...[...new Set([...pres.map(p => p.id), ...(Ambiente.rc ? [Auth.nuvemId] : [])])].map(id => `auditoria/${id}/dias`)];
       for (const [k, c] of cols.entries()) { ld.etapa(`Lendo… ${k + 1}/${cols.length}`); (await rc.list(c).catch(() => [])).forEach(d => alvos.push(c + '/' + d.id)); }
       await this.lote(alvos.map(p => () => rc.remove(p)), 8, (i, n) => ld.etapa(`Apagando… ${i}/${n}`));
-      const herdou = await MasterSync.herdar('rc').catch(() => 0); // v13.63: a RC zerada já nasce com o Master da Produção
-      if (!Ambiente.rc) { await this.registrarLog(Cloud.adapter, { acao: 'reset', alvo: 'rc', registros: alvos.length }); Audit.registrar({ modulo: 'backup', acao: 'excluiu', entidade: 'ambiente', entidadeId: 'rc', rotulo: 'Resetar Banco da RC Consultoria', mudancas: [{ campo: 'registros apagados', de: String(alvos.length), para: '0' }] }); }
+      const herdou = await MasterSync.herdar('rc').catch(() => 0); // v13.63: a Falco zerada já nasce com o Master da Produção
+      if (!Ambiente.rc) { await this.registrarLog(Cloud.adapter, { acao: 'reset', alvo: 'rc', registros: alvos.length }); Audit.registrar({ modulo: 'backup', acao: 'excluiu', entidade: 'ambiente', entidadeId: 'rc', rotulo: 'Resetar Banco da Falco Controladoria e Gestão', mudancas: [{ campo: 'registros apagados', de: String(alvos.length), para: '0' }] }); }
       ld.fechar();
-      UI.toast(`Banco da RC Consultoria resetado: ${alvos.length} registro(s) apagados${herdou ? '; o Master da Produção já entra com o mesmo CPF e senha' : ''}.`);
-      if (Ambiente.rc) { Audit._cache = {}; Sessao.encerrar('saiu'); await Sessao.iniciar(); } // a RC volta ao primeiro acesso
+      UI.toast(`Banco da Falco Controladoria e Gestão resetado: ${alvos.length} registro(s) apagados${herdou ? '; o Master da Produção já entra com o mesmo CPF e senha' : ''}.`);
+      if (Ambiente.rc) { Audit._cache = {}; Sessao.encerrar('saiu'); await Sessao.iniciar(); } // a Falco volta ao primeiro acesso
       return alvos.length;
     } catch (e) { ld.fechar(); UI.toast('Reset interrompido: ' + (e.message || e) + '. Rode de novo para concluir.'); }
   },
@@ -3612,15 +3692,15 @@ const GestaoAmbientes = {
 /* ------------- v13.65 · Recursos de código liberados por ambiente (Homologação → Produção) ------------- */
 /**
  * O painel é um só arquivo publicado para os três bancos; para uma correção nova rodar SÓ na Homologação, ela fica
- * atrás de um "recurso": ativo sempre na Homologação e, na Produção/RC, só depois de "Liberar Versão em Produção"
- * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a RC).
+ * atrás de um "recurso": ativo sempre na Homologação e, na Produção/Falco, só depois de "Liberar Versão em Produção"
+ * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
-  /** Versão efetiva de um banco: a Homologação roda tudo; Produção/RC, a base + os recursos já liberados (config/recursos). */
+  /** Versão efetiva de um banco: a Homologação roda tudo; Produção/Falco, a base + os recursos já liberados (config/recursos). */
   versaoDoc(doc, homolog = false) { return Object.entries(this.LISTA).filter(([k]) => homolog || doc?.[k]?.ativo).reduce((v, [, r]) => this.maior(v, r.versao), this.BASE); },
   atual() { return this.versaoDoc(Repo.get('config', 'recursos'), Ambiente.homolog); },
   /** Versões (distintas) que estão no código e ainda não foram liberadas no documento informado. */
@@ -3643,7 +3723,7 @@ const Recursos = {
 /* ------------------- v13.68 · Versões dos Ambientes (cabeçalho + quadro comparativo) ------------------- */
 const Versoes = {
   _cache: null, _em: 0,
-  ROT: { prod: 'Produção', homolog: 'Homologação', rc: 'RC Consultoria' },
+  ROT: { prod: 'Produção', homolog: 'Homologação', rc: 'Falco' },
   async carregar(forcar = false) {
     if (!forcar && this._cache && Date.now() - this._em < 15000) return this._cache;
     const out = {};
@@ -3662,7 +3742,7 @@ const Versoes = {
   html(v) {
     if (!v) return '';
     const lin = a => { const x = v[a.id] || {}, atual = a.id === Ambiente.id; return `<tr class="${atual ? 'atual' : ''}"><td><b>${esc(this.ROT[a.id])}</b>${atual ? ' <span class="pill ok">em uso</span>' : ''}</td><td class="mono">${esc(a.banco)}</td><td><span class="ver-tag ${a.id}">${x.versao ? esc(x.versao) : '—'}</span></td><td class="hint">${x.erro ? 'sem acesso a este banco' : a.id === 'homolog' ? 'versão em testes' : x.liberadoEm ? `liberada em ${Fmt.dataHora(x.liberadoEm)}${x.por ? ' · ' + esc(x.por) : ''}` : 'versão base (nenhuma liberação)'}</td></tr>`; };
-    const ambs = Ambiente.rc ? AMBIENTES.filter(a => a.id === 'rc') : AMBIENTES; // white-label: dentro da RC só aparece a própria base
+    const ambs = Ambiente.rc ? AMBIENTES.filter(a => a.id === 'rc') : AMBIENTES; // white-label: dentro da Falco só aparece a própria base
     return `<h3 style="margin:0 0 8px">Versões dos Ambientes</h3><div class="tbl-wrap"><table class="nolabel ver-tab"><thead><tr><th>Ambiente</th><th>Banco</th><th>Versão</th><th>Situação</th></tr></thead><tbody>${ambs.map(lin).join('')}</tbody></table></div>${Ambiente.rc ? '' : this.alerta(v)}`;
   },
   htmlCache() { return this._cache ? this.html(this._cache) : ''; },
@@ -3681,9 +3761,9 @@ const Versoes = {
  * A conta Master nasce e é mantida na Produção (DB_Esposende_Prod). Toda gravação em usuarios/* da Produção
  * (criação do Master, troca de senha, senha redefinida pelo dono, edição na Gestão de Acessos e o próprio login)
  * agenda a sincronização: CPF, nome, senha (hash), situação e "trocar senha" de cada Master são copiados para
- * DB_Esposende_Homolog e DB_RC_Consultoria — no mesmo documento do usuário com aquele CPF (sem duplicar o CPF).
- * Homologação/RC vazias (primeiro acesso ou reset) herdam os Masters da Produção antes de pedir configuração inicial.
- * O caminho é só Produção → Homologação/RC: nada gravado lá volta para a Produção.
+ * DB_Esposende_Homolog e DB_Falco_Controladoria — no mesmo documento do usuário com aquele CPF (sem duplicar o CPF).
+ * Homologação/Falco vazias (primeiro acesso ou reset) herdam os Masters da Produção antes de pedir configuração inicial.
+ * O caminho é só Produção → Homologação/Falco: nada gravado lá volta para a Produção.
  */
 const MasterSync = {
   CAMPOS: ['perfil', 'ativo', 'senha', 'trocarSenha', 'funcionarioId', 'nome', 'cpf'],
@@ -3729,14 +3809,14 @@ const MasterSync = {
     for (const x of atuais) if (x.masterSync && !usados.has(x.id) && !masters.some(m => m.u.id === x.masterSync.id) && x.ativo !== false) { const { id: _i, ...d } = x; await dst.set('usuarios/' + x.id, { ...d, ativo: false, sincronizadoEm: agora }); n++; }
     return n;
   },
-  /** Produção → Homologação e RC (exige "Pode editar": os bancos amb/* são restritos a editores). */
+  /** Produção → Homologação e Falco (exige "Pode editar": os bancos amb/* são restritos a editores). */
   async propagar(destinos = this.DESTINOS) {
     if (!Auth.podeEditarNuvem) return null;
     const ms = await this.mastersProd(); if (!ms.length) return null;
     const r = {}; for (const d of destinos) { try { r[d] = await this.aplicarEm(d, ms); } catch (e) { r[d] = 'erro: ' + (e.code || e.message || e); } }
     this.ultimo = { em: new Date().toISOString(), r }; return r;
   },
-  /** Primeiro acesso (ou reset) de Homologação/RC: herda os Masters da Produção. */
+  /** Primeiro acesso (ou reset) de Homologação/Falco: herda os Masters da Produção. */
   async herdar(id = Ambiente.id) {
     if (id === 'prod' || !Auth.podeEditarNuvem) return 0;
     const ms = await this.mastersProd().catch(() => []); return ms.length ? this.aplicarEm(id, ms) : 0;
@@ -10285,7 +10365,7 @@ const CRED_PEND = { COL: 'cred_pendencias', TIPOS: { cancelamento: 'Cancelamento
 Object.assign(Retaguarda.ui, { cp: { loja: '', status: '' } });
 
 Object.assign(Retaguarda, {
-  /** O recurso está ativo neste ambiente? (Homologação sempre; Produção/RC depois da liberação.) */
+  /** O recurso está ativo neste ambiente? (Homologação sempre; Produção/Falco depois da liberação.) */
   v66() { return typeof Recursos !== 'undefined' && Recursos.ativo('ret_credsystem_v1366'); },
   clsStatusCP(s) { return s === 'Resolvido' ? 'ok' : s === 'Em andamento' ? 'info' : 'warn'; },
   renderPendCred() {
@@ -13162,7 +13242,7 @@ const Sessao = {
     let base; try { base = await this.base(); } catch (e) { return this.render(this.semUso() || /permiss|denied|not_granted|not_found/i.test(String(e?.code || e?.message || e)) ? { semUso: true } : { erro: 'Não foi possível ler a base de usuários: ' + (e.message || e) }); }
     if (ctx !== Ambiente.id) return;
     if (!base.usuarios.some(u => u.perfil === 'MASTER' && u.ativo !== false)) {
-      // v13.63: Homologação/RC sem Master (primeiro acesso ou reset) herdam o Master da Produção (mesmo CPF e senha)
+      // v13.63: Homologação/Falco sem Master (primeiro acesso ou reset) herdam o Master da Produção (mesmo CPF e senha)
       if (!Ambiente.producao && await MasterSync.herdar(ctx).catch(() => 0)) return ctx === Ambiente.id ? this.iniciar() : undefined;
       if (Cloud.base?.tipo === 'local' && Ambiente.producao && await SementeLocal.aplicar(Cloud.base).catch(() => 0)) return ctx === Ambiente.id ? this.iniciar() : undefined; /* v13.74.4: navegador limpo cai no Login */
       if (await this.marcadorConfigurado()) return this.render({ semUso: true }); // configurado, mas este link não lê os acessos
@@ -13266,7 +13346,7 @@ const Sessao = {
     await Auth.carregarConfig();
     if (u.perfil !== 'MASTER') Auth.aplicarUsuario(u, f); // a matriz do usuário prevalece sobre config/permissoes
     this.ativa = true; Presenca._feito = false; this.vigiar(u, f);
-    if (Ambiente.producao && u.perfil === 'MASTER') MasterSync.agendar(2500); // v13.63: confere a cópia do Master na Homologação e na RC
+    if (Ambiente.producao && u.perfil === 'MASTER') MasterSync.agendar(2500); // v13.63: confere a cópia do Master na Homologação e na Falco
     App.iniciarPainel();
   },
   /** Desligamento automático e permissões ao vivo: o próprio usuário e o funcionário ficam sob observação. */
@@ -13360,7 +13440,7 @@ const Sessao = {
         ${senhaCampo('senha', 'Senha', 'current-password')}
         <button class="btn" type="submit">Entrar</button></form>
       <p class="login-rodape">Esqueceu a senha? Procure o seu gestor.</p>${Auth.isOwner ? (Ambiente.producao ? '<p class="login-rodape"><button class="btn ghost sm" type="button" data-a="sess-recuperar">Sou o dono do painel e esqueci a senha do Master</button></p>' : '<p class="login-rodape">O Master usa o mesmo CPF e senha do banco principal (Produção): para redefinir a senha do Master, entre na Produção.</p>') : ''}`;
-    const hero = `<aside class="login-hero" aria-hidden="true"><img src="${LOGO_BRANCO}" alt=""><div class="lh-txt"><span class="lh-eyebrow">Painel de Gestão</span><h2>Gestão das lojas, das pessoas e do caixa num só lugar.</h2>
+    const hero = `<aside class="login-hero" aria-hidden="true">${Marca.hero()}<div class="lh-txt"><span class="lh-eyebrow">Painel de Gestão</span><h2>Gestão das lojas, das pessoas e do caixa num só lugar.</h2>
       <ul class="lh-mods">${['Gestão de Pessoal', 'Gestão de Lojas', 'Contratos e seguros', 'FCX · Fluxo de Caixa', 'Retaguarda Financeira', 'Credsystem'].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
       <p class="lh-pe">Acesso restrito a colaboradores Esposende.</p></aside>`;
     $('#main').innerHTML = `<section class="login" aria-label="Acesso ao Painel de Gestão"><div class="login-shell">${hero}<div class="login-card">${marca}${Ambiente.seletorLogin(!!r.carregando)}${corpo}</div></div></section>`;
@@ -15948,7 +16028,7 @@ const PontoEquilibrio = {
   /* v13.53 · desempenho: cálculos memorizados pela versão dos dados (lojas, RH, contratos, parâmetros) + revisão do rascunho.
      Digitar num parâmetro só recalcula e repinta os resultados (cards, tabela, gráficos) — os campos não são redesenhados. */
   chaveDados() { return ['lojas', 'funcionarios', 'salarios', FolhaLoja.COL_FOLHAS, 'config', 'contratos_locacao', this.COL, 'lojas_faturamento'].map(c => Repo.versao(c)).join('.') + '|' + this.ui.ano + '|' + this.ui.base + '|' + this._rev; },
-  /** v13.65 · correção em homologação (Recursos): ativa na Homologação; na Produção/RC depois de "Liberar Versão em Produção". */
+  /** v13.65 · correção em homologação (Recursos): ativa na Homologação; na Produção/Falco depois de "Liberar Versão em Produção". */
   v65() { return typeof Recursos !== 'undefined' && Recursos.ativo('pe_v1365'); },
   /** v13.68.1 · sem importação o realizado fica R$ 0; a média do cadastro só entra com "Usar média cadastral para lojas sem importação". */
   v681() { return typeof Recursos !== 'undefined' && Recursos.ativo('pe_v13681'); },
@@ -18072,7 +18152,7 @@ const Inicio = {
   },
   render() {
     if (!this.visao()) return this.renderCards();
-    const abas = [['recebivel', 'Resumo do Recebível do Dia'], ['indicadores', 'Indicadores / Cards']].filter(([k]) => Acesso.tela('menu', k));
+    const abas = [['recebivel', 'Resumo do Recebível do Dia'], ['indicadores', 'Indicadores / Cards']].filter(([k]) => Acesso.tela('menu', k) && !(k === 'recebivel' && Ambiente.rc)); /* v13.90: na Falco, só os cards padrão e os indicadores operacionais */
     if (!abas.some(([k]) => k === this.ui.aba)) this.ui.aba = abas[0]?.[0] || 'indicadores';
     const tabs = abas.length > 1 ? `<div class="tabs ini-tabs" role="tablist">${abas.map(([k, r]) => `<button class="${this.ui.aba === k ? 'on' : ''}" role="tab" aria-selected="${this.ui.aba === k}" data-a="ini-aba" data-v="${k}">${r}</button>`).join('')}</div>` : '';
     return this.ui.aba === 'recebivel' ? `<div class="ini-hello"><h1>${this.saudacao().replace('esse é o seu resumo diário', 'esse é o resumo do recebível do dia')}</h1><p>Consolidado financeiro do dia, calculado agora com os dados do FCX, da Auditoria de Adquirentes e da Retaguarda.</p></div>${tabs}${ResumoRecebivel.html()}` : this.renderCards(tabs);
@@ -18326,6 +18406,8 @@ window.Rodape = Rodape;
 const ModContabil = {
   _st: null, _stP: null, abaInicial: null,
   netlify: () => !!Cloud.base?.netlify,
+  /** v13.91 · tela executiva (multiempresas, Radar, Laudo) com o recurso liberado; senão, a tela da v13.86. */
+  arquivo: () => (Recursos.ativo('contabil_v1391') ? 'contabilidade_v1391.html' : 'contabilidade.html'),
   stat() {
     if (!this.netlify()) return 'disponível na versão Netlify';
     const s = this._st; if (!s) { this.status().catch(() => { }); return '…'; }
@@ -18341,7 +18423,7 @@ const ModContabil = {
   render() {
     const cab = `<div class="page-head"><div><h1>Contabilidade</h1><p>Plano de contas único, lançamentos em partidas dobradas, relatórios contábeis e parâmetros tributários (Lucro Real com LALUR ou Lucro Presumido; DRE no modelo atual ou na Reforma). O FCX lê o plano de contas daqui, em modo consulta.</p></div>`;
     if (!this.netlify()) return cab + `</div><div class="panel ct-aviso"><h2>Disponível na versão Netlify do painel</h2><p style="margin:6px 0 0">O Módulo Contábil grava num banco PostgreSQL com travas próprias (partidas dobradas, lançamentos que não se alteram nem se excluem, estorno ligado ao original e cadeia de conferência). Por isso ele funciona só na versão publicada no Netlify. Aqui, o FCX mostra o plano de contas em modo consulta.</p></div>`;
-    return cab + `<div class="row" style="gap:8px"><a class="btn sec sm" href="contabilidade.html" target="_blank" rel="noopener">Abrir em nova aba</a></div></div>`;
+    return cab + `<div class="row" style="gap:8px"><a class="btn sec sm" href="${this.arquivo()}" target="_blank" rel="noopener">Abrir em nova aba</a></div></div>`;
   },
   /** Mostra/oculta o contêiner fixo conforme a rota. Chamado a cada App.render(). */
   sincronizar() {
@@ -18350,8 +18432,8 @@ const ModContabil = {
     if (vis) this.montar();
   },
   montar() {
-    const host = $('#contabilHost'); if (!host || $('#ctFrame')) return;
-    host.innerHTML = `<iframe id="ctFrame" class="fcx-frame ct-frame" title="Módulo Contábil" src="contabilidade.html?embed=1"></iframe>`;
+    const host = $('#contabilHost'), arq = this.arquivo(), f = $('#ctFrame'); if (!host || (f && f.dataset.arq === arq)) return;
+    host.innerHTML = `<iframe id="ctFrame" class="fcx-frame ct-frame" title="Módulo Contábil" data-arq="${arq}" src="${arq}?embed=1"></iframe>`;
   },
   frame() { try { return $('#ctFrame')?.contentWindow || null; } catch { return null; } },
 };
@@ -18885,16 +18967,19 @@ window.BackupDiario = BackupDiario;
  *  trocadas na hora (variáveis CSS) e lembradas no localStorage. Gráficos são redesenhados com as cores novas. */
 const Tema = {
   K: 'esp-painel:tema', OPC: [['padrao', 'Modo Atual (Padrão)'], ['noturno', 'Modo Noturno'], ['diurno', 'Modo Diurno'], ['rosa', 'Tons de Rosa'], ['preto', 'Tons de Preto']],
-  PALETAS: { rosa: { cor: '#24101B' }, preto: { cor: '#000000' } },
-  atual() { if (Ambiente.rc) return 'preto'; try { const v = localStorage.getItem(this.K); return this.OPC.some(o => o[0] === v) ? v : 'padrao'; } catch { return 'padrao'; } },
+  /* v13.90 · temas exclusivos da Falco Controladoria e Gestão (antes: AMOLED fixo). Só aparecem no ambiente da Falco. */
+  KF: 'falco-painel:tema', OPC_FALCO: [['falco_imperial', 'Falco Imperial'], ['falco_midnight', 'Falco Midnight Gold'], ['falco_slate', 'Falco Slate & Gold']],
+  PALETAS: { rosa: { cor: '#24101B' }, preto: { cor: '#000000' }, falco_imperial: { cor: '#19283f' }, falco_midnight: { cor: '#000000' }, falco_slate: { cor: '#1f2a36' } },
+  opcoes() { return Ambiente.rc ? this.OPC_FALCO : this.OPC; },
+  padrao() { return Ambiente.rc ? 'falco_imperial' : 'padrao'; },
+  atual() { const o = this.opcoes(); try { const v = localStorage.getItem(Ambiente.rc ? this.KF : this.K); return o.some(x => x[0] === v) ? v : this.padrao(); } catch { return this.padrao(); } },
   aplicar(v, salvar = false) {
-    if (Ambiente.rc) { v = 'preto'; salvar = false; } // v13.62: white-label RC Consultoria = AMOLED (preto/grafite) fixo
-    if (!this.OPC.some(o => o[0] === v)) v = 'padrao';
+    if (!this.opcoes().some(o => o[0] === v)) v = this.padrao(); /* na Falco só os temas Falco; fora dela, os temas Falco não valem */
     const r = document.documentElement, ant = r.getAttribute('data-theme') + '|' + r.getAttribute('data-paleta');
     if (v === 'noturno' || this.PALETAS[v]) r.setAttribute('data-theme', 'dark'); else if (v === 'diurno') r.setAttribute('data-theme', 'diurno'); else r.removeAttribute('data-theme');
     if (this.PALETAS[v]) r.setAttribute('data-paleta', v); else r.removeAttribute('data-paleta');
     try { let m = document.querySelector('meta[name="theme-color"]'); if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); } m.content = this.PALETAS[v]?.cor || (v === 'diurno' ? '#0A4A94' : '#11163F'); } catch { }
-    if (salvar) { try { localStorage.setItem(this.K, v); } catch { } document.querySelectorAll('.tema-sel').forEach(s => { s.value = v; }); }
+    if (salvar) { try { localStorage.setItem(Ambiente.rc ? this.KF : this.K, v); } catch { } document.querySelectorAll('.tema-sel').forEach(s => { s.value = v; }); }
     if (ant !== r.getAttribute('data-theme') + '|' + r.getAttribute('data-paleta')) this.redesenharGraficos();
   },
   /** Os gráficos (Chart.js) leem as cores na hora de desenhar: invalida os reaproveitados e redesenha a tela que tem gráfico. */
@@ -18904,7 +18989,7 @@ const Tema = {
     ids.forEach(id => { try { R._charts[id]._assin = '__tema__'; } catch { } });
     if (ids.some(id => document.body.contains(R._charts[id]?.canvas)) && typeof App !== 'undefined' && App.render) setTimeout(() => App.render(), 0);
   },
-  seletor(suf = '') { if (Ambiente.rc) return `<select class="tema-sel" id="temaSel${suf}" aria-label="Tema da interface (fixo na RC Consultoria)" title="Tema fixo da RC Consultoria" disabled><option>Tons de Preto (AMOLED)</option></select>`; const v = this.atual(); return `<select class="tema-sel" data-a="tema" id="temaSel${suf}" aria-label="Tema da interface">${this.OPC.map(([k, r]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${r}</option>`).join('')}</select>`; },
+  seletor(suf = '') { const v = this.atual(); return `<select class="tema-sel${Ambiente.rc ? ' tema-falco' : ''}" data-a="tema" id="temaSel${suf}" aria-label="${Ambiente.rc ? 'Tema visual da Falco' : 'Tema da interface'}" title="${Ambiente.rc ? 'Tema visual da Falco' : 'Tema da interface'}">${this.opcoes().map(([k, r]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${r}</option>`).join('')}</select>`; },
 };
 window.Tema = Tema;
 window.Recursos = Recursos; /* v13.77: o FCX (iframe) consulta os recursos liberados (fcx_semanas_v1377) */
@@ -18973,7 +19058,7 @@ Tema.aplicar(Tema.atual());
   $('#main').innerHTML = '<div class="panel" style="margin-top:30px"><p class="muted" style="margin:0">Conectando ao Painel de Gestão…</p></div>';
   await Cloud.init();
   await Auth.init();
-  if (!Ambiente.permitido(Ambiente.id)) { Ambiente.gravar('prod'); Cloud.adapter = Cloud.base; Marca.aplicar(); UI.toast('Homologação e RC Consultoria são restritas a quem pode editar o painel: aberto em Esposende · Produção.'); } // v13.62
+  if (!Ambiente.permitido(Ambiente.id)) { Ambiente.gravar('prod'); Cloud.adapter = Cloud.base; Marca.aplicar(); UI.toast('Homologação e Falco Controladoria e Gestão são restritas a quem pode editar o painel: aberto em Esposende · Produção.'); } // v13.62
   Sessao.iniciar();
 })();
 

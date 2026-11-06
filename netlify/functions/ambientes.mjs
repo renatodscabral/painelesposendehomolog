@@ -1,11 +1,11 @@
-/* v13.76 · /api/ambientes/<prod|homolog|rc>/docs[/lote] — a Gestão de Ambientes (Backup) do Master lê e grava no
+/* v13.76 · /api/ambientes/<prod|homolog|falco (ou rc)>/docs[/lote] — a Gestão de Ambientes (Backup) do Master lê e grava no
    banco de OUTRO ambiente. O navegador fala só com o próprio site; este repassa ao site do ambiente pedido
    (/api/inter/…) com a chave compartilhada, e o site de destino aplica a política entre ambientes.
    v13.76.1: GET /api/ambientes/diagnostico (Master) — testa a ligação com cada ambiente e diz a causa exata. */
 import { json, erro, rota } from '../lib/http.mjs';
 import { sessaoDe } from '../lib/sessao.mjs';
 import { NIVEL } from '../lib/regras.mjs';
-import { ambienteAtual, IDS, urlDe, estadoChave, impressaoChave, ROTULO } from '../lib/ambiente.mjs';
+import { ambienteAtual, IDS, urlDe, estadoChave, impressaoChave, ROTULO, normalizarAmbiente } from '../lib/ambiente.mjs';
 import { chamarAmbiente } from '../lib/inter.mjs';
 
 async function diagnostico() {
@@ -27,7 +27,8 @@ export default rota(async req => {
   const sess = await sessaoDe(req);
   if (!sess || sess.trocaPendente) return erro(401, 'Sessão encerrada. Faça login de novo.');
   if (sess.nivel < NIVEL.admin) return erro(403, 'Só o Master usa a Gestão de Ambientes.');
-  const url = new URL(req.url), [, , alvo, ...resto] = url.pathname.split('/').filter(Boolean); // api/ambientes/<alvo>/docs[/lote]
+  const url = new URL(req.url), [, , alvoUrl, ...resto] = url.pathname.split('/').filter(Boolean); // api/ambientes/<alvo>/docs[/lote]
+  const alvo = alvoUrl === 'diagnostico' ? alvoUrl : normalizarAmbiente(alvoUrl); /* v13.90: /api/ambientes/falco/… = …/rc/… */
   if (alvo === 'diagnostico' && req.method === 'GET') return json(200, await diagnostico());
   if (!IDS.includes(alvo)) return erro(404, 'Ambiente desconhecido.');
   if (alvo === ambienteAtual()) return erro(400, 'Este já é o ambiente deste site: use /api/docs.');

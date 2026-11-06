@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Módulo Contábil · Painel Executivo</title>
+<style>
+/* v13.91 · Módulo Contábil executivo (multiempresas). Dentro do painel, as cores seguem o tema do ambiente ativo (tokens copiados
+   do painel: paleta institucional ou a paleta da white-label). */
+:root{
+  --navy:#1B2362; --accent:#3F5BD8; --accent-soft:#E6EBFD;
+  --bg:#F2F3F8; --panel:#FFFFFF; --panel-2:#F8F9FC; --line:#E2E4EE; --line-soft:#ECEEF5;
+  --ink:#151934; --ink-soft:#585E7F; --ink-faint:#616787;
+  --ok:#1D7A4E; --ok-soft:#E1F3E9; --warn:#9A6408; --warn-soft:#FCF0D6; --bad:#B63A2F; --bad-soft:#FBE7E4;
+  --r:12px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-embed]){
+  --navy:#C9D0FF; --accent:#8EA2FF; --accent-soft:#232C55;
+  --bg:#0E1120; --panel:#161A2C; --panel-2:#1C2136; --line:#2A3050; --line-soft:#232842;
+  --ink:#E8EAF6; --ink-soft:#AEB3CF; --ink-faint:#A3A8C6;
+  --ok:#5FD39A; --ok-soft:#163528; --warn:#F2C065; --warn-soft:#3A2E12; --bad:#FF8A7E; --bad-soft:#3D1D1A; color-scheme:dark; } }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:16px}
+:root[data-embed] body{padding:4px 2px 24px}
+h1{font-size:22px;margin:0 0 4px} h2{font-size:16px;margin:0 0 8px} h3{font-size:14px;margin:14px 0 6px}
+p{margin:0 0 8px}
+.topo{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap}
+:root[data-embed] .topo{display:none}
+.muted{color:var(--ink-soft)} .hint{color:var(--ink-soft);font-size:12.5px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:5px;margin-bottom:12px}
+.tabs button{border:0;background:transparent;color:var(--ink-soft);font:inherit;font-weight:600;padding:8px 14px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--ink)}
+.tabs button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row.between{justify-content:space-between;align-items:center}
+.campo{display:flex;flex-direction:column;gap:4px;min-width:0}
+.campo>span{font-size:12px;font-weight:600;color:var(--ink-soft)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:16px;height:16px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+:root[data-escuro] .btn:not(.sec):not(.danger){color:#0E1120}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.btn.danger{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--line-soft);color:var(--ink-soft);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.info{background:var(--accent-soft);color:var(--ink)}
+.note{background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px}
+.note.warn{background:var(--warn-soft)} .note.bad{background:var(--bad-soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:10px;max-height:62vh}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:var(--panel-2);font-size:12px;color:var(--ink-soft);z-index:1}
+tr.sint td{font-weight:700} tr.inativa td{color:var(--ink-faint);text-decoration:line-through}
+tr.tot td{font-weight:700;border-top:2px solid var(--line)} tr.sub td{font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+.ind1{padding-left:18px}.ind2{padding-left:32px}.ind3{padding-left:46px}.ind4{padding-left:60px}.ind5{padding-left:74px}
+.edit-row td{background:var(--panel-2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lin-lanc{display:grid;grid-template-columns:minmax(150px,2fr) 74px minmax(110px,1fr) minmax(100px,1fr) minmax(120px,1.5fr) 34px;gap:6px;align-items:center;margin-bottom:6px}
+.tot-lanc{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;font-weight:600}
+.tot-lanc .dif{color:var(--bad)} .tot-lanc .ok{color:var(--ok)}
+details>summary{cursor:pointer;font-weight:600;padding:2px 0}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:10px;font-weight:600;z-index:9;max-width:92vw;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.vazio{padding:18px;text-align:center;color:var(--ink-soft)}
+.rel-cab{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px}
+.cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.cmp div{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:10px}
+.cmp b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:760px){ .grid2,.cmp{grid-template-columns:1fr} .lin-lanc{grid-template-columns:1fr 70px 1fr 34px} .lin-lanc .opc{display:none} body{padding:10px} }
+
+/* ---------- v13.91 · painel executivo ---------- */
+h1,h2,h3{color:var(--falco-tit,var(--ink))}
+.topo-disp{position:sticky;top:0;z-index:6;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:8px 0 10px;background:var(--bg)}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;min-width:0;border-top:3px solid var(--accent)}
+.dcard.tot{border-top-color:var(--ok)}
+.dcard .dt{display:block;font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dcard b{display:block;font-size:19px;font-variant-numeric:tabular-nums;margin:3px 0 2px;color:var(--ink)} .dcard b.neg{color:var(--bad)}
+.dcard .dm{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.dcard.esq b{background:var(--line-soft);border-radius:6px;height:22px;width:70%}
+.empcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px}
+.empcard>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;list-style:none}
+.empcard>summary::-webkit-details-marker{display:none}
+.empcard>summary::after{content:'▾';margin-left:auto;color:var(--ink-soft);transition:transform .15s} .empcard[open]>summary::after{transform:rotate(180deg)}
+.emp-ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:800;flex:none}
+.emp-nome{font-weight:700} .emp-sub{font-size:12px;color:var(--ink-soft)}
+.emp-corpo{border-top:1px solid var(--line-soft);padding:12px 14px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+.atalhos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.atalho{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font:inherit;color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.atalho:hover{border-color:var(--accent)} .atalho b{font-size:13.5px} .atalho span{font-size:12px;color:var(--ink-soft)}
+.escr{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px}
+.escr .row{justify-content:space-between} .escr b{font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px} .seg button{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:5px 10px;border-radius:8px;cursor:pointer}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff} :root[data-escuro] .seg button.on{color:var(--bg)}
+.subtabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin;border-bottom:1px solid var(--line);margin:0 0 12px;padding:0 2px}
+.subtabs button{flex:none;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--ink-soft);font:inherit;font-weight:600;font-size:13px;padding:9px 12px;cursor:pointer;white-space:nowrap}
+.subtabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.subtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 12px}
+.kpi{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;min-width:0}
+.kpi .kt{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em}
+.kpi b{display:block;font-size:18px;font-variant-numeric:tabular-nums;margin-top:3px} .kpi .ks{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.kpi.ok{border-left:4px solid var(--ok)} .kpi.bad{border-left:4px solid var(--bad)} .kpi.warn{border-left:4px solid var(--warn)}
+.selo{display:flex;align-items:center;gap:10px;border:1px dashed var(--accent);border-radius:10px;padding:8px 12px;margin:0 0 12px;background:var(--accent-soft)}
+.selo-ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;flex:none} :root[data-escuro] .selo-ic{color:var(--bg)}
+.selo b{display:block;font-size:12.5px} .selo span{font-size:12.5px;color:var(--ink-soft)}
+.radar-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+.ring{--c:var(--ok);width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p) * 1%),var(--line-soft) 0);display:grid;place-items:center;flex:none}
+.ring[data-faixa="atencao"]{--c:var(--warn)} .ring[data-faixa="critico"]{--c:var(--bad)}
+.ring>div{width:118px;height:118px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center}
+.ring b{font-size:34px;line-height:1;font-variant-numeric:tabular-nums} .ring span{font-size:11px;color:var(--ink-soft);display:block}
+.barra{height:8px;border-radius:6px;background:var(--line-soft);overflow:hidden} .barra i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.subnotas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin-top:10px}
+.subnotas .row{justify-content:space-between;margin-bottom:4px}
+.sugs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sug{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel-2)}
+.sug.alta{border-left:4px solid var(--bad)} .sug.media{border-left:4px solid var(--warn)} .sug.baixa{border-left:4px solid var(--accent)}
+.sug p{margin:3px 0 0;font-size:13px;color:var(--ink-soft)} .sug .sug-l{margin:6px 0 0;padding-left:16px;font-size:12.5px;color:var(--ink-soft)}
+.cmp-t td.var{font-size:12px} .cmp-t td.var.up{color:var(--ok)} .cmp-t td.var.dn{color:var(--bad)}
+tr.tit td{font-weight:800;text-transform:uppercase;font-size:11.5px;letter-spacing:.04em;color:var(--ink-soft);background:var(--panel-2)}
+.mdl-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:20;padding:16px}
+.mdl{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;width:min(760px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.mdl.largo{width:min(1000px,100%)} .mdl-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-soft);position:sticky;top:0;background:var(--panel)}
+.mdl-b{padding:14px 16px} .mdl iframe{width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+.lin-soc{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1.2fr) 90px 34px;gap:6px;align-items:center;margin-bottom:6px}
+@media (max-width:980px){ .topo-disp{grid-template-columns:repeat(2,minmax(0,1fr));position:static} .emp-corpo{grid-template-columns:1fr} }
+@media (max-width:560px){ .topo-disp{grid-template-columns:1fr 1fr;gap:6px} .dcard b{font-size:16px} .atalhos{grid-template-columns:1fr} .radar-top{grid-template-columns:1fr;justify-items:center} .subnotas{grid-template-columns:1fr} .sug{grid-template-columns:1fr} .lin-soc{grid-template-columns:1fr 1fr} }
+@media print{ body{background:#fff;color:#000;padding:0} .no-print,.tabs,.topo,.toast,.topo-disp,.empcard,.subtabs{display:none!important} .panel{border:0;padding:0} .tbl{max-height:none;overflow:visible;border:0} th{position:static} }
+</style>
+</head>
+<body>
+<div class="topo"><div><h1>Módulo Contábil</h1><p class="muted" style="margin:0">Painel executivo multiempresas: disponibilidades, relatórios, Radar de Saúde e laudo técnico.</p></div><a class="btn sec sm" href="./">Voltar ao painel</a></div>
+<div id="app"><div class="panel"><p class="muted" style="margin:0">Carregando o Módulo Contábil…</p></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<script>
+'use strict';
+/* =====================================================================
+   v13.91 · MÓDULO CONTÁBIL EXECUTIVO (contabilidade_v1391.html) — multiempresas, barra de disponibilidades, relatórios em abas
+   horizontais com KPIs, Radar de Saúde Empresarial, Motor de Crítica (sugestões de ação e correção) e Laudo Técnico em PDF.
+   Base: v13.86 (contabilidade.html) — fala com /api/contabil (mesma origem do painel).
+   As regras ficam no servidor e no banco: partidas dobradas, lançamentos intangíveis (só estorno), período
+   fechado e cadeia de conferência. Esta tela só monta os pedidos e mostra as respostas.
+   Abas: Radar de Saúde · Relatórios · Lançamentos · Plano de contas · De-para do FCX · Empresas · Parâmetros.
+   ===================================================================== */
+const EMBED = new URLSearchParams(location.search).has('embed');
+const PAI = (() => { try { return window.parent !== window && window.parent.PainelFCX ? window.parent : null; } catch (e) { return null; } })();
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtN = v => (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const pct = v => (Math.round((Number(v) || 0) * 10000) / 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+const dataBR = d => (d ? String(d).slice(0, 10).split('-').reverse().join('/') : '');
+const hoje = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+/** "1.234,56" | "1234.56" | 1234.56 → número */
+const lerValor = v => { if (typeof v === 'number') return v; const s = String(v || '').trim().replace(/\s|R\$/g, ''); if (!s) return NaN; return Number(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s); };
+const cent = v => Math.round(lerValor(v) * 100);
+
+async function api(met, rota, corpo) {
+  const r = await fetch('/api/contabil' + rota, { method: met, credentials: 'same-origin', cache: 'no-store', headers: { 'x-painel': '1', ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}) }, body: corpo === undefined ? undefined : JSON.stringify(corpo) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.erro || 'Erro ' + r.status + ' no servidor.'); e.status = r.status; e.dados = j; throw e; }
+  return j;
+}
+let toastT = null;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 4200); }
+const falhou = e => toast(e && e.message ? e.message : String(e));
+/** confirmação em dois cliques (confirm() pode ser bloqueado em molduras) */
+let pend = null;
+function confirmar(chave, msg) { const t = Date.now(); if (pend && pend.k === chave && t - pend.t < 6000) { pend = null; return true; } pend = { k: chave, t }; toast(msg + ' Clique de novo para confirmar.'); return false; }
+
+/* ---------- tema: dentro do painel, copia os tokens de cor do painel (e acompanha a troca de tema) ---------- */
+const TOK = ['--navy', '--accent', '--accent-soft', '--bg', '--panel', '--panel-2', '--line', '--line-soft', '--ink', '--ink-soft', '--ink-faint', '--ok', '--ok-soft', '--warn', '--warn-soft', '--bad', '--bad-soft', '--falco-tit', '--falco-ouro'];
+function lum(c) { /* v13.91: hex (#19283f) ou rgb(…) — antes os dígitos do hex eram lidos como rgb e o tema escuro não era reconhecido */ const t = String(c).trim(); if (t[0] === '#') { let h = t.slice(1); if (h.length === 3) h = h.split('').map(x => x + x).join(''); if (h.length < 6) return 1; return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255).reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0); } const m = t.match(/[\d.]+/g); if (!m || m.length < 3) return 1; return (m[0] * 0.2126 + m[1] * 0.7152 + m[2] * 0.0722) / 255; }
+function tema() {
+  if (!PAI) return;
+  try { const cs = PAI.getComputedStyle(PAI.document.documentElement), r = document.documentElement; let n = 0;
+    TOK.forEach(t => { const v = cs.getPropertyValue(t).trim(); if (v) { r.style.setProperty(t, v); n++; } else r.style.removeProperty(t); });
+    if (n) { r.dataset.embed = '1'; const esc_ = lum(cs.getPropertyValue('--bg').trim() || '#fff') < 0.4; r.toggleAttribute('data-escuro', esc_); r.style.colorScheme = esc_ ? 'dark' : 'light'; }
+  } catch (e) { /* sem acesso ao painel: tema próprio */ }
+}
+if (PAI) { tema(); try { new PAI.MutationObserver(tema).observe(PAI.document.documentElement, { attributes: true }); PAI.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(tema, 50)); } catch (e) { } }
+else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-escuro', '');
+
+/* ---------- estado ---------- */
+const S = {
+  aba: 'radar', st: null, contas: [], erro: null, emp: 'emp_principal', empAberto: false, disp: null, radar: null, ef: null,
+  pl: { busca: '', tipo: '', grupo: '', inativas: false, edit: null, sug: null, nome: '', pai: '' },
+  dp: { itens: null, resumo: null, busca: '', status: '', edit: null },
+  lf: null, ls: { lista: null, de: '', ate: '', conta: '', estorno: null },
+  rl: { tipo: 'diario', de: '', ate: '', modelo: '', anoReforma: '', conta: '', regime: '', dados: null, cmp: null, comparar: true, carregando: false },
+  pr: { lalur: null, ano: new Date().getFullYear(), integ: null },
+};
+const ABAS = [['radar', 'Radar de Saúde'], ['relatorios', 'Relatórios'], ['lancamentos', 'Lançamentos'], ['plano', 'Plano de contas'], ['depara', 'De-para do FCX'], ['empresas', 'Empresas'], ['parametros', 'Parâmetros']];
+const KEMP = 'contabil:empresa';
+try { const e = localStorage.getItem(KEMP); if (e) S.emp = e; } catch (e) { /* sem armazenamento: empresa principal */ }
+const empresas = () => (S.st && S.st.empresas && S.st.empresas.length ? S.st.empresas : [{ id: 'emp_principal', razaoSocial: 'Empresa principal', principal: true, ativa: true, socios: [], contador: {}, regime: 'presumido', capitalSocial: 0 }]);
+const empAtual = () => empresas().find(e => e.id === S.emp) || empresas()[0];
+const qe = (extra = {}) => new URLSearchParams({ empresa: empAtual().id, ...extra });
+const cnpjF = v => { const d = String(v || '').replace(/\D/g, ''); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : (v || 'sem CNPJ'); };
+const REGIME = { simples: 'Simples Nacional', presumido: 'Lucro Presumido', real: 'Lucro Real', mei: 'MEI' };
+const crcTxt = c => (c && c.crc ? `${c.nome || 'Contador(a)'} · CRC ${c.crc}${c.uf && !String(c.crc).startsWith(c.uf) ? '/' + c.uf : ''}` : '');
+const pode = p => !!(S.st && S.st.permissoes && S.st.permissoes.includes(p));
+const cat = () => (S.st && S.st.catalogo) || { grupos: {}, dre: {}, dva: {}, tributosAtuais: [], tributosReforma: [], outrosTributos: [] };
+const porCodigo = () => new Map(S.contas.map(c => [c.codigo, c]));
+const analiticas = () => S.contas.filter(c => c.tipo === 'A' && c.ativa);
+function novoLanc() { return { data: hoje(), historico: '', docRef: '', itens: [{ conta: '', dc: 'D', valor: '', historico: '' }, { conta: '', dc: 'C', valor: '', historico: '' }] }; }
+S.lf = novoLanc();
+{ const a = new Date().getFullYear(); S.ls.de = S.rl.de = `${a}-01-01`; S.ls.ate = S.rl.ate = `${a}-12-31`; }
+async function carregarDisp() { try { S.disp = await api('GET', '/disponibilidades?' + qe({ de: S.rl.de, ate: S.rl.ate })); } catch (e) { S.disp = { erro: e.message }; } }
+async function carregarRadar() { S.radar = null; render(); try { S.radar = await api('GET', '/radar?' + qe({ de: S.rl.de, ate: S.rl.ate })); } catch (e) { S.radar = { erro: e.message }; } render(); }
+/** troca de empresa ou de período: tudo o que depende dela é recarregado */
+async function aoMudarContexto() { S.disp = null; S.radar = null; S.rl.dados = null; S.rl.cmp = null; S.ls.lista = null; render(); await carregarDisp(); render(); await irAba(S.aba, true); }
+
+async function carregarBase() {
+  S.st = await api('GET', '');
+  S.contas = S.st.plano.criado ? (await api('GET', '/contas')).contas : [];
+}
+async function carregarDepara() { const j = await api('GET', '/depara'); S.dp.itens = j.itens; S.dp.resumo = j.resumo; }
+async function carregarLancs() { const p = qe({ de: S.ls.de, ate: S.ls.ate, limite: '1000' }); if (S.ls.conta) p.set('conta', S.ls.conta); S.ls.lista = (await api('GET', '/lancamentos?' + p)).lancamentos; }
+function avisarFCX() { try { PAI && PAI.PainelFCX.planoAlterado && PAI.PainelFCX.planoAlterado(); } catch (e) { } }
+
+async function irAba(a, forcar = false) {
+  if (!ABAS.some(x => x[0] === a)) return;
+  S.aba = a; render();
+  try {
+    if (a === 'radar' && S.st.plano.criado && (!S.radar || forcar)) await carregarRadar();
+    if (a === 'relatorios' && S.st.plano.criado && !S.rl.dados && !S.rl.carregando && (S.rl.tipo !== 'razao' || S.rl.conta)) await acoes['rl-gerar']();
+    if (a === 'depara' && !S.dp.itens) { await carregarDepara(); render(); }
+    if (a === 'lancamentos' && !S.ls.lista) { await carregarLancs(); render(); }
+    if (a === 'parametros' && !S.pr.lalur) { S.pr.lalur = (await api('GET', '/lalur?ano=' + S.pr.ano)).ajustes; render(); }
+  } catch (e) { falhou(e); }
+}
+
+/* ---------- desenho ---------- */
+function render() {
+  const app = $('#app'), at = document.activeElement, id = at && at.id, sel = at && 'selectionStart' in at ? [at.selectionStart, at.selectionEnd] : null;
+  if (S.erro) { app.innerHTML = `<div class="panel"><h2>Módulo Contábil indisponível</h2><p>${esc(S.erro)}</p><button class="btn sec" data-a="recarregar">Tentar de novo</button></div>`; return; }
+  if (!S.st) return;
+  const st = S.st, ro = !['contabil.lancar', 'contabil.plano', 'contabil.estornar', 'contabil.parametros'].some(pode);
+  const corpo = { radar: vRadar, plano: vPlano, depara: vDepara, lancamentos: vLancamentos, relatorios: vRelatorios, empresas: vEmpresas, parametros: vParametros }[S.aba]();
+  app.innerHTML = `${vTopo()}<div class="tabs no-print" role="tablist" aria-label="Seções do Módulo Contábil">${ABAS.map(([k, r]) => `<button role="tab" id="tab-${k}" aria-selected="${S.aba === k}" data-a="aba" data-v="${k}">${r}${k === 'depara' && st.depara && st.depara.pendente ? ` <span class="pill warn">${st.depara.pendente}</span>` : ''}</button>`).join('')}</div>
+    <p class="hint no-print" style="margin:-4px 0 10px">Empresa ativa: <b>${esc(empAtual().nomeFantasia || empAtual().razaoSocial)}</b> · ${st.plano.criado ? `Plano: <b>${st.plano.contas}</b> contas (${st.plano.analiticas} analíticas)` : 'Plano de contas ainda não criado'} · <b>${st.lancamentos.total}</b> lançamento(s) · Regime: <b>${st.parametros.regime === 'real' ? 'Lucro Real' : 'Lucro Presumido'}</b> · DRE padrão: <b>${st.parametros.dreModelo === 'reforma' ? 'Nova Reforma' : 'Modelo Atual'}</b>${st.parametros.fechadoAte ? ` · período fechado até ${dataBR(st.parametros.fechadoAte)}` : ''}${ro ? ' · <span class="pill">somente consulta</span>' : ''}</p>
+    <section role="tabpanel" aria-labelledby="tab-${S.aba}">${corpo}</section>
+    <datalist id="dlA">${analiticas().map(c => `<option value="${esc(c.codigo)}">${esc(c.nome)}</option>`).join('')}</datalist>
+    <datalist id="dlS">${S.contas.filter(c => c.tipo === 'S' && c.ativa).map(c => `<option value="${esc(c.codigo)}">${esc(c.nome)}</option>`).join('')}</datalist>`;
+  if (id) { const el = document.getElementById(id); if (el) { el.focus(); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { } } }
+}
+
+/* ---------- v13.91 · barra de disponibilidades (tempo real) e card da empresa ativa ---------- */
+function vTopo() {
+  const D = S.disp, e = empAtual(), esq = '<div class="dcard esq"><span class="dt">&nbsp;</span><b></b><span class="dm">&nbsp;</span></div>';
+  const cards = !D ? esq.repeat(4) : D.erro ? `<div class="dcard" style="grid-column:1/-1"><span class="dt">Disponibilidades</span><span class="dm">${esc(D.erro)}</span></div>`
+    : D.cards.map(c => `<div class="dcard" data-disp="${c.id}"><span class="dt" title="${esc(c.rotulo)} (${c.conta})">${esc(c.rotulo)} · <span class="mono">${c.conta}</span></span><b class="${c.saldo < 0 ? 'neg' : ''}">${fmt(c.saldo)}</b><span class="dm"><span>↑ ${esc(c.rotuloEntrada)} ${fmt(c.entradas)}</span><span>↓ ${esc(c.rotuloSaida)} ${fmt(c.saidas)}</span></span></div>`).join('')
+      + `<div class="dcard tot" data-disp="consolidado"><span class="dt">Total consolidado circulante</span><b class="${D.consolidado < 0 ? 'neg' : ''}">${fmt(D.consolidado)}</b><span class="dm"><span>Disponibilidades ${fmt(D.disponivel)}</span><span>Estoques ${fmt(D.estoques)}</span></span></div>`;
+  const es = D && D.escrituracao, ativas = empresas().filter(x => x.ativa !== false);
+  const emp = `<details class="empcard no-print" id="empCard" ${S.empAberto ? 'open' : ''}><summary><span class="emp-ic" aria-hidden="true">${esc((e.nomeFantasia || e.razaoSocial || '?').trim().slice(0, 1).toUpperCase())}</span>
+      <span><span class="emp-nome">${esc(e.razaoSocial)}</span><span class="emp-sub"> · CNPJ ${esc(cnpjF(e.cnpj))} · ${esc(REGIME[e.regime] || e.regime || '')}${crcTxt(e.contador) ? ' · ' + esc(crcTxt(e.contador)) : ''}</span></span>
+      <span class="pill info">Empresa ativa</span></summary>
+    <div class="emp-corpo"><div>
+      ${ativas.length > 1 ? `<div class="campo" style="margin-bottom:10px"><span>Trocar de empresa</span><div class="seg" role="radiogroup" aria-label="Empresa ativa">${ativas.map(x => `<button class="${x.id === e.id ? 'on' : ''}" role="radio" aria-checked="${x.id === e.id}" data-a="emp-sel" data-v="${esc(x.id)}">${esc(x.nomeFantasia || x.razaoSocial)}</button>`).join('')}</div></div>` : ''}
+      <div class="atalhos">
+        <button class="atalho" data-a="emp-lancar"><b>Efetuar lançamentos</b><span>Partidas dobradas, nesta empresa</span></button>
+        <button class="atalho" data-a="emp-ver"><b>Ver lançamentos</b><span>Lista do período, com estorno</span></button>
+        <button class="atalho" data-a="emp-socios"><b>Quadro de sócios (QSA)</b><span>${(e.socios || []).length} sócio(s) · capital ${fmt(e.capitalSocial)}</span></button>
+        <button class="atalho" data-a="emp-escr"><b>Resumo da escrituração</b><span>Σ Débitos × Σ Créditos e integridade</span></button></div></div>
+      <div class="escr"><b style="display:block;margin-bottom:6px">Resumo da escrituração · ${dataBR(S.rl.de)} a ${dataBR(S.rl.ate)}</b>
+        ${es ? `<div class="row"><span>Lançamentos</span><b>${es.lancamentos}</b></div><div class="row"><span>Σ Débitos</span><b>${fmt(es.debitos)}</b></div><div class="row"><span>Σ Créditos</span><b>${fmt(es.creditos)}</b></div>
+        <div class="row"><span>Situação</span>${es.confere ? '<span class="pill ok">Σ D = Σ C</span>' : `<span class="pill bad">Diferença ${fmt(es.debitos - es.creditos)}</span>`}</div>` : '<span class="hint">Carregando…</span>'}
+        <div class="row" style="margin-top:8px"><label class="campo"><span>De</span><input type="date" id="pg-de" value="${esc(S.rl.de)}"></label><label class="campo"><span>Até</span><input type="date" id="pg-ate" value="${esc(S.rl.ate)}"></label><button class="btn sec sm" data-a="pg-aplicar">Aplicar período</button></div></div></div></details>`;
+  return `<div class="topo-disp no-print" role="region" aria-label="Disponibilidades em tempo real">${cards}</div>${emp}`;
+}
+/* ---------- janela (modal) própria ---------- */
+function abrirModal(titulo, corpo, largo = false) { fecharModal(); const d = document.createElement('div'); d.className = 'mdl-ov'; d.id = 'mdl'; d.innerHTML = `<div class="mdl ${largo ? 'largo' : ''}" role="dialog" aria-modal="true" aria-label="${esc(titulo)}"><div class="mdl-h"><h2 style="margin:0">${esc(titulo)}</h2><button class="btn sec sm" data-a="mdl-fechar">Fechar</button></div><div class="mdl-b">${corpo}</div></div>`; document.body.appendChild(d); d.addEventListener('click', ev => { if (ev.target === d) fecharModal(); }); $('[data-a="mdl-fechar"]', d).focus(); return d; }
+function fecharModal() { const d = $('#mdl'); if (d) d.remove(); }
+const opts = (lista, v) => lista.map(([k, r]) => `<option value="${esc(k)}" ${String(v) === String(k) ? 'selected' : ''}>${esc(r)}</option>`).join('');
+const tribChecks = (sel, pref) => { const c = cat(); return [...c.tributosAtuais, ...c.tributosReforma, ...c.outrosTributos].map(t => `<label style="margin-right:10px;white-space:nowrap"><input type="checkbox" data-trib="${pref}" value="${t}" ${sel.includes(t) ? 'checked' : ''}> ${t}${c.tributosReforma.includes(t) ? ' <small class="muted">(reforma)</small>' : ''}</label>`).join(''); };
+const nat = n => (n === 'D' ? 'Devedora' : 'Credora');
+
+/* ---------- aba: plano de contas ---------- */
+function vPlano() {
+  const st = S.st;
+  if (!st.plano.criado) return `<div class="panel"><h2>O plano de contas ainda não foi criado</h2>
+    <p>O ponto de partida combinado é <b>importar as contas que o FCX já usa</b>: o Módulo Contábil cria o plano padrão (comércio varejista, 184 contas com as da Reforma — IBS, CBS e Imposto Seletivo), liga cada conta do FCX a uma conta do plano (de-para) e completa o que faltar.</p>
+    <div class="row">${pode('contabil.plano') ? '<button class="btn" data-a="importar-fcx">Importar contas do FCX</button>' : ''}${pode('contabil.parametros') ? '<button class="btn sec" data-a="plano-padrao">Só criar o plano padrão</button>' : ''}${!pode('contabil.plano') && !pode('contabil.parametros') ? '<p class="muted">Peça a quem gerencia o plano de contas (Gestão de Acessos › Contabilidade · Modificar).</p>' : ''}</div></div>`;
+  const P = S.pl, q = P.busca.toLowerCase().trim(), mapa = porCodigo(), c = cat();
+  const lista = S.contas.filter(x => (P.inativas || x.ativa) && (!P.tipo || x.tipo === P.tipo) && (!P.grupo || String(x.grupo) === P.grupo) && (!q || x.codigo.startsWith(q) || x.nome.toLowerCase().includes(q)));
+  const linhas = lista.map(x => {
+    const ed = P.edit === x.codigo;
+    const row = `<tr class="${x.tipo === 'S' ? 'sint' : ''} ${x.ativa ? '' : 'inativa'}"><td class="mono">${esc(x.codigo)}</td><td class="ind${Math.min(5, x.nivel - 1)}">${esc(x.nome)}${x.redutora ? ' <span class="pill">retificadora</span>' : ''}</td><td>${x.tipo === 'S' ? 'Sintética' : 'Analítica'}</td><td>${nat(x.natureza)}</td><td>${x.dre ? esc(c.dre[x.dre] || x.dre) : '<span class="muted">—</span>'}</td><td>${x.tributos.length ? x.tributos.map(t => `<span class="pill ${c.tributosReforma.includes(t) ? 'info' : ''}">${esc(t)}</span>`).join(' ') : '<span class="muted">—</span>'}</td><td class="no-print">${pode('contabil.plano') ? `<button class="btn sec sm" data-a="pl-editar" data-v="${esc(x.codigo)}" aria-expanded="${ed}">${ed ? 'Fechar' : 'Editar'}</button>` : ''}</td></tr>`;
+    if (!ed) return row;
+    const g = x.grupo >= 4;
+    return row + `<tr class="edit-row"><td colspan="7"><div class="row">
+      <label class="campo" style="flex:2 1 260px"><span>Nome</span><input id="pe-nome" value="${esc(x.nome)}"></label>
+      <label class="campo"><span>Tipo</span><select id="pe-tipo">${opts([['A', 'Analítica'], ['S', 'Sintética']], x.tipo)}</select></label>
+      ${g ? `<label class="campo"><span>Linha da DRE</span><select id="pe-dre"><option value="">—</option>${opts(Object.entries(c.dre), x.dre)}</select></label><label class="campo"><span>Linha da DVA</span><select id="pe-dva"><option value="">—</option>${opts(Object.entries(c.dva), x.dva)}</select></label>` : ''}
+      <label class="campo"><span>Situação</span><select id="pe-ativa">${opts([['1', 'Ativa'], ['0', 'Inativa']], x.ativa ? '1' : '0')}</select></label></div>
+      <div style="margin:8px 0"><span class="hint">Vínculo tributário: </span>${tribChecks(x.tributos, 'pe')}</div>
+      <div class="row"><button class="btn sm" data-a="pl-salvar" data-v="${esc(x.codigo)}">Salvar</button><button class="btn sec sm" data-a="pl-editar" data-v="">Cancelar</button><button class="btn danger sm" data-a="pl-excluir" data-v="${esc(x.codigo)}">Excluir (só sem lançamentos)</button>
+      <span class="hint">Código, grupo e conta-mãe não mudam. Natureza e tipo travam depois do primeiro lançamento.</span></div></td></tr>`;
+  }).join('');
+  const sug = P.sug;
+  const nova = pode('contabil.plano') ? `<details class="panel no-print" id="plNova" ${sug || P.nome ? 'open' : ''}><summary>+ Nova conta (com classificação automática)</summary>
+    <p class="hint" style="margin-top:6px">Digite o nome: a classificação automática sugere grupo, natureza, tipo (sintética/analítica), conta-mãe, código, linhas da DRE/DVA e o vínculo tributário (modelo atual ICMS/PIS/COFINS/ISS ou Reforma IBS/CBS/IS). Confira e ajuste antes de criar.</p>
+    <div class="row"><label class="campo" style="flex:2 1 280px"><span>Nome da conta</span><input id="pn-nome" value="${esc(P.nome)}" placeholder="Ex.: Aluguel a Pagar, Banco Conta Movimento 2, (-) IBS sobre Vendas"></label>
+      <label class="campo" style="flex:1 1 220px"><span>Conta-mãe (opcional)</span><select id="pn-pai"><option value="">— deixar a classificação sugerir —</option>${S.contas.filter(x => x.tipo === 'S' && x.ativa).map(x => `<option value="${esc(x.codigo)}" ${P.pai === x.codigo ? 'selected' : ''}>${esc(x.codigo)} · ${esc(x.nome)}</option>`).join('')}</select></label>
+      <button class="btn sec" data-a="pn-sugerir">Sugerir classificação</button></div>
+    ${sug ? `<div class="note" style="margin-top:10px"><b>Sugestão (confiança ${Math.round(sug.confianca * 100)}%):</b> ${esc(sug.grupo + ' · ' + sug.grupoNome)} · ${nat(sug.natureza)} · ${sug.tipo === 'S' ? 'Sintética' : 'Analítica'}${sug.redutora ? ' · retificadora' : ''} · mãe ${esc(sug.pai || '—')}<br><span class="hint">${esc(sug.motivos.join(' · '))}</span></div>
+      <div class="row"><label class="campo"><span>Código</span><input id="pn-codigo" value="${esc(sug.codigo || '')}" class="mono" style="width:150px"></label>
+        <label class="campo"><span>Tipo</span><select id="pn-tipo">${opts([['A', 'Analítica'], ['S', 'Sintética']], sug.tipo)}</select></label>
+        <label class="campo"><span>Retificadora</span><select id="pn-red">${opts([['0', 'Não'], ['1', 'Sim (natureza oposta)']], sug.redutora ? '1' : '0')}</select></label>
+        ${sug.grupo >= 4 ? `<label class="campo"><span>Linha da DRE</span><select id="pn-dre"><option value="">—</option>${opts(Object.entries(c.dre), sug.dre)}</select></label><label class="campo"><span>Linha da DVA</span><select id="pn-dva"><option value="">—</option>${opts(Object.entries(c.dva), sug.dva)}</select></label>` : ''}</div>
+      <div style="margin:8px 0"><span class="hint">Vínculo tributário: </span>${tribChecks(sug.tributos, 'pn')}</div>
+      <div class="row"><button class="btn" data-a="pn-criar">Criar conta</button><button class="btn sec" data-a="pn-limpar">Descartar</button></div>` : ''}</details>` : '';
+  return `${nova}<div class="panel"><div class="row between no-print" style="margin-bottom:10px"><div class="row">
+      <label class="campo"><span>Buscar</span><input id="pl-busca" type="search" value="${esc(P.busca)}" placeholder="Código ou nome" aria-label="Buscar conta"></label>
+      <label class="campo"><span>Tipo</span><select id="pl-tipo">${opts([['', 'Todas'], ['S', 'Sintéticas'], ['A', 'Analíticas']], P.tipo)}</select></label>
+      <label class="campo"><span>Grupo</span><select id="pl-grupo"><option value="">Todos</option>${opts(Object.entries(c.grupos).map(([k, g]) => [k, k + ' · ' + g.nome]), P.grupo)}</select></label>
+      <label style="display:flex;gap:6px;align-items:center;padding-bottom:8px"><input type="checkbox" id="pl-inativas" ${P.inativas ? 'checked' : ''}> Mostrar inativas</label></div>
+      <span class="hint">${lista.length} conta(s)</span></div>
+    <div class="tbl"><table><thead><tr><th>Código</th><th>Conta</th><th>Tipo</th><th>Natureza</th><th>DRE</th><th>Tributos</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${linhas || '<tr><td colspan="7" class="vazio">Nenhuma conta com esse filtro.</td></tr>'}</tbody></table></div></div>`;
+}
+
+/* ---------- aba: de-para do FCX ---------- */
+const ST_DP = { automatico: ['ok', 'Automático'], revisado: ['info', 'Revisado'], pendente: ['warn', 'Pendente'] };
+function vDepara() {
+  if (!S.dp.itens) return '<div class="panel"><p class="muted" style="margin:0">Carregando o de-para…</p></div>';
+  const D = S.dp, r = D.resumo, q = D.busca.toLowerCase().trim(), gerir = pode('contabil.plano');
+  const lista = D.itens.filter(x => (!D.status || (D.status === 'agrupador' ? x.agrupador : D.status === 'inativa' ? !x.ativa : D.status === 'contabil' ? x.fonte === 'contabil' : x.status === D.status && !x.agrupador)) && (!q || x.chave.toLowerCase().includes(q) || (x.conta || '').startsWith(q) || (x.contaNome || '').toLowerCase().includes(q)));
+  const auto = D.itens.filter(x => x.status === 'automatico' && x.ativa && x.conta);
+  const linhas = lista.map(x => {
+    const s = x.agrupador ? ['', 'Agrupador'] : ST_DP[x.status] || ST_DP.pendente, ed = D.edit === x.chave;
+    const cont = ed ? `<div class="row"><input id="dp-conta" list="${x.agrupador ? 'dlS' : 'dlA'}" value="${esc(x.conta || '')}" class="mono" style="width:150px" aria-label="Conta contábil para ${esc(x.chave)}"><button class="btn sm" data-a="dp-salvar" data-v="${esc(x.chave)}">Salvar</button><button class="btn sec sm" data-a="dp-editar" data-v="">Cancelar</button></div><span class="hint">${x.agrupador ? 'Agrupador do ERP: escolha uma conta sintética.' : 'Recebe lançamentos: escolha uma conta analítica.'}</span>`
+      : x.conta ? `<span class="mono"><b>${esc(x.conta)}</b></span> · ${esc(x.contaNome || '')}` : '<span class="muted">— sem conta —</span>';
+    const acoes = gerir ? `${!ed ? `<button class="btn sec sm" data-a="dp-editar" data-v="${esc(x.chave)}">Alterar</button>` : ''}${x.status !== 'revisado' && x.conta && !ed ? ` <button class="btn sm" data-a="dp-confirmar" data-v="${esc(x.chave)}">Confirmar</button>` : ''} <button class="btn sec sm" data-a="dp-ativa" data-v="${esc(x.chave)}">${x.ativa ? 'Inativar' : 'Reativar'}</button>` : '';
+    return `<tr class="${x.agrupador ? 'sint' : ''} ${x.ativa ? '' : 'inativa'}"><td>${esc(x.chave)}${x.fonte === 'contabil' ? ' <span class="pill info">do Contábil</span>' : ''}</td><td>${cont}</td><td><span class="pill ${s[0]}">${s[1]}</span></td><td class="num">${x.confianca == null ? '—' : Math.round(x.confianca * 100) + '%'}</td><td class="hint">${esc(x.motivo || '')}</td><td class="no-print" style="white-space:nowrap">${acoes}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="row between"><div><h2>De-para do FCX → plano de contas</h2><p class="hint" style="margin:0;max-width:820px">O FCX não cadastra mais contas: a lista dele vem daqui, em modo consulta. Cada conta do FCX (rótulo do ERP, que o painel analítico e a DFC continuam usando) aponta para uma conta do plano único. Os agrupadores do ERP apontam para a sintética correspondente. <b>Pendente</b> = a regra não teve confiança suficiente: confira e confirme.</p></div>
+      <div class="row no-print">${gerir ? `<button class="btn" data-a="importar-fcx">Importar contas do FCX</button>${auto.length ? `<button class="btn sec" data-a="dp-confirmar-todos">Confirmar os ${auto.length} automáticos</button>` : ''}` : ''}</div></div>
+    <div class="chips">${[['', 'Todas', r.total], ['pendente', 'Pendentes', r.pendente], ['automatico', 'Automáticas', r.automatico], ['revisado', 'Revisadas', r.revisado], ['agrupador', 'Agrupadores', r.agrupadores], ['contabil', 'Criadas no Contábil', r.doContabil], ['inativa', 'Inativas', r.inativas]].map(([k, t, n]) => `<button class="btn ${D.status === k ? '' : 'sec'} sm" data-a="dp-filtro" data-v="${k}" aria-pressed="${D.status === k}">${t} · ${n}</button>`).join('')}</div>
+    ${gerir ? `<details class="no-print" style="margin-bottom:10px"><summary>+ Conta nova para o FCX</summary><div class="row" style="margin-top:8px"><label class="campo" style="flex:2 1 300px"><span>Conta do FCX (com o código do ERP)</span><input id="dp-novo" placeholder="Ex.: 4.10.17 – (-) Nova despesa de ocupação"></label><label class="campo"><span>Conta contábil (opcional)</span><input id="dp-novo-conta" list="dlA" class="mono" style="width:150px" placeholder="sugestão automática"></label><button class="btn" data-a="dp-criar">Criar para o FCX</button></div><p class="hint">Sem conta contábil, a regra do ERP sugere; sem código do ERP, a classificação pelo nome sugere e fica pendente.</p></details>` : ''}
+    <div class="row no-print" style="margin-bottom:10px"><label class="campo"><span>Buscar</span><input id="dp-busca" type="search" value="${esc(D.busca)}" placeholder="Conta do FCX ou conta contábil" style="width:300px"></label><span class="hint" style="padding-bottom:8px">${lista.length} de ${r.total}</span></div>
+    <div class="tbl"><table><thead><tr><th>Conta do FCX</th><th>Conta contábil</th><th>Situação</th><th class="num">Confiança</th><th>Motivo</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${linhas || `<tr><td colspan="6" class="vazio">${r.total ? 'Nenhuma conta com esse filtro.' : 'Nada importado ainda: use “Importar contas do FCX”.'}</td></tr>`}</tbody></table></div></div>`;
+}
+
+/* ---------- aba: lançamentos ---------- */
+function totaisLanc() { let d = 0, c = 0; S.lf.itens.forEach(i => { const v = cent(i.valor); if (v > 0) { if (i.dc === 'D') d += v; else c += v; } }); return { d, c }; }
+function lancValido() {
+  const f = S.lf, m = porCodigo(), { d, c } = totaisLanc(), prob = [];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.data)) prob.push('data');
+  if (f.historico.trim().length < 3) prob.push('histórico');
+  const us = f.itens.filter(i => i.conta || i.valor);
+  if (us.length < 2) prob.push('ao menos duas partidas');
+  us.forEach((i, k) => { const x = m.get(i.conta.trim()); if (!x) prob.push(`conta da partida ${k + 1}`); else if (x.tipo !== 'A' || !x.ativa) prob.push(`partida ${k + 1}: conta sintética ou inativa`); if (!(cent(i.valor) > 0)) prob.push(`valor da partida ${k + 1}`); });
+  if (!d || !c) prob.push('um débito e um crédito');
+  if (d !== c) prob.push('débitos = créditos');
+  return { ok: !prob.length, prob, d, c };
+}
+function htmlTotais() { const v = lancValido(), dif = v.d - v.c; return `<span>Débitos: ${fmt(v.d / 100)}</span><span>Créditos: ${fmt(v.c / 100)}</span><span class="${dif ? 'dif' : 'ok'}">${dif ? 'Diferença: ' + fmt(Math.abs(dif) / 100) : '✓ Partidas dobradas: D = C'}</span>${v.ok ? '' : `<span class="hint" style="font-weight:400">Falta: ${esc([...new Set(v.prob)].slice(0, 4).join(', '))}</span>`}`; }
+function atualizarTotais() { const t = $('#lf-tot'); if (t) t.innerHTML = htmlTotais(); const b = $('#lf-gravar'); if (b) b.disabled = !lancValido().ok; }
+function vLancamentos() {
+  const f = S.lf, L = S.ls, m = porCodigo();
+  if (!S.st.plano.criado) return '<div class="panel"><p style="margin:0">Crie o plano de contas antes de lançar (aba Plano de contas).</p></div>';
+  const form = pode('contabil.lancar') ? `<div class="panel no-print"><h2>Novo lançamento (partidas dobradas)</h2>
+    <div class="row"><label class="campo"><span>Data</span><input type="date" id="lf-data" value="${esc(f.data)}"></label><label class="campo" style="flex:3 1 320px"><span>Histórico</span><input id="lf-hist" value="${esc(f.historico)}" placeholder="Ex.: Compra de mercadorias NF 1234"></label><label class="campo" style="flex:1 1 140px"><span>Documento (opcional)</span><input id="lf-doc" value="${esc(f.docRef)}"></label></div>
+    <div style="margin-top:10px">${f.itens.map((i, k) => { const x = m.get(i.conta.trim()); return `<div class="lin-lanc"><input data-li="${k}" data-f="conta" list="dlA" value="${esc(i.conta)}" class="mono" placeholder="Conta analítica" aria-label="Conta da partida ${k + 1}" title="${esc(x ? x.nome : '')}"><select data-li="${k}" data-f="dc" aria-label="Débito ou crédito da partida ${k + 1}">${opts([['D', 'D'], ['C', 'C']], i.dc)}</select><input data-li="${k}" data-f="valor" value="${esc(i.valor)}" inputmode="decimal" placeholder="0,00" style="text-align:right" aria-label="Valor da partida ${k + 1}"><span class="hint opc">${esc(x ? x.nome : i.conta ? 'conta não encontrada' : '')}</span><input class="opc" data-li="${k}" data-f="historico" value="${esc(i.historico)}" placeholder="Histórico da partida (opcional)" aria-label="Histórico da partida ${k + 1}"><button class="btn sec sm" data-a="lf-tirar" data-v="${k}" aria-label="Remover partida ${k + 1}" ${f.itens.length <= 2 ? 'disabled' : ''}>×</button></div>`; }).join('')}</div>
+    <div class="row"><button class="btn sec sm" data-a="lf-mais">+ partida</button></div>
+    <div class="tot-lanc" id="lf-tot" aria-live="polite">${htmlTotais()}</div>
+    <div class="row"><button class="btn" id="lf-gravar" data-a="lf-gravar" ${lancValido().ok ? '' : 'disabled'}>Gravar lançamento</button><button class="btn sec" data-a="lf-limpar">Limpar</button><span class="hint">Depois de gravado, o lançamento não se altera nem se exclui: correções são feitas por estorno (ligado ao original).</span></div></div>` : '';
+  const lista = L.lista ? [...L.lista].reverse() : null;
+  const linhas = lista ? lista.map(l => {
+    const sit = l.estornoDe ? `<span class="pill info">Estorno do nº ${esc((L.lista.find(x => x.id === l.estornoDe) || {}).numero || '')}</span>` : l.estornadoPor ? '<span class="pill warn">Estornado</span>' : l.origem === 'encerramento' ? '<span class="pill">Encerramento</span>' : '';
+    const est = L.estorno === l.id ? `<tr class="edit-row"><td colspan="6"><div class="row"><label class="campo" style="flex:2 1 300px"><span>Motivo do estorno</span><input id="le-motivo" placeholder="Ex.: valor digitado errado"></label><label class="campo"><span>Data do estorno</span><input type="date" id="le-data" value="${hoje()}"></label><button class="btn danger" data-a="le-confirmar" data-v="${esc(l.id)}">Estornar o nº ${l.numero}</button><button class="btn sec" data-a="le-abrir" data-v="">Cancelar</button></div><p class="hint">O estorno inverte todas as partidas (D↔C) e fica ligado ao lançamento original.</p></td></tr>` : '';
+    return `<tr><td class="num mono">${l.numero}</td><td>${dataBR(l.data)}</td><td>${esc(l.historico)}${l.docRef ? ` <span class="hint">· ${esc(l.docRef)}</span>` : ''}<div class="hint">${l.itens.map(i => `${i.dc} ${esc(i.conta)} ${esc(i.contaNome)} ${fmtN(i.valor)}`).join(' · ')}</div></td><td class="num">${fmtN(l.total)}</td><td>${sit}</td><td class="no-print">${pode('contabil.estornar') && !l.estornoDe && !l.estornadoPor ? `<button class="btn sec sm" data-a="le-abrir" data-v="${esc(l.id)}">Estornar</button>` : ''}</td></tr>${est}`;
+  }).join('') : '';
+  return `${form}<div class="panel" id="lista-lanc"><div class="row between"><h2>Lançamentos · ${esc(empAtual().nomeFantasia || empAtual().razaoSocial)}</h2><div class="row no-print"><label class="campo"><span>De</span><input type="date" id="ls-de" value="${esc(L.de)}"></label><label class="campo"><span>Até</span><input type="date" id="ls-ate" value="${esc(L.ate)}"></label><label class="campo"><span>Conta (e filhas)</span><input id="ls-conta" list="dlA" value="${esc(L.conta)}" class="mono" style="width:140px"></label><button class="btn sec" data-a="ls-filtrar">Filtrar</button></div></div>
+    <div class="tbl" style="margin-top:10px"><table><thead><tr><th class="num">Nº</th><th>Data</th><th>Histórico e partidas</th><th class="num">Total</th><th>Situação</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${lista ? linhas || '<tr><td colspan="6" class="vazio">Nenhum lançamento no período.</td></tr>' : '<tr><td colspan="6" class="vazio">Carregando…</td></tr>'}</tbody></table></div></div>`;
+}
+
+/* ---------- aba: relatórios (abas horizontais, KPIs por relatório e comparativo de exercícios) ---------- */
+const RELS = [['diario', 'Livro Diário'], ['caixa', 'Livro Caixa'], ['razao', 'Livro Razão'], ['balancete', 'Balancete Geral'], ['dre', 'DRE CPC 26'], ['dre51', 'DRE CPC 51'], ['balanco', 'Balanço Patrimonial'], ['dra', 'DRA'], ['dmpl', 'DMPL'], ['dfc', 'DFC'], ['dva', 'DVA'], ['lalur', 'LALUR']];
+const CMP = new Set(['dre', 'dre51', 'balanco']);
+const seg = (lista, atual, acao, rot) => `<div class="campo"><span>${rot}</span><div class="seg" role="radiogroup" aria-label="${esc(rot)}">${lista.map(([k, t]) => `<button class="${String(atual) === String(k) ? 'on' : ''}" role="radio" aria-checked="${String(atual) === String(k)}" data-a="${acao}" data-v="${esc(k)}">${esc(t)}</button>`).join('')}</div></div>`;
+const menos1 = d => (d ? `${Number(d.slice(0, 4)) - 1}${d.slice(4)}` : d);
+const rotPer = (de, ate) => (de && ate && de.slice(5) === '01-01' && ate.slice(5) === '12-31' && de.slice(0, 4) === ate.slice(0, 4) ? 'Exercício ' + de.slice(0, 4) : `${dataBR(de)} a ${dataBR(ate)}`);
+function vRelatorios() {
+  if (!S.st.plano.criado) return '<div class="panel"><p style="margin:0">Crie o plano de contas antes (aba Plano de contas).</p></div>';
+  const R = S.rl, p = S.st.parametros, modelo = R.modelo || p.dreModelo, Y = new Date().getFullYear();
+  const tabs = `<div class="subtabs no-print" role="tablist" aria-label="Relatórios contábeis">${RELS.map(([k, t]) => `<button role="tab" id="rt-${k}" aria-selected="${R.tipo === k}" aria-controls="relatorio" data-a="rl-aba" data-v="${k}">${t}</button>`).join('')}</div>`;
+  const exAtivo = R.de && R.ate && R.de.slice(5) === '01-01' && R.ate.slice(5) === '12-31' && R.de.slice(0, 4) === R.ate.slice(0, 4) ? R.de.slice(0, 4) : '';
+  const ctl = `<div class="panel no-print"><div class="row">
+    <label class="campo"><span>De</span><input type="date" id="rl-de" value="${esc(R.de)}"></label><label class="campo"><span>Até</span><input type="date" id="rl-ate" value="${esc(R.ate)}"></label>
+    ${CMP.has(R.tipo) ? seg([Y, Y - 1, Y - 2].map(a => [String(a), String(a)]), exAtivo, 'rl-ex', 'Exercício') + seg([['1', 'Lado a lado com o anterior'], ['0', 'Só o período']], R.comparar ? '1' : '0', 'rl-cmp', 'Comparativo') : ''}
+    ${R.tipo === 'dre' ? seg([['atual', 'Modelo Atual'], ['reforma', 'Nova Reforma']], modelo, 'rl-modelo', 'Modelo da DRE') + (modelo === 'reforma' ? seg([2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033].map(a => [String(a), String(a)]), R.anoReforma || p.reforma.ano, 'rl-anoref', 'Ano da transição') : '') : ''}
+    ${R.tipo === 'razao' || R.tipo === 'caixa' ? `<label class="campo"><span>Conta${R.tipo === 'caixa' ? ' do caixa' : ''}</span><input id="rl-conta" list="dlA" value="${esc(R.tipo === 'caixa' ? R.contaCaixa || '' : R.conta)}" class="mono" style="width:150px" placeholder="${R.tipo === 'caixa' ? '1.1.1.01 (todas)' : '1.1.1.01.001'}"></label>` : ''}
+    ${R.tipo === 'lalur' ? seg([['real', 'Lucro Real (LALUR)'], ['presumido', 'Lucro Presumido']], R.regime || p.regime, 'rl-regime', 'Regime') : ''}
+    <button class="btn" data-a="rl-gerar">Atualizar</button>
+    <span style="flex:1"></span>${R.dados ? '<button class="btn sec" data-a="rl-imprimir">Pré-visualizar / imprimir</button><button class="btn" data-a="rl-pdf">Exportar para PDF Relatório Selecionado</button>' : ''}</div></div>`;
+  const corpo = R.carregando ? '<div class="panel"><p class="muted" style="margin:0">Gerando…</p></div>' : R.dados ? `<div class="panel" id="relatorio" role="tabpanel" aria-labelledby="rt-${R.tipo}">${kpisRel(R.dados)}${relHTML(R.dados)}</div>`
+    : `<div class="panel"><p class="muted" style="margin:0">${R.tipo === 'razao' ? 'Informe a conta e clique em Atualizar.' : 'Clique em Atualizar.'}</p></div>`;
+  return tabs + ctl + corpo;
+}
+const K = (t, v, sub = '', cls = '') => `<div class="kpi ${cls}"><span class="kt">${t}</span><b>${v}</b>${sub ? `<span class="ks">${sub}</span>` : ''}</div>`;
+const varPct = (a, b) => (b ? (a - b) / Math.abs(b) : null);
+const pctTxt = v => (v == null ? '—' : (v > 0 ? '+' : '') + (Math.round(v * 1000) / 10).toLocaleString('pt-BR') + '%');
+function seloCRC() { const c = empAtual().contador || {}; return c.crc ? `<div class="selo"><span class="selo-ic" aria-hidden="true">✓</span><div><b>Responsável técnico</b><span>${esc(c.nome || 'Contador(a)')} · CRC ${esc(c.crc)}${c.uf ? ' · ' + esc(c.uf) : ''}</span></div></div>` : `<div class="note warn no-print">Cadastre o contador responsável (nome e CRC) na aba Empresas para o selo do responsável técnico.</div>`; }
+function kpisRel(d) {
+  if (d.tipo === 'diario' && d.resumo) { const r = d.resumo, F = ['', '1 débito : 1 crédito', '1 débito : n créditos', 'n débitos : 1 crédito', 'n débitos : n créditos'];
+    return `<div class="kpis">${K('Total de débitos', fmt(r.debitos))}${K('Total de créditos', fmt(r.creditos))}${K('Integridade das partidas dobradas', r.equilibrado ? 'Equilibrado' : 'Desequilibrado', r.equilibrado ? 'Σ D = Σ C em todos os lançamentos' : `diferença de ${fmt(r.diferenca)} · ${r.desequilibrados} lançamento(s)`, r.equilibrado ? 'ok' : 'bad')}${K('Lançamentos', r.lancamentos)}</div>
+      <div class="kpis">${[1, 2, 3, 4].map(n => K(`${n}ª fórmula`, r.formulas[n], F[n] + (r.lancamentos ? ' · ' + Math.round(r.formulas[n] / r.lancamentos * 100) + '%' : ''))).join('')}</div>`; }
+  if (d.tipo === 'caixa') return `<div class="kpis">${K('Saldo inicial', fmt(d.saldoAnterior))}${K('Total de entradas', fmt(d.entradas), '', 'ok')}${K('Total de saídas', fmt(d.saidas), '', 'warn')}${K('Saldo final', fmt(d.saldoFinal), d.saldoFinal < 0 ? 'caixa credor: revise' : '', d.saldoFinal < 0 ? 'bad' : '')}</div>${seloCRC()}`;
+  if (d.tipo === 'razao') return `<div class="kpis">${K('Saldo anterior', dc(d.saldoAnterior))}${K('Débitos', fmt(d.entradas))}${K('Créditos', fmt(d.saidas))}${K('Saldo final', dc(d.saldoFinal))}</div>`;
+  if (d.tipo === 'balancete') return `<div class="kpis">${K('Σ Débitos', fmt(d.totais.debitos))}${K('Σ Créditos', fmt(d.totais.creditos))}${K('Saldos devedores', fmt(d.totais.saldoDevedor))}${K('Saldos credores', fmt(d.totais.saldoCredor))}${K('Conferência', d.confere ? 'Confere' : 'Não confere', '', d.confere ? 'ok' : 'bad')}</div>`;
+  if (d.tipo === 'dre' || d.tipo === 'dre51') { const v = k => (d.linhas.find(l => l.chave === k) || {}).valor || 0, c = S.rl.cmp, vc = k => c ? (c.linhas.find(l => l.chave === k) || {}).valor || 0 : null, rl = v('rl'), ll = v('ll');
+    return `<div class="kpis">${K('Receita líquida', fmt(rl), c ? `anterior ${fmt(vc('rl'))} · ${pctTxt(varPct(rl, vc('rl')))}` : '')}${K(d.tipo === 'dre51' ? 'Resultado operacional' : 'Lucro bruto', fmt(v(d.tipo === 'dre51' ? 'rop' : 'lb')))}${K('Resultado líquido', fmt(ll), c ? `anterior ${fmt(vc('ll'))} · ${pctTxt(varPct(ll, vc('ll')))}` : '', ll < 0 ? 'bad' : 'ok')}${K('Margem líquida', rl ? pct(ll / rl) + '%' : '—')}</div>`; }
+  if (d.tipo === 'balanco') { const c = S.rl.cmp, pl = d.patrimonioLiquido.total, pc = d.passivo.circulante.total;
+    return `<div class="kpis">${K('Ativo total', fmt(d.ativo.total), c ? 'anterior ' + fmt(c.ativo.total) : '')}${K('Passivo total', fmt(d.passivo.total), c ? 'anterior ' + fmt(c.passivo.total) : '')}${K('Patrimônio líquido', fmt(pl), c ? 'anterior ' + fmt(c.patrimonioLiquido.total) : '', pl < 0 ? 'bad' : 'ok')}${K('Liquidez corrente', pc ? (d.ativo.circulante.total / pc).toFixed(2).replace('.', ',') : '—', 'ativo circulante ÷ passivo circulante')}${K('Conferência', d.confere ? 'Ativo = Passivo + PL' : 'Diferença ' + fmt(d.diferenca), '', d.confere ? 'ok' : 'bad')}</div>`; }
+  if (d.tipo === 'dfc') { const b = id => (d.blocos.find(x => x.id === id) || {}).total || 0;
+    return `<div class="kpis">${K('Caixa inicial', fmt(d.caixaInicial))}${K('Operacional', fmt(b('operacional')), '', b('operacional') < 0 ? 'warn' : 'ok')}${K('Investimento', fmt(b('investimento')))}${K('Financiamento', fmt(b('financiamento')))}${K('Caixa final', fmt(d.caixaFinal), 'variação ' + fmt(d.variacao))}</div>`; }
+  return '';
+}
+const vl = v => `<td class="num">${fmtN(v)}</td>`;
+const dc = (v, natureza) => { const n = Number(v) || 0; return n ? `${fmtN(Math.abs(n))} ${n > 0 ? 'D' : 'C'}` : '0,00'; };
+function relHTML(d) {
+  const tit = (RELS.find(r => r[0] === d.tipo) || [0, d.tipo])[1], e = empAtual(), cab = `<div class="rel-cab"><h2 style="margin:0">${esc(tit)}${d.tipo === 'dre' ? ' · ' + (d.modelo === 'reforma' ? 'Nova Reforma (simulação)' : 'Modelo Atual') : ''}</h2><span class="hint">${esc(e.razaoSocial)} · CNPJ ${esc(cnpjF(e.cnpj))} · ${rotPer(d.de, d.ate)} · gerado em ${new Date(d.geradoEm).toLocaleString('pt-BR')}</span></div>`;
+  const C = S.rl.cmp && S.rl.comparar && CMP.has(d.tipo) ? S.rl.cmp : null, colA = rotPer(d.de, d.ate), colB = C ? rotPer(C.de, C.ate) : '';
+  const notas = l => (l && l.length ? `<ul class="hint" style="margin:10px 0 0;padding-left:18px">${l.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '');
+  const tabela = (th, tr) => `<div class="tbl"><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></div>`;
+  if (d.tipo === 'diario') return cab + tabela('<th>Nº</th><th>Data</th><th>Conta</th><th>Histórico</th><th class="num">Débito</th><th class="num">Crédito</th>', d.lancamentos.map(l => `<tr class="sub"><td class="mono">${l.numero}</td><td>${dataBR(l.data)}</td><td colspan="2">${esc(l.historico)}${l.estornoDe ? ' <span class="pill info">estorno</span>' : ''}</td><td></td><td></td></tr>${l.itens.map(i => `<tr><td></td><td></td><td class="mono ${i.dc === 'C' ? 'ind1' : ''}">${esc(i.conta)} · ${esc(i.contaNome)}</td><td class="hint">${esc(i.historico || '')}</td>${i.dc === 'D' ? vl(i.valor) + '<td></td>' : '<td></td>' + vl(i.valor)}</tr>`).join('')}`).join('') + `<tr class="tot"><td colspan="4">${d.totais.lancamentos} lançamento(s)</td>${vl(d.totais.valor)}${vl(d.totais.valor)}</tr>`);
+  if (d.tipo === 'caixa') return cab + `<p><b class="mono">${esc(d.conta.codigo)}</b> · ${esc(d.conta.nome)} · saldo inicial ${fmt(d.saldoAnterior)}</p>` + tabela('<th>Data</th><th>Nº</th><th>Histórico</th><th>Contrapartida</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th>', `<tr class="sub"><td colspan="6">Saldo inicial</td>${vl(d.saldoAnterior)}</tr>` + d.linhas.map(l => `<tr><td>${dataBR(l.data)}</td><td class="mono">${l.numero}</td><td>${esc(l.historico)}</td><td class="mono">${esc(l.contrapartidas.join(', '))}</td>${vl(l.debito)}${vl(l.credito)}<td class="num">${fmtN(l.saldo)}</td></tr>`).join('') + `<tr class="tot"><td colspan="4">Totais e saldo final</td>${vl(d.entradas)}${vl(d.saidas)}${vl(d.saldoFinal)}</tr>`);
+  if (d.tipo === 'dfc') return cab + tabela('<th>Demonstração dos Fluxos de Caixa (método direto)</th><th class="num">Valor</th>', `<tr class="sub"><td>Caixa e equivalentes no início do período</td>${vl(d.caixaInicial)}</tr>` + d.blocos.map(b => `<tr class="tit"><td colspan="2">${esc(b.rotulo)}</td></tr>${b.linhas.map(l => `<tr><td class="ind1"><span class="mono">${esc(l.codigo)}</span> · ${esc(l.nome)}</td>${vl(l.valor)}</tr>`).join('') || '<tr><td class="ind1 hint" colspan="2">Sem movimento</td></tr>'}<tr class="sub"><td>Caixa líquido das ${esc(b.rotulo.toLowerCase())}</td>${vl(b.total)}</tr>`).join('') + `<tr class="sub"><td>Variação do caixa no período</td>${vl(d.variacao)}</tr><tr class="tot"><td>Caixa e equivalentes no fim do período</td>${vl(d.caixaFinal)}</tr>`) + notas(d.notas);
+  if ((d.tipo === 'dre' || d.tipo === 'dre51') && C) { const m = new Map(C.linhas.map(l => [l.chave, l.valor])); return cab + tabela(`<th>${d.tipo === 'dre51' ? 'DRE · CPC 51 (IFRS 18)' : 'DRE · CPC 26'}</th><th class="num">${esc(colA)}</th><th class="num">${esc(colB)}</th><th class="num">Variação</th>`, d.linhas.map(l => l.tipo === 'titulo' ? `<tr class="tit"><td colspan="4">${esc(l.rotulo)}</td></tr>` : `<tr class="${l.tipo === 'total' ? 'tot' : l.tipo === 'subtotal' ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}${vl(m.get(l.chave) || 0)}${(() => { const v = varPct(l.valor, m.get(l.chave) || 0); return `<td class="num var ${v > 0 ? 'up' : v < 0 ? 'dn' : ''}">${pctTxt(v)}</td>`; })()}</tr>`).join('')).replace('<table>', '<table class="cmp-t">') + notas(d.notas); }
+  if (d.tipo === 'dre51') return cab + tabela('<th>DRE · CPC 51 (IFRS 18)</th><th class="num">Valor</th>', d.linhas.map(l => l.tipo === 'titulo' ? `<tr class="tit"><td colspan="2">${esc(l.rotulo)}</td></tr>` : `<tr class="${l.tipo === 'total' ? 'tot' : l.tipo === 'subtotal' ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}</tr>`).join('')) + notas(d.notas);
+  if (d.tipo === 'balanco' && C) { const mp = g => new Map(g.contas.map(c => [c.codigo + c.nome, c.valor])), lin = (rot, a, b, cls = '') => `<tr class="${cls}"><td>${rot}</td>${vl(a)}${vl(b)}${(() => { const v = varPct(a, b); return `<td class="num var ${v > 0 ? 'up' : v < 0 ? 'dn' : ''}">${pctTxt(v)}</td>`; })()}</tr>`;
+    const bloco = (t, g, h) => { const m = mp(h), ks = [...new Set([...g.contas.map(c => c.codigo + c.nome), ...h.contas.map(c => c.codigo + c.nome)])], nm = new Map([...h.contas, ...g.contas].map(c => [c.codigo + c.nome, c])); const a = mp(g);
+      return lin(t, g.total, h.total, 'sub') + ks.map(k => lin(`<span class="mono ind1">${esc(nm.get(k).codigo)}</span> · ${esc(nm.get(k).nome)}`, a.get(k) || 0, m.get(k) || 0)).join(''); };
+    return cab + `<p>${d.confere ? '<span class="pill ok">Confere: Ativo = Passivo + PL</span>' : `<span class="pill bad">Diferença de ${fmt(d.diferenca)}</span>`}</p>` + tabela(`<th>Balanço Patrimonial</th><th class="num">${esc(colA)}</th><th class="num">${esc(colB)}</th><th class="num">Variação</th>`,
+      `<tr class="tit"><td colspan="4">Ativo</td></tr>` + bloco('Ativo circulante', d.ativo.circulante, C.ativo.circulante) + bloco('Ativo não circulante', d.ativo.naoCirculante, C.ativo.naoCirculante) + lin('Total do Ativo', d.ativo.total, C.ativo.total, 'tot')
+      + `<tr class="tit"><td colspan="4">Passivo e Patrimônio Líquido</td></tr>` + bloco('Passivo circulante', d.passivo.circulante, C.passivo.circulante) + bloco('Passivo não circulante', d.passivo.naoCirculante, C.passivo.naoCirculante) + bloco('Patrimônio líquido', d.patrimonioLiquido, C.patrimonioLiquido) + lin('Total do Passivo + PL', d.passivoMaisPL, C.passivoMaisPL, 'tot')).replace('<table>', '<table class="cmp-t">'); }
+  if (d.tipo === 'razao') return cab + `<p><b class="mono">${esc(d.conta.codigo)}</b> · ${esc(d.conta.nome)} · natureza ${nat(d.conta.natureza).toLowerCase()} · saldo anterior ${dc(d.saldoAnterior)}</p>` + tabela('<th>Data</th><th>Nº</th><th>Histórico</th><th>Contrapartida</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Saldo</th>', d.linhas.map(l => `<tr><td>${dataBR(l.data)}</td><td class="mono">${l.numero}</td><td>${esc(l.historico)}</td><td class="mono">${esc(l.contrapartidas.join(', '))}</td>${vl(l.debito)}${vl(l.credito)}<td class="num">${fmtN(Math.abs(l.saldo))} ${l.dc}</td></tr>`).join('') + `<tr class="tot"><td colspan="6">Saldo final</td><td class="num">${dc(d.saldoFinal)}</td></tr>`);
+  if (d.tipo === 'balancete') return cab + `<p>${d.confere ? '<span class="pill ok">Confere: débitos = créditos</span>' : '<span class="pill bad">Não confere</span>'}</p>` + tabela('<th>Código</th><th>Conta</th><th class="num">Saldo anterior</th><th class="num">Débitos</th><th class="num">Créditos</th><th class="num">Saldo final</th>', d.linhas.map(l => `<tr class="${l.tipo === 'S' ? 'sint' : ''}"><td class="mono">${esc(l.codigo)}</td><td class="ind${Math.min(5, l.nivel - 1)}">${esc(l.nome)}</td><td class="num">${dc(l.saldoAnterior)}</td>${vl(l.debitos)}${vl(l.creditos)}<td class="num">${fmtN(l.saldoFinal)} ${l.dc}</td></tr>`).join('') + `<tr class="tot"><td colspan="3">Totais (analíticas)</td>${vl(d.totais.debitos)}${vl(d.totais.creditos)}<td class="num">D ${fmtN(d.totais.saldoDevedor)} · C ${fmtN(d.totais.saldoCredor)}</td></tr>`);
+  if (d.tipo === 'dre') { const c = d.comparativo; return cab + tabela('<th>Demonstração do Resultado do Exercício</th><th class="num">Valor</th>', d.linhas.map(l => `<tr class="${l.tipo === 'total' ? 'tot' : l.tipo === 'subtotal' ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}</tr>`).join(''))
+    + (c ? `<h3>Comparativo: Modelo Atual × Nova Reforma${d.transicao ? ' (' + d.transicao.ano + ')' : ''}</h3><div class="cmp"><div><span class="hint">Lucro líquido · Modelo Atual</span><b>${fmt(c.atual.lucroLiquido)}</b><span class="hint">Receita líquida ${fmt(c.atual.receitaLiquida)}</span></div><div><span class="hint">Lucro líquido · Nova Reforma</span><b>${fmt(c.reforma.lucroLiquido)}</b><span class="hint">Receita líquida ${fmt(c.reforma.receitaLiquida)}</span></div><div><span class="hint">Diferença no lucro</span><b>${fmt(c.diferencaLucro)}</b><span class="hint">${d.transicao ? esc(d.transicao.nota) : ''}</span></div></div>` : '') + notas(d.notas); }
+  if (d.tipo === 'balanco') { const bloco = (t, g) => `<tr class="sub"><td colspan="2">${t}</td>${vl(g.total)}</tr>${g.contas.map(c => `<tr><td class="mono ind1">${esc(c.codigo)}</td><td>${esc(c.nome)}</td>${vl(c.valor)}</tr>`).join('')}`;
+    return cab + `<p>${d.confere ? '<span class="pill ok">Confere: Ativo = Passivo + PL</span>' : `<span class="pill bad">Diferença de ${fmt(d.diferenca)}</span>`}</p><div class="grid2">` + tabela('<th colspan="2">Ativo</th><th class="num">Valor</th>', bloco('Circulante', d.ativo.circulante) + bloco('Não circulante', d.ativo.naoCirculante) + `<tr class="tot"><td colspan="2">Total do Ativo</td>${vl(d.ativo.total)}</tr>`)
+      + tabela('<th colspan="2">Passivo e Patrimônio Líquido</th><th class="num">Valor</th>', bloco('Passivo circulante', d.passivo.circulante) + bloco('Passivo não circulante', d.passivo.naoCirculante) + bloco('Patrimônio líquido', d.patrimonioLiquido) + `<tr class="tot"><td colspan="2">Total do Passivo + PL</td>${vl(d.passivoMaisPL)}</tr>`) + '</div>'; }
+  if (d.tipo === 'dmpl') return cab + tabela(`<th>Movimentação</th>${d.colunas.map(c => `<th class="num">${esc(c.nome)}</th>`).join('')}<th class="num">Total</th>`, d.linhas.map((l, i) => `<tr class="${i === 0 || i === d.linhas.length - 1 ? 'tot' : ''}"><td>${esc(l.rotulo)}</td>${d.colunas.map(c => vl(l.valores[c.codigo])).join('')}${vl(l.total)}</tr>`).join(''));
+  if (d.tipo === 'dra') return cab + tabela('<th>Demonstração do Resultado Abrangente</th><th class="num">Valor</th>', d.linhas.map(l => `<tr class="${l.total ? 'tot' : ''}"><td>${esc(l.rotulo)}</td>${vl(l.valor)}</tr>`).join(''));
+  if (d.tipo === 'dva') return cab + `<p>${d.conferencia.ok ? '<span class="pill ok">Confere com o lucro líquido da DRE</span>' : `<span class="pill bad">Diferença de ${fmt(d.conferencia.diferenca)} com a DRE</span>`}</p>` + tabela('<th>Demonstração do Valor Adicionado</th><th class="num">Valor</th>', d.linhas.map(l => `<tr class="${l.total ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}</tr>`).join('')) + notas(d.notas);
+  if (d.tipo === 'lalur') { const L = (r, v, t) => `<tr class="${t || ''}"><td>${r}</td>${vl(v)}</tr>`;
+    const corpo = d.regime === 'real' ? L('Lucro antes do IRPJ e da CSLL (LAIR)', d.lair) + L('(+) Adições (IRPJ)', d.adicoesIRPJ) + L('(−) Exclusões (IRPJ)', -d.exclusoesIRPJ) + L('Lucro ajustado', d.lucroAjustado, 'sub') + L('(−) Compensação de prejuízos (até 30%)', -d.compensacaoIRPJ) + L('Lucro real', d.lucroReal, 'sub') + L('Base da CSLL', d.baseCSLL) + L('IRPJ (15% + adicional de 10%)', d.irpj) + L('CSLL (9%)', d.csll) + L('Total de IRPJ e CSLL', d.total, 'tot') + (d.prejuizoFiscal ? L('Prejuízo fiscal do período (Parte B)', d.prejuizoFiscal) : '')
+      : L('Receita bruta', d.receitaBruta) + L('Base presumida do IRPJ', d.baseIRPJ) + L('Base presumida da CSLL', d.baseCSLL) + (d.excedenteLC224 ? L('Receita acima de R$ 5 milhões (LC 224/2025)', d.excedenteLC224) : '') + L('IRPJ (15% + adicional de 10%)', d.irpj) + L('CSLL (9%)', d.csll) + L('Total de IRPJ e CSLL', d.total, 'tot');
+    return cab + `<p><span class="pill info">${d.regime === 'real' ? 'Lucro Real' : 'Lucro Presumido'}</span> · ano ${d.ano} · IRPJ/CSLL já escriturados no período: ${fmt(d.irpjCsllEscriturados)}</p>` + tabela('<th>Apuração</th><th class="num">Valor</th>', corpo) + notas(d.notas); }
+  return cab + `<pre class="mono">${esc(JSON.stringify(d, null, 2))}</pre>`;
+}
+
+
+/* ---------- v13.91 · aba: Radar de Saúde Empresarial ---------- */
+const SEV = { alta: ['bad', 'Alta'], media: ['warn', 'Média'], baixa: ['info', 'Baixa'] };
+const indF = (v, tipo) => (v == null ? '—' : tipo === 'x' ? v.toFixed(2).replace('.', ',') : pct(v) + '%');
+function vRadar() {
+  if (!S.st.plano.criado) return '<div class="panel"><p style="margin:0">Crie o plano de contas antes (aba Plano de contas).</p></div>';
+  const R = S.radar; if (!R) return '<div class="panel"><p class="muted" style="margin:0">Analisando a escrituração…</p></div>';
+  if (R.erro) return `<div class="panel"><p style="margin:0">${esc(R.erro)}</p><button class="btn sec sm" data-a="rd-atualizar" style="margin-top:8px">Tentar de novo</button></div>`;
+  const sc = R.score, I = R.indicadores, F = { saudavel: 'Saudável', atencao: 'Atenção', critico: 'Crítico' };
+  const ind = [['Liquidez corrente', indF(I.liquidezCorrente, 'x'), 'AC ÷ PC'], ['Liquidez seca', indF(I.liquidezSeca, 'x'), '(AC − estoques) ÷ PC'], ['Liquidez imediata', indF(I.liquidezImediata, 'x'), 'disponível ÷ PC'], ['Endividamento geral', indF(I.endividamento), 'passivo ÷ ativo'], ['Margem líquida', indF(I.margemLiquida), 'lucro ÷ receita líquida'], ['Retorno sobre o PL', indF(I.roe), 'lucro ÷ PL'], ['Capital circulante líquido', fmt(I.capitalCirculante), 'AC − PC'], ['Patrimônio líquido', fmt(I.patrimonioLiquido), '']];
+  const sugs = R.sugestoes.map((x, k) => { const [c, t] = SEV[x.severidade] || SEV.baixa, a = x.acao;
+    return `<li class="sug ${x.severidade}"><span class="pill ${c}">${t}</span><div><b>${esc(x.titulo)}</b><p>${esc(x.texto)}</p>${x.lista && x.lista.length ? `<ul class="sug-l">${x.lista.map(l => `<li>nº ${l.numero} · ${dataBR(l.data)} · ${esc(l.historico)} · ${fmt(l.total)}</li>`).join('')}</ul>` : ''}</div>
+      <div class="sug-a">${a ? `<button class="btn ${a.tipo === 'lancamento' || a.tipo === 'retencoes' ? '' : 'sec'} sm" data-a="sug" data-v="${k}">${esc(a.rotulo)}</button>` : ''}</div></li>`; }).join('');
+  return `<div class="panel"><div class="row between"><div><h2 style="margin:0">Radar de Saúde Empresarial</h2><p class="hint" style="margin:2px 0 0">${esc(R.empresa.razaoSocial)} · ${rotPer(R.de, R.ate)} · analisado em ${new Date(R.geradoEm).toLocaleString('pt-BR')}</p></div>
+      <div class="row no-print"><button class="btn sec" data-a="rd-atualizar">Reanalisar</button><button class="btn" data-a="laudo">Gerar Laudo Técnico &amp; Parecer Contábil</button></div></div>
+    <div class="radar-top" style="margin-top:12px"><div class="ring" style="--p:${sc.total}" data-faixa="${sc.faixa}" role="img" aria-label="Score de integridade e saúde financeira: ${sc.total} de 100 (${F[sc.faixa]})"><div><div><b>${sc.total}</b><span>de 100 · ${F[sc.faixa]}</span></div></div></div>
+      <div><b>Score de Integridade e Saúde Financeira</b><p class="hint" style="margin:2px 0 8px">Calculado agora a partir do banco: cadeia de conferência, partidas dobradas, saldos invertidos, conciliação com o FCX, liquidez, endividamento, margem e conformidade tributária.</p>
+        <div class="subnotas"><div><div class="row"><span>Integridade da escrituração</span><b>${sc.integridade}%</b></div><div class="barra"><i style="width:${sc.integridade}%"></i></div></div><div><div class="row"><span>Saúde financeira</span><b>${sc.saude}%</b></div><div class="barra"><i style="width:${sc.saude}%"></i></div></div></div>
+        <p style="margin:10px 0 0"><span class="pill ${R.parecer.opiniao === 'sem ressalvas' ? 'ok' : R.parecer.opiniao === 'com ressalvas' ? 'warn' : 'bad'}">Parecer ${esc(R.parecer.opiniao)}</span> <span class="hint">${esc(R.parecer.conclusao)}</span></p></div></div></div>
+    <div class="kpis">${ind.map(([t, v, sub]) => K(t, v, sub)).join('')}</div>
+    <div class="panel"><div class="row between"><h2 style="margin:0">Sugestões de Ação e Correção</h2><span class="hint">${R.sugestoes.length} item(ns) · Motor de Crítica Contábil</span></div>
+      ${R.sugestoes.length ? `<ul class="sugs" style="margin-top:10px">${sugs}</ul>` : '<p class="hint" style="margin:8px 0 0">Nenhuma inconsistência encontrada no período.</p>'}
+      <p class="hint" style="margin:10px 0 0">As correções de saldo voltam como <b>proposta de lançamento</b>: o formulário abre preenchido, você confere e grava. Nada é lançado sem conferência.</p></div>
+    <details class="panel"><summary>Composição do score (${sc.fatores.length} fatores)</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Fator</th><th class="num">Peso</th><th class="num">Nota</th><th style="width:40%"><span class="sr">Barra</span></th></tr></thead><tbody>${sc.fatores.map(f => `<tr><td>${esc(f.rotulo)}</td><td class="num">${f.peso}</td><td class="num">${f.nota}%</td><td><div class="barra"><i style="width:${f.nota}%"></i></div></td></tr>`).join('')}</tbody></table></div></details>`;
+}
+
+/* ---------- v13.91 · documentos (relatório selecionado e laudo) ---------- */
+const CSS_DOC = `.tbl{overflow:visible;border:0;max-height:none} table{border-collapse:collapse;width:100%;font-size:9.5pt} th,td{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top} th{background:#f2f2f2;font-size:8.5pt;color:#333}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} tr.sint td{font-weight:700} tr.tot td{font-weight:700;border-top:2px solid #999} tr.sub td{font-weight:600} tr.tit td{font-weight:800;text-transform:uppercase;font-size:8pt;background:#f6f6f6}
+  .pill{display:inline-block;font-size:8pt;font-weight:700;padding:1px 6px;border:1px solid #bbb;border-radius:10px} .hint,.muted{color:#555;font-size:8.5pt} .mono{font-family:ui-monospace,Menlo,monospace;font-size:8.5pt}
+  .ind1{padding-left:14px}.ind2{padding-left:26px}.ind3{padding-left:38px}.ind4{padding-left:50px}.ind5{padding-left:62px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px} .cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0} .cmp div{border:1px solid #ccc;border-radius:6px;padding:6px} .cmp b{display:block;font-size:12pt}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 8px} .kpi{border:1px solid #ccc;border-radius:6px;padding:5px 7px;break-inside:avoid} .kpi .kt{display:block;font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555} .kpi b{display:block;font-size:11pt} .kpi .ks{display:block;font-size:7.5pt;color:#555}
+  .selo{display:flex;gap:8px;align-items:center;border:1px dashed #888;border-radius:6px;padding:5px 8px;margin:0 0 8px} .selo-ic{font-weight:800} .selo b{display:block;font-size:8.5pt}
+  .rel-cab{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px} .no-print,button{display:none!important} h2{font-size:12pt;margin:0 0 6px} h3{font-size:10.5pt;margin:12px 0 4px}
+  .lau-id{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:9.5pt;border:1px solid #ccc;border-radius:6px;padding:8px 10px;margin:0 0 10px} .lau-id b{font-weight:700}
+  .score{display:flex;gap:14px;align-items:center;border:1px solid #ccc;border-radius:6px;padding:8px 10px;margin:0 0 8px} .score .n{font-size:26pt;font-weight:800;line-height:1} .sev{font-weight:700} .sev.alta{color:#B63A2F} .sev.media{color:#9A6408} .sev.baixa{color:#1B2362}
+  .parecer{border-left:3px solid #1B2362;padding:6px 10px;background:#f7f7fa;margin:6px 0} .ass{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:46px;break-inside:avoid} .ass div{border-top:1px solid #222;padding-top:6px;font-size:9pt;text-align:center} .disc{font-size:8pt;color:#555;margin-top:18px}`;
+function montarDoc(tit, sub, corpo, paisagem = false) {
+  const D = PAI && PAI.Documento;
+  if (D && D.montar) return D.montar(tit, D.cabecalho(tit, sub) + corpo, { paisagem, margem: '12mm 10mm', css: CSS_DOC });
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(tit)}</title><style>@page{size:A4${paisagem ? ' landscape' : ''};margin:12mm 10mm} body{font-family:system-ui,Arial,sans-serif;color:#151934;font-size:10pt;margin:0;padding:16px} ${CSS_DOC}</style></head><body><h1 style="font-size:16pt;margin:0">${esc(tit)}</h1><p class="hint" style="margin:2px 0 12px">${esc(sub)}</p>${corpo}</body></html>`;
+}
+function previaDoc(tit, html, nome) {
+  const D = PAI && PAI.Documento;
+  if (D && D.previa) return D.previa(tit, html, nome);
+  const m = abrirModal('Pré-visualização — ' + tit, `<div class="row" style="margin-bottom:8px"><button class="btn" data-a="mdl-imprimir">Imprimir / salvar em PDF</button></div><iframe title="${esc(tit)}"></iframe>`, true);
+  $('iframe', m).srcdoc = html;
+}
+function nomeArq(t) { return `${t.replace(/[^\wÀ-ú]+/g, '_')}_${(empAtual().nomeFantasia || empAtual().razaoSocial || '').replace(/[^\wÀ-ú]+/g, '_').slice(0, 30)}_${S.rl.de}_a_${S.rl.ate}`; }
+function docRelatorio() {
+  const R = S.rl, el = $('#relatorio'); if (!el) return null;
+  const tit = (RELS.find(x => x[0] === R.tipo) || [R.tipo, 'Relatório'])[1], e = empAtual();
+  const sub = `${e.razaoSocial} · CNPJ ${cnpjF(e.cnpj)} · ${rotPer(R.de, R.ate)}${crcTxt(e.contador) ? ' · Responsável técnico: ' + crcTxt(e.contador) : ''}`;
+  return { tit, nome: nomeArq(tit), html: montarDoc(tit, sub, el.innerHTML, ['balancete', 'diario', 'razao', 'caixa', 'dmpl'].includes(R.tipo) || (R.tipo === 'balanco' && !!R.cmp) || (CMP.has(R.tipo) && !!R.cmp)) };
+}
+async function laudoHTML() {
+  const e = empAtual(), p = qe({ de: S.rl.de, ate: S.rl.ate }), R = S.radar && !S.radar.erro ? S.radar : await api('GET', '/radar?' + p);
+  const [dr, bp, fc] = await Promise.all([api('GET', '/relatorios/dre?' + qe({ de: S.rl.de, ate: S.rl.ate, modelo: 'atual' })), api('GET', '/relatorios/balanco?' + p), api('GET', '/relatorios/dfc?' + p)]);
+  const v = k => (dr.linhas.find(l => l.chave === k) || {}).valor || 0, T = (th, tr) => `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`, L = (r, x, c = '') => `<tr class="${c}"><td>${r}</td><td class="num">${fmtN(x)}</td></tr>`;
+  const c = e.contador || {}, adm = (e.socios || []).find(s => /admin/i.test(s.qualificacao || '')) || (e.socios || [])[0], I = R.indicadores, sc = R.score, F = { saudavel: 'Saudável', atencao: 'Atenção', critico: 'Crítico' };
+  const corpo = `<div class="lau-id"><div><b>Empresa:</b> ${esc(e.razaoSocial)}${e.nomeFantasia ? ' (' + esc(e.nomeFantasia) + ')' : ''}</div><div><b>CNPJ:</b> ${esc(cnpjF(e.cnpj))}</div><div><b>Regime tributário:</b> ${esc(REGIME[e.regime] || e.regime || '—')}</div><div><b>Capital social:</b> ${fmt(e.capitalSocial)}</div>
+      <div><b>Período examinado:</b> ${rotPer(S.rl.de, S.rl.ate)}</div><div><b>Responsável técnico:</b> ${c.crc ? esc(crcTxt(c)) : '<i>não cadastrado</i>'}</div>${e.endereco ? `<div style="grid-column:1/-1"><b>Endereço:</b> ${esc(e.endereco)}</div>` : ''}</div>
+    <h3>1. Resumo dos demonstrativos</h3><div class="grid2"><div>${T('<th>Demonstração do Resultado</th><th class="num">R$</th>', L('Receita líquida', v('rl')) + L('(-) Custo das mercadorias e serviços', v('cmv')) + L('Lucro bruto', v('lb'), 'sub') + L('Despesas operacionais (líquidas)', v('rop') - v('lb')) + L('Resultado financeiro', v('rf') + v('df')) + L('(-) IRPJ e CSLL', v('ir')) + L(v('ll') >= 0 ? 'Lucro líquido' : 'Prejuízo', v('ll'), 'tot'))}</div>
+      <div>${T('<th>Balanço Patrimonial</th><th class="num">R$</th>', L('Ativo circulante', bp.ativo.circulante.total) + L('Ativo não circulante', bp.ativo.naoCirculante.total) + L('Total do Ativo', bp.ativo.total, 'sub') + L('Passivo circulante', bp.passivo.circulante.total) + L('Passivo não circulante', bp.passivo.naoCirculante.total) + L('Patrimônio líquido', bp.patrimonioLiquido.total) + L('Total do Passivo + PL', bp.passivoMaisPL, 'tot'))}
+      <p class="hint">${bp.confere ? 'Balanço fechado: Ativo = Passivo + PL.' : 'Atenção: o Balanço não fecha (diferença de ' + fmt(bp.diferenca) + ').'}</p></div></div>
+    ${T('<th>Fluxo de Caixa (método direto)</th><th class="num">R$</th>', L('Caixa no início do período', fc.caixaInicial) + fc.blocos.map(b => L(b.rotulo, b.total)).join('') + L('Caixa no fim do período', fc.caixaFinal, 'tot'))}
+    <h3>2. Radar de Saúde Empresarial</h3><div class="score"><div class="n">${sc.total}</div><div><b>Score de integridade e saúde financeira: ${sc.total}/100 · ${F[sc.faixa]}</b><br><span class="hint">Integridade da escrituração ${sc.integridade}% · Saúde financeira ${sc.saude}% · cadeia de conferência ${R.integridade.cadeiaIntegra ? 'íntegra' : 'com quebras'} · partidas dobradas ${R.integridade.equilibrados ? 'equilibradas' : 'com diferença'}</span></div></div>
+    ${T('<th>Indicador</th><th class="num">Valor</th><th>Leitura</th>', [['Liquidez corrente', indF(I.liquidezCorrente, 'x'), I.liquidezCorrente == null ? '—' : I.liquidezCorrente >= 1 ? 'cobre o passivo de curto prazo' : 'não cobre o passivo de curto prazo'], ['Liquidez seca', indF(I.liquidezSeca, 'x'), 'sem depender dos estoques'], ['Liquidez imediata', indF(I.liquidezImediata, 'x'), 'disponível ÷ passivo circulante'], ['Endividamento geral', indF(I.endividamento), 'passivo ÷ ativo'], ['Margem líquida', indF(I.margemLiquida), 'lucro ÷ receita líquida'], ['Retorno sobre o PL', indF(I.roe), 'lucro ÷ patrimônio líquido']].map(([a, b, c2]) => `<tr><td>${a}</td><td class="num">${b}</td><td class="hint">${c2}</td></tr>`).join(''))}
+    <h3>3. Diagnóstico de riscos</h3>${R.sugestoes.length ? T('<th>Risco</th><th>Descrição</th>', R.sugestoes.map(x => `<tr><td><span class="sev ${x.severidade}">${(SEV[x.severidade] || SEV.baixa)[1]}</span></td><td><b>${esc(x.titulo)}</b><br><span class="hint">${esc(x.texto)}</span></td></tr>`).join('')) : '<p>Nenhum risco relevante identificado no período.</p>'}
+    <h3>4. Parecer conclusivo da Inteligência de Auditoria</h3><div class="parecer"><p style="margin:0"><b>Opinião: ${esc(R.parecer.opiniao)}.</b> ${esc(R.parecer.conclusao)}</p></div>
+    ${R.parecer.ajustes.length ? `<p style="margin:6px 0 2px"><b>Ajustes sugeridos:</b></p><ol style="margin:0;padding-left:18px">${R.parecer.ajustes.map(a => `<li>${esc(a)}</li>`).join('')}</ol>` : '<p>Nenhum ajuste sugerido.</p>'}
+    <div class="ass"><div><b>${esc(c.nome || 'Contador(a) responsável')}</b><br>${c.crc ? 'CRC ' + esc(c.crc) : 'CRC ______________'}<br>Contador(a) responsável · assinatura digital ou física</div><div><b>${esc(adm ? adm.nome : 'Diretoria')}</b><br>${esc(adm ? adm.qualificacao || 'Administrador(a)' : 'Administrador(a)')}<br>${esc(e.razaoSocial)} · Diretoria</div></div>
+    <p class="disc">Laudo gerado em ${new Date().toLocaleString('pt-BR')} pelo Módulo Contábil a partir da escrituração registrada (lançamentos em partidas dobradas, cadeia de conferência por hash). É um relatório técnico de apoio à gestão: deve ser revisado e assinado pelo contador responsável e não substitui o relatório do auditor independente (NBC TA 700).</p>`;
+  const tit = 'Laudo Técnico e Parecer Contábil', sub = `${e.razaoSocial} · CNPJ ${cnpjF(e.cnpj)} · ${rotPer(S.rl.de, S.rl.ate)}`;
+  return { tit, nome: nomeArq('Laudo_Tecnico'), html: montarDoc(tit, sub, corpo, false) };
+}
+
+/* ---------- v13.91 · aba: Empresas (cadastro por CNPJ, QSA e contador) ---------- */
+function novaEmpresa() { return { id: null, cnpj: '', razaoSocial: '', nomeFantasia: '', regime: 'presumido', capitalSocial: '', endereco: '', socios: [{ nome: '', documento: '', qualificacao: 'Sócio-Administrador', participacao: '' }], contador: { nome: '', crc: '', uf: '', email: '' }, ativa: true }; }
+function vEmpresas() {
+  const ed = pode('contabil.parametros'), F = S.ef;
+  const linhas = empresas().map(e => `<tr class="${e.ativa === false ? 'inativa' : ''}"><td><b>${esc(e.razaoSocial)}</b>${e.nomeFantasia ? `<div class="hint">${esc(e.nomeFantasia)}</div>` : ''}${e.principal ? ' <span class="pill">principal</span>' : ''}${e.id === empAtual().id ? ' <span class="pill info">ativa</span>' : ''}</td><td class="mono">${esc(cnpjF(e.cnpj))}</td><td>${esc(REGIME[e.regime] || e.regime)}</td><td class="num">${fmtN(e.capitalSocial)}</td><td>${(e.socios || []).length}</td><td>${crcTxt(e.contador) ? esc(crcTxt(e.contador)) : '<span class="muted">—</span>'}</td>
+    <td class="no-print" style="white-space:nowrap">${e.id !== empAtual().id && e.ativa !== false ? `<button class="btn sec sm" data-a="emp-sel" data-v="${esc(e.id)}">Tornar ativa</button> ` : ''}${ed ? `<button class="btn sec sm" data-a="ef-editar" data-v="${esc(e.id)}">Editar</button>` : ''}</td></tr>`).join('');
+  const inp = (rot, k, v, extra = '') => `<label class="campo" ${extra}><span>${rot}</span><input data-ef="${k}" value="${esc(v == null ? '' : v)}"></label>`;
+  const form = F ? `<div class="panel"><h2>${F.id ? 'Editar empresa' : 'Nova empresa'}</h2>
+      <div class="row">${inp('CNPJ', 'cnpj', F.cnpj, 'style="flex:1 1 170px"')}${inp('Razão social', 'razaoSocial', F.razaoSocial, 'style="flex:3 1 300px"')}${inp('Nome fantasia', 'nomeFantasia', F.nomeFantasia, 'style="flex:2 1 200px"')}</div>
+      <div class="row" style="margin-top:8px">${seg(Object.entries(REGIME), F.regime, 'ef-regime', 'Regime tributário')}${inp('Capital social (R$)', 'capitalSocial', F.capitalSocial, 'style="flex:0 1 160px"')}${inp('Endereço', 'endereco', F.endereco, 'style="flex:3 1 280px"')}</div>
+      <h3>Quadro de sócios e administradores (QSA)</h3>${F.socios.map((x, k) => `<div class="lin-soc"><input data-si="${k}" data-f="nome" value="${esc(x.nome)}" placeholder="Nome do sócio" aria-label="Nome do sócio ${k + 1}"><input data-si="${k}" data-f="documento" value="${esc(x.documento)}" placeholder="CPF/CNPJ (pode mascarar)" aria-label="Documento do sócio ${k + 1}"><input data-si="${k}" data-f="qualificacao" value="${esc(x.qualificacao)}" placeholder="Qualificação" aria-label="Qualificação do sócio ${k + 1}"><input data-si="${k}" data-f="participacao" value="${esc(x.participacao)}" inputmode="decimal" placeholder="%" aria-label="Participação do sócio ${k + 1} em %" style="text-align:right"><button class="btn sec sm" data-a="ef-tirar" data-v="${k}" aria-label="Remover sócio ${k + 1}">×</button></div>`).join('')}
+      <button class="btn sec sm" data-a="ef-mais">+ sócio</button>
+      <h3>Contador responsável</h3><div class="row">${inp('Nome', 'contador.nome', F.contador.nome, 'style="flex:2 1 220px"')}${inp('CRC', 'contador.crc', F.contador.crc, 'style="flex:1 1 150px"')}${inp('UF', 'contador.uf', F.contador.uf, 'style="flex:0 1 70px"')}${inp('E-mail', 'contador.email', F.contador.email, 'style="flex:2 1 220px"')}</div>
+      <p class="hint">CRC no formato UF-000000/O (ex.: PE-012345/O). Documentos dos sócios são opcionais: para a LGPD, prefira o CPF mascarado (***.444.777-**).</p>
+      <div class="row"><button class="btn" data-a="ef-salvar">Salvar empresa</button><button class="btn sec" data-a="ef-cancelar">Cancelar</button>${F.id && !(empresas().find(x => x.id === F.id) || {}).principal ? `<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-ef="ativa" ${F.ativa ? 'checked' : ''}> Empresa ativa</label>` : ''}</div></div>` : '';
+  return `${form}<div class="panel"><div class="row between"><div><h2 style="margin:0">Empresas</h2><p class="hint" style="margin:2px 0 0">Plano de contas único; lançamentos, relatórios e Radar separados por empresa (CNPJ).</p></div>${ed && !F ? '<button class="btn" data-a="ef-nova">+ Nova empresa</button>' : ''}</div>
+    <div class="tbl" style="margin-top:10px"><table><thead><tr><th>Razão social</th><th>CNPJ</th><th>Regime</th><th class="num">Capital social</th><th>Sócios</th><th>Contador (CRC)</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div></div>`;
+}
+/* ---------- aba: parâmetros ---------- */
+function vParametros() {
+  const p = S.st.parametros, ed = pode('contabil.parametros'), dis = ed ? '' : 'disabled', P = S.pr;
+  const pl = S.contas.filter(c => c.grupo === 3 && c.tipo === 'A');
+  return `<div class="grid2"><div class="panel"><h2>Regime e DRE</h2>
+      <div class="row" role="radiogroup" aria-label="Regime tributário">${[['real', 'Lucro Real (com LALUR)'], ['presumido', 'Lucro Presumido']].map(([k, t]) => `<label style="display:flex;gap:6px;align-items:center"><input type="radio" name="pp-regime" value="${k}" ${p.regime === k ? 'checked' : ''} ${dis}> ${t}</label>`).join('')}</div>
+      <h3>Presunção (Lucro Presumido), em %</h3><div class="row">${[['irpjComercio', 'IRPJ comércio'], ['csllComercio', 'CSLL comércio'], ['irpjServicos', 'IRPJ serviços'], ['csllServicos', 'CSLL serviços']].map(([k, t]) => `<label class="campo"><span>${t}</span><input id="pp-${k}" value="${pct(p.presumido[k])}" inputmode="decimal" style="width:90px" ${dis}></label>`).join('')}</div>
+      <label style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="pp-lc224" ${p.lc224 ? 'checked' : ''} ${dis}> Aplicar o acréscimo de 10% da LC 224/2025 sobre a receita acima de R$ 5 milhões/ano <span class="hint">(há liminares: confirme com o tributário)</span></label>
+      <h3>DRE padrão</h3><div class="row">${[['atual', 'Modelo Atual (ICMS/PIS/COFINS/ISS)'], ['reforma', 'Nova Reforma (IBS/CBS/IS)']].map(([k, t]) => `<label style="display:flex;gap:6px;align-items:center"><input type="radio" name="pp-dre" value="${k}" ${p.dreModelo === k ? 'checked' : ''} ${dis}> ${t}</label>`).join('')}</div>
+      <h3>Simulação da Reforma (alíquotas de referência, em %)</h3><div class="row"><label class="campo"><span>Ano</span><input id="pp-ano" value="${esc(p.reforma.ano)}" inputmode="numeric" style="width:80px" ${dis}></label>${['cbs', 'ibs', 'is'].map(k => `<label class="campo"><span>${k.toUpperCase()}</span><input id="pp-${k}" value="${pct(p.reforma[k])}" inputmode="decimal" style="width:80px" ${dis}></label>`).join('')}</div>
+      <p class="hint" style="margin-top:6px">2026 é o ano-teste (CBS 0,9% e IBS 0,1%, compensáveis); de 2027 a 2032 a DRE da Reforma aplica a transição da LC 214/2025 automaticamente; em 2033, o regime pleno.</p>
+      <h3>Encerramento do exercício</h3><label class="campo"><span>Conta de Lucros ou Prejuízos Acumulados</span><select id="pp-res" ${dis}>${opts(pl.map(c => [c.codigo, c.codigo + ' · ' + c.nome]), p.contaResultado)}</select></label>
+      ${ed ? '<div class="row" style="margin-top:12px"><button class="btn" data-a="pp-salvar">Salvar parâmetros</button></div>' : ''}</div>
+    <div><div class="panel"><h2>Fechamento de período</h2><p class="hint">Nada pode ser lançado (nem estornado) com data até o fechamento. Só o Master reabre um período fechado.</p>
+      <div class="row"><label class="campo"><span>Fechado até</span><input type="date" id="pf-data" value="${esc(p.fechadoAte || '')}" ${dis}></label>${ed ? '<button class="btn sec" data-a="pf-salvar">Gravar fechamento</button>' : ''}</div></div>
+      <div class="panel"><h2>LALUR · adições, exclusões e compensações</h2>
+      <div class="row"><label class="campo"><span>Ano</span><input id="lz-ano" value="${P.ano}" inputmode="numeric" style="width:80px"></label><button class="btn sec sm" data-a="lz-ver">Ver</button></div>
+      ${P.lalur ? `<div class="tbl" style="margin-top:8px;max-height:260px"><table><thead><tr><th>Tipo</th><th>Base</th><th>Descrição</th><th class="num">Valor</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${P.lalur.map(a => `<tr><td>${{ adicao: 'Adição', exclusao: 'Exclusão', compensacao: 'Compensação' }[a.tipo]} <span class="hint">(Parte ${a.parte})</span></td><td>${a.base === 'ambos' ? 'IRPJ e CSLL' : a.base.toUpperCase()}</td><td>${esc(a.descricao)}</td>${vl(a.valor)}<td class="no-print">${ed ? `<button class="btn danger sm" data-a="lz-tirar" data-v="${a.id}">Remover</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" class="vazio">Sem ajustes neste ano.</td></tr>'}</tbody></table></div>` : ''}
+      ${ed ? `<div class="row" style="margin-top:8px"><label class="campo"><span>Tipo</span><select id="lz-tipo">${opts([['adicao', 'Adição'], ['exclusao', 'Exclusão'], ['compensacao', 'Compensação de prejuízo']], 'adicao')}</select></label><label class="campo"><span>Base</span><select id="lz-base">${opts([['ambos', 'IRPJ e CSLL'], ['irpj', 'Só IRPJ'], ['csll', 'Só CSLL']], 'ambos')}</select></label><label class="campo" style="flex:2 1 200px"><span>Descrição</span><input id="lz-desc" placeholder="Ex.: multas não dedutíveis"></label><label class="campo"><span>Valor</span><input id="lz-valor" inputmode="decimal" style="width:110px"></label><button class="btn sec" data-a="lz-incluir">Incluir</button></div>` : ''}</div>
+      <div class="panel"><h2>Encerramento e conferência</h2>
+      ${pode('contabil.estornar') ? `<div class="row"><label class="campo"><span>Encerrar o exercício de</span><input id="pe-ano" value="${new Date().getFullYear() - 1}" inputmode="numeric" style="width:80px"></label><button class="btn sec" data-a="enc">Encerrar (zera o resultado contra ${esc(p.contaResultado)})</button></div>` : ''}
+      <div class="row" style="margin-top:10px"><button class="btn sec" data-a="integ">Conferir a integridade dos lançamentos</button></div>
+      ${P.integ ? `<p style="margin-top:8px">${P.integ.cadeiaIntegra && P.integ.equilibrados ? `<span class="pill ok">Íntegro</span> ${P.integ.lancamentos} lançamento(s): cadeia de conferência sem quebras e todos com D = C.` : `<span class="pill bad">Atenção</span> ${P.integ.quebras.length ? 'quebra na cadeia nos nº ' + P.integ.quebras.join(', ') + '. ' : ''}${P.integ.desequilibrados.length ? 'Desequilibrados: nº ' + P.integ.desequilibrados.join(', ') + '.' : ''}`}</p>` : ''}</div></div></div>`;
+}
+
+/* ---------- ações ---------- */
+async function recarregarBase() { await carregarBase(); render(); }
+async function importarFCX() {
+  if (!PAI || !PAI.PainelFCX || !PAI.PainelFCX.contasFCX) return toast('Abra o Módulo Contábil pelo painel (menu Contabilidade) para importar as contas do FCX.');
+  toast('Lendo as contas do FCX…');
+  const f = await PAI.PainelFCX.contasFCX();
+  const r = await api('POST', '/importar-fcx', { contas: f.contas, usadas: f.usadas });
+  await carregarBase(); await carregarDepara(); S.aba = 'depara'; render(); avisarFCX();
+  toast(`${r.planoCriado ? 'Plano padrão criado (' + r.planoCriado + ' contas). ' : ''}${r.novos} conta(s) do FCX mapeadas${r.criadas.length ? ', ' + r.criadas.length + ' conta(s) nova(s) no plano' : ''}${r.complemento ? ', ' + r.complemento + ' da Reforma para o FCX' : ''} · ${r.resumo.pendente} pendente(s) de revisão.`);
+}
+const acoes = {
+  async recarregar() { S.erro = null; await iniciar(); },
+  aba(el) { return irAba(el.dataset.v); },
+  async 'plano-padrao'() { const r = await api('POST', '/plano-padrao'); await recarregarBase(); toast(`Plano padrão criado: ${r.criadas} contas.`); },
+  'importar-fcx': importarFCX,
+  'pl-editar'(el) { S.pl.edit = el.dataset.v || null; render(); },
+  async 'pl-salvar'(el) {
+    const c = S.contas.find(x => x.codigo === el.dataset.v), d = { nome: $('#pe-nome').value, tipo: $('#pe-tipo').value, ativa: $('#pe-ativa').value === '1', tributos: $$('[data-trib="pe"]:checked').map(x => x.value) };
+    if ($('#pe-dre')) { d.dre = $('#pe-dre').value || null; d.dva = $('#pe-dva').value || null; }
+    await api('PUT', '/contas?codigo=' + encodeURIComponent(c.codigo), d); S.pl.edit = null; await recarregarBase(); avisarFCX(); toast('Conta ' + c.codigo + ' atualizada.');
+  },
+  async 'pl-excluir'(el) { if (!confirmar('ex' + el.dataset.v, `Excluir a conta ${el.dataset.v}?`)) return; await api('DELETE', '/contas?codigo=' + encodeURIComponent(el.dataset.v)); S.pl.edit = null; await recarregarBase(); toast('Conta excluída.'); },
+  async 'pn-sugerir'() { S.pl.nome = $('#pn-nome').value; S.pl.pai = $('#pn-pai').value; if (S.pl.nome.trim().length < 2) return toast('Digite o nome da conta.'); S.pl.sug = (await api('POST', '/classificar', { nome: S.pl.nome, pai: S.pl.pai || undefined })).sugestao; render(); },
+  async 'pn-criar'() {
+    const g = S.pl.sug, d = { nome: $('#pn-nome').value, codigo: $('#pn-codigo').value.trim() || undefined, tipo: $('#pn-tipo').value, redutora: $('#pn-red').value === '1', tributos: $$('[data-trib="pn"]:checked').map(x => x.value) };
+    if ($('#pn-dre')) { d.dre = $('#pn-dre').value || null; d.dva = $('#pn-dva').value || null; }
+    const r = await api('POST', '/contas', d); S.pl.sug = null; S.pl.nome = ''; S.pl.pai = ''; await recarregarBase(); toast(`Conta ${r.conta.codigo} · ${r.conta.nome} criada.`); void g;
+  },
+  'pn-limpar'() { S.pl.sug = null; S.pl.nome = ''; S.pl.pai = ''; render(); },
+  'dp-filtro'(el) { S.dp.status = el.dataset.v; render(); },
+  'dp-editar'(el) { S.dp.edit = el.dataset.v || null; render(); if (S.dp.edit) $('#dp-conta')?.focus(); },
+  async 'dp-salvar'(el) { const conta = $('#dp-conta').value.trim(); const r = await api('PUT', '/depara', { itens: [{ chave: el.dataset.v, conta }] }); S.dp.edit = null; await aplicarDepara(r); toast('Conta do FCX revisada.'); },
+  async 'dp-confirmar'(el) { const x = S.dp.itens.find(i => i.chave === el.dataset.v); const r = await api('PUT', '/depara', { itens: [{ chave: x.chave, conta: x.conta }] }); await aplicarDepara(r); },
+  async 'dp-confirmar-todos'() { const l = S.dp.itens.filter(x => x.status === 'automatico' && x.ativa && x.conta); if (!confirmar('dpall', `Confirmar as ${l.length} contas mapeadas automaticamente?`)) return; const r = await api('PUT', '/depara', { itens: l.map(x => ({ chave: x.chave, conta: x.conta })) }); await aplicarDepara(r); toast(`${l.length} conta(s) confirmadas.`); },
+  async 'dp-ativa'(el) { const x = S.dp.itens.find(i => i.chave === el.dataset.v); const r = await api('PUT', '/depara', { itens: [{ chave: x.chave, ativa: !x.ativa, status: x.status === 'revisado' ? undefined : x.status }] }); await aplicarDepara(r); toast(x.ativa ? 'Conta inativada: sai da lista do FCX (lançamentos antigos continuam).' : 'Conta reativada no FCX.'); },
+  async 'dp-criar'() { const rotulo = $('#dp-novo').value.trim(), conta = $('#dp-novo-conta').value.trim(); const r = await api('POST', '/depara', { rotulo, conta: conta || undefined }); await carregarDepara(); await carregarBase(); render(); avisarFCX(); toast(`"${r.item.chave}" criada para o FCX → ${r.item.conta || 'sem conta'} (${ST_DP[r.item.status][1].toLowerCase()}).`); },
+  'lf-mais'() { S.lf.itens.push({ conta: '', dc: S.lf.itens.length % 2 ? 'C' : 'D', valor: '', historico: '' }); render(); },
+  'lf-tirar'(el) { S.lf.itens.splice(Number(el.dataset.v), 1); render(); },
+  'lf-limpar'() { S.lf = novoLanc(); render(); },
+  async 'lf-gravar'() {
+    const v = lancValido(); if (!v.ok) return toast('Confira o lançamento: ' + [...new Set(v.prob)].join(', ') + '.');
+    const f = S.lf, r = await api('POST', '/lancamentos', { empresa: empAtual().id, data: f.data, historico: f.historico, docRef: f.docRef || undefined, itens: f.itens.filter(i => i.conta || i.valor).map(i => ({ conta: i.conta.trim(), dc: i.dc, valor: lerValor(i.valor), historico: i.historico || undefined })) });
+    S.lf = novoLanc(); S.radar = null; S.rl.dados = null; await carregarBase(); await carregarLancs(); await carregarDisp(); render(); toast(`Lançamento nº ${r.lancamento.numero} gravado (${fmt(r.lancamento.total)}) em ${empAtual().nomeFantasia || empAtual().razaoSocial}.`);
+  },
+  async 'ls-filtrar'() { S.ls.de = $('#ls-de').value; S.ls.ate = $('#ls-ate').value; S.ls.conta = $('#ls-conta').value.trim(); await carregarLancs(); render(); },
+  'le-abrir'(el) { S.ls.estorno = el.dataset.v || null; render(); if (S.ls.estorno) $('#le-motivo')?.focus(); },
+  async 'le-confirmar'(el) { const r = await api('POST', '/lancamentos/estorno', { id: el.dataset.v, motivo: $('#le-motivo').value, data: $('#le-data').value }); S.ls.estorno = null; S.radar = null; S.rl.dados = null; await carregarBase(); await carregarLancs(); await carregarDisp(); render(); toast(`Estorno nº ${r.estorno.numero} gravado, ligado ao lançamento original.`); },
+  'rl-modelo'(el) { S.rl.modelo = el.dataset.v; return acoes['rl-gerar'](); },
+  'rl-anoref'(el) { S.rl.anoReforma = el.dataset.v; return acoes['rl-gerar'](); },
+  'rl-regime'(el) { S.rl.regime = el.dataset.v; return acoes['rl-gerar'](); },
+  'rl-cmp'(el) { S.rl.comparar = el.dataset.v === '1'; return acoes['rl-gerar'](); },
+  async 'rl-ex'(el) { const a = el.dataset.v; S.rl.de = `${a}-01-01`; S.rl.ate = `${a}-12-31`; S.disp = null; await acoes['rl-gerar'](); await carregarDisp(); S.radar = null; render(); },
+  async 'rl-aba'(el) { const R = S.rl; lerCtlRel(); R.tipo = el.dataset.v; R.dados = null; R.cmp = null; render(); $('#rt-' + R.tipo)?.focus(); if (R.tipo !== 'razao' || R.conta) await acoes['rl-gerar'](); },
+  async 'rl-gerar'() {
+    const R = S.rl; lerCtlRel(); const p = qe({ de: R.de, ate: R.ate });
+    if (R.tipo === 'dre') { p.set('modelo', R.modelo || S.st.parametros.dreModelo); if ((R.modelo || S.st.parametros.dreModelo) === 'reforma' && R.anoReforma) p.set('anoReforma', R.anoReforma); }
+    if (R.tipo === 'razao') { if (!R.conta) { R.dados = null; render(); return toast('Informe a conta do razão.'); } p.set('conta', R.conta); }
+    if (R.tipo === 'caixa' && R.contaCaixa) p.set('conta', R.contaCaixa);
+    if (R.tipo === 'lalur') p.set('regime', R.regime || S.st.parametros.regime);
+    R.carregando = true; render();
+    try { const [a, b] = await Promise.all([api('GET', `/relatorios/${R.tipo}?${p}`), CMP.has(R.tipo) && R.comparar ? api('GET', `/relatorios/${R.tipo}?${(() => { const q = new URLSearchParams(p); q.set('de', menos1(R.de)); q.set('ate', menos1(R.ate)); return q; })()}`).catch(() => null) : null]);
+      R.dados = a; R.cmp = b; } finally { R.carregando = false; render(); }
+  },
+  async 'rl-pdf'() {
+    const d = docRelatorio(); if (!d) return toast('Gere o relatório antes.');
+    const D = PAI && PAI.Documento; if (D && D.pdfDireto) { toast('Gerando o PDF em A4…'); return D.pdfDireto(d.tit, d.html, d.nome); }
+    previaDoc(d.tit, d.html, d.nome);
+  },
+  async laudo() { toast('Montando o laudo técnico…'); const d = await laudoHTML(); previaDoc(d.tit, d.html, d.nome); },
+  'rd-atualizar'() { return carregarRadar(); },
+  async sug(el) {
+    const x = (S.radar && S.radar.sugestoes || [])[Number(el.dataset.v)]; const a = x && x.acao; if (!a) return;
+    if (a.tipo === 'lancamento') { if (!pode('contabil.lancar')) return toast('Seu acesso não lança: peça a quem lança no Módulo Contábil.'); S.lf = { data: S.rl.ate && S.rl.ate < hoje() ? S.rl.ate : hoje(), historico: a.proposta.historico, docRef: 'RADAR-' + x.id.replace(/^inv:/, ''), itens: a.proposta.itens.map(i => ({ conta: i.conta, dc: i.dc, valor: fmtN(i.valor), historico: '' })) }; await irAba('lancamentos'); toast('Correção proposta pelo Motor de Crítica: confira as partidas e clique em Gravar lançamento.'); $('#lf-hist')?.focus(); return; }
+    if (a.tipo === 'retencoes') { const r = await api('POST', '/radar/corrigir', { tipo: 'retencoes' }); await carregarBase(); await carregarRadar(); avisarFCX(); return toast(r.criadas.length ? `${r.criadas.length} conta(s) de retenções criadas no plano (2.1.3.03).` : 'As contas de retenções já existiam.'); }
+    if (a.tipo === 'razao') { S.rl.tipo = 'razao'; S.rl.conta = a.conta; S.rl.dados = null; await irAba('relatorios'); return; }
+    if (a.tipo === 'relatorio') { S.rl.tipo = a.rel === 'dre26' ? 'dre' : a.rel; if (a.modelo) S.rl.modelo = a.modelo; S.rl.dados = null; await irAba('relatorios'); return; }
+    if (a.tipo === 'lancamentos') return irAba('lancamentos');
+    if (a.tipo === 'aba') return irAba(a.aba);
+  },
+  'mdl-fechar'() { fecharModal(); },
+  'mdl-imprimir'() { const f = $('#mdl iframe'); try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não foi possível imprimir.'); } },
+  async 'emp-sel'(el) { S.emp = el.dataset.v; try { localStorage.setItem(KEMP, S.emp); } catch (e) { } toast('Empresa ativa: ' + (empAtual().nomeFantasia || empAtual().razaoSocial)); await aoMudarContexto(); },
+  async 'emp-lancar'() { S.empAberto = false; await irAba('lancamentos'); $('#lf-hist') ? $('#lf-hist').focus() : toast('Seu acesso não lança no Módulo Contábil.'); },
+  async 'emp-ver'() { S.empAberto = false; await irAba('lancamentos'); $('#lista-lanc')?.scrollIntoView({ block: 'start' }); },
+  'emp-socios'() { const e = empAtual(), so = e.socios || []; abrirModal('Quadro de sócios e administradores', `<p class="hint" style="margin-top:0">${esc(e.razaoSocial)} · CNPJ ${esc(cnpjF(e.cnpj))} · capital social ${fmt(e.capitalSocial)}</p>${so.length ? `<div class="tbl"><table><thead><tr><th>Sócio</th><th>Documento</th><th>Qualificação</th><th class="num">Participação</th><th class="num">Capital</th></tr></thead><tbody>${so.map(x => `<tr><td>${esc(x.nome)}</td><td class="mono">${esc(x.documento || '—')}</td><td>${esc(x.qualificacao || '')}</td><td class="num">${fmtN(x.participacao)}%</td><td class="num">${fmtN((Number(e.capitalSocial) || 0) * (Number(x.participacao) || 0) / 100)}</td></tr>`).join('')}<tr class="tot"><td colspan="3">Total</td><td class="num">${fmtN(so.reduce((a, x) => a + (Number(x.participacao) || 0), 0))}%</td><td class="num">${fmtN(e.capitalSocial)}</td></tr></tbody></table></div>` : '<p>Nenhum sócio cadastrado.</p>'}<p class="hint">Responsável técnico: ${esc(crcTxt(e.contador) || 'não cadastrado')}</p>${pode('contabil.parametros') ? `<button class="btn sec sm" data-a="ef-editar" data-v="${esc(e.id)}">Editar na aba Empresas</button>` : ''}`); },
+  async 'emp-escr'() { const es = S.disp && S.disp.escrituracao, ig = await api('GET', '/integridade'); abrirModal('Resumo da escrituração', `<div class="kpis">${K('Lançamentos no período', es ? es.lancamentos : '—')}${K('Σ Débitos', es ? fmt(es.debitos) : '—')}${K('Σ Créditos', es ? fmt(es.creditos) : '—')}${K('Partidas dobradas', es && es.confere ? 'Σ D = Σ C' : 'Diferença', '', es && es.confere ? 'ok' : 'bad')}</div><p>${ig.cadeiaIntegra && ig.equilibrados ? `<span class="pill ok">Íntegro</span> ${ig.lancamentos} lançamento(s) no banco: cadeia de conferência sem quebras e todos com D = C.` : `<span class="pill bad">Atenção</span> ${ig.quebras.length ? 'quebra na cadeia nos nº ' + ig.quebras.join(', ') + '. ' : ''}${ig.desequilibrados.length ? 'Desequilibrados: nº ' + ig.desequilibrados.join(', ') : ''}`}</p><p class="hint">${esc(empAtual().razaoSocial)} · ${dataBR(S.rl.de)} a ${dataBR(S.rl.ate)}</p>`); },
+  async 'pg-aplicar'() { const de = $('#pg-de').value, ate = $('#pg-ate').value; if (!de || !ate || de > ate) return toast('Período inválido.'); S.rl.de = S.ls.de = de; S.rl.ate = S.ls.ate = ate; await aoMudarContexto(); },
+  'ef-nova'() { S.ef = novaEmpresa(); render(); $('[data-ef="cnpj"]')?.focus(); },
+  'ef-editar'(el) { const e = empresas().find(x => x.id === el.dataset.v); if (!e) return; fecharModal(); S.ef = JSON.parse(JSON.stringify({ ...novaEmpresa(), ...e, capitalSocial: fmtN(e.capitalSocial), socios: (e.socios || []).length ? e.socios.map(x => ({ ...x, participacao: fmtN(x.participacao) })) : novaEmpresa().socios, contador: { ...novaEmpresa().contador, ...(e.contador || {}) } })); if (S.aba !== 'empresas') return irAba('empresas'); render(); },
+  'ef-cancelar'() { S.ef = null; render(); },
+  'ef-regime'(el) { S.ef.regime = el.dataset.v; render(); },
+  'ef-mais'() { S.ef.socios.push({ nome: '', documento: '', qualificacao: 'Sócio', participacao: '' }); render(); },
+  'ef-tirar'(el) { S.ef.socios.splice(Number(el.dataset.v), 1); render(); },
+  async 'ef-salvar'() {
+    const F = S.ef, d = { cnpj: F.cnpj, razaoSocial: F.razaoSocial, nomeFantasia: F.nomeFantasia, regime: F.regime, capitalSocial: lerValor(F.capitalSocial) || 0, endereco: F.endereco, contador: F.contador, ativa: F.ativa,
+      socios: F.socios.filter(x => String(x.nome || '').trim()).map(x => ({ ...x, participacao: lerValor(x.participacao) || 0 })) };
+    const r = F.id ? await api('PUT', '/empresas?id=' + encodeURIComponent(F.id), d) : await api('POST', '/empresas', d);
+    S.ef = null; await carregarBase(); render(); toast(`${r.empresa.razaoSocial} salva.`); if (r.empresa.id === empAtual().id) { await carregarDisp(); render(); }
+  },
+  'rl-imprimir'() {
+    const d = docRelatorio(); if (!d) return; const D = PAI && PAI.Documento;
+    if (!D) { window.print(); return; }
+    previaDoc(d.tit, d.html, d.nome);
+  },
+  async 'pp-salvar'() {
+    const n = id => lerValor($(id).value) / 100, d = { regime: ($('[name="pp-regime"]:checked') || {}).value, dreModelo: ($('[name="pp-dre"]:checked') || {}).value, lc224: $('#pp-lc224').checked, contaResultado: $('#pp-res').value,
+      presumido: { irpjComercio: n('#pp-irpjComercio'), csllComercio: n('#pp-csllComercio'), irpjServicos: n('#pp-irpjServicos'), csllServicos: n('#pp-csllServicos') }, reforma: { ano: Number($('#pp-ano').value), cbs: n('#pp-cbs'), ibs: n('#pp-ibs'), is: n('#pp-is') } };
+    const r = await api('PUT', '/parametros', d); S.st.parametros = r.parametros; S.rl.dados = null; render(); toast('Parâmetros salvos.');
+  },
+  async 'pf-salvar'() { const v = $('#pf-data').value || null; const r = await api('PUT', '/parametros', { fechadoAte: v }); S.st.parametros = r.parametros; render(); toast(v ? 'Período fechado até ' + dataBR(v) + '.' : 'Fechamento removido.'); },
+  async 'lz-ver'() { S.pr.ano = Number($('#lz-ano').value) || S.pr.ano; S.pr.lalur = (await api('GET', '/lalur?ano=' + S.pr.ano)).ajustes; render(); },
+  async 'lz-incluir'() { await api('POST', '/lalur', { ano: S.pr.ano, tipo: $('#lz-tipo').value, base: $('#lz-base').value, descricao: $('#lz-desc').value, valor: $('#lz-valor').value }); await acoes['lz-ver'](); toast('Ajuste do LALUR incluído.'); },
+  async 'lz-tirar'(el) { if (!confirmar('lz' + el.dataset.v, 'Remover este ajuste do LALUR?')) return; await api('DELETE', '/lalur?id=' + el.dataset.v); await acoes['lz-ver'](); },
+  async enc() { const ano = Number($('#pe-ano').value); if (!confirmar('enc' + ano, `Encerrar o exercício de ${ano} de ${empAtual().razaoSocial}? As contas de resultado serão zeradas contra ${S.st.parametros.contaResultado}.`)) return; const r = await api('POST', '/encerramento', { ano, empresa: empAtual().id }); await carregarBase(); render(); toast(`Exercício de ${ano} encerrado: resultado ${fmt(r.resultado)}.`); },
+  async integ() { S.pr.integ = await api('GET', '/integridade'); render(); },
+};
+async function aplicarDepara(r) { const m = new Map(r.itens.map(x => [x.chave, x])); S.dp.itens = S.dp.itens.map(x => m.get(x.chave) || x); S.dp.resumo = r.resumo; if (S.st) S.st.depara = r.resumo; render(); avisarFCX(); }
+function lerCtlRel() { const R = S.rl, g = id => ($(id) ? $(id).value : null); R.de = g('#rl-de') || R.de; R.ate = g('#rl-ate') || R.ate; if ($('#rl-conta')) { if (R.tipo === 'caixa') R.contaCaixa = g('#rl-conta').trim(); else R.conta = g('#rl-conta').trim(); } }
+
+let ocupado = false;
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-a]'); if (!el || el.disabled) return; const f = acoes[el.dataset.a]; if (!f) return;
+  e.preventDefault(); if (ocupado) return; ocupado = true; el.setAttribute('aria-busy', 'true');
+  try { await f(el); } catch (err) { falhou(err); } finally { ocupado = false; el.removeAttribute('aria-busy'); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'pl-busca') { S.pl.busca = t.value; return render(); }
+  if (t.id === 'dp-busca') { S.dp.busca = t.value; return render(); }
+  if (t.id === 'lf-data') S.lf.data = t.value; if (t.id === 'lf-hist') S.lf.historico = t.value; if (t.id === 'lf-doc') S.lf.docRef = t.value;
+  if (t.dataset.ef != null && S.ef) { const [a, b] = t.dataset.ef.split('.'); if (b) S.ef[a][b] = t.value; else if (t.type !== 'checkbox') S.ef[a] = t.value; }
+  if (t.dataset.si != null && S.ef) S.ef.socios[Number(t.dataset.si)][t.dataset.f] = t.value;
+  if (t.dataset.li != null) { const i = S.lf.itens[Number(t.dataset.li)]; i[t.dataset.f] = t.value; if (t.dataset.f === 'conta') { const x = porCodigo().get(t.value.trim()), h = t.parentElement.querySelector('.opc.hint, span.hint'); if (h) h.textContent = x ? x.nome : t.value ? 'conta não encontrada' : ''; } }
+  if (S.aba === 'lancamentos') atualizarTotais();
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'pl-tipo') { S.pl.tipo = t.value; render(); } if (t.id === 'pl-grupo') { S.pl.grupo = t.value; render(); } if (t.id === 'pl-inativas') { S.pl.inativas = t.checked; render(); }
+  if (t.dataset.ef === 'ativa' && S.ef) S.ef.ativa = t.checked;
+  if (t.id === 'rl-de' || t.id === 'rl-ate') lerCtlRel();
+  if (t.dataset.li != null && t.dataset.f === 'dc') { S.lf.itens[Number(t.dataset.li)].dc = t.value; atualizarTotais(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'pn-nome') { e.preventDefault(); acoes['pn-sugerir']().catch(falhou); }
+  if (e.key === 'Enter' && e.target.id === 'dp-conta') { e.preventDefault(); $('[data-a="dp-salvar"]')?.click(); }
+  if (e.key === 'Escape' && $('#mdl')) { fecharModal(); return; }
+  const sub = e.target.closest && e.target.closest('.subtabs [role="tab"]');
+  if (sub && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); const i = RELS.findIndex(a => a[0] === S.rl.tipo), n = RELS[(i + (e.key === 'ArrowRight' ? 1 : RELS.length - 1)) % RELS.length][0]; acoes['rl-aba']({ dataset: { v: n } }).catch(falhou); return; }
+  const tab = e.target.closest && e.target.closest('.tabs [role="tab"]');
+  if (tab && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { const i = ABAS.findIndex(a => a[0] === S.aba), n = ABAS[(i + (e.key === 'ArrowRight' ? 1 : ABAS.length - 1)) % ABAS.length][0]; irAba(n).then(() => $('#tab-' + n)?.focus()); }
+});
+document.addEventListener('toggle', e => { if (e.target && e.target.id === 'empCard') S.empAberto = e.target.open; }, true);
+window.addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tipo === 'ct-aba') irAba(e.data.aba); });
+
+async function iniciar() {
+  try { await carregarBase(); }
+  catch (e) { S.erro = e.status === 401 ? 'Sessão encerrada: entre no painel de novo.' : e.status === 403 ? 'Seu acesso não abre o Módulo Contábil (Gestão de Acessos › Contabilidade · Ler).' : e.message; return render(); }
+  let a = (location.hash || '').slice(1); try { if (PAI && PAI.ModContabil && PAI.ModContabil.abaInicial) { a = PAI.ModContabil.abaInicial; PAI.ModContabil.abaInicial = null; } } catch (e) { }
+  if (!empresas().some(e => e.id === S.emp && e.ativa !== false)) S.emp = 'emp_principal';
+  carregarDisp().then(render);
+  await irAba(ABAS.some(x => x[0] === a) ? a : !S.st.plano.criado ? 'plano' : S.st.depara && S.st.depara.pendente && !S.st.lancamentos.total ? 'depara' : 'radar');
+}
+window.Contabil = { S, irAba, api, versao: 'v13.91', laudoHTML, docRelatorio }; /* para testes */
+iniciar();
+</script>
+</body>
+</html>

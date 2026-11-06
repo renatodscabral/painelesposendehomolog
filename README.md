@@ -321,3 +321,84 @@ Só tela (painel e Módulo Contábil). Nenhuma função, tabela ou migração no
   - No resumo de viagem, "Baixar PDF" continua gerando o PDF completo com os vouchers.
   - O "Imprimir" do Módulo Contábil usa a mesma prévia.
 - Com o recurso desligado, tudo funciona como na v13.88.
+
+## v13.90 · RC Consultoria → Falco Controladoria e Gestão
+- **Nome:** todas as telas, documentos, nomes de arquivo e o FCX do site white-label passam a exibir **Falco Controladoria e Gestão**.
+  Nas versões reduzidas aparece só **Falco**: cabeçalho ("Falco · Painel de Gestão"), chip do ambiente e rodapé ("ERP Falco").
+- **Compatibilidade (backend):** o identificador gravado continua `rc`. Isso vale para a coluna `sessoes.ambiente`, o cookie
+  `painel_sessao_rc`, o prefixo `amb/rc/` e os registros existentes, então nenhuma sessão aberta cai.
+  - `netlify/lib/ambiente.mjs` → `normalizarAmbiente()` aceita `falco` e `rc` em todas as entradas: `PAINEL_AMBIENTE`,
+    `?amb=`, `/api/ambientes/falco/…` e o cabeçalho `x-painel-origem`.
+  - `lib/sessao.mjs` grava e lê sempre o id normalizado.
+  - Endereço do site: `PAINEL_URL_FALCO`. A antiga `PAINEL_URL_RC` continua valendo se a nova não existir.
+  - **No Netlify, nada precisa mudar.** Opcional: no site da Falco, trocar `PAINEL_AMBIENTE=rc` por `falco`; nos três sites,
+    criar `PAINEL_URL_FALCO`.
+- **Logomarca oficial (a imagem enviada pela Falco, usada como está):** pasta `public/marca-falco/`. Nenhum vetor ou ícone novo foi criado.
+  - `logo_falco.png`: a imagem original, cópia byte a byte.
+  - `logo_falco_transparente.png`: o mesmo desenho sem o fundo azul, para os temas Midnight e Slate e para a tela de entrada.
+  - `emblema_falco.png` e `emblema_falco_transparente.png`: recorte do círculo com o falcão, usado no topo e no ícone da aba.
+  - `logo_branco.png`, `logo_navy.png` e `logo_fcx.png`: a imagem inteira centrada no próprio azul do fundo, nos tamanhos que o
+    build do site usa.
+  - O build (`scripts/preparar-ambiente.mjs`) usa essa pasta. A pasta antiga `public/marca-rc/` pode ser apagada.
+- **Cores extraídas da logomarca:**
+  - azul do fundo `#19283f`: fundo da plataforma, topo e menu (a logomarca se funde nele);
+  - dourado do traço `#d5af66`: botões, bordas e destaques; `#c19a55` no hover;
+  - títulos em ouro suave `#f0d8a8` e texto em branco;
+  - bordas `rgba(213,175,102,.2)`.
+- **Temas exclusivos da Falco:** seletor na barra superior com **Falco Imperial** (padrão), **Falco Midnight Gold** e
+  **Falco Slate & Gold**. A escolha fica lembrada no navegador, separada dos temas da Esposende.
+- **Tela Inicial:** na Falco, sem o Resumo do Recebível do Dia; aparecem só os cards padrão e os indicadores operacionais. Na
+  Esposende (Produção e Homologação), nada muda.
+- **Sem recurso de liberação:** a identidade vale no site da Falco assim que publicar, inclusive na tela de entrada.
+  A v13.90 fica registrada na lista de versões.
+- **Testes:** `tests/teste-ambiente-falco.mjs` (7). O `tests/tres-ambientes.sh` sobe o 3º site com `PAINEL_AMBIENTE=falco`.
+
+## v13.91 · Módulo Contábil executivo multiempresas (recurso `contabil_v1391`)
+A tela nova é `public/contabilidade_v1391.html`. Com o recurso ligado, o painel abre essa tela; desligado, abre a da v13.86
+(`contabilidade.html`). O backend novo é compatível com as duas.
+- **Multiempresas:** migração `20261108120000_esquema_empresas.sql`.
+  - Tabela `contab_empresas`: CNPJ validado, razão social, nome fantasia, regime tributário, capital social, QSA (sócios e
+    participações) e contador responsável (nome, CRC, UF).
+  - Coluna `contab_lancamentos.empresa_id`. O plano de contas, o de-para do FCX e os parâmetros continuam únicos.
+  - Os lançamentos que já existiam ficam na "Empresa principal". Os hashes antigos não mudam; a empresa entra no hash dos
+    lançamentos novos (mover um lançamento de empresa por fora quebra a cadeia).
+  - Todas as rotas de lançamento e de relatório aceitam `?empresa=`; o encerramento é feito por empresa.
+- **Barra de Disponibilidades em tempo real:**
+  - cards: Caixa Geral (1.1.1.01) com entradas e saídas; Bancos c/ Movimento (1.1.1.02) com depósitos e pagamentos;
+    Estoque de Mercadorias (1.1.3) com entradas e baixas de CMV; Total consolidado circulante;
+  - card expansível da Empresa Ativa com os atalhos Efetuar lançamentos, Ver lançamentos, Quadro de sócios e Resumo da
+    escrituração (Σ Débitos × Σ Créditos e integridade).
+  - Rota `GET /api/contabil/disponibilidades`.
+  - Os códigos são os do plano padrão do painel (1.1.1.01, 1.1.1.02 e 1.1.3), que correspondem às contas 1.1.01, 1.1.02 e 1.1.05
+    pedidas.
+- **Relatórios em abas horizontais, sem caixas de seleção:** Livro Diário | Livro Caixa | Livro Razão | Balancete Geral |
+  DRE CPC 26 | DRE CPC 51 | Balanço Patrimonial | DRA | DMPL | DFC, mais DVA e LALUR. Cada aba tem os seus KPIs:
+  - Livro Diário: Total de Débitos, Total de Créditos, integridade das partidas dobradas e a divisão em 1ª, 2ª, 3ª e 4ª fórmula.
+  - Livro Caixa: saldo inicial, entradas, saídas e saldo final, com o selo do responsável técnico (CRC).
+  - DRE e Balanço: comparativo lado a lado com o exercício anterior e seletor de exercício.
+  - DFC: caixa inicial, fluxos operacional, de investimento e de financiamento, e caixa final.
+- **Novos relatórios no servidor:**
+  - `caixa` (Livro Caixa);
+  - `dfc` (DFC pelo método direto, classificada pela contrapartida do Disponível);
+  - `dre51` (DRE no formato do CPC 51 / IFRS 18, com as categorias operacional, de investimento e de financiamento; é uma
+    aproximação gerencial pelo plano de contas).
+- **Radar de Saúde Empresarial:** `GET /api/contabil/radar`, com a lógica em `netlify/lib/contabil-radar.mjs`.
+  - Score de 0 a 100, dividido em integridade da escrituração e saúde financeira (12 fatores), mais os indicadores de liquidez,
+    endividamento, margem e retorno sobre o PL.
+  - **Motor de Crítica, bloco "Sugestões de Ação e Correção":**
+    - contas do Ativo com saldo credor e do Passivo com saldo devedor, com a reclassificação proposta;
+    - movimentos do Disponível sem documento de origem (pendentes de conciliação com o FCX) e contas pendentes no de-para;
+    - variação desproporcional em relação ao mês anterior;
+    - recomendações tributárias: retenções na fonte, ano-teste 2026 do IBS/CBS, simulação Modelo Atual × Reforma
+      (LC 214/2025), tributos sem recolhimento e limites do Lucro Presumido.
+  - As correções de saldo voltam como proposta de lançamento: o formulário abre preenchido, o usuário confere e grava.
+    `POST /api/contabil/radar/corrigir {tipo:'retencoes'}` cria as contas de tributos retidos (2.1.3.03).
+- **Laudo Técnico & Parecer Contábil:** prévia em A4 com o cabeçalho da empresa e do responsável técnico, o resumo da DRE, do
+  BP e da DFC, o Radar e os riscos, o parecer conclusivo com os ajustes sugeridos e as assinaturas do contador e da diretoria.
+  O laudo é um relatório de apoio à gestão: não substitui o relatório do auditor independente.
+- **"Exportar para PDF Relatório Selecionado":** gera o PDF em A4 direto pelo painel, com a empresa e o CRC no cabeçalho.
+- **Cores do ambiente:** a tela segue os tokens do painel (paleta institucional ou a da Falco: azul-marinho e dourado, com
+  títulos em ouro suave). Também foi corrigida a detecção de tema escuro quando as cores vêm em hexadecimal.
+- **Testes:**
+  - `tests/teste-contabil-v1391.mjs` (20 verificações);
+  - `test1391n` (16 verificações, ponta a ponta dentro do painel).

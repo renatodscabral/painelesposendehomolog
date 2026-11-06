@@ -4,7 +4,7 @@ import { q } from './db.mjs';
 import { lerCookie, SESSAO_HORAS } from './http.mjs';
 import { nivelDoPerfil } from './regras.mjs';
 import { permissoesEfetivas, normalizarPerfil } from './permissoes.mjs';
-import { ambienteAtual } from './ambiente.mjs';
+import { ambienteAtual, normalizarAmbiente } from './ambiente.mjs';
 
 export const hashToken = t => createHash('sha256').update(String(t)).digest('hex');
 
@@ -12,7 +12,7 @@ export async function criarSessao({ usuarioCaminho, ambiente, trocaPendente, ip,
   const token = randomBytes(32).toString('base64url');
   await q(`INSERT INTO sessoes (token_hash, usuario_caminho, ambiente, troca_pendente, expira_em, ip, agente)
            VALUES ($1, $2, $3, $4, now() + ($5 || ' hours')::interval, $6, $7)`,
-    [hashToken(token), usuarioCaminho, ambiente, !!trocaPendente, String(SESSAO_HORAS), ip || null, String(agente || '').slice(0, 300)]);
+    [hashToken(token), usuarioCaminho, normalizarAmbiente(ambiente) || ambienteAtual() /* v13.90: 'falco' grava 'rc' (CHECK do banco) */, !!trocaPendente, String(SESSAO_HORAS), ip || null, String(agente || '').slice(0, 300)]);
   return token;
 }
 
@@ -28,6 +28,6 @@ export async function sessaoDe(req) {
   /* v13.88: perfil e permissões relidos do banco a cada requisição e normalizados (strings, booleanos, números e aninhamentos);
      perms = permissões efetivas pela matriz da Gestão de Acessos, com os recursos liberados no ambiente (Homologação: todos). */
   const perfil = normalizarPerfil(s.usuario.perfil), rec = s.recursos || {}, recursoAtivo = k => ambienteAtual() === 'homolog' || !!rec[k]?.ativo;
-  return { tokenHash: th, uid: s.uid, caminho: s.usuario_caminho, ambiente: s.ambiente, trocaPendente: s.troca_pendente,
+  return { tokenHash: th, uid: s.uid, caminho: s.usuario_caminho, ambiente: normalizarAmbiente(s.ambiente) || s.ambiente, trocaPendente: s.troca_pendente,
            perfil, nivel: nivelDoPerfil(perfil), usuario: s.usuario, perms: permissoesEfetivas(s.usuario, recursoAtivo), recursoAtivo };
 }

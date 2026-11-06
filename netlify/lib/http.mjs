@@ -1,6 +1,6 @@
 /* Respostas JSON, cookie de sessão e proteção contra CSRF. */
 import { COOKIE as nomeCookie } from './ambiente.mjs';
-/* v13.76: um cookie por ambiente (painel_sessao_prod, _homolog, _rc) */
+/* v13.76: um cookie por ambiente (painel_sessao_prod, _homolog, _rc — a Falco mantém o nome _rc: sessões abertas continuam válidas) */
 export const SESSAO_HORAS = 12;
 
 export function json(status, corpo, headers = {}) {

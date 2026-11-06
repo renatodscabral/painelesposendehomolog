@@ -1,12 +1,13 @@
 /* v13.76 · Chamada de um site do painel para outro (servidor → servidor), com a chave compartilhada.
    v13.76.1: log claro de falha de rede / resposta não-OK (aparece em Netlify › Logs › Functions) e o mesmo detalhe
    volta para o navegador do Master, para saber a causa exata (endereço, HTTP, motivo). */
-import { ambienteAtual, urlDe, chave, estadoChave, ROTULO } from './ambiente.mjs';
+import { ambienteAtual, urlDe, chave, estadoChave, ROTULO, normalizarAmbiente } from './ambiente.mjs';
 import { ErroHttp } from './http.mjs';
 
-const VAR = { prod: 'PAINEL_URL_PROD', homolog: 'PAINEL_URL_HOMOLOG', rc: 'PAINEL_URL_RC' };
+const VAR = { prod: 'PAINEL_URL_PROD', homolog: 'PAINEL_URL_HOMOLOG', rc: 'PAINEL_URL_FALCO (ou PAINEL_URL_RC)' };
 
 export async function chamarAmbiente(alvo, caminho, { metodo = 'GET', corpo, ator = '', tempo = 20000 } = {}) {
+  alvo = normalizarAmbiente(alvo) || alvo; /* v13.90: 'falco' = 'rc' */
   const base = urlDe(alvo), k = chave(), ec = estadoChave(), origem = ambienteAtual();
   if (!base || !k) {
     const motivo = !base ? `${VAR[alvo]} vazia ou inválida neste site (use https://…, sem barra no final)` : ec.estado === 'curta' ? `PAINEL_CHAVE_AMBIENTES curta demais neste site (${ec.tamanho} caracteres; mínimo 16)` : 'PAINEL_CHAVE_AMBIENTES não configurada neste site';
