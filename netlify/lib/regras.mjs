@@ -14,6 +14,7 @@ export const REGRAS = {
   caixas: ['interact', 'interact'], credsystem_resultados: ['interact', 'interact'], sistema: ['view', 'interact'], ret_ocorrencias: ['admin', 'admin'],
   ieo_auto: ['interact', 'admin'], pe_simulador: ['admin', 'admin'], rh_folhas: ['admin', 'admin'], amb: ['admin', 'admin'],
   lojas_faturamento: ['interact', 'admin'], cred_pendencias: ['admin', 'admin'], ec_taxas: ['admin', 'admin'], conc_fechamento: ['admin', 'admin'],
+  parceiros: ['admin', 'admin'], /* v13.94: fornecedores e clientes (CNPJ/CPF) — só o Master ou quem a matriz libera (parceiros.ver/editar/excluir) */
 };
 export const NIVEL = { nenhum: 0, view: 1, interact: 2, admin: 3 };
 export const nivelDoPerfil = perfil0 => { const perfil = normalizarPerfil(perfil0); return perfil === 'MASTER' ? NIVEL.admin : perfil === 'OPERACIONAL' || perfil === 'LOJA' ? NIVEL.interact : NIVEL.nenhum; }; // v13.83: LOJA lê como Operacional · v13.88: perfil normalizado ('Operacional', 'master'…)

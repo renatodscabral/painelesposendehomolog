@@ -19,7 +19,7 @@
   --accent:#3F5BD8; --accent-soft:#E6EBFD;
   --bg:#F2F3F8; --panel:#FFFFFF; --panel-2:#F8F9FC; --line:#E2E4EE; --line-soft:#ECEEF5;
   --ink:#151934; --ink-soft:#585E7F; --ink-faint:#616787; /* v13.83.1: era #8E93AE (3,0:1) — agora ≥ 4,6:1 em todas as superfícies (WCAG AA) */
-  --ok:#1D7A4E; --ok-soft:#E1F3E9; --warn:#9A6408; --warn-soft:#FCF0D6; --bad:#B63A2F; --bad-soft:#FBE7E4;
+  --ok:#1D7A4E; --ok-soft:#E1F3E9; --warn:#966108; --warn-soft:#FCF0D6; --bad:#B63A2F; --bad-soft:#FBE7E4;
   --heat-0:#EEF0F8; --heat-1:#D9DEF5; --heat-2:#B3BDEB; --heat-3:#7F8FDB; --heat-4:#4A5CC4; --heat-5:#1B2362;
   --heat-ink-dark:#151934; --heat-ink-light:#FFFFFF;
   --radius:14px; --radius-sm:9px;
@@ -1579,6 +1579,87 @@ details.lj-tef summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var
 details.cmp-leitura{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel-2);}
 details.cmp-leitura summary{cursor:pointer;font-size:13px;}
 .cmp-leitura-tab td,.cmp-leitura-tab th{white-space:nowrap;}
+
+/* v13.93 · férias em períodos, folga por período, POS consolidado, KPIs por m² e alerta de prestação vencida */
+.fp-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0;} .fp-linha input[type=date]{width:auto;min-width:150px;} .fp-linha .fp-n{margin:0;min-width:74px;} .fp-dias{min-width:64px;font-variant-numeric:tabular-nums;color:var(--ink-soft);}
+.note.fp-ok{border-left-color:var(--ok);background:var(--ok-soft);} .note.fp-erro{border-left-color:var(--bad);background:var(--bad-soft);}
+table.lj-pos tr.lj-sub td{background:var(--panel-2);font-weight:600;} table.lj-pos tr.tot td,table.lj-kpi tr.tot td{font-weight:700;border-top:2px solid var(--line);background:var(--panel-2);}
+.lj-bar{height:5px;border-radius:3px;background:var(--panel-2);margin-top:4px;min-width:70px;} .lj-bar i{display:block;height:100%;border-radius:3px;background:var(--navy);}
+.vg-atraso{font-weight:700;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px;margin-left:6px;white-space:nowrap;} tr.vg-linha-atraso td:first-child{box-shadow:inset 3px 0 0 var(--bad);}
+
+/* =====================================================================
+   v13.94 · LAYOUT 100% DA LARGURA E TABELAS ADAPTATIVAS (html.fw94 = recurso gestao_v1394)
+   Sem teto de 1240px: o conteúdo usa toda a tela (notebook 1366/1440, Full HD, ultra-wide) com respiro lateral fluido de 1,5 a 2 rem
+   (1 rem no celular). Grades de cartões e formulários repartem a largura sozinhas (auto-fit); tabelas ficam mais densas e, quando
+   ainda não cabem, viram uma grade de cartões — o painel não tem barra de rolagem horizontal na página.
+   ===================================================================== */
+html.fw94{--fw-pad:clamp(1.5rem,2vw,2rem);}
+@media (max-width:720px){html.fw94{--fw-pad:1rem;}}
+html.fw94 .topbar{padding-inline:var(--fw-pad);}
+html.fw94 .topbar-inner{max-width:none;}
+html.fw94 .wrap{max-width:none;padding-inline:var(--fw-pad);}
+html.fw94 .page-head p{max-width:none;}
+html.fw94 .g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));}
+html.fw94 .g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));}
+html.fw94 .g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));}
+html.fw94 .g5{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));}
+html.fw94 .modules{grid-template-columns:repeat(auto-fill,minmax(min(100%,265px),1fr));}
+html.fw94 .form-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+html.fw94 .form-grid>.field.full,html.fw94 .form-grid>.full{grid-column:1/-1;}
+html.fw94 .dl,html.fw94 .cs-cards,html.fw94 .cmp-varr-cards,html.fw94 .cp-outros-g,html.fw94 .mixleg,html.fw94 .lj-dash{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));}
+html.fw94 .pe-kpis,html.fw94 .pe-kpis.pe-k4,html.fw94 .pe-kpis.pe-k7,html.fw94 .pe-g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));}
+html.fw94 .modal{max-width:min(94vw,760px);} html.fw94 .modal.wide{max-width:min(94vw,1180px);}
+@media screen{
+  html.fw94 table{font-size:clamp(12px,.2vw + 10px,13.5px);}
+  html.fw94 th{padding:8px 10px;} html.fw94 td{padding:7px 10px;}
+  html.fw94 table.rt94-compact{font-size:12px;}
+  html.fw94 table.rt94-compact th{padding:6px 7px;white-space:normal;font-size:10px;letter-spacing:.03em;}
+  html.fw94 table.rt94-compact td{padding:6px 7px;}
+  html.fw94 .rt94-w{overflow:visible!important;border:0!important;max-height:none!important;border-radius:0;}
+  html.fw94 table.rt94-card,html.fw94 table.rt94-card tbody,html.fw94 table.rt94-card tfoot,html.fw94 table.rt94-card tr,html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{display:block;width:100%;}
+  html.fw94 table.rt94-card thead{display:none;}
+  html.fw94 table.rt94-card tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px 16px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);}
+  html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{padding:0;border:0;text-align:left!important;min-width:0;overflow-wrap:anywhere;white-space:normal;}
+  html.fw94 table.rt94-card td::before,html.fw94 table.rt94-card tbody th::before,html.fw94 table.rt94-card tfoot th::before{content:attr(data-label);display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:2px;}
+  html.fw94 table.rt94-card td[data-label=""]::before,html.fw94 table.rt94-card td.span-all::before,html.fw94 table.rt94-card tbody th[data-label=""]::before{display:none;}
+  html.fw94 table.rt94-card td:first-child,html.fw94 table.rt94-card td.span-all,html.fw94 table.rt94-card td.acts,html.fw94 table.rt94-card td.rt94-acts,html.fw94 table.rt94-card tbody th:first-child{grid-column:1/-1;}
+  html.fw94 table.rt94-card td.acts,html.fw94 table.rt94-card td.rt94-acts{display:flex;gap:6px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:8px;}
+  html.fw94 table.rt94-card td.acts::before,html.fw94 table.rt94-card td.rt94-acts::before{display:none;}
+  html.fw94 table.rt94-card select{width:100%;}
+  html.fw94 table.rt94-card tr.tot,html.fw94 table.rt94-card tr.sub{background:var(--panel-2);}
+}
+/* indicador discreto da consulta de CNPJ e aviso de CPF inválido */
+.cnpj94-st{display:flex;align-items:center;gap:6px;min-height:18px;margin-top:4px;font-size:12px;color:var(--ink-soft);}
+.cnpj94-st.ok{color:var(--ok);} .cnpj94-st.warn{color:var(--warn);} .cnpj94-st.bad{color:var(--bad);}
+.cnpj94-spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent);display:inline-block;flex:none;animation:cnpj94giro .7s linear infinite;}
+@keyframes cnpj94giro{to{transform:rotate(360deg);}}
+.field.cnpj94 .row{flex-wrap:wrap;gap:6px;} .field.cnpj94 .row input{flex:1 1 170px;min-width:160px;} .field.cnpj94 .row .btn{flex:0 0 auto;white-space:nowrap;}
+  @media (min-width:900px){ html.fw94 .form-grid>.field.cnpj94{grid-column:span 2;} }
+input[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 2px var(--bad-soft);}
+.cpf94-msg{display:block;margin-top:4px;font-size:12px;color:var(--bad);}
+/* botão claro do cabeçalho do Ponto de Equilíbrio: nos temas escuros a regra global do botão pintava o fundo de azul e o texto navy sumia (1,7:1) */
+html.fw94 .pe-root .btn.pe-bt-claro{background:#fff!important;color:#2A217A!important;} html.fw94 .pe-root .btn.pe-bt-claro:hover{background:#ECEAFB!important;} html.fw94 .pe-root .btn.pe-bt-claro:disabled{opacity:.6;}
+/* Ponto de Equilíbrio (achados da auditoria de contraste): subtítulo do seletor de base (4,3:1) e nota de projeção em dourado escuro sobre painel escuro no modo escuro do sistema (3,6:1) */
+html.fw94 .pe-visao button small{opacity:1;}
+@media (prefers-color-scheme: dark){ :root.fw94:not([data-theme="light"]):not([data-theme="diurno"]) .pe-proj{color:#F5C451;} }
+.field.rf-preenchido input,.field.rf-preenchido select,.field.rf-preenchido textarea{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.field.rf-preenchido .lbl::after{content:' · Receita Federal';color:var(--accent);text-transform:none;letter-spacing:0;font-weight:600;}
+/* v13.94 · Banco de dados · Migrações (Master) */
+html.fw94 .mig-banco{padding:0;}
+html.fw94 .mig-banco>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px;cursor:pointer;list-style:none;font-family:var(--font-display);font-size:16.5px;font-weight:650;border-radius:var(--radius);}
+html.fw94 .mig-banco>summary::-webkit-details-marker{display:none;}
+html.fw94 .mig-banco>summary::before{content:'';flex:none;width:8px;height:8px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);transform:rotate(-45deg);transition:transform .15s var(--ease);}
+html.fw94 .mig-banco[open]>summary::before{transform:rotate(45deg);}
+html.fw94 .mig-corpo{padding:0 20px 20px;}
+html.fw94 .mig-acoes{margin:12px 0;}
+html.fw94 .mig-resumo{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0 8px;}
+html.fw94 .mig-esq{list-style:none;margin:6px 0 14px;padding:0;display:grid;gap:6px;}
+html.fw94 .mig-esq li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+@media (max-width:720px){html.fw94 .mig-banco>summary{padding:14px 16px;} html.fw94 .mig-corpo{padding:0 16px 16px;}}
+/* Backup e dados (onde fica o bloco acima): o botão longo "Resetar Banco da Falco…" e a tabela da Gestão de Ambientes empurravam a página para o lado */
+html.fw94 .amb-acao{min-width:0;}
+html.fw94 .amb-acao .btn{white-space:normal;max-width:100%;text-align:center;}
+@media (max-width:720px){html.fw94 .tbl-wrap:has(>table.nolabel){overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}}
 </style>
 <header id="topbar" class="topbar"></header>
 <main class="wrap" id="main"></main>
@@ -1946,7 +2027,7 @@ class NetlifyAdapter {
    abertura de cada navegador eles são gravados no banco local — só o que ainda não existe, nunca sobrescreve —
    e a pessoa cai direto na tela de Login. No claude.ai (banco na nuvem) nada disso roda.
    No código publicado no claude.ai a semente fica vazia (null); ela é injetada só no pacote do Netlify. */
-const SEMENTE_LOCAL = null; /*@@SEMENTE_LOCAL@@*/
+const SEMENTE_LOCAL = {"versao":"2026-10-27a","docs":{"lojas/loja-901":{"codigo":"901","nome":"LOJA FICTICIA A","cnpj":"00.000.000/0001-91","cidade":"Recife","uf":"PE","ativa":true,"tipo":"RUA","adquirentes":[{"adquirente":"GETNET","ec":"9901","qtdePos":2}]},"lojas/loja-902":{"codigo":"902","nome":"LOJA FICTICIA B","cnpj":"00.000.000/0002-72","cidade":"Olinda","uf":"PE","ativa":true,"tipo":"SHOPPING","adquirentes":[]},"config/empresas":{"lista":[{"id":"emp-ficticia","nome":"Empresa Ficticia","razao":"Empresa Ficticia LTDA","cnpj":"00000000000191"}]},"config/recursos":{"_versao":"v13.74.3","conc_det_v1373":{"ativo":true,"versao":"v13.73"}}},"masters":[{"id":"usr-semente-qa","nome":"QA Master Semente","cpf":"52998224725","senha":{"alg":"sha256x3000","sal":"a9f723a6ebab2f973a67e1c435a2eeec","hash":"951d278442343005d1d6f2c3250ad287478e6decdd27fc17b3c64d8d9e6c7301"}}]};
 const SementeLocal = {
   CHAVE: 'sistema/semente',
   dados() { return (typeof SEMENTE_LOCAL !== 'undefined' && SEMENTE_LOCAL && SEMENTE_LOCAL.versao) ? SEMENTE_LOCAL : null; },
@@ -2016,6 +2097,7 @@ const PERMISSOES = {
     'pdi.ver', 'pdi.avaliar', 'lojas.ver', 'lojas.editar', 'lojas.excluir', 'lojas.contrato.editar',
     'lojas.arquivos', 'lojas.importar', 'ia.resumo', 'fcx.ver',
     'contabil.ver', 'contabil.lancar', 'contabil.plano', 'contabil.estornar', 'contabil.parametros', // v13.86: Módulo Contábil (no servidor: /api/contabil)
+    'parceiros.ver', 'parceiros.editar', 'parceiros.excluir', // v13.94: Módulo 13 · Fornecedores e Clientes (coleção parceiros)
     'lojas.contratos.ver', 'lojas.contratos.editar',   // contratos de locação + radar (só GESTOR)
     'retaguarda.ver', 'retaguarda.credsystem.importar', 'retaguarda.credsystem.editar', 'retaguarda.faltas.lancar',
     'retaguarda.faltas.status', 'retaguarda.faltas.excluir', 'retaguarda.caixas.editar',
@@ -2055,11 +2137,15 @@ const MATRIZ_MODULOS = [
   { id: 'solicitacoes', curto: 'Solicitações', rotulo: 'Solicitações Operacionais (Modificar = pedir · Excluir = atender e excluir)', num: 'Módulo 10', ler: ['solicitacoes.ver'], modificar: ['solicitacoes.lancar'], excluir: ['solicitacoes.atender', 'solicitacoes.excluir'],
     extras: [['solicitacoes.todas', 'Acessar todas as lojas', 'Vê e gerencia as solicitações de todas as filiais, independentemente do perfil e da lotação']] }, // v13.60 · v13.61: + "Acessar todas as lojas" 
   { id: 'contabil', curto: 'Contábil', rotulo: 'Contabilidade · Módulo Contábil (plano de contas, lançamentos, relatórios e de-para do FCX)', num: 'Módulo 12', ler: ['contabil.ver'], modificar: ['contabil.lancar', 'contabil.plano'], excluir: ['contabil.estornar', 'contabil.parametros'], rec: 'contabil_v1386' }, /* v13.86 */
+  { id: 'parceiros', curto: 'Fornec./Clientes', rotulo: 'Cadastros · Fornecedores e Clientes (CNPJ com consulta na Receita Federal e CPF validado)', num: 'Módulo 13', ler: ['parceiros.ver'], modificar: ['parceiros.editar'], excluir: ['parceiros.excluir'], rec: 'gestao_v1394' }, /* v13.94 */
   { id: 'visao', curto: 'Visão', rotulo: 'Visão / Dashboard (Tela Inicial com o Resumo do Recebível do Dia)', num: 'Início', ler: ['visao.dashboard'], modificar: [], excluir: [], v1383: true }, // v13.83
 ];
 /* v13.83 · "Pode solicitar viagem": opção da linha do Módulo 8 que vale sozinha (não exige Ler, que é "ver todos os pedidos") */
 MATRIZ_MODULOS.find(m => m.id === 'viagens').extras = [['viagens.solicitar', 'Pode solicitar viagem', 'Libera a tela "Nova Solicitação de Viagem" para a própria pessoa e a equipe da loja dela (não exige Ler, que é ver todos os pedidos)', true],
   ['viagens.importar', 'Pode importar arquivo de prestação de contas', 'Libera a leitura automática de arquivo de prestação (CSV, Excel ou JSON) com a crítica de itens indevidos — exige Ler ou mais neste módulo (v13.88)']];
+/* v13.93 · "Pode ver salários" (rh.ver_salarios): chave PRÓPRIA da Gestão de Acessos, independente de perfil, cargo ou de ser gestor de área/setor.
+   Só quem tem a opção marcada (ou o Master) enxerga salário, líquido e custo nos cards, na listagem e no relatório da equipe. Vale sem nível no módulo. */
+MATRIZ_MODULOS.find(m => m.id === 'rh').extras = [['rh.ver_salarios', 'Pode ver salários e custos de folha', 'Libera os valores de salário (base, líquido e custo) nos cards, na listagem e no relatório da equipe. Chave própria: ser gestor de área ou de setor NÃO libera salários (v13.93)', true, 'gestao_v1393']];
 
 /**
  * v13.83 · SUB-PERMISSÕES (telas e ações de cada módulo) — Gestão de Acessos.
@@ -2100,7 +2186,7 @@ const NIVEIS_ACESSO = ['', 'ler', 'modificar', 'excluir'];
 /** Padrão de um novo usuário OPERACIONAL (equivale ao perfil OPERACIONAL das versões anteriores). */
 const MATRIZ_PADRAO = { pdi: 'ler', lojas: 'modificar', contratos: '', fcx: 'ler', retaguarda: 'modificar', credsystem: '', rh: '', viagens: '', solicitacoes: 'modificar' }; // viagens '': cada um vê as próprias (e o gestor, a equipe)
 /** Permissões que o banco do claude.ai só libera a quem tem "Pode editar" no compartilhamento do painel (regras admin). */
-const PERM_SO_EDITOR = ['pe.', 'pessoal.salario.', 'pessoal.parametros', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.matriz', 'retaguarda.ieo.lancar', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo', 'auditoria.', 'backup.', 'acessos.'];
+const PERM_SO_EDITOR = ['pe.', 'parceiros.', 'rh.ver_salarios', 'pessoal.salario.', 'pessoal.parametros', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.matriz', 'retaguarda.ieo.lancar', 'retaguarda.ieo.fechar', 'retaguarda.ieo.laudo', 'auditoria.', 'backup.', 'acessos.'];
 /** v13.86 · linha da matriz visível? (v13.83: linhas novas só com o recurso; rec: recurso próprio da linha) */
 const matrizOk = (m, v83) => (!m.v1383 || v83) && (!m.rec || Recursos.ativo(m.rec));
 /**
@@ -2146,7 +2232,7 @@ const PermNorm = (() => {
 })();
 window.PermNorm = PermNorm;
 /** v13.88 · No Netlify o servidor passou a entregar estes dados a quem a matriz libera (antes: só o Master) — ver COLECOES_MATRIZ. */
-const PERM_MATRIZ_SERVIDOR = ['lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.'];
+const PERM_MATRIZ_SERVIDOR = ['parceiros.', 'rh.ver_salarios', 'lojas.contratos.', 'lojas.contrato.editar', 'fcx.dfc.', 'retaguarda.adq.', 'retaguarda.ieo.'];
 const permDoServidor = perm => !!Cloud.base?.netlify && PERM_MATRIZ_SERVIDOR.some(p => p.endsWith('.') ? String(perm).startsWith(p) : perm === p);
 function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
   m = PermNorm.normalizar(m); perfil = PermNorm.perfil(perfil); // v13.88: aceita qualquer formato gravado
@@ -2154,7 +2240,7 @@ function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
   for (const mod of MATRIZ_MODULOS) {
     if (!matrizOk(mod, v83)) continue; // v13.83: linha nova só com o recurso liberado · v13.86: + recurso da linha
     let n = NIVEIS_ACESSO.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); // v13.60: usuários antigos já podem pedir (Solicitações)
-    (mod.extras || []).forEach(([k, , , livre]) => { if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); }); // v13.61: opções extras da linha do módulo · v13.83: "livre" vale sem nível
+    (mod.extras || []).forEach(([k, , , livre, rec]) => { if (rec && !Recursos.ativo(rec)) return; if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); }); // v13.61: opções extras da linha do módulo · v13.83: "livre" vale sem nível
     if (n <= 0) continue;
     if (loja) n = mod.id === 'solicitacoes' ? Math.min(n, 2) : 1; // v13.83 · perfil Loja (ponta): só leitura; grava apenas Solicitações (pedir) e a viagem (opção própria)
     const s = sub[mod.id] || {}, { fora, acoes } = Acesso.recorte(mod.id, s);
@@ -2199,6 +2285,7 @@ const Auth = {
     if (!this.id) return false;
     if (String(perm).startsWith('pdi.')) return this.perfil === 'GESTOR' && this.podeEditarNuvem; // v13.38: PDI só do Master; o banco só entrega a coleção pdi ao nível admin
     if (this.usuario && this.usuario.perfil !== 'MASTER' && this._v83 !== this.chaveRec()) this.recalcular(); // v13.83: recurso liberado depois do login (config/recursos chega depois)
+    if (perm === 'pessoal.salario.ver' && g93()) perm = 'rh.ver_salarios'; /* v13.93: ver salário = permissão própria (Master tem '*'); gestor de área/setor não herda */
     const lista = this.matriz[this.perfil] || [];
     if (!lista.some(p => p === '*' || p === perm || (p.endsWith('.*') && perm.startsWith(p.slice(0, -1))))
       && !(this.PERM_SUPERVISOR.includes(perm) && this.perfil !== 'GESTOR' && !this.loja && this.ehSupervisor())) return false; // v13.83: perfil Loja não ganha o bônus de supervisor
@@ -2221,8 +2308,8 @@ const Auth = {
     this.recalcular();
   },
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
-  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
-  recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; },
+  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
+  recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; try { Repo._salarios93(); } catch { } /* v13.93 */ },
   loja: false,
   limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
 };
@@ -2396,7 +2483,11 @@ const Repo = {
   cols: {},           // nome → Map(id → doc)
   vers: {},           // v13.46 · nome → versão (sobe a cada snapshot/gravação/exclusão da coleção): chave dos caches de cálculo
   versao(col) { return this.vers[col] || 0; },
-  _bump(col) { this.vers[col] = (this.vers[col] || 0) + 1; this.rev++; },
+  _bump(col) { this.vers[col] = (this.vers[col] || 0) + 1; this.rev++; if (col === 'config') this._salarios93(); },
+  /** v13.93 · assina salários e folhas assim que o recurso da versão chega (config/recursos) ou a matriz do usuário é refeita; idempotente (assinar ignora o que já está assinado). */
+  _salarios93() { this._parceiros94(); try { if (!Auth.id || !Sessao.ativa || !g93() || !Auth.can('pessoal.salario.ver')) return; ['salarios', 'rh_folhas'].forEach(c => this.assinar(c)); } catch { } },
+  /** v13.94 · assina os cadastros de fornecedores e clientes quando o recurso e a permissão existem */
+  _parceiros94() { try { if (Auth.id && Sessao.ativa && g94() && Auth.can('parceiros.ver') && !Acesso.loja()) this.assinar('parceiros'); } catch { } },
   /** v13.46 · documento sem os metadados que o Repo acrescenta (para comparar conteúdo). */
   semMeta(d) { if (!d) return d; const { id, atualizadoEm, atualizadoPor, criadoEm, criadoPor, ...r } = d; return r; },
   prontas: new Set(), // coleções que já receberam o 1º snapshot
@@ -3099,6 +3190,140 @@ const Receita = {
   },
 };
 
+/**
+ * v13.94 · CNPJ e CPF nas telas de cadastro (recurso gestao_v1394).
+ *   Cnpj94 — máscara 00.000.000/0000-00 enquanto digita; ao completar os 14 dígitos (ou ao sair do campo) consulta a Receita e preenche
+ *            razão social, nome fantasia, CEP, logradouro, bairro, cidade, UF, capital social e situação cadastral, com um indicador
+ *            discreto ("Buscando dados do CNPJ..."). No Netlify a consulta vai pela Function /api/consulta-cnpj (BrasilAPI → MinhaReceita,
+ *            exige login); no claude.ai, sem servidor, tenta a BrasilAPI direto e, se o ambiente bloquear, avisa e o cadastro segue à mão.
+ *   Cpf94  — máscara 000.000.000-00, dígitos verificadores conferidos ao sair do campo e alerta de CPF inválido antes de salvar.
+ */
+const Cnpj94 = {
+  _cache: new Map(),
+  mascara(v) {
+    const d = CNPJ.limpar(v).slice(0, 14);
+    if (d.length > 12) return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/, '$1.$2.$3/$4-$5');
+    if (d.length > 8) return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/, '$1.$2.$3/$4');
+    if (d.length > 5) return d.replace(/^(\d{2})(\d{3})(\d{0,3}).*/, '$1.$2.$3');
+    if (d.length > 2) return d.replace(/^(\d{2})(\d{0,3}).*/, '$1.$2');
+    return d;
+  },
+  cep(v) { const d = String(v || '').replace(/\D/g, '').slice(0, 8); return d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d; },
+  /** logradouro + número + complemento numa linha (o bairro, a cidade e a UF têm campo próprio) */
+  linha(d) { return [d.logradouro, d.numero, d.complemento].filter(Boolean).join(', '); },
+  /** mesmos nomes de campo do servidor (netlify/lib/consulta-cnpj.mjs), para o caminho direto do claude.ai */
+  normalizar(r, cnpj) {
+    const t = v => (v == null ? '' : String(v).replace(/\s+/g, ' ').trim()), tipo = t(r.descricao_tipo_de_logradouro), log = t(r.logradouro), cep = String(r.cep || '').replace(/\D/g, '');
+    return { cnpj, razaoSocial: t(r.razao_social), nomeFantasia: t(r.nome_fantasia), situacao: t(r.descricao_situacao_cadastral), cep: cep ? cep.padStart(8, '0').slice(-8) : '',
+      logradouro: tipo && log && !log.toUpperCase().startsWith(tipo.toUpperCase()) ? tipo + ' ' + log : log, numero: t(r.numero), complemento: t(r.complemento), bairro: t(r.bairro),
+      municipio: t(r.municipio), uf: t(r.uf).toUpperCase().slice(0, 2), capitalSocial: Number(r.capital_social) || 0, cnae: t(r.cnae_fiscal), cnaeDescricao: t(r.cnae_fiscal_descricao), abertura: t(r.data_inicio_atividade) };
+  },
+  /** → { ok, dados, fonte } | { ok: false, invalido?, indisponivel?, motivo } */
+  async buscar(v) {
+    const d = CNPJ.limpar(v);
+    if (!CNPJ.valido(d)) return { ok: false, invalido: true, motivo: 'CNPJ inválido — confira os dígitos verificadores.' };
+    if (this._cache.has(d)) return this._cache.get(d);
+    let r;
+    if (Cloud.base?.netlify) {
+      const ac = new AbortController(), t = setTimeout(() => ac.abort(), 20000);
+      try {
+        const x = await fetch('/api/consulta-cnpj?cnpj=' + d, { credentials: 'same-origin', cache: 'no-store', headers: { 'x-painel': '1' }, signal: ac.signal }), j = await x.json().catch(() => ({}));
+        r = x.ok && j.ok ? { ok: true, dados: j.dados, fonte: j.fonte === 'minhareceita' ? 'MinhaReceita' : 'BrasilAPI' }
+          : { ok: false, indisponivel: x.status !== 404, motivo: x.status === 404 ? 'CNPJ não encontrado na base da Receita Federal.' : (j.erro || 'Erro ' + x.status + ' na consulta.') + (x.status === 502 ? '' : '') };
+      } catch (e) { r = { ok: false, indisponivel: true, motivo: e.name === 'AbortError' ? 'A consulta à Receita demorou demais. Preencha à mão ou tente de novo.' : 'Sem conexão com o servidor do painel. Preencha à mão.' }; }
+      finally { clearTimeout(t); }
+    } else if (Receita.bloqueada) r = { ok: false, indisponivel: true, motivo: 'CNPJ válido. A consulta automática à Receita só funciona no servidor Netlify; neste ambiente preencha os dados à mão.' };
+    else {
+      try { r = { ok: true, dados: this.normalizar(await Receita.provedor(d), d), fonte: 'BrasilAPI' }; }
+      catch (e) { r = { ok: false, indisponivel: e.message === 'bloqueada', motivo: e.message === 'bloqueada' ? 'CNPJ válido. A consulta automática à Receita só funciona no servidor Netlify; neste ambiente preencha os dados à mão.' : e.message }; }
+    }
+    if (r.ok) this._cache.set(d, r);
+    return r;
+  },
+  /** campo de CNPJ com botão "Consultar Receita" e a linha do indicador de consulta */
+  campo(rotulo, nome, valor, { botao = true, dica = '' } = {}) {
+    const id = 'f_' + nome.replace(/\W/g, '_');
+    return `<div class="field cnpj94"><label class="lbl" for="${id}">${esc(rotulo)}</label><div class="row"><input id="${id}" type="text" name="${nome}" value="${esc(valor || '')}" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" autocomplete="off" data-cnpj94>${botao ? '<button type="button" class="btn sec sm" data-cnpj-btn>Consultar Receita</button>' : ''}</div><span class="cnpj94-st" data-cnpj-st role="status" aria-live="polite"></span>${dica ? `<span class="hint">${dica}</span>` : ''}</div>`;
+  },
+  /**
+   * Liga a máscara e a consulta automática no campo de CNPJ de um formulário (m = a janela). preencher(dados, m) devolve { nomeDoCampo: valor };
+   * campos vazios na resposta não apagam o que já está digitado. aoDados(dados) roda depois do preenchimento; duplicado(cnpj) devolve um aviso.
+   */
+  ligar(m, { campo = '[name="cnpj"]', preencher, aoDados, duplicado } = {}) {
+    const inp = $(campo, m); if (!inp) return null;
+    const caixa = inp.closest('.field') || inp.parentElement; let st = $('[data-cnpj-st]', caixa); const btn = $('[data-cnpj-btn]', caixa);
+    if (!st) { st = document.createElement('span'); st.className = 'cnpj94-st'; st.dataset.cnpjSt = ''; st.setAttribute('role', 'status'); st.setAttribute('aria-live', 'polite'); (inp.closest('.row') || inp).insertAdjacentElement('afterend', st); }
+    let ultimo = CNPJ.limpar(inp.value), seq = 0;
+    const msg = (t, tipo = '', giro = false) => { st.className = 'cnpj94-st ' + tipo; st.innerHTML = (t || giro) ? (giro ? '<i class="cnpj94-spin" aria-hidden="true"></i>' : '') + `<span>${esc(t)}</span>` : ''; };
+    const rodar = async () => {
+      const d = CNPJ.limpar(inp.value), meu = ++seq; ultimo = d;
+      if (!CNPJ.valido(d)) { inp.setAttribute('aria-invalid', 'true'); return msg(d.length < 14 ? 'CNPJ incompleto: informe os 14 dígitos.' : 'CNPJ inválido — confira os dígitos verificadores.', 'bad'); }
+      inp.removeAttribute('aria-invalid'); inp.setAttribute('aria-busy', 'true'); if (btn) btn.disabled = true; msg('Buscando dados do CNPJ...', '', true);
+      const r = await this.buscar(d);
+      if (meu !== seq) return; // digitou outro CNPJ no meio da consulta
+      inp.removeAttribute('aria-busy'); if (btn) btn.disabled = false;
+      const aviso = (duplicado && duplicado(d)) || '';
+      if (!r.ok) return msg(r.motivo + (aviso ? ' ' + aviso : ''), r.indisponivel ? 'warn' : 'bad');
+      Object.entries(preencher ? preencher(r.dados, m) : {}).forEach(([k, v]) => { const i = $(`[name="${k}"]`, m); if (i && v !== undefined && v !== null && v !== '') { if (i.tagName === 'SELECT' && ![...i.options].some(o => o.value === String(v))) i.add(new Option(String(v), String(v))); i.value = v; i.closest('.field')?.classList.add('rf-preenchido'); } });
+      if (aoDados) aoDados(r.dados, r);
+      const sit = r.dados.situacao || '';
+      msg(`${r.dados.razaoSocial}${sit ? ' · ' + sit : ''} — dados preenchidos pela Receita Federal (${r.fonte}). Revise e salve.${aviso ? ' ' + aviso : ''}`, (sit && !/ativa/i.test(sit)) || aviso ? 'warn' : 'ok');
+    };
+    inp.addEventListener('input', () => {
+      if (inp.selectionStart === inp.value.length) inp.value = this.mascara(inp.value); // máscara automática (com o cursor no fim)
+      inp.removeAttribute('aria-invalid'); const d = CNPJ.limpar(inp.value);
+      if (d.length === 14 && d !== ultimo) rodar(); else if (d.length < 14) { ultimo = ''; seq++; if (btn) btn.disabled = false; msg(''); }
+    });
+    inp.addEventListener('blur', () => {
+      const d = CNPJ.limpar(inp.value); if (!d) return msg('');
+      if (d.length === 14 && d !== ultimo) rodar(); else if (d.length < 14) { inp.setAttribute('aria-invalid', 'true'); msg('CNPJ incompleto: informe os 14 dígitos.', 'bad'); }
+    });
+    if (btn) btn.addEventListener('click', () => { ultimo = ''; rodar(); });
+    return { rodar, msg };
+  },
+  /** Loja (Módulo 2): endereço, bairro, cidade, UF, CEP, razão social, nome fantasia, capital social e situação cadastral */
+  ligarLoja(m, l) {
+    return this.ligar(m, {
+      preencher: d => ({ razaoSocial: d.razaoSocial, nomeFantasia: d.nomeFantasia, endereco: this.linha(d), bairro: d.bairro, cidade: d.municipio, uf: d.uf, cep: this.cep(d.cep), capitalSocial: d.capitalSocial || '', situacaoCadastral: d.situacao }),
+      aoDados: d => { l._receita = { razaoSocial: d.razaoSocial, nomeFantasia: d.nomeFantasia, situacao: d.situacao, endereco: this.linha(d), cidade: d.municipio, uf: d.uf, cep: this.cep(d.cep), cnae: [d.cnae, d.cnaeDescricao].filter(Boolean).join(' · '), abertura: d.abertura, consultadoEm: new Date().toISOString() }; },
+      duplicado: dn => { const o = Repo.todos('lojas').find(x => x.id !== l.id && CNPJ.limpar(x.cnpj) === dn); return o ? `Atenção: este CNPJ já está na loja ${o.codigo} · ${o.nome}.` : ''; },
+    });
+  },
+  /** Empresa da Conciliação de Meios de Pagamento: razão social e, se o nome estiver em branco, o nome fantasia */
+  ligarEmpresa(m) {
+    return this.ligar(m, { preencher: (d, f) => ({ razao: d.razaoSocial, nome: $('[name="nome"]', f)?.value.trim() ? undefined : d.nomeFantasia || d.razaoSocial }) });
+  },
+  /** CNPJ do TEF (adquirente da loja): a razão social vai para "Empresa concentradora" se ela estiver em branco */
+  ligarTef(m) {
+    return this.ligar(m, { campo: '[name="cnpjTef"]', preencher: (d, f) => ({ concentradora: $('[name="concentradora"]', f)?.value.trim() ? undefined : d.razaoSocial }) });
+  },
+};
+window.Cnpj94 = Cnpj94;
+const Cpf94 = {
+  mascara(v) { return CPF.limpar(v).slice(0, 11).replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2'); },
+  /** digitou algo e não é um CPF válido (campo vazio não é erro: a obrigatoriedade é de cada tela) */
+  invalido(v) { const d = CPF.limpar(v); return d.length > 0 && !CPF.valido(d); },
+  marcar(inp, ok, texto = 'CPF inválido: os dígitos verificadores não conferem.') {
+    const f = inp.closest('.field') || inp.parentElement; let m = f.querySelector('.cpf94-msg');
+    if (ok) { inp.removeAttribute('aria-invalid'); if (m) m.remove(); return; }
+    inp.setAttribute('aria-invalid', 'true');
+    if (!m) { m = document.createElement('span'); m.className = 'cpf94-msg'; m.setAttribute('role', 'alert'); inp.insertAdjacentElement('afterend', m); }
+    m.textContent = texto;
+  },
+  /** antes de salvar: confere todos os campos de CPF da janela; avisa, marca e foca o primeiro inválido (devolve-o) */
+  conferir(m) {
+    for (const i of $$('input[data-cpf]', m)) if (this.invalido(i.value)) {
+      const n = CPF.limpar(i.value).length; this.marcar(i, false, n < 11 ? 'CPF incompleto: informe os 11 dígitos.' : undefined); i.focus();
+      UI.toast(n < 11 ? 'CPF incompleto: informe os 11 dígitos.' : 'CPF inválido: os dígitos verificadores não conferem. Corrija antes de salvar.'); return i;
+    }
+    return null;
+  },
+};
+window.Cpf94 = Cpf94;
+/* CPF inválido aparece assim que o campo perde o foco (todas as telas com CPF mascarado) e some quando a pessoa volta a digitar */
+document.addEventListener('focusout', e => { const i = e.target; if (!g94() || !i.matches?.('input[data-cpf]')) return; if (Cpf94.invalido(i.value)) Cpf94.marcar(i, false, CPF.limpar(i.value).length < 11 ? 'CPF incompleto: informe os 11 dígitos.' : undefined); else Cpf94.marcar(i, true); });
+document.addEventListener('input', e => { const i = e.target; if (i.matches?.('input[data-cpf]') && i.getAttribute('aria-invalid')) Cpf94.marcar(i, true); });
+
 /* ============================== 7. UI ============================== */
 const ICON = {
   livro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5Z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/><path d="M9 10.5h6"/><path d="M12 13.5v-.01"/></svg>', // v13.86
@@ -3689,6 +3914,11 @@ const GestaoAmbientes = {
 };
 
 
+/** v13.94 · o recurso da versão está ativo neste ambiente? (layout 100% da largura, consulta de CNPJ/CPF, Fornecedores e Clientes) */
+function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
+/** v13.93 · o recurso da versão está ativo neste ambiente? (declaração com hoisting: vale em qualquer ponto do arquivo) */
+function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1393'); }
+
 /* ------------- v13.65 · Recursos de código liberados por ambiente (Homologação → Produção) ------------- */
 /**
  * O painel é um só arquivo publicado para os três bancos; para uma correção nova rodar SÓ na Homologação, ela fica
@@ -3696,7 +3926,7 @@ const GestaoAmbientes = {
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -4394,7 +4624,7 @@ const Pessoal = {
     const u = Auth.usuario || {}, f = Auth.funcionario || null, master = Auth.perfilReal === 'GESTOR' && !Auth.simulado;
     const funcs = Repo.todos('funcionarios'), lojas = Repo.todos('lojas'), ids = new Set();
     if (master && this.ui.verBase) return { tipo: 'base', rotulo: 'Base inteira', ids: null };
-    const subordinados = () => { if (!f) return; ids.add(f.id); funcs.filter(x => x.gestorId === f.id).forEach(x => ids.add(x.id));
+    const subordinados = () => { if (!f) return; ids.add(f.id); funcs.filter(x => x.gestorId === f.id).forEach(x => ids.add(x.id)); if (g93()) this.arvoreDe(f.id).forEach(i => ids.add(i)); /* v13.93: árvore transitiva */
       // v13.10: responsável de departamento de retaguarda vê quem está lotado no departamento e nos departamentos abaixo dele
       const deps = Repo.todos('rh_departamentos'), meus = new Set(deps.filter(d => d.responsavelId === f.id).map(d => d.id)); let mais = true;
       while (mais) { mais = false; deps.forEach(d => { if (d.paiId && meus.has(d.paiId) && !meus.has(d.id)) { meus.add(d.id); mais = true; } }); }
@@ -4416,6 +4646,39 @@ const Pessoal = {
       if (/GERENTE/.test(RH.chave(this.cargoNome(f))) && f.lotacao?.startsWith('loja-')) { daLoja([f.lotacao]); subordinados(); const l = Repo.get('lojas', f.lotacao); return { tipo: 'loja', rotulo: `Loja ${l ? l.codigo + ' · ' + l.nome : f.lotacao}`, ids }; }
     }
     subordinados(); return { tipo: f && ids.size > 1 ? 'equipe' : 'proprio', rotulo: f ? (ids.size > 1 ? 'Você e seus liderados diretos' : 'Só o próprio cadastro') : 'Nenhum colaborador vinculado ao seu acesso', ids };
+  },
+  /**
+   * v13.93 · ÁRVORE HIERÁRQUICA TRANSITIVA: todos os colaboradores abaixo de `meId`, em qualquer nível — os liderados diretos (Gestor direto),
+   * os liderados deles, os departamentos de que a pessoa (ou um liderado dela) é responsável, os sub-departamentos e quem está lotado neles.
+   * Fecho por busca em largura com conjunto de visitados (proteção contra ciclos: A gestor de B e B gestor de A). Nunca inclui o próprio `meId`.
+   */
+  arvoreDe(meId) {
+    if (!meId) return new Set();
+    const chave = ['funcionarios', 'rh_departamentos'].map(c => Repo.versao(c)).join('|') + '|' + meId;
+    if (this._arv && this._arv.k === chave) return this._arv.s;
+    const funcs = Repo.todos('funcionarios'), deps = Repo.todos('rh_departamentos'), add = (m, k, v) => { if (k) (m.get(k) || m.set(k, []).get(k)).push(v); };
+    const porGestor = new Map(), porDep = new Map(), depsDe = new Map(), filhos = new Map();
+    funcs.forEach(x => { add(porGestor, x.gestorId, x); add(porDep, x.departamentoId, x); });
+    deps.forEach(d => { add(depsDe, d.responsavelId, d); add(filhos, d.paiId, d); });
+    const vf = new Set([meId]), vd = new Set(), pf = [meId], pd = [];
+    const novoF = id => { if (id && !vf.has(id)) { vf.add(id); pf.push(id); } }, novoD = d => { if (d && !vd.has(d.id)) { vd.add(d.id); pd.push(d); } };
+    while (pf.length || pd.length) {
+      while (pf.length) { const id = pf.pop(); (porGestor.get(id) || []).forEach(x => novoF(x.id)); (depsDe.get(id) || []).forEach(novoD); }
+      while (pd.length) { const d = pd.pop(); (porDep.get(d.id) || []).forEach(x => novoF(x.id)); novoF(d.responsavelId); (filhos.get(d.id) || []).forEach(novoD); }
+    }
+    vf.delete(meId); this._arv = { k: chave, s: vf }; return vf;
+  },
+  /** v13.93 · períodos de férias programados: a lista nova (ferias.periodos, até 3) ou o período único antigo (programadaInicio/Fim). */
+  periodosFerias(f) {
+    const fe = f?.ferias || {}, l = Array.isArray(fe.periodos) ? fe.periodos.filter(p => p && p.inicio && p.fim) : [];
+    if (l.length) return l.map(p => ({ inicio: p.inicio, fim: p.fim })).sort((a, b) => a.inicio.localeCompare(b.inicio));
+    return fe.programadaInicio && fe.programadaFim ? [{ inicio: fe.programadaInicio, fim: fe.programadaFim }] : [];
+  },
+  /** v13.93 · se o período "principal" foi editado à mão no cadastro, a lista de períodos deixa de valer (evita dado velho). */
+  limparPeriodos93(dados, antes) {
+    const a = antes?.ferias || {}, d = dados?.ferias;
+    if (d?.periodos && (d.programadaInicio !== a.programadaInicio || d.programadaFim !== a.programadaFim)) delete d.periodos;
+    return dados;
   },
   /** Candidatos a gestor: cadastros feitos à mão e cargos de liderança (+ o atual), sem a própria pessoa. */
   opcoesGestor(id, atual) {
@@ -4475,7 +4738,7 @@ const Pessoal = {
     const a = Datas.de(f.admissao); if (!a) return { txt: 'Sem admissão', cls: 'neutral' };
     const hoje = Datas.hoje(); const completos = Math.floor(Datas.mesesEntre(a, hoje) / 12);
     const gozados = Number(f.ferias?.periodosGozados || 0); const pend = Math.max(0, completos - gozados);
-    const prog = f.ferias?.programadaInicio && Datas.de(f.ferias.programadaInicio) >= hoje ? ` · programadas ${Fmt.data(f.ferias.programadaInicio)}` : '';
+    const futuros = this.periodosFerias(f).filter(p => Datas.de(p.inicio) >= hoje), prog = futuros.length ? ` · programadas ${Fmt.data(futuros[0].inicio)}${futuros.length > 1 ? ` (+${futuros.length - 1} período${futuros.length > 2 ? 's' : ''})` : ''}` : ''; /* v13.93: vários períodos */
     if (pend === 0) { const prox = Datas.addAnos(a, completos + 1); return { txt: `Adquire em ${Fmt.data(Datas.iso(prox))}`, cls: 'neutral', prog }; }
     const limite = new Date(Datas.addAnos(a, gozados + 2).getTime() - 864e5); const d = Datas.dias(hoje, limite);
     if (d < 0) return { txt: `Vencidas há ${-d} dias`, cls: 'bad', det: 'Pagamento em dobro (CLT art. 137)', prog, limite };
@@ -4487,7 +4750,7 @@ const Pessoal = {
    * fora do período de férias programadas. Sem folga fixa, devolve a observação de folgas (rodízio etc.).
    */
   folgasPrevistas(f, base = Datas.hoje(), dias = 30) {
-    const fixas = (f.folgas || []), ferIni = Datas.de(f.ferias?.programadaInicio), ferFim = Datas.de(f.ferias?.programadaFim);
+    const fixas = (f.folgas || []), pers = this.periodosFerias(f).map(p => ({ a: Datas.de(p.inicio), b: Datas.de(p.fim), p })).filter(x => x.a && x.b); /* v13.93: todos os períodos */
     if ((f.status || 'Ativo') === 'Desligado') return { datas: [], txt: 'Desligado' };
     const nomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], out = [];
     const limite = Datas.iso(new Date(base.getFullYear(), base.getMonth(), base.getDate() + dias));
@@ -4497,12 +4760,12 @@ const Pessoal = {
     for (let i = 0; i <= dias; i++) {
       const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i), dn = nomes[d.getDay()];
       if (!fixas.includes(dn)) continue;
-      if (ferIni && ferFim && d >= ferIni && d <= ferFim) continue; // de férias: não conta como folga
+      if (pers.some(x => d >= x.a && d <= x.b)) continue; /* de férias: não conta como folga */
       if (!out.some(x => x.iso === Datas.iso(d))) out.push({ iso: Datas.iso(d), dia: dn });
     }
     out.sort((a, b) => a.iso.localeCompare(b.iso));
-    const emFerias = ferIni && ferFim && ferIni <= new Date(base.getTime() + dias * 864e5) && ferFim >= base;
-    return { datas: out, txt: out.map(x => `${x.dia} ${Fmt.data(x.iso).slice(0, 5)}`).join(' · ') || 'Nenhuma no período', ferias: emFerias ? `Férias ${Fmt.data(f.ferias.programadaInicio)} a ${Fmt.data(f.ferias.programadaFim)}` : '', obs: f.folgaObs || '' };
+    const emFerias = pers.find(x => x.a <= new Date(base.getTime() + dias * 864e5) && x.b >= base);
+    return { datas: out, txt: out.map(x => `${x.dia} ${Fmt.data(x.iso).slice(0, 5)}`).join(' · ') || 'Nenhuma no período', ferias: emFerias ? `Férias ${Fmt.data(emFerias.p.inicio)} a ${Fmt.data(emFerias.p.fim)}` : '', obs: f.folgaObs || '' };
   },
   /** v13.3 · Relatório da equipe (lista filtrada da tela) para imprimir ou salvar em PDF. */
   /** v13.89 · opções da impressão da equipe: período das folgas agendadas e o que sai em Férias. */
@@ -4512,28 +4775,34 @@ const Pessoal = {
         <fieldset class="full ct-grupo"><legend>Férias</legend>
           <label class="check"><input type="radio" name="ferias" value="programadas" checked> Imprimir apenas Períodos de Férias Programados/Agendados <span class="hint">(padrão)</span></label>
           <label class="check"><input type="radio" name="ferias" value="aquisitivos"> Incluir Períodos Aquisitivos A Vencer</label></fieldset>
+        ${g93() && Auth.can('pessoal.salario.ver') ? '<label class="check full"><input type="checkbox" name="salarios"> Incluir salário base, líquido e custo de cada colaborador <span class="hint">(só aparece para quem tem a permissão “Pode ver salários”)</span></label>' : ''}
         <p class="hint full" style="margin:0">Folgas: saem só as folgas efetivamente agendadas no período (aprovadas na Liberação Remota). As folgas fixas da escala não são impressas.</p></form>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Pré-visualizar', acao: m => { const d = UI.lerForm(m), fe = m.querySelector('[name="ferias"]:checked')?.value || 'programadas';
         if (!d.de || !d.ate) { UI.toast('Informe o período (de / até).'); return false; } if (d.de > d.ate) { UI.toast('A data inicial é depois da final.'); return false; }
-        setTimeout(() => this.relatorioEquipe({ de: d.de, ate: d.ate, ferias: fe }), 30); } }] });
+        setTimeout(() => this.relatorioEquipe({ de: d.de, ate: d.ate, ferias: fe, salarios: !!m.querySelector('[name="salarios"]:checked') }), 30); } }] });
   },
   /** v13.89 · relatório da equipe respeitando as opções: folgas agendadas no período e férias programadas (± aquisitivos a vencer). */
-  relatorioEquipeV89({ de, ate, ferias = 'programadas' }) {
+  relatorioEquipeV89({ de, ate, ferias = 'programadas', salarios = false }) {
+    salarios = !!salarios && g93() && Auth.can('pessoal.salario.ver'); /* v13.93: confere a permissão de novo na hora de gerar */
     const lista = this.filtrados(), aq = ferias === 'aquisitivos', nomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const filtro = [this.ui.lotacao ? (this.opcoesLotacao().find(([v]) => v === this.ui.lotacao) || [])[1] : 'Todas as lotações', this.ui.status || 'Todas as situações', this.ui.busca ? `busca “${this.ui.busca}”` : ''].filter(Boolean).join(' · ');
     const folgas = f => { if ((f.status || 'Ativo') === 'Desligado') return 'Desligado'; const xs = (f.folgasAvulsas || []).filter(x => x.data >= de && x.data <= ate).sort((a, b) => a.data.localeCompare(b.data));
       return xs.length ? xs.map(x => `${nomes[Datas.de(x.data).getDay()]} ${Fmt.data(x.data)}${x.motivo ? ` <span class="sub">(${esc(x.motivo)})</span>` : ''}`).join('<br>') : '<span class="sub">Nenhuma folga agendada no período</span>'; };
-    const feriasHtml = f => { const ini = f.ferias?.programadaInicio, fim = f.ferias?.programadaFim, partes = [];
-      if (ini && fim && fim >= de) partes.push(`<b>Programadas:</b> ${Fmt.data(ini)} a ${Fmt.data(fim)}${ini <= ate ? ' <span class="sub">(no período)</span>' : ''}`);
+    const feriasHtml = f => { const ps = this.periodosFerias(f).filter(p => p.fim >= de), partes = []; /* v13.93: todos os períodos programados (até 3) */
+      if (ps.length) partes.push(`<b>Programadas:</b> ${ps.map(p => `${Fmt.data(p.inicio)} a ${Fmt.data(p.fim)}${p.inicio <= ate ? ' <span class="sub">(no período)</span>' : ''}`).join('<br>')}${f.ferias?.abonoPecuniario ? ' <span class="sub">· abono de 10 dias</span>' : ''}`);
       else if (!aq) partes.push('<span class="sub">Nenhum período programado</span>');
       if (aq) { const fe = this.ferias(f); partes.push(`<b>Aquisitivo:</b> ${esc(fe.txt)}${fe.det ? ` <span class="sub">${esc(fe.det)}</span>` : ''}`); }
       return partes.join('<br>'); };
+    let totCusto = 0;
+    const salCel = f => { const sal = FolhaLoja.salario(f.id), c = sal?.valor ? Folha.calcular(sal.valor, { dependentes: f.dependentesIR }) : null; if (c) totCusto += c.custoTotal;
+      return `<td class="num">${c ? `Base ${Fmt.brl(c.base)}<div class="sub">Líquido ${Fmt.brl(c.liquido)} · Custo ${Fmt.brl(c.custoTotal)}</div>` : '<span class="sub">sem salário</span>'}</td>`; };
     const linhas = lista.map(f => { const bh = Number(f.bancoHoras) || 0;
       return `<tr><td><b>${esc(f.nome)}</b><div class="sub">Mat. ${esc(f.matricula || '—')} · ${esc(f.status || 'Ativo')}</div></td><td>${esc(this.cargoNome(f) || '—')}<div class="sub">${esc(this.lotacaoNome(f))}</div></td>
-        <td class="mono">${Fmt.data(f.admissao)}</td><td>${esc(f.escala || '—')}</td><td class="mono num ${bh < 0 ? 'neg' : ''}">${Fmt.horas(bh)}</td><td>${feriasHtml(f)}</td><td>${folgas(f)}</td></tr>`; }).join('');
+        <td class="mono">${Fmt.data(f.admissao)}</td><td>${esc(f.escala || '—')}</td><td class="mono num ${bh < 0 ? 'neg' : ''}">${Fmt.horas(bh)}</td><td>${feriasHtml(f)}</td><td>${folgas(f)}</td>${salarios ? salCel(f) : ''}</tr>`; }).join('');
     const corpo = `${Documento.cabecalho('Relatório da Equipe', `${lista.length} colaborador(es) · ${filtro}`)}
       <p style="margin:0 0 10px"><b>Período:</b> ${Fmt.data(de)} a ${Fmt.data(ate)} · <b>Folgas:</b> só as agendadas no período (aprovadas na Liberação Remota; folgas fixas da escala não entram) · <b>Férias:</b> ${aq ? 'períodos programados e períodos aquisitivos a vencer' : 'apenas períodos programados/agendados'}.</p>
-      <table class="eq"><thead><tr><th>Colaborador</th><th>Cargo</th><th>Admissão</th><th>Escala</th><th class="num">Banco de horas</th><th>${aq ? 'Férias (programadas e aquisitivos)' : 'Férias programadas'}</th><th>Folgas agendadas no período</th></tr></thead><tbody>${linhas}</tbody></table>
+      <table class="eq"><thead><tr><th>Colaborador</th><th>Cargo</th><th>Admissão</th><th>Escala</th><th class="num">Banco de horas</th><th>${aq ? 'Férias (programadas e aquisitivos)' : 'Férias programadas'}</th><th>Folgas agendadas no período</th>${salarios ? '<th class="num">Salário · líquido · custo</th>' : ''}</tr></thead><tbody>${linhas}</tbody></table>
+      ${salarios ? `<p style="margin:8px 0 0"><b>Custo real total da equipe listada:</b> ${Fmt.brl(totCusto)} <span class="sub">(salário + encargos; conteúdo restrito a quem tem a permissão “Pode ver salários”)</span></p>` : ''}
       <div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>`;
     const css = `table.eq{font-size:10.5px;} table.eq td{padding:5px 6px;} table.eq th{padding:5px 6px;} table.eq tr{break-inside:avoid;} .sub{font-size:9.5px;color:#585E7F;} td.num{text-align:right;white-space:nowrap;} td.neg{color:#B63A2F;} .mono{font-family:'IBM Plex Mono',monospace;}`;
     Documento.previa('Relatório da equipe', Documento.montar('Relatório da Equipe', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Relatorio_Equipe_${de}_a_${ate}`);
@@ -4645,7 +4914,7 @@ const Pessoal = {
           ${podeSal ? `<th class="num"><span class="row" style="justify-content:flex-end;gap:4px">Salário · líquido · custo <button class="iconbtn" data-a="sal-todos" aria-label="${this.ui.verSalarios ? 'Ocultar' : 'Exibir'} todos os salários">${this.ui.verSalarios ? ICON.olhoFechado : ICON.olho}</button></span></th>` : ''}
           <th>Situação</th></tr></thead><tbody>${linhas}</tbody></table></div>`
         : `<div class="empty">${Repo.todos('funcionarios').length ? 'Nenhum colaborador com esses filtros.' : 'Nenhum colaborador cadastrado ainda. O cadastro (Base Ativa ou “+ Novo colaborador”) fica no módulo RH.'}</div>`}
-        ${!podeSal ? '<p class="hint" style="margin-top:10px">Salários visíveis apenas para o perfil GESTOR.</p>' : ''}
+        ${!podeSal ? `<p class="hint" style="margin-top:10px">${g93() ? 'Salários, líquido e custo só aparecem para quem tem a permissão “Pode ver salários” (Gestão de Acessos › RH) e para o Master.' : 'Salários visíveis apenas para o perfil GESTOR.'}</p>` : ''}
       </div>`;
   },
 
@@ -4688,6 +4957,7 @@ const Pessoal = {
       ${campo('Banco de horas (saldo em horas)', 'bancoHoras', f.bancoHoras, { tipo: 'number', attrs: disDia, dica: 'Use negativo para débito. Ex.: 12.5 = 12h30; −3 = 3h devidas.' })}
       ${campo('Períodos de férias já gozados', 'ferias.periodosGozados', f.ferias?.periodosGozados ?? 0, { tipo: 'number', attrs: disDia + ' min="0"', dica: 'Quantos períodos aquisitivos já foram gozados desde a admissão.' })}
       <div class="field"><span class="lbl">Férias programadas</span><div class="row" style="flex-wrap:nowrap"><input type="date" name="ferias.programadaInicio" value="${esc(f.ferias?.programadaInicio || '')}" aria-label="Início das férias" ${dis}><input type="date" name="ferias.programadaFim" value="${esc(f.ferias?.programadaFim || '')}" aria-label="Fim das férias" ${dis}></div></div>
+      ${this.periodosFerias(f).length > 1 ? `<div class="field full"><span class="lbl">Todos os períodos de férias programados</span><div class="hint">${this.periodosFerias(f).map((p, i) => `P${i + 1}: ${Fmt.data(p.inicio)} a ${Fmt.data(p.fim)}`).join(' · ')}${f.ferias?.abonoPecuniario ? ' · abono pecuniário de 10 dias' : ''}${f.ferias?.antecipa13 ? ' · 1ª parcela do 13º antecipada' : ''}</div></div>` : ''}
       ${podeSalEd ? campo('Salário atual (R$)', '_salario', sal?.valor, { tipo: 'number', dica: 'Visível apenas para GESTOR. Alterações ficam no histórico e no log.' }) : ''}
       ${campo('Dependentes para IRRF', 'dependentesIR', f.dependentesIR ?? 0, { tipo: 'number', attrs: dis + ' min="0"' })}
       ${Auth.can('pessoal.salario.ver') ? `<div class="field full"><span class="lbl">Folha líquida e custo real</span><div id="folhaComp">${Folha.composicaoHTML(sal?.valor ? Folha.calcular(sal.valor, { dependentes: f.dependentesIR }) : null)}</div></div>` : ''}
@@ -4749,6 +5019,7 @@ const Pessoal = {
     const dados = { ...base, escala: d.escala, folgas: d.folgas || [], folgaObs: d.folgaObs || '', bancoHoras: d.bancoHoras === '' || d.bancoHoras == null ? 0 : Number(d.bancoHoras), email: d.email || '', telefone: d.telefone || '',
       ferias: { ...(antes.ferias || {}), periodosGozados: Number(d.ferias?.periodosGozados) || 0, programadaInicio: d.ferias?.programadaInicio || '', programadaFim: d.ferias?.programadaFim || '' } };
     if (d.status && d.status !== 'Desligado' && antes.status !== 'Desligado') dados.status = d.status;
+    this.limparPeriodos93(dados, antes);
     await Repo.salvar('funcionarios', id, dados, { modulo: 'pessoal', rotulo: `${antes.nome} · dia a dia` });
     UI.toast('Dia a dia atualizado');
   },
@@ -4795,6 +5066,7 @@ const Pessoal = {
     if (this.podeCadastro()) {
       const dados = mergeProfundo(id ? antes : {}, d); dados.folgas = d.folgas || []; delete dados.exemplo; if (antes?.exemplo) dados.exemplo = true;
       if (avulsas) dados.folgasAvulsas = avulsas;
+      if (id) this.limparPeriodos93(dados, antes);
       await Repo.salvar('funcionarios', novoId, dados, { modulo: 'pessoal', rotulo: d.nome });
     }
     if (Auth.can('pessoal.salario.editar') && salario != null && salario !== salAntes?.valor) {
@@ -6080,6 +6352,7 @@ const Lojas = {
   render() {
     if (this.ui.sel) return this.renderDetalhe(this.ui.sel);
     if (!Repo.prontas.has('lojas')) return `<div class="panel"><p class="muted">Carregando lojas…</p></div>`;
+    if (g93() && this.ui.vista && this.ui.vista !== 'lista') return this.renderV93(); /* v13.93 */
     const todas = Repo.todos('lojas'), ativas = todas.filter(l => l.ativa), u = this.ui, lista = this.filtradas();
     const hoje = Datas.hoje();
     const reaj = ativas.filter(l => { const d = this.proximoReajuste(this.contratoLoja(l).view); return d && Datas.dias(hoje, d) <= 60; }).length;
@@ -6091,6 +6364,7 @@ const Lojas = {
     return `
       <div class="page-head"><div><h1>Gestão de Lojas</h1><p>Cadastro das filiais, adquirentes e TEF, despesas fixas e os seguros e contratos de cada loja (vindos do Módulo 3).</p></div>
         <div class="row"><button class="btn sec" data-a="lj-resumo-escolher">${ICON.pdf} Resumo executivo da loja</button><button class="btn sec" data-a="lj-resumo-rede">${ICON.pdf} Resumo executivo · Todas as Lojas</button>${Auth.can('lojas.importar') ? `<button class="btn sec" data-a="lj-importar">Importar BASECADASTRO (.xlsx)</button>` : ''}${Contratos.podeEd() ? `<button class="btn sec" data-a="lj-ocup-importar">Importar Ocupação (.xlsx)</button>` : ''}${Contratos.pode() ? `<button class="btn sec" data-a="lj-ocup-modelo">Exportar Modelo Ocupação</button>` : ''}${Auth.can('lojas.editar') ? `<button class="btn" data-a="lj-nova">+ Nova loja</button>` : ''}</div></div>
+      ${g93() ? this.abasV93() : ''}
       <section class="lj-dash" id="ljDash" aria-label="Painel das lojas"></section>
       <div class="grid g4" style="margin-bottom:16px">
         <div class="kpi"><div class="k">Contratos não localizados</div><div class="v" style="color:var(${semContrato ? '--warn' : '--ok'})">${semContrato}</div><div class="d">status “FALTA” na base</div></div>
@@ -6126,6 +6400,7 @@ const Lojas = {
   /** Lista e painel montados com DocumentFragment (fora do innerHTML principal). */
   afterRender() {
     if (this.ui.sel) return this.montarSeguros();
+    if (g93() && this.ui.vista && this.ui.vista !== 'lista') return; /* v13.93: abas POS e KPIs não têm o painel nem a tabela da lista */
     this.montarDashboard();
     const tb = $('#ljBody'); if (!tb) return;
     const lista = this.filtradas(), todas = Repo.todos('lojas');
@@ -6195,7 +6470,8 @@ const Lojas = {
     return `<div class="panel"><div class="row between"><h2>Dados fiscais e operacionais</h2>${Auth.can('lojas.editar') ? `<button class="btn sec sm" data-a="lj-editar-dados" data-id="${l.id}">${ICON.editar} Editar</button>` : ''}</div>
       <div class="dl" style="margin-top:14px">
         ${this.item('CNPJ', `<span class="mono">${esc(l.cnpj)}</span> <span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'válido' : 'dígito inválido'}</span>`)}
-        ${this.item('Razão social', esc(l.razaoSocial || 'ESPOSENDE CALÇADOS LTDA'))}${this.item('Inscrição estadual', esc(l.inscricaoEstadual))}
+        ${this.item('Razão social', esc(l.razaoSocial || 'ESPOSENDE CALÇADOS LTDA'))}${g94() ? this.item('Nome fantasia', esc(l.nomeFantasia)) : ''}${this.item('Inscrição estadual', esc(l.inscricaoEstadual))}
+        ${g94() ? this.item('Situação cadastral', l.situacaoCadastral ? `<span class="pill ${/ativa/i.test(l.situacaoCadastral) ? 'ok' : 'warn'}">${esc(l.situacaoCadastral)}</span>` : '') + this.item('Capital social', l.capitalSocial ? Fmt.brl(l.capitalSocial) : '') + this.item('Bairro', esc(l.bairro)) : ''}
         ${this.item('Endereço', esc(l.endereco))}${this.item('Cidade / UF', esc(l.cidade) + ' / ' + esc(l.uf))}${this.item('CEP', `<span class="mono">${esc(l.cep)}</span>`)}
         ${this.item('Tipo de loja', esc(l.tipo))}${this.item('Praça', esc(l.classificacao))}${this.item('Supervisor regional', esc(l.supervisor))}
         ${this.item('Faturamento médio mensal', l.faturamentoMedio ? `<span class="mono">${Fmt.brl0(l.faturamentoMedio)}</span>${l.faturamentoMedioBase?.meses ? `<div class="cell-sub">média de ${l.faturamentoMedioBase.meses} mês(es) realizados (${l.faturamentoMedioBase.de.split('-').reverse().join('/')} a ${l.faturamentoMedioBase.ate.split('-').reverse().join('/')}) · Importar Realizado</div>` : ''}` : '')}${this.item('Área de vendas', l.areaM2 ? Fmt.num(l.areaM2) + ' m²' : '')}${this.item('Gerente da loja', esc(l.gerente))}
@@ -6209,10 +6485,11 @@ const Lojas = {
     return `<div class="form-grid">
       ${campo('Código da filial', 'codigo', l.codigo, { attrs: l.id ? 'disabled' : 'required inputmode="numeric" placeholder="Ex.: 06"', dica: l.id ? '' : 'Padrão oficial de 2 dígitos (06, 13). Se digitar 906 ou 006, vira 06.' })}${campo('Nome da loja', 'nome', l.nome)}
       ${campo('Bandeira', 'bandeira', l.bandeira, { opcoes: BANDEIRAS })}${campo('Tipo', 'tipo', l.tipo, { opcoes: TIPOS_LOJA })}
-      <div class="field"><label class="lbl" for="f_cnpj">CNPJ</label><div class="row" style="flex-wrap:nowrap"><input id="f_cnpj" name="cnpj" value="${esc(l.cnpj || '')}"><button type="button" class="btn sec sm" data-receita>Consultar Receita</button></div><span class="hint" data-receita-msg style="margin-top:4px"></span></div>
-      ${campo('Inscrição estadual', 'inscricaoEstadual', l.inscricaoEstadual)}
+      ${g94() ? Cnpj94.campo('CNPJ', 'cnpj', l.cnpj) : `<div class="field"><label class="lbl" for="f_cnpj">CNPJ</label><div class="row" style="flex-wrap:nowrap"><input id="f_cnpj" name="cnpj" value="${esc(l.cnpj || '')}"><button type="button" class="btn sec sm" data-receita>Consultar Receita</button></div><span class="hint" data-receita-msg style="margin-top:4px"></span></div>`}
+      ${g94() ? campo('Razão social', 'razaoSocial', l.razaoSocial) + campo('Nome fantasia', 'nomeFantasia', l.nomeFantasia) : ''}${campo('Inscrição estadual', 'inscricaoEstadual', l.inscricaoEstadual)}
       ${campo('Endereço', 'endereco', l.endereco, { full: true })}
-      ${campo('Cidade', 'cidade', l.cidade)}${campo('UF', 'uf', l.uf, { opcoes: UFS })}${campo('CEP', 'cep', l.cep)}${campo('Praça / classificação', 'classificacao', l.classificacao)}
+      ${g94() ? campo('Bairro', 'bairro', l.bairro) : ''}${campo('Cidade', 'cidade', l.cidade)}${campo('UF', 'uf', l.uf, { opcoes: UFS })}${campo('CEP', 'cep', l.cep, g94() ? { attrs: 'inputmode="numeric" maxlength="9" placeholder="00000-000"' } : {})}${campo('Praça / classificação', 'classificacao', l.classificacao)}
+      ${g94() ? campo('Capital social (R$)', 'capitalSocial', l.capitalSocial, { tipo: 'number' }) + campo('Situação cadastral', 'situacaoCadastral', l.situacaoCadastral, { attrs: 'placeholder="Preenchida pela consulta do CNPJ"' }) : ''}
       ${campo('Supervisor regional', 'supervisor', l.supervisor)}${campo('Gerente da loja', 'gerente', l.gerente)}
       ${campo('Faturamento médio mensal (R$)', 'faturamentoMedio', l.faturamentoMedio, { tipo: 'number' })}${campo('Área de vendas (m²)', 'areaM2', l.areaM2, { tipo: 'number' })}
       ${campo('Horário seg. a sex.', 'horario.semana', h.semana, { attrs: 'placeholder="09:00 às 19:00"' })}${campo('Horário sábado', 'horario.sabado', h.sabado, { attrs: 'placeholder="09:00 às 17:00"' })}
@@ -6225,6 +6502,7 @@ const Lojas = {
     UI.modal({
       titulo: id ? 'Editar · ' + l.nome : 'Nova loja', largo: true, corpo: this.formDados(l),
       aoAbrir: m => {
+        if (g94()) { Cnpj94.ligarLoja(m, l); const cep = $('[name="cep"]', m); if (cep) cep.addEventListener('input', () => { cep.value = Cnpj94.cep(cep.value); }); return; } // v13.94: componente único de consulta do CNPJ
         let ultimo = CNPJ.limpar(l.cnpj);
         const consultar = async () => {
           const msg = $('[data-receita-msg]', m), v = $('#f_cnpj', m).value; ultimo = CNPJ.limpar(v); msg.textContent = 'Consultando a Receita Federal…'; msg.style.color = '';
@@ -6244,6 +6522,7 @@ const Lojas = {
           const d = UI.lerForm(m);
           const codigo = id ? l.codigo : CodLoja.oficial(d.codigo); // v13.43: código oficial de 2 dígitos (06, 13)
           if (!id && (!+codigo || CodLoja.loja(codigo))) { UI.toast('Informe um código de filial novo.'); return false; }
+          if (g94() && d.cnpj && CNPJ.limpar(d.cnpj) !== CNPJ.limpar(l.cnpj) && !CNPJ.valido(d.cnpj)) { UI.toast('CNPJ inválido: confira os dígitos verificadores antes de salvar.'); return false; } // v13.94: só barra o CNPJ que a pessoa alterou
           d.cnpj = CNPJ.formatar(d.cnpj); if (l._receita) d.receita = l._receita; delete d.codigo;
           const novo = mergeProfundo(l, d); delete novo._receita; novo.codigo = codigo;
           await Repo.salvar('lojas', id || CodLoja.id(codigo), novo, { modulo: 'lojas', rotulo: `${codigo} · ${d.nome}` });
@@ -6443,7 +6722,7 @@ const Lojas = {
   abrirAdq(id, i) {
     const l = Repo.get('lojas', id), a = i != null ? l.adquirentes[i] : { adquirente: 'GETNET', tipo: 'CARTÃO TERCEIROS', posicao: 'PRIMÁRIA', integradora: 'SITEF' };
     UI.modal({
-      titulo: (i != null ? 'Editar' : 'Novo') + (ConcMP.v72() ? ' EC · ' : ' adquirente · ') + l.nome, corpo: ConcMP.v72() ? this.corpoAdq72(a, l) : `<div class="form-grid">
+      titulo: (i != null ? 'Editar' : 'Novo') + (ConcMP.v72() ? ' EC · ' : ' adquirente · ') + l.nome, aoAbrir: m => { if (g94()) Cnpj94.ligarTef(m); }, corpo: ConcMP.v72() ? this.corpoAdq72(a, l) : `<div class="form-grid">
       ${campo('Adquirente', 'adquirente', a.adquirente, { attrs: 'list="adqList"' })}${campo('Tipo', 'tipo', a.tipo, { opcoes: ['CARTÃO TERCEIROS', 'CARTÃO PRÓPRIO', 'PIX', 'VOUCHER'] })}
       ${campo('Posição', 'posicao', a.posicao, { opcoes: ['PRIMÁRIA', 'SECUNDÁRIA', 'CONTINGÊNCIA'] })}${campo('EC (estabelecimento comercial)', 'ec', a.ec)}
       ${ConcMP.ativo() ? campo('Empresa (Razão Social / CNPJ) do EC', 'empresaId', a.empresaId || '', { opcoes: ConcMP.opcoesEmpresa(a.empresaId), dica: 'Vincula o EC à empresa do grupo (ex.: Resilienza, Mar Aberto). O EC é a chave da leitura das vendas da adquirente.' }) + '<div></div>' : ''}
@@ -6882,10 +7161,147 @@ const Lojas = {
     return { novas, atualizadas };
   },
 
+  /* ======================= v13.93 · Máquinas POS Consolidado e Indicadores & KPIs Operacionais ======================= */
+  ABAS_V93: [['lista', 'Lojas'], ['pos', 'Máquinas POS Consolidado'], ['kpis', 'Indicadores & KPIs Operacionais']],
+  abasV93() {
+    const v = this.ui.vista || 'lista';
+    return `<div class="tabs" role="tablist" aria-label="Visões da Gestão de Lojas">${this.ABAS_V93.map(([k, r]) => `<button role="tab" aria-selected="${v === k}" class="${v === k ? 'on' : ''}" data-a="lj-vista" data-v="${k}">${r}</button>`).join('')}</div>`;
+  },
+  renderV93() {
+    const v = this.ui.vista, head = `<div class="page-head"><div><h1>Gestão de Lojas</h1><p>${v === 'pos' ? 'Todas as máquinas de cartão (POS) da rede, com o aluguel de cada uma, por filial e adquirente.' : 'Venda, custo e resultado por metro quadrado de cada loja, com a área de vendas cadastrada.'}</p></div></div>`;
+    return head + this.abasV93() + (v === 'pos' ? this.renderPOS93() : this.renderKpi93());
+  },
+  /**
+   * v13.93 · Máquinas POS: uma linha por EC com POS de cada filial ativa (quantidade, aluguel unitário e custo mensal), com subtotal por filial e total da rede.
+   * Usa ConcMP.custoPos: valor unitário = exceção do EC da loja (0 = isenta) ou o padrão das Regras de Taxa (adquirente + empresa); sem nenhum dos dois = "sem valor".
+   */
+  dadosPOS93({ adq = '', busca = '' } = {}) {
+    const r2 = n => Math.round((Number(n) || 0) * 100) / 100, q = RH.chave(busca || ''), nomeAdq = a => String(a.adquirente || '').toUpperCase().trim();
+    const lojas = Repo.todos('lojas').filter(l => l.ativa !== false && (!q || RH.chave(`${l.codigo} ${l.nome}`).includes(q))).sort((a, b) => String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true }));
+    const grupos = [], porAdq = new Map();
+    lojas.forEach(l => {
+      const nomes = [...new Set((l.adquirentes || []).map(nomeAdq).filter(Boolean))].filter(A => !adq || A === adq), linhas = [];
+      nomes.forEach(A => ConcMP.custoPos(l.id, A).itens.forEach(it => linhas.push({ adquirente: A, ec: it.ec, qtd: it.qtd, unit: it.unit, total: it.total, fonte: it.fonte })));
+      if (!linhas.length) return;
+      grupos.push({ lojaId: l.id, codigo: l.codigo, loja: l.nome, linhas, qtd: linhas.reduce((a, x) => a + x.qtd, 0), custo: r2(linhas.reduce((a, x) => a + x.total, 0)), semValor: linhas.filter(x => x.unit == null).length });
+      linhas.forEach(x => { const a = porAdq.get(x.adquirente) || { adquirente: x.adquirente, qtd: 0, qtdValor: 0, custo: 0, lojas: new Set(), semValor: 0 }; a.qtd += x.qtd; a.custo = r2(a.custo + x.total); a.lojas.add(l.id); if (x.unit == null) a.semValor++; else a.qtdValor += x.qtd; porAdq.set(x.adquirente, a); });
+    });
+    const adqs = [...porAdq.values()].map(a => ({ adquirente: a.adquirente, qtd: a.qtd, custo: a.custo, lojas: a.lojas.size, semValor: a.semValor, medio: a.qtdValor ? r2(a.custo / a.qtdValor) : null })).sort((a, b) => b.custo - a.custo || a.adquirente.localeCompare(b.adquirente));
+    const qtd = grupos.reduce((a, g) => a + g.qtd, 0), custo = r2(grupos.reduce((a, g) => a + g.custo, 0)), qtdValor = grupos.reduce((a, g) => a + g.linhas.filter(x => x.unit != null).reduce((b, x) => b + x.qtd, 0), 0);
+    const todasAdq = [...new Set(Repo.todos('lojas').filter(l => l.ativa !== false).flatMap(l => (l.adquirentes || []).map(nomeAdq).filter(Boolean)))].sort();
+    return { grupos, adqs, todasAdq, total: { qtd, custo, lojas: grupos.length, semValor: grupos.reduce((a, g) => a + g.semValor, 0), medio: qtdValor ? r2(custo / qtdValor) : null } };
+  },
+  htmlTabelaPOS93(d) {
+    const unit = x => x.unit == null ? '<span class="pill warn" title="Sem exceção no EC da loja e sem aluguel de POS nas Regras de Taxa">sem valor</span>' : x.unit === 0 ? 'isenta' : Fmt.brl(x.unit);
+    const linhas = d.grupos.map(g => g.linhas.map((x, i) => `<tr><td class="cell-main">${i === 0 ? `<span class="mono muted">${esc(g.codigo)}</span> ${esc(g.loja)}` : ''}</td><td>${esc(x.adquirente)}</td><td class="mono">${esc(x.ec || '—')}</td><td class="num">${x.qtd}</td><td class="num">${unit(x)}<div class="cell-sub">${esc(x.fonte)}</div></td><td class="num">${x.unit == null ? '—' : Fmt.brl(x.total)}</td></tr>`).join('')
+      + `<tr class="lj-sub"><td colspan="3" class="num">Subtotal da filial ${esc(g.codigo)}</td><td class="num">${g.qtd}</td><td></td><td class="num">${Fmt.brl(g.custo)}</td></tr>`).join('');
+    return `<table class="lj-pos"><thead><tr><th>Filial</th><th>Adquirente</th><th>EC</th><th class="num">Qtd de POS</th><th class="num">Valor unitário de aluguel</th><th class="num">Custo total de aluguel POS</th></tr></thead><tbody>${linhas}
+      <tr class="tot"><td colspan="3" class="num">TOTAL DA REDE · ${d.total.lojas} filial(is)</td><td class="num">${d.total.qtd}</td><td class="num">${d.total.medio != null ? Fmt.brl(d.total.medio) + '<div class="cell-sub">média por POS</div>' : '—'}</td><td class="num">${Fmt.brl(d.total.custo)}</td></tr></tbody></table>`;
+  },
+  renderPOS93() {
+    const u = this.ui, d = this.dadosPOS93({ adq: u.v93Adq || '', busca: u.v93Busca || '' }), t = d.total;
+    const kpi = (k, v, dd, c = '') => `<div class="kpi"><div class="k">${k}</div><div class="v mono" ${c ? `style="color:var(${c})"` : ''}>${v}</div><div class="d">${dd}</div></div>`;
+    return `<div class="grid g4" style="margin-bottom:16px">
+        ${kpi('Máquinas POS na rede', Fmt.num(t.qtd), `${t.lojas} filial(is) com POS${u.v93Adq ? ' · ' + esc(u.v93Adq) : ''}`)}
+        ${kpi('Custo mensal de aluguel POS', Fmt.brl(t.custo), 'soma de todas as filiais listadas')}
+        ${kpi('Valor médio por POS', t.medio != null ? Fmt.brl(t.medio) : '—', 'só POS com valor de aluguel')}
+        ${kpi('ECs sem valor de aluguel', String(t.semValor), t.semValor ? 'cadastre o padrão nas Regras de Taxa ou a exceção no EC' : 'todos os ECs com valor', t.semValor ? '--warn' : '--ok')}</div>
+      <div class="panel"><div class="toolbar">
+          <div class="field grow"><label class="lbl" for="ljPosBusca">Filial</label><input id="ljPosBusca" type="search" placeholder="Código ou nome da filial…" value="${esc(u.v93Busca || '')}" data-a="lj-busca93"></div>
+          <div class="field"><label class="lbl" for="ljPosAdq">Adquirente</label><select id="ljPosAdq" data-a="lj-filtro" data-k="v93Adq"><option value="">Todas</option>${d.todasAdq.map(a => `<option ${a === u.v93Adq ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select></div>
+          <div class="row" style="align-self:flex-end;gap:8px"><button class="btn sec sm" data-a="lj-v93-xlsx" data-v="pos">Exportar Excel</button><button class="btn sec sm" data-a="lj-v93-pdf" data-v="pos">${ICON.pdf} Imprimir / PDF</button></div></div>
+        ${d.grupos.length ? `<div class="tbl-wrap">${this.htmlTabelaPOS93(d)}</div>` : '<div class="empty">Nenhuma filial com POS cadastrado para este filtro. A quantidade de POS fica no EC de cada loja (Gestão de Lojas › Adquirentes e TI).</div>'}</div>
+      ${d.adqs.length ? `<div class="panel"><h2>Consolidado por adquirente</h2><div class="tbl-wrap"><table><thead><tr><th>Adquirente</th><th class="num">Filiais</th><th class="num">Qtd de POS</th><th class="num">Aluguel médio por POS</th><th class="num">Custo mensal</th></tr></thead><tbody>
+        ${d.adqs.map(a => `<tr><td class="cell-main">${esc(a.adquirente)}${a.semValor ? ` <span class="pill warn">${a.semValor} EC sem valor</span>` : ''}</td><td class="num">${a.lojas}</td><td class="num">${a.qtd}</td><td class="num">${a.medio != null ? Fmt.brl(a.medio) : '—'}</td><td class="num">${Fmt.brl(a.custo)}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+      <p class="hint">Valor unitário: exceção do EC da loja (R$ 0,00 = isenta) ou o padrão de Aluguel de POS das Regras de Taxa (Conciliação de Meios de Pagamento). Filiais inativas não entram.</p>`;
+  },
+  /**
+   * v13.93 · Indicadores por m² (área de vendas cadastrada na loja). Faturamento = média mensal do cadastro (atualizada pelo realizado importado).
+   * Custo operacional = ocupação + água/energia (Módulo 3, só para quem acessa Contratos) + aluguel de POS (+ folha com encargos, se marcada e permitida).
+   * Resultado = faturamento médio − custo operacional (não deduz CMV nem impostos). Rede = razão das somas (não média das razões), só com as lojas que têm todos os dados.
+   */
+  dadosKpi93({ tipo = '', regional = '', folha = false } = {}) {
+    const r2 = n => Math.round((Number(n) || 0) * 100) / 100, hoje = Datas.hoje(), ano = hoje.getFullYear(), mes = hoje.getMonth() + 1;
+    const verCustos = Contratos.pode(), verFolha = !!folha && Auth.can('pessoal.salario.ver') && Repo.prontas.has('salarios') && Repo.prontas.has('funcionarios');
+    const posPorLoja = new Map(this.dadosPOS93().grupos.map(g => [g.lojaId, g.custo]));
+    const lojas = Repo.todos('lojas').filter(l => l.ativa !== false && (!tipo || l.tipo === tipo) && (!regional || l.supervisor === regional));
+    const linhas = lojas.map(l => {
+      const area = Number(l.areaM2) > 0 ? Number(l.areaM2) : 0, fat = Number(l.faturamentoMedio) > 0 ? Number(l.faturamentoMedio) : 0, pos = posPorLoja.get(l.id) || 0;
+      const k = verCustos ? this.custos(l) : null, ocup = k ? k.total : null;
+      let fol = null; if (verFolha) { try { fol = FolhaLoja.mes(l, ano, mes).total; } catch { fol = null; } }
+      const custo = verCustos && ocup != null ? r2(ocup + pos + (fol || 0)) : null, res = custo != null && fat ? r2(fat - custo) : null;
+      return { lojaId: l.id, codigo: l.codigo, loja: l.nome, tipo: l.tipo, area, fat, ocup, pos, folha: fol, custo, resultado: res,
+        vendaM2: area && fat ? r2(fat / area) : null, custoM2: area && custo != null ? r2(custo / area) : null, resultadoM2: area && res != null ? r2(res / area) : null, margem: res != null && fat ? res / fat * 100 : null,
+        semArea: !area, semFat: !fat, semCusto: verCustos && ocup == null };
+    }).sort((a, b) => (b.vendaM2 ?? -1) - (a.vendaM2 ?? -1) || String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true }));
+    const soma = (xs, f) => xs.reduce((a, x) => a + f(x), 0), cv = linhas.filter(x => x.vendaM2 != null), cc = linhas.filter(x => x.custoM2 != null), cr = linhas.filter(x => x.resultadoM2 != null);
+    const rede = { vendaM2: cv.length ? r2(soma(cv, x => x.fat) / soma(cv, x => x.area)) : null, custoM2: cc.length ? r2(soma(cc, x => x.custo) / soma(cc, x => x.area)) : null,
+      resultadoM2: cr.length ? r2(soma(cr, x => x.resultado) / soma(cr, x => x.area)) : null, margem: cr.length ? soma(cr, x => x.resultado) / soma(cr, x => x.fat) * 100 : null,
+      lojas: linhas.length, comArea: linhas.filter(x => !x.semArea).length, semArea: linhas.filter(x => x.semArea).length, comTudo: cr.length, areaTotal: soma(cv, x => x.area) };
+    return { linhas, rede, verCustos, verFolha };
+  },
+  htmlTabelaKpi93(d, impressao = false) {
+    const mx = Math.max(0, ...d.linhas.map(x => x.vendaM2 || 0)), n = v => v == null ? '<span class="hint">—</span>' : Fmt.brl(v), cor = v => v == null ? '' : `style="color:var(${v < 0 ? '--bad' : '--ok'})"`;
+    const sem = x => x.semArea ? '<span class="pill warn" title="Cadastre a área de vendas (m²) na loja">sem m²</span>' : Fmt.num(x.area, x.area % 1 ? 1 : 0);
+    const cab = `<tr><th>Loja</th><th>Tipo</th><th class="num">m²</th><th class="num">Faturamento médio/mês</th><th class="num">Venda por m²</th>${d.verCustos ? '<th class="num">Custo operacional/mês</th><th class="num">Custo por m²</th><th class="num">Resultado/mês</th><th class="num">Resultado por m²</th><th class="num">Margem</th>' : ''}</tr>`;
+    const lin = d.linhas.map(x => `<tr><td class="cell-main"><span class="mono muted">${esc(x.codigo)}</span> ${esc(x.loja)}</td><td class="cell-sub">${esc(x.tipo || '—')}</td><td class="num">${sem(x)}</td><td class="num">${x.fat ? Fmt.brl(x.fat) : '<span class="hint">—</span>'}</td>
+      <td class="num">${n(x.vendaM2)}${!impressao && x.vendaM2 && mx ? `<div class="lj-bar" aria-hidden="true"><i style="width:${Math.round(x.vendaM2 / mx * 100)}%"></i></div>` : ''}</td>
+      ${d.verCustos ? `<td class="num">${x.custo != null ? Fmt.brl(x.custo) : `<span class="hint">${x.semCusto ? 'sem custos' : '—'}</span>`}</td><td class="num">${n(x.custoM2)}</td><td class="num" ${cor(x.resultado)}>${n(x.resultado)}</td><td class="num" ${cor(x.resultadoM2)}>${n(x.resultadoM2)}</td><td class="num" ${cor(x.margem)}>${x.margem != null ? Fmt.pct(x.margem, 1) : '<span class="hint">—</span>'}</td>` : ''}</tr>`).join('');
+    const r = d.rede;
+    const tot = `<tr class="tot"><td colspan="2">REDE (${r.comArea} de ${r.lojas} lojas com m²)</td><td class="num">${Fmt.num(r.areaTotal, 0)}</td><td></td><td class="num">${n(r.vendaM2)}</td>${d.verCustos ? `<td></td><td class="num">${n(r.custoM2)}</td><td></td><td class="num" ${cor(r.resultadoM2)}>${n(r.resultadoM2)}</td><td class="num" ${cor(r.margem)}>${r.margem != null ? Fmt.pct(r.margem, 1) : '—'}</td>` : ''}</tr>`;
+    return `<table class="lj-kpi"><thead>${cab}</thead><tbody>${lin}${tot}</tbody></table>`;
+  },
+  renderKpi93() {
+    const u = this.ui, todas = Repo.todos('lojas'), sup = [...new Set(todas.map(l => l.supervisor).filter(Boolean))].sort(), podeFolha = Auth.can('pessoal.salario.ver');
+    const d = this.dadosKpi93({ tipo: u.v93Tipo || '', regional: u.v93Reg || '', folha: podeFolha && u.v93Folha === true }), r = d.rede;
+    const kpi = (k, v, dd, c = '') => `<div class="kpi"><div class="k">${k}</div><div class="v mono" ${c ? `style="color:var(${c})"` : ''}>${v}</div><div class="d">${dd}</div></div>`;
+    const m2 = v => v == null ? '—' : Fmt.brl(v), sel = (k, rot, ops, vl) => `<div class="field"><label class="lbl" for="lj_${k}">${rot}</label><select id="lj_${k}" data-a="lj-filtro" data-k="${k}"><option value="">Todos</option>${ops.map(o => `<option ${o === vl ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`;
+    return `<div class="grid g4" style="margin-bottom:16px">
+        ${kpi('Venda por m²', m2(r.vendaM2), `por mês · faturamento médio ÷ m² · ${r.comArea} de ${r.lojas} lojas com m²`)}
+        ${d.verCustos ? kpi('Custo operacional por m²', m2(r.custoM2), `ocupação + utilidades + aluguel de POS${d.verFolha ? ' + folha' : ''}`) : kpi('Custo operacional por m²', '—', 'custos de ocupação são restritos ao Módulo 3 (Contratos)')}
+        ${d.verCustos ? kpi('Resultado por m²', m2(r.resultadoM2), r.margem != null ? `margem de ${Fmt.pct(r.margem, 1)} sobre a venda · ${r.comTudo} loja(s) com todos os dados` : 'faltam dados de custo ou faturamento', r.resultadoM2 != null ? (r.resultadoM2 < 0 ? '--bad' : '--ok') : '') : kpi('Resultado por m²', '—', 'restrito a quem acessa o Módulo 3')}
+        ${kpi('Lojas sem m² cadastrado', String(r.semArea), r.semArea ? 'preencha “Área de vendas (m²)” em Gestão de Lojas › Dados' : 'todas com área cadastrada', r.semArea ? '--warn' : '--ok')}</div>
+      <div class="panel"><div class="toolbar">${sel('v93Tipo', 'Tipo', TIPOS_LOJA, u.v93Tipo)}${sel('v93Reg', 'Regional (supervisor)', sup, u.v93Reg)}
+          ${podeFolha ? `<label class="check" style="align-self:flex-end"><input type="checkbox" data-a="lj-v93-folha" ${u.v93Folha === true ? 'checked' : ''}> Incluir folha de pagamento (salário + encargos)</label>` : ''}
+          <div class="row" style="align-self:flex-end;gap:8px"><button class="btn sec sm" data-a="lj-v93-xlsx" data-v="kpis">Exportar Excel</button><button class="btn sec sm" data-a="lj-v93-pdf" data-v="kpis">${ICON.pdf} Imprimir / PDF</button></div></div>
+        ${d.linhas.length ? `<div class="tbl-wrap">${this.htmlTabelaKpi93(d)}</div>` : '<div class="empty">Nenhuma loja ativa com esses filtros.</div>'}</div>
+      <details class="cmp-leitura"><summary><b>Como os indicadores são calculados</b></summary><p class="hint" style="margin:8px 0 0"><b>Venda por m²</b> = faturamento médio mensal da loja ÷ área de vendas (m²). <b>Custo operacional</b> = custos de ocupação (aluguel, condomínio, fundo de promoção, IPTU e taxas) + água e energia + aluguel das máquinas POS${podeFolha ? ' (+ folha com encargos, quando marcada)' : ''}. <b>Resultado</b> = faturamento médio − custo operacional (não deduz CMV nem impostos). <b>Margem</b> = resultado ÷ faturamento. Os números da rede dividem a soma dos valores pela soma das áreas (não é média das médias) e só consideram lojas com todos os dados do indicador.</p></details>`;
+  },
+  async exportarV93(qual) {
+    const XLSX = await Libs.xlsx(), wb = XLSX.utils.book_new(), hoje = Datas.hojeISO();
+    if (qual === 'pos') {
+      const d = this.dadosPOS93({ adq: this.ui.v93Adq || '', busca: this.ui.v93Busca || '' }), rows = [['Filial', 'Loja', 'Adquirente', 'EC', 'Qtd de POS', 'Valor unitário de aluguel (R$)', 'Custo total de aluguel POS (R$)', 'Origem do valor']];
+      d.grupos.forEach(g => { g.linhas.forEach(x => rows.push([g.codigo, g.loja, x.adquirente, x.ec, x.qtd, x.unit == null ? 'sem valor' : x.unit, x.unit == null ? '' : x.total, x.fonte])); rows.push([g.codigo, g.loja, 'SUBTOTAL DA FILIAL', '', g.qtd, '', g.custo, '']); });
+      rows.push(['', 'TOTAL DA REDE', '', '', d.total.qtd, d.total.medio ?? '', d.total.custo, '']);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'POS por filial');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Adquirente', 'Filiais', 'Qtd de POS', 'Aluguel médio por POS (R$)', 'Custo mensal (R$)'], ...d.adqs.map(a => [a.adquirente, a.lojas, a.qtd, a.medio ?? '', a.custo])]), 'Por adquirente');
+      return Documento.baixarArquivo(`maquinas_pos_consolidado_${hoje}.xlsx`, new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]));
+    }
+    const d = this.dadosKpi93({ tipo: this.ui.v93Tipo || '', regional: this.ui.v93Reg || '', folha: Auth.can('pessoal.salario.ver') && this.ui.v93Folha === true });
+    const rows = [['Código', 'Loja', 'Tipo', 'm²', 'Faturamento médio/mês (R$)', 'Venda por m² (R$)', ...(d.verCustos ? ['Custo operacional/mês (R$)', 'Custo por m² (R$)', 'Resultado/mês (R$)', 'Resultado por m² (R$)', 'Margem (%)'] : [])]];
+    d.linhas.forEach(x => rows.push([x.codigo, x.loja, x.tipo, x.area || '', x.fat || '', x.vendaM2 ?? '', ...(d.verCustos ? [x.custo ?? '', x.custoM2 ?? '', x.resultado ?? '', x.resultadoM2 ?? '', x.margem != null ? Math.round(x.margem * 10) / 10 : ''] : [])]));
+    rows.push(['', 'REDE', '', d.rede.areaTotal, '', d.rede.vendaM2 ?? '', ...(d.verCustos ? ['', d.rede.custoM2 ?? '', '', d.rede.resultadoM2 ?? '', d.rede.margem != null ? Math.round(d.rede.margem * 10) / 10 : ''] : [])]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'KPIs por m²');
+    return Documento.baixarArquivo(`indicadores_operacionais_m2_${hoje}.xlsx`, new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]));
+  },
+  imprimirV93(qual) {
+    const css = `table{font-size:10.5px;} td,th{padding:5px 6px;} td.num,th.num{text-align:right;white-space:nowrap;} tr.lj-sub td{font-weight:700;background:#F3F4FA;} tr.tot td{font-weight:700;border-top:2px solid #1B2362;} .cell-sub{font-size:9.5px;color:#585E7F;} .mono{font-family:'IBM Plex Mono',monospace;} .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;background:#FCF0D6;}`;
+    if (qual === 'pos') { const d = this.dadosPOS93({ adq: this.ui.v93Adq || '', busca: this.ui.v93Busca || '' });
+      const corpo = `${Documento.cabecalho('Máquinas POS Consolidado', `${d.total.qtd} POS · ${d.total.lojas} filial(is) · custo mensal ${Fmt.brl(d.total.custo)}`)}${this.htmlTabelaPOS93(d)}<div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>`;
+      return Documento.previa('Máquinas POS Consolidado', Documento.montar('Máquinas POS Consolidado', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Maquinas_POS_Consolidado_${Datas.hojeISO()}`); }
+    const d = this.dadosKpi93({ tipo: this.ui.v93Tipo || '', regional: this.ui.v93Reg || '', folha: Auth.can('pessoal.salario.ver') && this.ui.v93Folha === true });
+    const corpo = `${Documento.cabecalho('Indicadores & KPIs Operacionais por m²', `${d.rede.lojas} loja(s) · venda por m² da rede ${d.rede.vendaM2 != null ? Fmt.brl(d.rede.vendaM2) : '—'}`)}${this.htmlTabelaKpi93(d, true)}<div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')} · resultado = faturamento médio − custo operacional (sem CMV e impostos)</div>`;
+    return Documento.previa('Indicadores operacionais por m²', Documento.montar('Indicadores & KPIs Operacionais', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Indicadores_Operacionais_m2_${Datas.hojeISO()}`);
+  },
+
   /* ---------------- eventos ---------------- */
   async acao(a, el) {
     const u = this.ui, id = el.dataset.id;
     switch (a) {
+      case 'lj-vista': u.vista = el.dataset.v || 'lista'; u.sel = null; return App.render(); /* v13.93 */
+      case 'lj-v93-folha': u.v93Folha = !!el.checked; return App.render();
+      case 'lj-v93-xlsx': return this.exportarV93(el.dataset.v);
+      case 'lj-v93-pdf': return this.imprimirV93(el.dataset.v);
       case 'lj-abrir': u.sel = id; u.aba = 'dados'; u.calc = { pct: '', data: '' }; return App.render();
       case 'lj-voltar': u.sel = null; return App.render();
       case 'lj-dash': { const k = el.dataset.k, v = el.dataset.v; u[k] = u[k] === v ? '' : v; if (u.ativa === 'NAO') u.ativa = 'SIM'; return App.render(); }
@@ -6932,6 +7348,7 @@ const Lojas = {
   },
   entrada(a, el) {
     if (a === 'lj-busca') { this.ui.busca = el.value; App.render(); }
+    if (a === 'lj-busca93') { this.ui.v93Busca = el.value; App.render(); } /* v13.93 */
     if (a === 'lj-calc') { this.ui.calc[el.dataset.k] = el.value; App.render(); }
   },
 };
@@ -8328,7 +8745,7 @@ const IEO = {
     const porOrigem = o => matriz.tipos.find(t => t.ativo !== false && t.origem === o);
     const res = {};
     lojas.forEach(l => { res[l.id] = { lojaId: l.id, codigo: l.codigo, nome: l.nome, deducoes: [] }; });
-    const add = (lojaId, tipo, data, detalhe, ref) => { if (tipo && res[lojaId]) res[lojaId].deducoes.push({ tipoId: tipo.id, nome: tipo.nome, pontos: Number(tipo.pontos) || 0, data, detalhe, ref, origem: tipo.origem }); };
+    const add = (lojaId, tipo, data, detalhe, ref, fator = 1) => { if (tipo && res[lojaId]) { const base = Number(tipo.pontos) || 0; res[lojaId].deducoes.push({ tipoId: tipo.id, nome: tipo.nome, pontos: fator === 1 ? base : Math.round(base * fator * 100) / 100, data, detalhe, ref, origem: tipo.origem, ...(fator !== 1 ? { fator, unit: base } : {}) }); } }; /* v13.93: fator 0,5 = dedução de 50% */
 
     // 1) Faltas de caixa: 1ª e 2ª do caixa no mês = isolada; a partir da N-ésima = reincidente. Sobras e abonadas não pontuam.
     const tIsolada = porOrigem('faltas'), tReinc = porOrigem('faltas_reincidencia'), tAtraso = porOrigem('faltas_atraso');
@@ -8351,12 +8768,12 @@ const IEO = {
     // 4) Ocorrências manuais (qualquer tipo da matriz)
     ocorrencias.filter(o => o.data && o.data.startsWith(mes)).forEach(o => add(o.lojaId, tipos[o.tipoId], o.data, o.descricao || '', o.id));
     // 5) v13.39 · Retaguarda de Loja: Conta Cofre fora do prazo, crédito de cliente além de 24h, DVC por erro operacional
-    extras.filter(e => e.data && e.data.startsWith(mes)).forEach(e => add(e.lojaId, porOrigem(e.origem), e.data, e.detalhe || '', e.ref));
+    extras.filter(e => e.data && e.data.startsWith(mes)).forEach(e => add(e.lojaId, porOrigem(e.origem), e.data, e.detalhe || '', e.ref, e.fator ?? 1));
 
     const lista = Object.values(res).map(r => {
       const total = r.deducoes.reduce((a, d) => a + d.pontos, 0);
       const pontos = Math.max(0, Math.round((matriz.pontosIniciais + total) * 100) / 100);
-      const resumo = {}; r.deducoes.forEach(d => { const x = resumo[d.tipoId] ||= { nome: d.nome, n: 0, pontos: 0, unit: d.pontos }; x.n++; x.pontos += d.pontos; });
+      const resumo = {}; r.deducoes.forEach(d => { const x = resumo[d.tipoId] ||= { nome: d.nome, n: 0, pontos: 0, unit: d.unit ?? d.pontos }; x.n++; x.pontos = Math.round((x.pontos + d.pontos) * 100) / 100; });
       return { ...r, deducoes: r.deducoes.sort((a, b) => a.data.localeCompare(b.data)), pontos, zona: this.zona(pontos, matriz), resumo };
     }).sort((a, b) => b.pontos - a.pontos || a.deducoes.length - b.deducoes.length || a.codigo.localeCompare(b.codigo));
     lista.forEach((r, i) => { r.posicao = i + 1; });
@@ -9600,6 +10017,10 @@ Object.assign(Retaguarda, {
     const horas = isNaN(ini) ? 0 : Math.max(0, (fim - ini) / 36e5), prazo = Number(m.prazoCreditoHoras ?? 24), vencido = horas > prazo;
     return { horas, prazo, vencido, resolvido: !!o.resolvidoEm, rotulo: o.resolvidoEm ? (vencido ? 'Resolvido fora do prazo' : 'Resolvido no prazo') : vencido ? `Em aberto há ${Math.floor(horas)}h · prazo vencido` : `Em aberto há ${Math.floor(horas)}h`, cls: vencido ? 'bad' : o.resolvidoEm ? 'ok' : 'warn' };
   },
+  /** v13.93 · resposta do check de depósitos: 'sim' (100% dos pontos do item mantidos) · 'parcial' (50%: desconta a metade) · 'nao' (0%: desconta tudo).
+      Registros antigos têm só `conforme` (true/false); 'parcial' grava conforme = false, então versões anteriores leem como "Não" (conservador). */
+  sitDep(d) { const s = d?.situacao; if (s === 'sim' || s === 'parcial' || s === 'nao') return s; return d?.conforme === true ? 'sim' : d?.conforme === false ? 'nao' : null; },
+  FATOR_DEP: { sim: 0, parcial: 0.5, nao: 1 }, /* fração da DEDUÇÃO aplicada (o complemento é a fração dos pontos do item que a loja mantém: 100% / 50% / 0%) */
   /** Deduções automáticas da Retaguarda de Loja para o IEO (todas as datas; o motor filtra pelo mês). */
   deducoesLoja() {
     const m = IEO.matriz(), out = [];
@@ -9614,8 +10035,8 @@ Object.assign(Retaguarda, {
       if (o.tipo === 'registro_vendas') out.push({ lojaId: o.lojaId, origem: 'registro_vendas', data: o.dataFalta, ref: o.id, detalhe: `Registro de vendas não enviado ao shopping em ${Fmt.data(o.dataFalta)}${o.regularizadoEm ? ' (regularizado em ' + Fmt.data(o.regularizadoEm) + ')' : ''}` });
     }
     if (Repo.prontas.has(RET_LOJA.DEP)) for (const d of Repo.todos(RET_LOJA.DEP)) { // v13.40: check respondido "Não" para uma loja
-      if (d.conforme !== false || !d.lojaId) continue;
-      out.push({ lojaId: d.lojaId, origem: d.check === 'prazo' ? 'deposito_prazo' : 'deposito_descricao', data: d.periodoFim || d.periodoIni, ref: d.id, detalhe: `${d.check === 'prazo' ? 'Depósitos fora do prazo' : 'Lançamentos de depósito sem descrição correta'} · ${Fmt.data(d.periodoIni)} a ${Fmt.data(d.periodoFim)}` });
+      const sit = this.sitDep(d); if ((sit !== 'nao' && sit !== 'parcial') || !d.lojaId) continue;
+      out.push({ lojaId: d.lojaId, origem: d.check === 'prazo' ? 'deposito_prazo' : 'deposito_descricao', data: d.periodoFim || d.periodoIni, ref: d.id, ...(sit === 'parcial' ? { fator: this.FATOR_DEP.parcial } : {}), detalhe: `${d.check === 'prazo' ? (sit === 'parcial' ? 'Depósitos parcialmente no prazo (50% da dedução)' : 'Depósitos fora do prazo') : 'Lançamentos de depósito sem descrição correta'} · ${Fmt.data(d.periodoIni)} a ${Fmt.data(d.periodoFim)}` });
     }
     return out;
   },
@@ -9801,7 +10222,7 @@ Object.assign(Retaguarda, {
     const painel = (k, n) => { const xs = todos.filter(d => d.check === k);
       return `<div class="panel dp-check" data-check="${k}"><div class="row between"><div><span class="pill navy">Check ${n}</span><h2 style="margin-top:6px">${esc(RET_LOJA.CHECKS_DEP[k])}</h2></div>${pode ? `<button class="btn sec" data-a="rt-dp-nova" data-v="${k}">+ Registrar verificação</button>` : ''}</div>
         ${xs.length ? `<div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Período de análise</th><th>Loja</th><th>${k === 'prazo' ? 'No prazo?' : 'Descrições corretas?'}</th><th>Observações</th><th>Registrado</th><th></th></tr></thead><tbody>
-          ${xs.map(d => `<tr><td class="mono">${periodo(d)}</td><td>${d.lojaId ? esc(this.nomeLoja(d.lojaId)) : 'Todas as lojas'}${d.dataUltimaConciliacao && this.v67() ? `<div class="cell-sub">conciliado até ${Fmt.data(d.dataUltimaConciliacao)}</div>` : ''}${this.depConciliado(d) ? ' <span class="pill neutral" title="Período conciliado: só o Master altera">🔒 conciliado</span>' : ''}</td><td>${d.conforme == null ? '<span class="hint">—</span>' : `<span class="pill ${d.conforme ? 'ok' : 'bad'}">${d.conforme ? 'Sim' : 'Não'}</span>${d.conforme === false && d.lojaId ? ' <span class="pill bad" title="Dedução automática no IEO">IEO</span>' : ''}`}</td><td style="max-width:320px">${esc(d.obs || '—')}${d.retornoLoja ? `<div class="cell-sub"><b>Retorno loja:</b> ${esc(d.retornoLoja)}</div>` : ''}</td><td class="hint">${Fmt.dataHora(d.criadoEm)}</td>
+          ${xs.map(d => `<tr><td class="mono">${periodo(d)}</td><td>${d.lojaId ? esc(this.nomeLoja(d.lojaId)) : 'Todas as lojas'}${d.dataUltimaConciliacao && this.v67() ? `<div class="cell-sub">conciliado até ${Fmt.data(d.dataUltimaConciliacao)}</div>` : ''}${this.depConciliado(d) ? ' <span class="pill neutral" title="Período conciliado: só o Master altera">🔒 conciliado</span>' : ''}</td><td>${this.sitDep(d) == null ? '<span class="hint">—</span>' : `<span class="pill ${({ sim: 'ok', parcial: 'warn', nao: 'bad' })[this.sitDep(d)]}">${({ sim: 'Sim', parcial: 'Parcialmente', nao: 'Não' })[this.sitDep(d)]}</span>${this.sitDep(d) !== 'sim' && d.lojaId ? ` <span class="pill ${this.sitDep(d) === 'parcial' ? 'warn' : 'bad'}" title="Dedução automática no IEO${this.sitDep(d) === 'parcial' ? ' (50% dos pontos do item)' : ''}">IEO${this.sitDep(d) === 'parcial' ? ' 50%' : ''}</span>` : ''}`}</td><td style="max-width:320px">${esc(d.obs || '—')}${d.retornoLoja ? `<div class="cell-sub"><b>Retorno loja:</b> ${esc(d.retornoLoja)}</div>` : ''}</td><td class="hint">${Fmt.dataHora(d.criadoEm)}</td>
             <td class="acts">${pode ? `<button class="iconbtn" data-a="rt-dp-editar" data-id="${d.id}" aria-label="Editar">${ICON.editar}</button>` : ''}${podeEx ? `<button class="iconbtn" data-a="rt-dp-del" data-id="${d.id}" aria-label="Excluir">${ICON.lixo}</button>` : ''}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty" style="margin-top:12px">Nenhuma verificação registrada.</div>'}</div>`; };
     return `${this.badgeConc(u.loja)}<div class="toolbar"><div class="field" style="max-width:320px"><label class="lbl" for="dpLoja">Loja</label><select id="dpLoja" data-a="rt-dp" data-k="loja">${this.lojasOpcoes('Todas', u.loja).map(([v, l]) => `<option value="${v}" ${v === u.loja ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div></div>
       ${this.renderDepDiv()}${painel('prazo', 1)}${painel('descricao', 2)}`;
@@ -9811,8 +10232,8 @@ Object.assign(Retaguarda, {
     UI.modal({ titulo: `Check ${check === 'prazo' ? 1 : 2} · ${RET_LOJA.CHECKS_DEP[check]}`,
       corpo: `<div class="form-grid">${campo('Loja', 'lojaId', v.lojaId || this.ui.dp.loja || '', { opcoes: this.lojasOpcoes('Todas as lojas', v.lojaId) })}<div></div>
         <div class="field full"><span class="lbl">${esc(RET_LOJA.CHECKS_DEP[check])}</span><div class="row" role="radiogroup">
-          <label class="check"><input type="radio" name="_conforme" value="sim" ${v.conforme !== false ? 'checked' : ''}> Sim</label><label class="check"><input type="radio" name="_conforme" value="nao" ${v.conforme === false ? 'checked' : ''}> Não</label></div>
-          <span class="hint" style="margin-top:4px">“Não” para uma loja pontua no IEO (${esc(IEO.matriz().tipos.find(t => t.id === (check === 'prazo' ? 'deposito_prazo' : 'deposito_descricao'))?.pontos ?? '')} pontos).</span></div>
+          <label class="check"><input type="radio" name="_conforme" value="sim" ${(this.sitDep(v) || 'sim') === 'sim' ? 'checked' : ''}> Sim</label>${(g93() && check === 'prazo') || this.sitDep(v) === 'parcial' ? `<label class="check"><input type="radio" name="_conforme" value="parcial" ${this.sitDep(v) === 'parcial' ? 'checked' : ''}> Parcialmente</label>` : ''}<label class="check"><input type="radio" name="_conforme" value="nao" ${this.sitDep(v) === 'nao' ? 'checked' : ''}> Não</label></div>
+          <span class="hint" style="margin-top:4px">${g93() && check === 'prazo' ? `Pontuação do item na Nota de Saúde da Loja (IEO): <b>Sim = 100%</b> dos pontos mantidos · <b>Parcialmente = 50%</b> (desconta metade de ${esc(Math.abs(IEO.matriz().tipos.find(t => t.id === 'deposito_prazo')?.pontos ?? 0))} pontos) · <b>Não = 0%</b> (desconta tudo).` : `“Não” para uma loja pontua no IEO (${esc(IEO.matriz().tipos.find(t => t.id === (check === 'prazo' ? 'deposito_prazo' : 'deposito_descricao'))?.pontos ?? '')} pontos).`}</span></div>
         ${campo('Período de análise · de', 'periodoIni', v.periodoIni || '', { tipo: 'date' })}${campo('até', 'periodoFim', v.periodoFim || '', { tipo: 'date' })}
         ${check === 'prazo' && this.v67() ? campo('Data Última Conciliação', 'dataUltimaConciliacao', v.dataUltimaConciliacao || '', { tipo: 'date', dica: 'Data limite até a qual as conferências e depósitos bancários da loja foram auditados e encerrados. Depois disso, lançamentos e edições até essa data exigem o perfil Master.' }) + '<div></div>' : ''}
         ${campo('Observações', 'obs', v.obs, { tipo: 'textarea', full: true })}${campo('Retorno Loja', 'retornoLoja', v.retornoLoja, { tipo: 'textarea', full: true, dica: 'Justificativa e providências tomadas pela gerência da loja.' })}</div>`,
@@ -9821,11 +10242,11 @@ Object.assign(Retaguarda, {
         if (!d.periodoIni || !d.periodoFim) { UI.toast('Informe o período de análise.'); return false; }
         if (d.periodoFim < d.periodoIni) { UI.toast('O fim do período não pode ser anterior ao início.'); return false; }
         const reg = { ...(x || {}), check, lojaId: d.lojaId || '', periodoIni: d.periodoIni, periodoFim: d.periodoFim, obs: d.obs, retornoLoja: d.retornoLoja || '', criadoPor: x?.criadoPor || Auth.id, criadoEm: x?.criadoEm || new Date().toISOString() }; delete reg.id;
-        reg.conforme = d._conforme !== 'nao'; // v13.40: os dois checks têm Sim/Não
+        reg.situacao = d._conforme === 'parcial' && (g93() || x?.situacao === 'parcial') ? 'parcial' : d._conforme === 'nao' ? 'nao' : 'sim'; reg.conforme = reg.situacao === 'sim'; /* v13.40: Sim/Não · v13.93: + Parcialmente (grava conforme = false) */
         if (check === 'prazo' && this.v67()) { reg.dataUltimaConciliacao = d.dataUltimaConciliacao || ''; if (reg.dataUltimaConciliacao && reg.dataUltimaConciliacao > Datas.hojeISO()) { UI.toast('A Data Última Conciliação não pode ser futura.'); return false; } } // v13.67
         { const tr = this.travaConc(reg, x); if (tr) { UI.toast(tr); return false; } }
-        if (!reg.conforme && !reg.lojaId) { UI.toast('Resposta “Não”: informe a loja (ela é pontuada no IEO).'); return false; }
-        await Repo.salvar(RET_LOJA.DEP, x?.id || 'dp-' + uid(), reg, { modulo: 'retaguarda', rotulo: `Depósitos · ${reg.lojaId ? this.nomeLoja(reg.lojaId) : 'todas as lojas'}`, detalhe: RET_LOJA.CHECKS_DEP[check] + (check === 'descricao' ? (reg.conforme ? ' Sim' : ' Não') : '') });
+        if (!reg.conforme && !reg.lojaId) { UI.toast(`Resposta “${reg.situacao === 'parcial' ? 'Parcialmente' : 'Não'}”: informe a loja (ela é pontuada no IEO).`); return false; }
+        await Repo.salvar(RET_LOJA.DEP, x?.id || 'dp-' + uid(), reg, { modulo: 'retaguarda', rotulo: `Depósitos · ${reg.lojaId ? this.nomeLoja(reg.lojaId) : 'todas as lojas'}`, detalhe: RET_LOJA.CHECKS_DEP[check] + (check === 'descricao' ? (reg.conforme ? ' Sim' : ' Não') : reg.situacao === 'parcial' ? ' · Parcialmente' : '') });
         UI.toast('Verificação registrada');
       } }] });
   },
@@ -10335,7 +10756,7 @@ const HistoricoLoja = {
     });
     if (Repo.prontas.has(RET_LOJA.DEP)) Repo.todos(RET_LOJA.DEP).filter(d => d.lojaId === lojaId).forEach(d => {
       if (d.check === 'divergencia') { const s = R.statusDepDiv(d); add('deposito', d.dataLancamento, `Depósito · ${RET_LOJA.DIV_DEP[d.tipoDiv] || d.tipoDiv}`, [s.dif != null ? `lançado ${Fmt.brl(d.valorLancado)} · compensado ${Fmt.brl(d.valorCompensado)}` : '', d.retornoLoja ? 'retorno loja: ' + d.retornoLoja : ''].filter(Boolean).join(' · '), { valor: s.dif != null ? Math.abs(s.dif) : d.valorLancado, status: s.st, ref: d.id }); }
-      else if (d.conforme === false) add('deposito', d.periodoFim || d.periodoIni, d.check === 'prazo' ? 'Depósitos fora do prazo' : 'Depósitos sem descrição correta', `${Fmt.data(d.periodoIni)} a ${Fmt.data(d.periodoFim)}${d.retornoLoja ? ' · retorno loja: ' + d.retornoLoja : ''}`, { status: 'Não conforme', ref: d.id });
+      else if (d.conforme === false) add('deposito', d.periodoFim || d.periodoIni, d.check === 'prazo' ? (R.sitDep(d) === 'parcial' ? 'Depósitos parcialmente no prazo' : 'Depósitos fora do prazo') : 'Depósitos sem descrição correta', `${Fmt.data(d.periodoIni)} a ${Fmt.data(d.periodoFim)}${d.retornoLoja ? ' · retorno loja: ' + d.retornoLoja : ''}`, { status: R.sitDep(d) === 'parcial' ? 'Parcialmente conforme' : 'Não conforme', ref: d.id });
     });
     if (Repo.prontas.has(RET_LOJA.COFRE)) Repo.todos(RET_LOJA.COFRE).filter(c => c.lojaId === lojaId).forEach(c => { const s = R.statusCofre(c); if (c.origem === 'falta' || s.atrasado || s.divergente) add('cofre', c.dataSolicitacao, c.origem === 'falta' ? 'Conta Cofre · falta informada' : s.divergente ? 'Conta Cofre com divergência' : 'Conta Cofre fora do prazo', s.rotulo + (s.divergente ? ` · diferença ${Fmt.brl(s.diferenca)}` : ''), { valor: c.valorSistema, status: s.rotulo, ref: c.id }); });
     if (Repo.prontas.has(RET_LOJA.CONS)) Repo.todos(RET_LOJA.CONS).filter(x => x.lojaId === lojaId).forEach(x => { const c = R.calcConsumidor(x); if (c.acima) add('consumidor', x.periodoFim, 'Vendas como consumidor acima da tolerância', `${Fmt.pct(c.pct, 1)} sem CPF/CNPJ (${Fmt.num(c.semRegistro)} de ${Fmt.num(c.vendas)}) · tolerância ${Fmt.num(c.tol, 1)}%`, { status: 'Acima da tolerância', ref: x.id }); });
@@ -13568,7 +13989,7 @@ const Acessos = {
     };
     const mods = MATRIZ_MODULOS.filter(m => matrizOk(m, v83));
     return `<div class="tbl-wrap"><table class="nolabel acc-matriz"><thead><tr><th>Módulo</th><th>Ler</th><th>Modificar</th><th>Excluir</th></tr></thead><tbody>
-      ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre]) => { const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
+      ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre, rec]) => { if (rec && !Recursos.ativo(rec)) return ''; const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
         if (livre && !v83) return '';
         return `<tr class="acc-extra"><td colspan="4"><label class="check"><input type="checkbox" data-extra="${k}" data-mod-extra="${m.id}" ${master || (perm[k] === true && !sem) ? 'checked' : ''} ${master || sem ? 'disabled' : ''}> <b>${esc(rot)}</b> <span class="hint">${esc(dica)}${sem ? ' · marque ao menos “Ler” no módulo' : ''}</span></label></td></tr>`; }).join('')}${subRow(m)}`).join('')}</tbody></table></div>
       <p class="hint" style="margin-top:6px">Modificar inclui Ler; Excluir inclui Modificar e Ler.${v83 && !master ? ' Em “Telas e ações” escolha exatamente as abas e as ações liberadas em cada módulo: o menu e o roteador do painel só abrem o que estiver marcado.' : ''}${loja ? ' <b>Perfil Loja (ponta):</b> tudo somente leitura; grava apenas as Solicitações Operacionais (Modificar = pedir) e a Nova Solicitação de Viagem (opção “Pode solicitar viagem”).' : ''} ${master ? 'Master tem acesso total, inclusive à Gestão de Acessos, Auditoria e Backup.' : 'Salários, parâmetros de RH, Auditoria, Backup e Gestão de Acessos ficam só com o Master.'}</p>`;
@@ -13584,7 +14005,7 @@ const Acessos = {
     MATRIZ_MODULOS.forEach(mod => {
       if (!matrizOk(mod, v83)) return;
       out[mod.id] = ['excluir', 'modificar', 'ler'].find(v => $(`[data-mod="${mod.id}"][data-niv="${v}"]`, m)?.checked) || '';
-      (mod.extras || []).forEach(([k, , , livre]) => { if ((out[mod.id] || (livre && v83)) && $(`[data-extra="${k}"]`, m)?.checked) out[k] = true; }); // v13.61: + opções extras
+      (mod.extras || []).forEach(([k, , , livre, rec]) => { if (rec && !Recursos.ativo(rec)) return; if ((out[mod.id] || (livre && v83)) && $(`[data-extra="${k}"]`, m)?.checked) out[k] = true; }); // v13.61: + opções extras
       if (!v83 || !out[mod.id]) return; /* v13.83: sub-permissões — só grava o recorte (tudo marcado = sem recorte) */
       const ts = $$(`[data-tela-mod="${mod.id}"]`, m), as = $$(`[data-acao-mod="${mod.id}"]`, m), x = {};
       if (ts.some(i => !i.checked)) x.telas = ts.filter(i => i.checked).map(i => i.dataset.tela);
@@ -13622,6 +14043,7 @@ const Acessos = {
         if (u.perfil === 'MASTER' && perfil !== 'MASTER' && this.masters().length <= 1) { UI.toast('Este é o único Master ativo: defina outro Master antes.'); return false; }
         const { id: _, ...d } = u;
         const ant = PermNorm.normalizar(u.permissoes), ocultos = Object.fromEntries(MATRIZ_MODULOS.filter(mm => !matrizOk(mm, Acesso.ativo())).flatMap(mm => [[mm.id, ant[mm.id]], ...(mm.extras || []).map(([k]) => [k, ant[k]])]).filter(([, x]) => x !== undefined && x !== '' && x !== false)); /* v13.88: linhas fora da tela não se perdem */
+        Object.assign(ocultos, Object.fromEntries(MATRIZ_MODULOS.flatMap(mm => (mm.extras || []).filter(e => e[4] && !Recursos.ativo(e[4]) && ant[e[0]] === true).map(e => [e[0], true])))); /* v13.93: opção de recurso ainda não liberado não se perde */
         await Repo.salvar(this.COL, id, { ...d, perfil, permissoes: perfil === 'MASTER' ? {} : { ...ocultos, ...this.lerMatriz(m) }, escopo: $('[name="escopo"]', m)?.value || 'auto' }, { modulo: 'acessos', rotulo: `Acesso · ${this.nomeDe(u)}`, detalhe: 'Permissões alteradas' });
         if (id === Auth.id) Sessao.revalidar(); /* v13.88: a própria conta: aplica na hora */
         UI.toast('Permissões salvas: valem na hora para a pessoa.');
@@ -13956,19 +14378,37 @@ const Liberacao = {
   lider() {
     const f = this.eu(); if (!f) return false;
     if (Repo.todos('funcionarios').some(x => x.gestorId === f.id)) return true;
+    if (g93() && Pessoal.arvoreDe(f.id).size) return true; /* v13.93: gestor de setor vê a árvore inteira (liderados dos liderados, sub-departamentos) */
     if (!Auth.can('pessoal.editar')) return false;
     const e = Pessoal.escopo(); return !e.ids || e.ids.size > 1;
   },
   podeVer() { return !!Auth.id && (this.master() || this.lider()); },
   /** Este pedido é da minha alçada? (Master: todos; gestor: pedidos de férias/folga da equipe dele.) */
+  /** v13.93 · "só Master": prestação, exclusão e zerar FCX seguem do Master; a SOLICITAÇÃO de viagem passa a poder ser decidida pelo gestor da árvore. */
+  soMaster(tipo) { return this.SO_MASTER.includes(tipo) && !(g93() && tipo === 'viagem'); },
+  /** v13.93 · alçada pela ÁRVORE HIERÁRQUICA transitiva (gestor direto, gestor do gestor, responsável de setor e sub-setores). Ninguém decide o próprio pedido. */
+  alcance93(r) {
+    if (this.SO_MASTER.includes(r.tipo) && r.tipo !== 'viagem') return false;
+    const me = this.eu(); if (!me) return false;
+    const arv = Pessoal.arvoreDe(me.id);
+    if (r.tipo === 'viagem') { /* todos os viajantes do grupo têm de estar na árvore de quem decide, e quem decide não pode estar entre eles */
+      const v = Repo.get(Viagens.COL, r.dados?.viagemId), ids = (v ? Viagens.participantes(v).map(p => p.funcionarioId) : [r.funcionarioId]).filter(Boolean);
+      return !!ids.length && !ids.includes(me.id) && ids.every(id => arv.has(id));
+    }
+    if (!r.funcionarioId || r.funcionarioId === me.id) return false;
+    if (arv.has(r.funcionarioId)) return true;
+    const f = Repo.get('funcionarios', r.funcionarioId); if (!f) return false;
+    return f.gestorId === me.id || (!f.gestorId && Auth.can('pessoal.editar') && Pessoal.noEscopo(f)); /* regra anterior preservada */
+  },
   daMinhaAlcada(r) {
     if (this.master()) return true;
+    if (g93()) return this.alcance93(r);
     if (this.SO_MASTER.includes(r.tipo)) return false;
     const me = this.eu(); if (!me || r.funcionarioId === me.id) return false;
     const f = Repo.get('funcionarios', r.funcionarioId); if (!f) return false;
     return f.gestorId === me.id || (!f.gestorId && Auth.can('pessoal.editar') && Pessoal.noEscopo(f));
   },
-  podeDecidir(r) { return this.statusDe(r) === 'pendente' && this.daMinhaAlcada(r) && (!this.SO_MASTER.includes(r.tipo) || this.master()); },
+  podeDecidir(r) { return this.statusDe(r) === 'pendente' && this.daMinhaAlcada(r) && (!this.soMaster(r.tipo) || this.master()); },
   todos() { return Repo.todos(this.COL).sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')); },
   meusPendentes() { return this.todos().filter(r => this.podeDecidir(r)); },
   meusPedidos() { const me = this.eu(); return this.todos().filter(r => r.solicitanteId === Auth.id || (me && r.funcionarioId === me.id)); },
@@ -14005,13 +14445,137 @@ const Liberacao = {
   },
   resumo(r) {
     const d = r.dados || {};
+    if (r.tipo === 'ferias' && d.periodos?.length) return this.resumoFerias93(d);
+    if (r.tipo === 'folga' && d.periodo) return `${Fmt.data(d.periodo.inicio)} a ${Fmt.data(d.periodo.fim)} (${d.periodo.dias} dia${d.periodo.dias === 1 ? '' : 's'})${d.motivo ? ' · ' + d.motivo : ''}`;
     if (r.tipo === 'ferias') return `${Fmt.data(d.inicio)} a ${Fmt.data(d.fim)} (${d.dias} dia${d.dias === 1 ? '' : 's'})${d.antecipa13 ? ' · antecipar 1ª parcela do 13º' : ''}${d.obs ? ' · ' + d.obs : ''}`;
     if (r.tipo === 'folga') { const ds = this.diasFolga(d); return `${ds.map(x => Fmt.data(x)).join(', ')}${ds.length > 1 ? ` (${ds.length} dias)` : ''}${d.motivo ? ' · ' + d.motivo : ''}`; }
     if (r.tipo === 'fcx-zerar') return 'Apagar projeções, parâmetros de meios de pagamento, prestação de clientes, saídas e orçamento do FCX';
     if (String(r.tipo).startsWith('viagem')) return Viagens.resumoLib(r);
     return '';
   },
+  resumoFerias93(d) {
+    const ps = d.periodos || [], tot = d.totalDias || ps.reduce((a, p) => a + (p.dias || 0), 0);
+    return `${ps.map((p, i) => `${ps.length > 1 ? `P${i + 1}: ` : ''}${Fmt.data(p.inicio)} a ${Fmt.data(p.fim)} (${p.dias} dia${p.dias === 1 ? '' : 's'})`).join(' + ')}${ps.length > 1 ? ` · total ${tot} dias` : ''}${d.abonoPecuniario ? ` · abono pecuniário (venda de ${d.abonoDias || 10} dias, art. 143 da CLT)` : ''}${d.antecipa13 ? ' · 1ª parcela do 13º antecipada (Lei 4.749/1965)' : ''}${d.obs ? ' · ' + d.obs : ''}`;
+  },
+  /* ---------------- v13.93 · férias em períodos (até 3), abono pecuniário e 1ª parcela do 13º ---------------- */
+  LIM_FERIAS: 30, ABONO_DIAS: 10, MIN_PRINCIPAL: 14, MIN_DEMAIS: 5, MAX_PERIODOS: 3, MAX_FOLGA: 31,
+  /**
+   * Regras da CLT (art. 134, §1º e art. 143) — função pura: soma dos períodos ≤ 30 dias (≤ 20 se vender 1/3), no máximo 3 períodos,
+   * um deles com 14 dias corridos ou mais e os demais com 5 ou mais, sem sobreposição e sem datas no passado.
+   * Devolve { ok, erros[], avisos[], total, limite, saldo, maior, periodos[] } (períodos ordenados, com `dias`).
+   */
+  validarFerias(periodos, { abono = false, hoje = Datas.hojeISO() } = {}) {
+    const lista = periodos || [], erros = [], avisos = [], limite = this.LIM_FERIAS - (abono ? this.ABONO_DIAS : 0), ps = [];
+    lista.forEach((p, i) => {
+      const n = i + 1, ini = Datas.de(p?.inicio), fim = Datas.de(p?.fim);
+      if (!ini || !fim) { erros.push(`Período ${n}: informe o início e o fim.`); return; }
+      if (fim < ini) { erros.push(`Período ${n}: o fim não pode ser antes do início.`); return; }
+      if (p.inicio < hoje) { erros.push(`Período ${n}: o início não pode ser no passado.`); return; }
+      ps.push({ inicio: p.inicio, fim: p.fim, dias: Datas.dias(ini, fim) + 1, n });
+    });
+    if (!lista.length) erros.push('Informe ao menos um período de férias.');
+    if (lista.length > this.MAX_PERIODOS) erros.push(`No máximo ${this.MAX_PERIODOS} períodos (CLT, art. 134, §1º).`);
+    const ord = [...ps].sort((a, b) => a.inicio.localeCompare(b.inicio));
+    for (let i = 1; i < ord.length; i++) if (ord[i].inicio <= ord[i - 1].fim) erros.push(`Os períodos ${ord[i - 1].n} e ${ord[i].n} se sobrepõem.`);
+    const total = ps.reduce((a, p) => a + p.dias, 0), maior = ps.reduce((a, p) => Math.max(a, p.dias), 0);
+    if (total > limite) erros.push(`A soma dos períodos (${total} dias) passa do limite de ${limite} dias${abono ? ' (30 dias menos os 10 do abono pecuniário)' : ''}.`);
+    if (ps.length && ps.length === lista.length) {
+      if (maior < this.MIN_PRINCIPAL) erros.push(`Pelo menos um período deve ter ${this.MIN_PRINCIPAL} dias corridos ou mais (CLT, art. 134, §1º).`);
+      const ip = ps.findIndex(p => p.dias === maior);
+      ps.forEach((p, i) => { if (i !== ip && p.dias < this.MIN_DEMAIS) erros.push(`Período ${p.n}: ${p.dias} dia${p.dias === 1 ? '' : 's'} — os demais períodos não podem ter menos de ${this.MIN_DEMAIS} dias (CLT, art. 134, §1º).`); });
+    }
+    const saldo = Math.max(0, limite - total);
+    if (!erros.length && saldo > 0) avisos.push(`Restam ${saldo} dia${saldo === 1 ? '' : 's'} sem programação: peça-${saldo === 1 ? 'o' : 'os'} em outra solicitação.`);
+    return { ok: !erros.length, erros, avisos, total, limite, saldo, maior, periodos: ord.map(({ n, ...p }) => p) };
+  },
+  lerFerias93(m) { return $$('[data-fp-linha]', m).map(l => ({ inicio: $('[data-fp-ini]', l).value, fim: $('[data-fp-fim]', l).value })).filter(p => p.inicio || p.fim); },
+  pedirFerias93(f) {
+    const hoje = Datas.hojeISO(), linha = (i, p = {}) => `<div class="fp-linha" data-fp-linha><span class="lbl fp-n">Período ${i}</span><input type="date" data-fp-ini value="${esc(p.inicio || '')}" min="${hoje}" aria-label="Início do período ${i}"><span class="hint">até</span><input type="date" data-fp-fim value="${esc(p.fim || '')}" min="${hoje}" aria-label="Fim do período ${i}"><b class="fp-dias" data-fp-dias>—</b><button type="button" class="iconbtn" data-fp-del aria-label="Remover este período" title="Remover este período">${ICON.lixo}</button></div>`;
+    UI.modal({
+      titulo: 'Solicitar Férias', largo: true, corpo: `<form class="form-grid" onsubmit="return false">
+        <fieldset class="full ct-grupo"><legend>Antes de escolher as datas</legend>
+          <label class="check"><input type="checkbox" name="abono"> Vender 1/3 das férias (Abono Pecuniário - 10 dias seg. Art. 143 da CLT)</label>
+          <label class="check"><input type="checkbox" name="antecipa13"> Adiantar a 1ª parcela do 13º salário (seg. Art. 2º da Lei 4.749/1965)</label>
+          <span class="hint">Vendendo 1/3 você goza até 20 dias e recebe 10 dias em dinheiro. A 1ª parcela do 13º é paga junto com as férias.</span></fieldset>
+        <div class="field full"><span class="lbl">Períodos de gozo · até ${this.MAX_PERIODOS}, somando no máximo <b id="fpLim">${this.LIM_FERIAS}</b> dias</span>
+          <div id="fpLista">${linha(1)}</div>
+          <div><button type="button" class="btn ghost sm" data-fp-add>+ Adicionar período</button></div>
+          <span class="hint">CLT (art. 134, §1º): um dos períodos com no mínimo 14 dias corridos e os demais com no mínimo 5. Exemplos que passam: 15 + 15 · 14 + 8 + 8 · 20 + 10 (10 + 10 + 10 não passa: falta um período de 14 dias).</span></div>
+        <div class="field full"><div class="note fp-resumo" id="fpResumo" role="status" aria-live="polite"></div></div>
+        ${campo('Observação (opcional)', 'obs', '', { full: true })}</form>
+        <p class="hint" style="margin-top:10px">O pedido vai para a Liberação Remota. As férias só entram no seu cadastro depois de aprovadas.</p>`,
+      aoAbrir: m => {
+        const lista = $('#fpLista', m), linhas = () => $$('[data-fp-linha]', lista);
+        const atualizar = () => {
+          const ab = !!$('[name="abono"]', m).checked, ls = linhas(), box = $('#fpResumo', m), ent = this.lerFerias93(m);
+          $('#fpLim', m).textContent = this.LIM_FERIAS - (ab ? this.ABONO_DIAS : 0);
+          ls.forEach((l, i) => { const a = Datas.de($('[data-fp-ini]', l).value), b = Datas.de($('[data-fp-fim]', l).value); $('[data-fp-dias]', l).textContent = a && b && b >= a ? `${Datas.dias(a, b) + 1} dias` : '—'; $('.fp-n', l).textContent = 'Período ' + (i + 1); $('[data-fp-del]', l).style.visibility = ls.length > 1 ? 'visible' : 'hidden'; });
+          $('[data-fp-add]', m).disabled = ls.length >= this.MAX_PERIODOS;
+          if (!ent.length) { box.className = 'note fp-resumo'; box.textContent = 'Escolha o início e o fim de cada período: os dias são contados sozinhos e as regras da CLT são conferidas na hora.'; return; }
+          const v = this.validarFerias(ent, { abono: ab });
+          box.className = 'note fp-resumo ' + (v.ok ? 'fp-ok' : 'fp-erro');
+          box.innerHTML = v.ok ? `✓ ${v.periodos.length} período${v.periodos.length > 1 ? 's' : ''}: ${v.periodos.map(p => p.dias).join(' + ')} = <b>${v.total}</b> de ${v.limite} dias${ab ? ' · mais 10 dias de abono pecuniário' : ''}${v.avisos.map(x => `<br>${esc(x)}`).join('')}` : v.erros.map(x => esc(x)).join('<br>');
+        };
+        m.addEventListener('input', atualizar); m.addEventListener('change', atualizar);
+        m.addEventListener('click', e => {
+          if (e.target.closest('[data-fp-add]')) { const n = linhas().length; if (n >= this.MAX_PERIODOS) return; lista.insertAdjacentHTML('beforeend', linha(n + 1)); atualizar(); }
+          const del = e.target.closest('[data-fp-del]'); if (del && linhas().length > 1) { del.closest('[data-fp-linha]').remove(); atualizar(); }
+        });
+        atualizar();
+      },
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Enviar pedido', acao: async m => {
+        const ab = !!$('[name="abono"]', m).checked, a13 = !!$('[name="antecipa13"]', m).checked, obs = ($('[name="obs"]', m)?.value || '').trim();
+        const v = this.validarFerias(this.lerFerias93(m), { abono: ab });
+        if (!v.ok) { UI.toast(v.erros[0]); return false; }
+        await this.criar('ferias', f.id, { inicio: v.periodos[0].inicio, fim: v.periodos[0].fim, dias: v.periodos[0].dias, periodos: v.periodos, totalDias: v.total, abonoPecuniario: ab, abonoDias: ab ? this.ABONO_DIAS : 0, antecipa13: a13, obs });
+        UI.toast('Pedido de férias enviado para a Liberação Remota.'); App.render();
+      } }],
+    });
+  },
+  /* ---------------- v13.93 · folga por período (Data Inicial até Data Final, com contagem automática) ---------------- */
+  /** Pura: dias corridos entre as duas datas (inclusive) e a lista de datas. */
+  periodoFolga93(ini, fim, hoje = Datas.hojeISO()) {
+    const a = Datas.de(ini), b = Datas.de(fim);
+    if (!a || !b) return { ok: false, erro: 'Escolha a data inicial e a data final.' };
+    if (b < a) return { ok: false, erro: 'A data final não pode ser antes da data inicial.' };
+    if (ini < hoje) return { ok: false, erro: 'A folga não pode ser no passado.' };
+    const dias = Datas.dias(a, b) + 1; if (dias > this.MAX_FOLGA) return { ok: false, erro: `No máximo ${this.MAX_FOLGA} dias por pedido.` };
+    const datas = []; for (let i = 0; i < dias; i++) datas.push(Datas.iso(new Date(a.getFullYear(), a.getMonth(), a.getDate() + i)));
+    return { ok: true, dias, datas, inicio: ini, fim };
+  },
+  pedirFolga93(f) {
+    const hoje = Datas.hojeISO(), sem = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    UI.modal({
+      titulo: 'Solicitar Folga', corpo: `<form class="form-grid" onsubmit="return false">
+        <div class="field full"><span class="lbl">Como você quer pedir</span><div class="row" role="radiogroup"><label class="check"><input type="radio" name="fmodo" value="dias" checked> Dia(s) avulso(s)</label><label class="check"><input type="radio" name="fmodo" value="periodo"> Por período (Data Inicial até Data Final)</label></div></div>
+        <div class="full" data-fg="dias">${DatasMulti.html('dmFolga', [], { rotulo: 'Dia(s) da folga', min: hoje, dica: 'Clique no calendário para escolher o dia. Para mais de um dia, use “+ Adicionar outro dia”.' })}</div>
+        <div class="full" data-fg="periodo" style="display:none"><div class="form-grid">${campo('Data Inicial', 'pIni', '', { tipo: 'date', attrs: `min="${hoje}"` })}${campo('Data Final', 'pFim', '', { tipo: 'date', attrs: `min="${hoje}"` })}</div>
+          <p class="note fp-resumo" id="fgConta" role="status" aria-live="polite" style="margin:8px 0 0">Escolha a data inicial e a final no calendário: os dias são contados sozinhos.</p></div>
+        ${campo('Observação / justificativa (opcional)', 'motivo', '', { full: true, dica: 'Só o motivo, em texto livre (ex.: compensação do banco de horas, consulta, aniversário). A data vem do calendário.' })}</form>
+        <p class="hint" style="margin-top:10px">O pedido vai para a Liberação Remota. As folgas só entram no seu cadastro depois de aprovadas.</p>`,
+      aoAbrir: m => {
+        DatasMulti.ligar(m);
+        const modo = () => $('[name="fmodo"]:checked', m).value, nome = iso => { const d = Datas.de(iso); return `${sem[d.getDay()]} ${Fmt.data(iso)}`; };
+        const conta = () => { const box = $('#fgConta', m); if (modo() !== 'periodo') return; const ini = $('[name="pIni"]', m).value, fim = $('[name="pFim"]', m).value;
+          if (!ini && !fim) { box.className = 'note fp-resumo'; box.textContent = 'Escolha a data inicial e a final no calendário: os dias são contados sozinhos.'; return; }
+          const p = this.periodoFolga93(ini, fim); box.className = 'note fp-resumo ' + (p.ok ? 'fp-ok' : 'fp-erro');
+          box.innerHTML = p.ok ? `✓ <b>${p.dias} dia${p.dias === 1 ? '' : 's'}</b> de folga · ${esc(nome(p.inicio))} a ${esc(nome(p.fim))}` : esc(p.erro); };
+        const sync = () => { $('[data-fg="dias"]', m).style.display = modo() === 'dias' ? '' : 'none'; $('[data-fg="periodo"]', m).style.display = modo() === 'periodo' ? '' : 'none'; conta(); };
+        m.addEventListener('change', sync); m.addEventListener('input', conta); sync();
+      },
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Enviar pedido', acao: async m => {
+        const d = UI.lerForm(m), porPeriodo = $('[name="fmodo"]:checked', m).value === 'periodo';
+        let datas, periodo = null;
+        if (porPeriodo) { const p = this.periodoFolga93($('[name="pIni"]', m).value, $('[name="pFim"]', m).value); if (!p.ok) { UI.toast(p.erro); return false; } datas = p.datas; periodo = { inicio: p.inicio, fim: p.fim, dias: p.dias }; }
+        else { datas = DatasMulti.ler($('#dmFolga', m)); if (!datas.length) { UI.toast('Escolha o dia da folga no calendário.'); return false; } if (datas.some(x => Datas.de(x) < Datas.hoje())) { UI.toast('A folga não pode ser no passado.'); return false; } }
+        if (DatasMulti.temDataNoTexto(d.motivo)) { await UI.alerta('Use o calendário para a data', 'A observação parece conter uma data digitada. Marque o(s) dia(s) da folga <b>no calendário</b> e deixe a observação só para a justificativa.'); return false; }
+        await this.criar('folga', f.id, { datas, data: datas[0], motivo: d.motivo || '', ...(periodo ? { periodo } : {}) });
+        UI.toast(porPeriodo ? `Pedido de folga de ${periodo.dias} dia${periodo.dias === 1 ? '' : 's'} (${Fmt.data(periodo.inicio)} a ${Fmt.data(periodo.fim)}) enviado para a Liberação Remota.` : datas.length > 1 ? `Pedido de ${datas.length} folgas enviado para a Liberação Remota.` : 'Pedido de folga enviado para a Liberação Remota.'); App.render();
+      } }],
+    });
+  },
   pedirFerias(f) {
+    if (g93()) return this.pedirFerias93(f);
     UI.modal({
       titulo: 'Solicitar Férias', corpo: `<form class="form-grid" onsubmit="return false">
         ${campo('Início', 'inicio', '', { tipo: 'date', attrs: 'required' })}${campo('Fim', 'fim', '', { tipo: 'date', attrs: 'required' })}
@@ -14031,6 +14595,7 @@ const Liberacao = {
   },
   /** v13.41 · dia(s) da folga escolhidos no calendário (um ou vários, com "+ Adicionar outro dia"); observação só para justificativa. */
   pedirFolga(f) {
+    if (g93()) return this.pedirFolga93(f);
     UI.modal({
       titulo: 'Solicitar Folga', corpo: `<form class="form-grid" onsubmit="return false">${DatasMulti.html('dmFolga', [], { rotulo: 'Dia(s) da folga', min: Datas.hojeISO(), dica: 'Clique no calendário para escolher o dia. Para mais de um dia, use “+ Adicionar outro dia”.' })}
         ${campo('Observação / justificativa (opcional)', 'motivo', '', { full: true, dica: 'Só o motivo, em texto livre (ex.: compensação do banco de horas, consulta, aniversário). A data vem do calendário.' })}</form>
@@ -14077,7 +14642,10 @@ const Liberacao = {
   /** Aprovação de férias/folga: grava só os campos do pedido, sobre o cadastro atual. */
   async aplicar(r, f) {
     const { id, atualizadoEm, atualizadoPor, criadoEm, criadoPor, ...base } = f, d = r.dados || {};
-    if (r.tipo === 'ferias') base.ferias = { ...(f.ferias || {}), programadaInicio: d.inicio, programadaFim: d.fim, antecipa13: !!d.antecipa13, liberacaoId: r.id };
+    if (r.tipo === 'ferias' && d.periodos?.length) { /* v13.93: até 3 períodos; o 1º (mais cedo) segue como "programada" para as telas e relatórios antigos */
+      const ps = [...d.periodos].sort((a, b) => a.inicio.localeCompare(b.inicio));
+      base.ferias = { ...(f.ferias || {}), programadaInicio: ps[0].inicio, programadaFim: ps[0].fim, periodos: ps.map(p => ({ inicio: p.inicio, fim: p.fim, dias: p.dias })), abonoPecuniario: !!d.abonoPecuniario, abonoDias: d.abonoPecuniario ? (d.abonoDias || 10) : 0, antecipa13: !!d.antecipa13, liberacaoId: r.id };
+    } else if (r.tipo === 'ferias') { base.ferias = { ...(f.ferias || {}), programadaInicio: d.inicio, programadaFim: d.fim, antecipa13: !!d.antecipa13, liberacaoId: r.id }; delete base.ferias.periodos; delete base.ferias.abonoPecuniario; delete base.ferias.abonoDias; }
     if (r.tipo === 'folga') { const ds = this.diasFolga(d); base.folgasAvulsas = [...(f.folgasAvulsas || []).filter(x => !ds.includes(x.data)), ...ds.map(x => ({ data: x, motivo: d.motivo || '', liberacaoId: r.id }))].sort((a, b) => a.data.localeCompare(b.data)); }
     await Repo.salvar('funcionarios', f.id, base, { modulo: 'pessoal', rotulo: `${f.nome} · ${this.TIPOS[r.tipo]} aprovada(s) na Liberação Remota` });
   },
@@ -14142,7 +14710,7 @@ const Liberacao = {
         <p style="margin:10px 0 6px">${esc(this.resumo(r))}</p>${String(r.tipo).startsWith('viagem') ? Viagens.chipLib(r) : ''}
         <div class="hint">Pedido em ${Fmt.dataHora(r.criadoEm)}${s === 'pendente' && resta != null ? ` · <b class="lib-prazo" data-lib-exp="${esc(r.expiraEm)}">expira em ${Math.ceil(resta / 1000)} s</b>` : ''}${r.decididoPorNome ? ` · ${s === 'recusado' ? 'recusado' : 'liberado'} por ${esc(r.decididoPorNome)} em ${Fmt.dataHora(r.decididoEm)}` : ''}${r.obsDecisao ? ` · “${esc(r.obsDecisao)}”` : ''}</div>
         ${pode ? `<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm" data-a="lib-aprovar" data-id="${r.id}">${r.tipo === 'fcx-zerar' ? 'Liberar' : 'Aprovar'}</button><button class="btn sec sm" data-a="lib-recusar" data-id="${r.id}">Recusar</button></div>`
-          : s === 'pendente' && this.SO_MASTER.includes(r.tipo) && !this.master() ? '<p class="hint" style="margin:10px 0 0">Só o Master libera este pedido.</p>' : ''}</article>`;
+          : s === 'pendente' && this.soMaster(r.tipo) && !this.master() ? '<p class="hint" style="margin:10px 0 0">Só o Master libera este pedido.</p>' : ''}</article>`;
     };
     return `<div class="page-head"><div><h1>Liberação Remota</h1><p>Pedidos que só produzem efeito depois de aprovados: férias e folgas pedidas pelos colaboradores (gestor direto ou Master) e o “Zerar todos os dados do FCX” feito por quem não é Master (só o Master, em até 3 minutos).</p></div></div>
       <div class="grid g3" style="margin-bottom:16px">
@@ -14473,6 +15041,7 @@ const Viagens = {
     const me = this.eu(), ps = this.participantes(v).map(p => p.funcionarioId); // v13.26: viagem em grupo — vale para qualquer participante
     if (me && ps.includes(me.id)) return true;
     if (me && ps.some(id => Repo.get('funcionarios', id)?.gestorId === me.id)) return true;
+    if (g93() && me) { const arv = Pessoal.arvoreDe(me.id); if (ps.some(id => arv.has(id))) return true; } /* v13.93: gestor de setor enxerga a árvore inteira */
     const ids = this.equipe(); return !ids || ps.some(id => ids.has(id));
   },
   todos() { return Repo.todos(this.COL).filter(v => this.noAlcance(v)).sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')); },
@@ -14663,7 +15232,17 @@ const Viagens = {
       return [['devolver', 'a devolver', 'warn'], ['reembolsar', 'a reembolsar', 'info'], ['quitado', 'quitado(s)', 'ok']].filter(([k]) => n(k)).map(([k, r, c]) => `<span class="pill ${c}">${n(k)} ${r}</span>`).join(' '); }
     const t = this.totais(v); return t.gasto > 0 ? `<span class="pill ${t.sit.cls}">${esc(t.sit.rot)}${t.abs ? ' ' + Fmt.brl(t.abs) : ''}</span>` : '';
   },
-  rotStatus(v) { const s = VIAGEM_ST[v.status] || { rot: v.status, cls: 'neutral' }; return `<span class="pill ${s.cls}">${esc(s.rot)}</span>`; },
+  /** v13.93 · prestação vencida: hoje passou do prazo (N dias úteis após a volta, política da própria viagem — ex.: D+5) e a prestação ainda não foi enviada. */
+  atrasoPrestacao(v, hoje = Datas.hojeISO()) {
+    if (!g93() || !v || v.status !== 'aguardando_prestacao') return null;
+    const p = this.politica(v), limite = p?.prazoData || ''; if (!limite || hoje <= limite) return null;
+    return { limite, dias: Datas.dias(Datas.de(limite), Datas.de(hoje)) };
+  },
+  badgeAtraso(v) {
+    const a = this.atrasoPrestacao(v); if (!a) return '';
+    return `<span class="pill bad vg-atraso" role="alert" title="Prazo da prestação de contas: ${Fmt.data(a.limite)} · ${a.dias} dia${a.dias === 1 ? '' : 's'} de atraso">${ICON.alerta} PRAZO EXCEDIDO - PRESTAÇÃO PENDENTE</span>`;
+  },
+  rotStatus(v) { const s = VIAGEM_ST[v.status] || { rot: v.status, cls: 'neutral' }; return `<span class="pill ${s.cls}">${esc(s.rot)}</span>${g93() ? this.badgeAtraso(v) : ''}`; },
   periodo(v) { return `${Fmt.data(v.ida)} a ${Fmt.data(v.volta)}`; },
   resumoLib(r) {
     const d = r.dados || {};
@@ -15586,22 +16165,23 @@ const Viagens = {
     if (!pronto) return head + '<div class="panel"><p class="muted" style="margin:0">Carregando…</p></div>';
     if (Documento.v89() && this.podeResumo() && this.ui.aba === 'resumo') return head + this.abasHtml() + this.renderResumoOp(); /* v13.89 */
     const u = this.ui, todos = this.todos(), q = RH.chave(u.busca);
-    const grupos = { andamento: v => !['concluido', 'recusado'].includes(v.status), prestacao: v => v.status === 'aguardando_prestacao', pagar: v => v.status === 'aprovado_pagamento', concluidos: v => ['concluido', 'recusado'].includes(v.status), todos: () => true };
+    const grupos = { andamento: v => !['concluido', 'recusado'].includes(v.status), prestacao: v => v.status === 'aguardando_prestacao', pagar: v => v.status === 'aprovado_pagamento', concluidos: v => ['concluido', 'recusado'].includes(v.status), atrasadas: v => !!this.atrasoPrestacao(v), todos: () => true };
     const lista = todos.filter(grupos[u.filtro] || grupos.andamento).filter(v => !q || RH.chave(`${this.participantes(v).map(p => p.nome).join(' ')} ${v.origem || ''} ${v.destino} ${v.motivo}`).includes(q));
     const abertos = todos.filter(v => this.PAGOS.includes(v.status) && v.status !== 'concluido'), emAberto = abertos.reduce((a, v) => a + (Number(v.valorPago ?? v.valor) || 0), 0);
     const devolver = todos.filter(v => v.status === 'prestacao_enviada' || v.status === 'aguardando_prestacao').map(v => this.totais(v)).filter(t => t.gasto > 0);
+    const atr = g93() ? todos.filter(v => this.atrasoPrestacao(v)).length : 0; /* v13.93: prestações com prazo excedido */
     const kpi = (k, v, d, c = '') => `<div class="kpi"><div class="k">${k}</div><div class="v" ${c ? `style="color:var(${c})"` : ''}>${v}</div><div class="d">${d}</div></div>`;
     const visao = this.verTodos() || this.financeiro() ? 'todos os colaboradores (Financeiro)' : Liberacao.lider() ? 'você e a sua equipe (só acompanhamento)' : 'as suas viagens — os pedidos são lançados pelo Financeiro';
-    const linhas = lista.map(v => { const t = this.totais(v), np = this.participantes(v).length; return `<tr class="click" data-a="vg-abrir" data-id="${v.id}"><td><div class="cell-main">${esc(this.nomes(v))}${np > 1 ? ` <span class="pill neutral" title="${esc(this.participantes(v).map(p => p.nome).join(', '))}">grupo · ${esc(this.MODOS[this.modo(v)].replace('Repasse ', ''))}</span>` : ''}</div><div class="cell-sub">${esc(v.motivo).slice(0, 80)}</div></td>
+    const linhas = lista.map(v => { const t = this.totais(v), np = this.participantes(v).length; return `<tr class="click${g93() && this.atrasoPrestacao(v) ? ' vg-linha-atraso' : ''}" data-a="vg-abrir" data-id="${v.id}"><td><div class="cell-main">${esc(this.nomes(v))}${np > 1 ? ` <span class="pill neutral" title="${esc(this.participantes(v).map(p => p.nome).join(', '))}">grupo · ${esc(this.MODOS[this.modo(v)].replace('Repasse ', ''))}</span>` : ''}</div><div class="cell-sub">${esc(v.motivo).slice(0, 80)}</div></td>
         <td>${esc(Trajeto.rota(v))}<div class="cell-sub mono">${this.periodo(v)}</div>${v.transporte ? `<div class="cell-sub">${esc(Trajeto.resumo(v))}</div>` : ''}</td><td class="num">${Fmt.brl(v.valorPago ?? v.valor)}</td><td>${this.rotStatus(v)}</td>
         <td>${this.PAGOS.includes(v.status) && this.saldoCelula(v) ? this.saldoCelula(v) : '<span class="hint">—</span>'}</td></tr>`; }).join('');
     return head + (Documento.v89() && this.podeResumo() ? this.abasHtml() : '') + `<div class="grid g4" style="margin-bottom:14px">
         ${kpi('Aguardando aprovação', todos.filter(v => v.status === 'aguardando_aprovacao').length, 'na Liberação Remota')}
         ${kpi('Aprovados para pagamento', todos.filter(v => v.status === 'aprovado_pagamento').length, 'aguardando o financeiro', todos.some(v => v.status === 'aprovado_pagamento') ? '--warn' : '')}
-        ${kpi('Aguardando prestação de contas', todos.filter(v => v.status === 'aguardando_prestacao').length, `${Fmt.brl(emAberto)} adiantados em aberto`, todos.some(v => v.status === 'aguardando_prestacao') ? '--warn' : '')}
+        ${kpi('Aguardando prestação de contas', todos.filter(v => v.status === 'aguardando_prestacao').length, `${Fmt.brl(emAberto)} adiantados em aberto${atr ? ` · <b style="color:var(--bad)">${atr} com PRAZO EXCEDIDO</b>` : ''}`, atr ? '--bad' : todos.some(v => v.status === 'aguardando_prestacao') ? '--warn' : '')}
         ${kpi('Prestações em análise', todos.filter(v => v.status === 'prestacao_enviada').length, `${devolver.filter(t => t.sit.k === 'devolver').length} a devolver · ${devolver.filter(t => t.sit.k === 'reembolsar').length} a reembolsar`)}</div>
       <div class="panel"><div class="row between" style="gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <div class="seg">${[['andamento', 'Em andamento'], ['pagar', 'A pagar'], ['prestacao', 'Aguardando prestação'], ['concluidos', 'Concluídos'], ['todos', 'Todos']].map(([k, r]) => `<button class="${u.filtro === k ? 'on' : ''}" data-a="vg-filtro" data-v="${k}">${r}</button>`).join('')}</div>
+        <div class="seg">${[['andamento', 'Em andamento'], ['pagar', 'A pagar'], ['prestacao', 'Aguardando prestação'], ...(g93() ? [['atrasadas', 'Prazo excedido']] : []), ['concluidos', 'Concluídos'], ['todos', 'Todos']].map(([k, r]) => `<button class="${u.filtro === k ? 'on' : ''}" data-a="vg-filtro" data-v="${k}">${r}</button>`).join('')}</div>
         <div class="field" style="min-width:220px;margin:0"><input type="search" placeholder="Buscar colaborador ou destino" value="${esc(u.busca)}" data-a="vg-busca" aria-label="Buscar"></div></div>
         <p class="hint" style="margin:0 0 10px">Visão: ${esc(visao)}.</p>
         ${lista.length ? `<div class="tbl-wrap"><table><thead><tr><th>Colaborador</th><th>Trajeto · período</th><th class="num">Valor</th><th>Situação</th><th>Saldo</th></tr></thead><tbody>${linhas}</tbody></table></div>` : '<div class="empty">Nenhuma viagem neste filtro.</div>'}</div>`;
@@ -15645,7 +16225,7 @@ const Viagens = {
     const cels = x => `<td class="num">${x.n}</td><td class="num">${Fmt.brl(x.adiantado)}</td>${this.TIPOS_CUSTO.map(([k]) => `<td class="num">${Fmt.brl(x[k])}</td>`).join('')}<td class="num"><b>${Fmt.brl(x.despesas)}</b></td><td class="num">${Fmt.brl(r2s(x.adiantado - x.despesas))}</td>`;
     const cc = `<table class="vg-res vg-res-cc"><thead><tr><th>Setor / Centro de Custo</th><th class="num">Viagens</th><th class="num">Adiantado</th>${this.TIPOS_CUSTO.map(([, rot]) => `<th class="num">${rot.split(' / ')[0]}</th>`).join('')}<th class="num">Despesas</th><th class="num">Saldo</th></tr></thead><tbody>
       ${r.porCC.map(g => { const aberto = impressao || ab.has(g.cc); return `<tr class="cc${aberto ? ' aberto' : ''}">${impressao ? `<td><b>${esc(g.cc)}</b></td>` : `<td><button type="button" class="vg-cc-bt" data-a="vg-cc" data-v="${esc(g.cc)}" aria-expanded="${aberto}"><span aria-hidden="true">${aberto ? '▾' : '▸'}</span> ${esc(g.cc)}</button></td>`}${cels(g)}</tr>
-        ${aberto ? g.viagens.map(l => `<tr class="det"><td><span class="vg-det-n">${esc(this.nomes(l.v))}</span><div class="cell-sub">${esc(Trajeto.rota(l.v))} · ${this.periodo(l.v)} · ${esc(VIAGEM_ST[l.v.status]?.rot || l.v.status)}</div></td>${cels(l)}</tr>`).join('') : ''}`; }).join('')}
+        ${aberto ? g.viagens.map(l => `<tr class="det"><td><span class="vg-det-n">${esc(this.nomes(l.v))}</span><div class="cell-sub">${esc(Trajeto.rota(l.v))} · ${this.periodo(l.v)} · ${esc(VIAGEM_ST[l.v.status]?.rot || l.v.status)}${g93() ? this.badgeAtraso(l.v) : ''}</div></td>${cels(l)}</tr>`).join('') : ''}`; }).join('')}
       <tr class="tot"><td>Total geral</td>${cels(T)}</tr></tbody></table>`;
     return { tipos, cc };
   },
@@ -16986,7 +17566,7 @@ const ConcMP = {
   abrirEmpresa(id) {
     if (!this.podeTaxas()) return;
     const lista = clone(this.empresas()), e = id ? lista.find(x => x.id === id) : { id: '', nome: '', razao: '', cnpj: '' };
-    UI.modal({ titulo: id ? 'Empresa · editar' : 'Nova empresa', corpo: `<div class="form-grid">${campo('Nome (como aparece no painel)', 'nome', e.nome)}${campo('Razão social', 'razao', e.razao)}${campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '', { attrs: 'inputmode="numeric" placeholder="00.000.000/0000-00"' })}</div>`,
+    UI.modal({ titulo: id ? 'Empresa · editar' : 'Nova empresa', aoAbrir: m => { if (g94()) Cnpj94.ligarEmpresa(m); }, corpo: `<div class="form-grid">${campo('Nome (como aparece no painel)', 'nome', e.nome)}${campo('Razão social', 'razao', e.razao)}${g94() ? Cnpj94.campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '') : campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '', { attrs: 'inputmode="numeric" placeholder="00.000.000/0000-00"' })}</div>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar', acao: async m => {
         const d = UI.lerForm(m), cnpj = String(d.cnpj || '').replace(/\D/g, '');
         if (!String(d.nome || '').trim()) { UI.toast('Informe o nome da empresa.'); return false; }
@@ -18092,15 +18672,15 @@ const Inicio = {
       const onde = this.master() ? 'na empresa' : e && !e.ids ? 'em todo o cadastro' : 'na sua equipe';
       out.push({ id: 'equipe', icon: 'pessoas', titulo: 'Equipe', valor: ok ? pessoas.length : null, estado: 'info', texto: `colaboradores ativos ${onde}`, sub: ok ? this.resumoSituacao(pessoas) : '', ir: ['pessoal', 'equipe'] });
       const ini = Datas.de(mes + '-01'), fim = new Date(ini.getFullYear(), ini.getMonth() + 1, 0);
-      const ferias = pessoas.filter(f => f.status === 'Férias' || (() => { const a = Datas.de(f.ferias?.programadaInicio), b = Datas.de(f.ferias?.programadaFim); return a && b && a <= fim && b >= ini; })());
+      const ferias = pessoas.filter(f => f.status === 'Férias' || Pessoal.periodosFerias(f).some(p => { const a = Datas.de(p.inicio), b = Datas.de(p.fim); return a && b && a <= fim && b >= ini; }));
       const alerta = ok ? pessoas.filter(f => ['bad', 'warn'].includes(Pessoal.ferias(f).cls)).length : 0;
       out.push({ id: 'ferias', icon: 'diario', titulo: 'Férias', valor: ok ? ferias.length : null, estado: alerta ? 'warn' : 'info', texto: `${ferias.length === 1 ? 'pessoa de férias' : 'pessoas de férias'} em ${mesRot}`, sub: alerta ? `${alerta} com férias vencidas ou vencendo em 60 dias` : 'nenhuma férias vencida', ir: ['pessoal', 'equipe'] });
     }
     // 2b · Viagens aguardando prestação de contas (v13.21) — Viagens.todos() já aplica a visão
     if (Viagens.podeVer()) {
       const ok = this.pronto(Viagens.COL), vs = ok ? Viagens.aguardandoPrestacao() : [], val = vs.reduce((a, v) => a + (Number(v.valorPago ?? v.valor) || 0), 0);
-      const atrasadas = vs.filter(v => v.volta && v.volta < Datas.hojeISO()).length;
-      out.push({ id: 'viagens', icon: 'aviao', titulo: 'Viagens', valor: ok ? vs.length : null, estado: atrasadas ? 'warn' : vs.length ? 'info' : 'ok', texto: `${vs.length === 1 ? 'viagem aguardando' : 'viagens aguardando'} prestação de contas`, sub: vs.length ? `${Fmt.brl(val)} adiantados${atrasadas ? ` · ${atrasadas} já voltaram` : ''}` : 'nenhuma prestação pendente', ir: ['viagens'] });
+      const atrasadas = vs.filter(v => v.volta && v.volta < Datas.hojeISO()).length, excedidas = g93() ? vs.filter(v => Viagens.atrasoPrestacao(v)).length : 0; /* v13.93 */
+      out.push({ id: 'viagens', icon: 'aviao', titulo: 'Viagens', valor: ok ? vs.length : null, estado: excedidas ? 'bad' : atrasadas ? 'warn' : vs.length ? 'info' : 'ok', texto: `${vs.length === 1 ? 'viagem aguardando' : 'viagens aguardando'} prestação de contas`, sub: vs.length ? `${Fmt.brl(val)} adiantados${atrasadas ? ` · ${atrasadas} já voltaram` : ''}${excedidas ? ` · ${excedidas} com prazo excedido` : ''}` : 'nenhuma prestação pendente', ir: ['viagens'] });
     }
     // 3 · Contratos e seguros
     if (Auth.can('lojas.contratos.ver')) {
@@ -18439,6 +19019,139 @@ const ModContabil = {
 };
 window.ModContabil = ModContabil;
 
+/* =====================================================================
+   MÓDULO 13 — Fornecedores e Clientes (v13.94, recurso gestao_v1394)
+   Coleção parceiros: { tipo 'PJ'|'PF', papeis ['fornecedor','cliente'], documento (CNPJ ou CPF formatado), nome (razão social ou nome completo),
+   nomeFantasia, inscricaoEstadual, cep, endereco, bairro, cidade, uf, capitalSocial, situacaoCadastral, telefone, email, observacoes, ativo, receita }.
+   PJ: o CNPJ é conferido (dígitos verificadores) e, aos 14 dígitos, a Receita preenche o cadastro. PF: o CPF é conferido (dígitos verificadores)
+   com máscara automática e alerta antes de salvar. Mesmo documento não se cadastra duas vezes. Permissões: parceiros.ver / .editar / .excluir.
+   ===================================================================== */
+const Parceiros = {
+  COL: 'parceiros', ui: { q: '', papel: '', tipo: '', situacao: 'ativos' },
+  podeEditar() { return Auth.can('parceiros.editar'); }, podeExcluir() { return Auth.can('parceiros.excluir'); },
+  todos() { return Repo.todos(this.COL).sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')); },
+  stat() { if (!Repo.prontas.has(this.COL)) return '…'; const a = this.todos().filter(p => p.ativo !== false).length; return `${a} cadastro${a === 1 ? '' : 's'} ativo${a === 1 ? '' : 's'}`; },
+  semAcento: t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(),
+  filtrados() {
+    const { q, papel, tipo, situacao } = this.ui, busca = this.semAcento(q), dig = String(q || '').replace(/\D/g, '');
+    return this.todos().filter(p => (!papel || (p.papeis || []).includes(papel)) && (!tipo || p.tipo === tipo)
+      && (situacao === 'todos' || (situacao === 'inativos' ? p.ativo === false : p.ativo !== false))
+      && (!busca || this.semAcento([p.nome, p.nomeFantasia, p.cidade, p.documento].join(' ')).includes(busca) || (dig.length >= 3 && String(p.documento || '').replace(/\D/g, '').includes(dig))));
+  },
+  pillSituacao(p) { return p.tipo === 'PJ' && p.situacaoCadastral ? `<span class="pill ${/ativa/i.test(p.situacaoCadastral) ? 'ok' : 'warn'}">${esc(p.situacaoCadastral)}</span>` : '<span class="muted">—</span>'; },
+  render() {
+    const todos = this.todos(), lista = this.filtrados(), ativos = todos.filter(p => p.ativo !== false), forn = ativos.filter(p => (p.papeis || []).includes('fornecedor')).length, cli = ativos.filter(p => (p.papeis || []).includes('cliente')).length;
+    const irreg = ativos.filter(p => p.tipo === 'PJ' && p.situacaoCadastral && !/ativa/i.test(p.situacaoCadastral)).length;
+    const linhas = lista.map(p => `<tr>
+        <td class="mono">${esc(p.documento || '')}</td>
+        <td><b>${esc(p.nome || '')}</b>${p.nomeFantasia && p.nomeFantasia !== p.nome ? `<div class="cell-sub">${esc(p.nomeFantasia)}</div>` : ''}</td>
+        <td>${p.tipo === 'PF' ? 'Pessoa física' : 'Pessoa jurídica'}</td>
+        <td>${(p.papeis || []).map(k => `<span class="pill ${k === 'fornecedor' ? 'info' : 'neutral'}">${k === 'fornecedor' ? 'Fornecedor' : 'Cliente'}</span>`).join(' ')}</td>
+        <td>${esc([p.cidade, p.uf].filter(Boolean).join(' / ')) || '—'}</td>
+        <td>${this.pillSituacao(p)}</td>
+        <td>${p.ativo === false ? '<span class="pill neutral">Inativo</span>' : '<span class="pill ok">Ativo</span>'}</td>
+        <td class="acts">${this.podeEditar() ? `<button class="iconbtn" data-a="par-editar" data-id="${esc(p.id)}" aria-label="Editar ${esc(p.nome || '')}" title="Editar">${ICON.editar}</button><button class="btn sec sm" data-a="par-ativar" data-id="${esc(p.id)}">${p.ativo === false ? 'Reativar' : 'Inativar'}</button>` : ''}${this.podeExcluir() ? `<button class="iconbtn" data-a="par-excluir" data-id="${esc(p.id)}" aria-label="Excluir ${esc(p.nome || '')}" title="Excluir">${ICON.lixo}</button>` : ''}</td></tr>`).join('');
+    return `<div class="page-head"><div><h1>Fornecedores e Clientes</h1><p>Cadastro de pessoas jurídicas (CNPJ) e físicas (CPF). Ao digitar os 14 dígitos do CNPJ, a Receita Federal preenche razão social, nome fantasia, endereço, capital social e situação cadastral; o CPF é conferido pelos dígitos verificadores.</p></div>
+      ${this.podeEditar() ? '<button class="btn" data-a="par-novo">+ Novo cadastro</button>' : ''}</div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="k">Cadastros ativos</div><div class="v">${ativos.length}</div><div class="d">${todos.length - ativos.length} inativo(s)</div></div>
+        <div class="kpi"><div class="k">Fornecedores</div><div class="v">${forn}</div></div>
+        <div class="kpi"><div class="k">Clientes</div><div class="v">${cli}</div></div>
+        <div class="kpi"><div class="k">Situação cadastral irregular</div><div class="v">${irreg}</div><div class="d">CNPJ que não consta como ATIVA na Receita</div></div>
+      </div>
+      <div class="panel"><div class="toolbar">
+        <div class="field grow"><label class="lbl" for="parBusca">Buscar</label><input id="parBusca" type="search" value="${esc(this.ui.q)}" placeholder="Nome, fantasia, cidade, CNPJ ou CPF" data-a="par-busca" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="parPapel">Papel</label><select id="parPapel" data-a="par-filtro" data-k="papel"><option value="">Todos</option><option value="fornecedor" ${this.ui.papel === 'fornecedor' ? 'selected' : ''}>Fornecedores</option><option value="cliente" ${this.ui.papel === 'cliente' ? 'selected' : ''}>Clientes</option></select></div>
+        <div class="field"><label class="lbl" for="parTipo">Tipo</label><select id="parTipo" data-a="par-filtro" data-k="tipo"><option value="">Todos</option><option value="PJ" ${this.ui.tipo === 'PJ' ? 'selected' : ''}>Pessoa jurídica</option><option value="PF" ${this.ui.tipo === 'PF' ? 'selected' : ''}>Pessoa física</option></select></div>
+        <div class="field"><label class="lbl" for="parSit">Situação</label><select id="parSit" data-a="par-filtro" data-k="situacao"><option value="ativos" ${this.ui.situacao === 'ativos' ? 'selected' : ''}>Ativos</option><option value="inativos" ${this.ui.situacao === 'inativos' ? 'selected' : ''}>Inativos</option><option value="todos" ${this.ui.situacao === 'todos' ? 'selected' : ''}>Todos</option></select></div>
+      </div>
+      ${!Repo.prontas.has(this.COL) ? '<div class="empty">Carregando os cadastros…</div>' : lista.length ? `<div class="tbl-wrap"><table><thead><tr><th>CNPJ / CPF</th><th>Razão social / Nome</th><th>Tipo</th><th>Papel</th><th>Cidade / UF</th><th>Situação cadastral</th><th>Cadastro</th><th></th></tr></thead><tbody id="parCorpo">${linhas}</tbody></table></div>`
+        : `<div class="empty">${todos.length ? 'Nenhum cadastro com este filtro.' : 'Nenhum fornecedor ou cliente cadastrado ainda.' + (this.podeEditar() ? ' Use “+ Novo cadastro”.' : '')}</div>`}
+      <p class="hint" style="margin-top:10px">${lista.length} de ${todos.length} cadastro(s).</p></div>`;
+  },
+  async acao(a, el) {
+    if (a === 'par-novo') return this.abrir('');
+    if (a === 'par-editar') return this.abrir(el.dataset.id);
+    if (a === 'par-ativar') {
+      const p = Repo.get(this.COL, el.dataset.id); if (!p || !this.podeEditar()) return;
+      const { id, ...x } = p; await Repo.salvar(this.COL, p.id, { ...x, ativo: p.ativo === false }, { modulo: 'parceiros', rotulo: p.nome, detalhe: p.ativo === false ? 'Reativado' : 'Inativado' }); return UI.toast(p.ativo === false ? 'Cadastro reativado' : 'Cadastro inativado');
+    }
+    if (a === 'par-excluir') {
+      const p = Repo.get(this.COL, el.dataset.id); if (!p || !this.podeExcluir()) return;
+      if (!(await UI.confirmarExclusao(`o cadastro de ${esc(p.nome || '')}`, 'Prefira <b>Inativar</b> se o fornecedor ou cliente pode voltar a ser usado.'))) return;
+      await Repo.excluir(this.COL, p.id, { modulo: 'parceiros', rotulo: p.nome }); UI.toast('Cadastro excluído');
+    }
+  },
+  mudanca(a, el) { if (a === 'par-filtro') { this.ui[el.dataset.k] = el.value; App.agendarRender(); } },
+  entrada(a, el) { if (a === 'par-busca') { const pos = el.selectionStart; this.ui.q = el.value; App.agendarRender(); setTimeout(() => { const i = $('#parBusca'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch { } } }, 30); } },
+  form(p) {
+    const pj = p.tipo !== 'PF', papel = k => (p.papeis || []).includes(k) ? 'checked' : '';
+    return `<div class="form-grid">
+      <div class="field"><label class="lbl" for="f_tipo">Tipo de pessoa</label><select id="f_tipo" name="tipo"><option value="PJ" ${pj ? 'selected' : ''}>Pessoa jurídica (CNPJ)</option><option value="PF" ${pj ? '' : 'selected'}>Pessoa física (CPF)</option></select></div>
+      <div class="field"><span class="lbl">Cadastrar como</span><div class="row" style="gap:18px;padding-top:8px"><label class="check"><input type="checkbox" name="fornecedor" ${papel('fornecedor')}> Fornecedor</label><label class="check"><input type="checkbox" name="cliente" ${papel('cliente')}> Cliente</label></div></div>
+      <div class="full ${pj ? '' : 'hidden'}" data-par-tipo="PJ">${Cnpj94.campo('CNPJ', 'cnpj', pj ? p.documento : '', { dica: 'Ao completar os 14 dígitos a Receita Federal preenche o cadastro.' })}</div>
+      <div class="full ${pj ? 'hidden' : ''}" data-par-tipo="PF">${campo('CPF', 'cpf', pj ? '' : CPF.formatar(p.documento), { attrs: 'inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" data-cpf', dica: 'Máscara automática; os dígitos verificadores são conferidos antes de salvar.' })}</div>
+      <div class="full">${campo('Razão social', 'nome', p.nome, { attrs: 'data-par-nome' })}</div>
+      <div data-par-tipo="PJ" class="${pj ? '' : 'hidden'}">${campo('Nome fantasia', 'nomeFantasia', p.nomeFantasia)}</div>
+      <div data-par-tipo="PJ" class="${pj ? '' : 'hidden'}">${campo('Inscrição estadual', 'inscricaoEstadual', p.inscricaoEstadual)}</div>
+      ${campo('CEP', 'cep', p.cep, { attrs: 'inputmode="numeric" maxlength="9" placeholder="00000-000"' })}${campo('Logradouro, número e complemento', 'endereco', p.endereco)}
+      ${campo('Bairro', 'bairro', p.bairro)}${campo('Cidade', 'cidade', p.cidade)}${campo('UF', 'uf', p.uf, { opcoes: [['', '—'], ...UFS_BR.map(([u]) => [u, u])] })}
+      <div data-par-tipo="PJ" class="${pj ? '' : 'hidden'}">${campo('Capital social (R$)', 'capitalSocial', p.capitalSocial, { tipo: 'number' })}</div>
+      <div data-par-tipo="PJ" class="${pj ? '' : 'hidden'}">${campo('Situação cadastral', 'situacaoCadastral', p.situacaoCadastral, { attrs: 'placeholder="Preenchida pela consulta do CNPJ"' })}</div>
+      ${campo('Telefone', 'telefone', p.telefone, { tipo: 'tel' })}${campo('E-mail', 'email', p.email, { tipo: 'email' })}
+      <div class="full">${campo('Observações', 'observacoes', p.observacoes, { tipo: 'textarea' })}</div>
+      <div class="field"><span class="lbl">Cadastro</span><label class="check" style="padding-top:8px"><input type="checkbox" name="ativo" ${p.ativo !== false ? 'checked' : ''}> Ativo</label></div>
+    </div>`;
+  },
+  abrir(id) {
+    if (!this.podeEditar()) return UI.toast('Seu acesso a Fornecedores e Clientes é somente leitura.');
+    const p = id ? clone(Repo.get(this.COL, id)) : { tipo: 'PJ', papeis: ['fornecedor'], ativo: true };
+    if (id && !p) return;
+    UI.modal({
+      titulo: id ? 'Editar · ' + (p.nome || 'cadastro') : 'Novo fornecedor / cliente', largo: true, corpo: this.form(p),
+      aoAbrir: m => {
+        const alternar = () => {
+          const pj = $('[name="tipo"]', m).value !== 'PF';
+          $$('[data-par-tipo]', m).forEach(b => b.classList.toggle('hidden', b.dataset.parTipo !== (pj ? 'PJ' : 'PF')));
+          const lb = $('[data-par-nome]', m)?.closest('.field')?.querySelector('label'); if (lb) lb.textContent = pj ? 'Razão social' : 'Nome completo';
+        };
+        $('[name="tipo"]', m).addEventListener('change', alternar); alternar();
+        Cnpj94.ligar(m, {
+          preencher: d => ({ nome: d.razaoSocial, nomeFantasia: d.nomeFantasia, cep: Cnpj94.cep(d.cep), endereco: Cnpj94.linha(d), bairro: d.bairro, cidade: d.municipio, uf: d.uf, capitalSocial: d.capitalSocial || '', situacaoCadastral: d.situacao }),
+          aoDados: (d, r) => { p._receita = { consultadoEm: new Date().toISOString(), fonte: r.fonte }; },
+          duplicado: dn => { const o = this.todos().find(x => x.id !== id && x.tipo === 'PJ' && CNPJ.limpar(x.documento) === dn); return o ? `Atenção: este CNPJ já está cadastrado (${o.nome}).` : ''; },
+        });
+        const cep = $('[name="cep"]', m); if (cep) cep.addEventListener('input', () => { cep.value = Cnpj94.cep(cep.value); });
+      },
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar', acao: async m => {
+        const d = UI.lerForm(m), pj = d.tipo !== 'PF';
+        if (!d.fornecedor && !d.cliente) { UI.toast('Marque ao menos um papel: Fornecedor e/ou Cliente.'); return false; }
+        let documento, limpo;
+        if (pj) {
+          limpo = CNPJ.limpar(d.cnpj);
+          if (!CNPJ.valido(limpo)) { const i = $('[name="cnpj"]', m); i.setAttribute('aria-invalid', 'true'); i.focus(); UI.toast(limpo ? 'CNPJ inválido: confira os dígitos verificadores antes de salvar.' : 'Informe o CNPJ.'); return false; }
+          documento = CNPJ.formatar(limpo);
+        } else {
+          limpo = CPF.limpar(d.cpf);
+          if (!limpo) { $('[name="cpf"]', m).focus(); UI.toast('Informe o CPF.'); return false; }
+          if (Cpf94.conferir(m)) return false; // CPF inválido: alerta, marca o campo e não salva
+          documento = CPF.formatar(limpo);
+        }
+        if (!String(d.nome || '').trim()) { UI.toast(pj ? 'Informe a razão social.' : 'Informe o nome completo.'); return false; }
+        const dup = this.todos().find(x => x.id !== id && x.tipo === (pj ? 'PJ' : 'PF') && String(x.documento || '').replace(/\D/g, '') === limpo);
+        if (dup) { UI.toast(`Este ${pj ? 'CNPJ' : 'CPF'} já está cadastrado: ${dup.nome}.`); return false; }
+        const novo = { tipo: pj ? 'PJ' : 'PF', papeis: [d.fornecedor && 'fornecedor', d.cliente && 'cliente'].filter(Boolean), documento, nome: String(d.nome).trim(),
+          nomeFantasia: pj ? d.nomeFantasia || '' : '', inscricaoEstadual: pj ? d.inscricaoEstadual || '' : '', cep: d.cep || '', endereco: d.endereco || '', bairro: d.bairro || '', cidade: d.cidade || '', uf: d.uf || '',
+          capitalSocial: pj && d.capitalSocial != null ? d.capitalSocial : null, situacaoCadastral: pj ? d.situacaoCadastral || '' : '', telefone: d.telefone || '', email: d.email || '', observacoes: d.observacoes || '', ativo: d.ativo !== false };
+        const rec = p._receita || p.receita; if (pj && rec) novo.receita = rec;
+        await Repo.salvar(this.COL, id || 'par-' + uid(), novo, { modulo: 'parceiros', rotulo: novo.nome, detalhe: id ? 'Cadastro alterado' : 'Cadastro criado' });
+        UI.toast('Cadastro salvo');
+      } }],
+    });
+  },
+};
+window.Parceiros = Parceiros;
+
 const MODULOS = [
   { id: 'pessoal', num: 'Módulo 1', titulo: 'Gestão de Pessoal', icon: 'pessoas', perm: 'pessoal.ver',
     desc: 'Equipe, jornada, banco de horas, férias e o PDI com matriz de competências e parecer para o colaborador.',
@@ -18462,6 +19175,9 @@ const MODULOS = [
   { id: 'fcx', num: 'Módulo 4', titulo: 'FCX · Fluxo de Caixa', curto: 'FCX', icon: 'caixa', perm: 'fcx.ver',
     desc: 'Projeção diária de caixa, orçamento, painel analítico e a DFC: extratos OFX cruzados com as premissas do FCX (realizado × previsto).',
     stat: () => 'receitas 2025 · saídas 2026' },
+  { id: 'parceiros', num: 'Módulo 13', titulo: 'Fornecedores e Clientes', curto: 'Fornec./Clientes', icon: 'pessoas', perm: 'parceiros.ver', ver: () => g94() && Auth.can('parceiros.ver') && !Acesso.loja(), // v13.94 · Loja não abre (o servidor recusa)
+    desc: 'Cadastro de fornecedores e clientes, pessoa jurídica ou física: CNPJ com consulta automática na Receita Federal (razão social, endereço, capital social e situação cadastral) e CPF com validação dos dígitos.',
+    stat: () => Parceiros.stat() },
   { id: 'contabil', num: 'Módulo 12', titulo: 'Contabilidade', curto: 'Contabilidade', icon: 'livro', perm: 'contabil.ver', ver: () => Recursos.ativo('contabil_v1386') && Auth.can('contabil.ver') && !Acesso.loja(), // v13.86 · v13.88: Loja não abre (o servidor recusa)
     desc: 'Plano de contas único (sintéticas e analíticas com classificação automática), partidas dobradas com estorno, LALUR, DRE no modelo atual e na Reforma (IBS/CBS/IS) e os relatórios contábeis. O FCX lê o plano de contas daqui.',
     stat: () => ModContabil.stat() },
@@ -18500,7 +19216,7 @@ const ADMIN = [
  */
 const NAV_GRUPOS = [
   { titulo: 'Pessoas & Operação', ids: ['menu', 'pessoal', 'rh', 'lojas', 'contratos', 'solicitacoes'] },
-  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
+  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'parceiros', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
   { titulo: 'Sistema & Segurança', ids: ['liberacao', 'acessos', 'auditoria', 'backup'] },
 ];
 const NAV_SUB = {
@@ -18515,6 +19231,7 @@ const NAV_SUB = {
 /* v13.89 · submenus novos (só com o recurso rel_v1389) */
 NAV_SUB.solicitacoes = { ok: () => Documento.v89(), itens: () => [['lista', 'Solicitações'], ['relatorio', 'Relatório por período']], ir: v => { Solicitacoes.ui.vista = v; }, atual: () => Solicitacoes.ui.vista || 'lista' };
 NAV_SUB.viagens = { ok: () => Documento.v89() && Viagens.podeResumo(), itens: () => [['pedidos', 'Pedidos e prestações'], ['resumo', 'Resumo Operacional']], ir: v => { Viagens.ui.aba = v; }, atual: () => Viagens.ui.aba || 'pedidos' };
+NAV_SUB.lojas = { ok: () => g93(), itens: () => [['lista', 'Lojas'], ['pos', 'Máquinas POS Consolidado'], ['kpis', 'Indicadores & KPIs Operacionais']], ir: v => { Lojas.ui.vista = v; Lojas.ui.sel = null; }, atual: () => Lojas.ui.vista || 'lista' }; /* v13.93 */
 const navSubOk = id => !!NAV_SUB[id] && (!NAV_SUB[id].ok || NAV_SUB[id].ok());
 /** Submenu em cascata: um painel ao lado do menu, aberto ao passar o mouse (ou pelo teclado) num módulo com abas. */
 /**
@@ -18567,6 +19284,68 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && e.target.matches?.('#mainnav button[data-sub]')) { e.preventDefault(); $('#sbFly .sb-fly-it')?.focus(); }
 });
 
+/**
+ * v13.94 · Layout 100% da largura e tabelas adaptativas (recurso gestao_v1394).
+ * Para cada tabela que não cabe no espaço dela: 1º ela fica mais densa (fonte e espaçamento menores, cabeçalho quebrando linha);
+ * se ainda assim não couber, vira uma grade de cartões (um cartão por linha, rótulo da coluna em cima de cada valor, colunas
+ * automáticas conforme a largura) — em vez da barra de rolagem horizontal. Mede de novo a cada render, redimensionamento e
+ * mudança de largura do conteúdo (menu lateral). O FCX e o Módulo Contábil (quadros) recebem o mesmo tratamento.
+ * Tabelas de matriz (mapa de calor, mais de 20 colunas ou marcadas data-rt94="off") ficam com rolagem só dentro do quadro delas.
+ */
+const Layout94 = {
+  MAX_COLS: 20, _docs: new WeakMap(), _t: 0,
+  contentor(t) { return t.closest('.tbl-wrap,.scroll-table,.tbl'); },
+  elegivel(t) {
+    if (t.closest('[data-rt94="off"],.nolabel,.prev-folha,.heat,.rd-relatorio,.rd-impressao') || t.matches('.heat,.nolabel') || t.closest('td,th') || !t.rows.length || t.offsetParent === null) return false;
+    return !t.querySelector('table');
+  },
+  /** a tabela é mais larga que o espaço dela (ou passa da borda da tela)? */
+  estoura(t) {
+    const w = this.contentor(t) || t.parentElement; if (!w) return false;
+    const doc = t.ownerDocument, cs = doc.defaultView.getComputedStyle(w);
+    const disp = w.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    return (disp > 0 && t.offsetWidth > disp + 1) || t.getBoundingClientRect().right > doc.documentElement.clientWidth + 1;
+  },
+  cartao(t) { return t.classList.contains('resp') && !!t.querySelector('thead th') && Math.max(...[...t.tHead.rows].map(r => r.cells.length)) <= this.MAX_COLS; },
+  ajustar(doc = document) {
+    const raiz = doc.body; if (!raiz || !g94()) return;
+    try {
+      if (doc !== document) UI.rotularTabelas(raiz); // FCX e Contábil: mesmos rótulos de coluna do painel
+      const tabs = [...raiz.querySelectorAll('table')].filter(t => this.elegivel(t));
+      tabs.forEach(t => { t.classList.remove('rt94-compact', 'rt94-card'); this.contentor(t)?.classList.remove('rt94-w'); });
+      const a = tabs.filter(t => this.estoura(t)); a.forEach(t => t.classList.add('rt94-compact'));
+      a.filter(t => this.estoura(t) && this.cartao(t)).forEach(t => {
+        t.classList.add('rt94-card'); this.contentor(t)?.classList.add('rt94-w');
+        t.querySelectorAll('tbody td').forEach(td => { if (!td.dataset.label && td.querySelector('button,.btn,a.btn') && !td.textContent.trim().replace(/\s+/g, '')) td.classList.add('rt94-acts'); });
+      });
+    } catch (e) { console.warn('[layout94]', e); }
+  },
+  agendar(doc = document) {
+    const e = this._docs.get(doc) || {}; if (e.t) return;
+    e.t = setTimeout(() => { e.t = 0; this.ajustar(doc); }, 40); this._docs.set(doc, e);
+  },
+  /** liga os observadores (mudança de conteúdo e de largura) num documento: o painel e cada quadro (iframe) */
+  observar(doc) {
+    if (!doc || !doc.body || this._docs.get(doc)?.obs) return;
+    const e = this._docs.get(doc) || {}; e.obs = true; this._docs.set(doc, e);
+    new MutationObserver(() => this.agendar(doc)).observe(doc.body, { childList: true, subtree: true });
+    try { doc.defaultView.addEventListener('resize', () => this.agendar(doc)); } catch { }
+    if (doc.defaultView?.ResizeObserver) { let w = 0; new doc.defaultView.ResizeObserver(() => { const n = doc.documentElement.clientWidth; if (n !== w) { w = n; this.agendar(doc); } }).observe(doc.documentElement); }
+    this.agendar(doc);
+  },
+  /** chamado a cada App.render: liga/desliga a classe (também nos quadros do FCX e do Contábil) e agenda a medição */
+  aplicar() {
+    const on = g94(); document.documentElement.classList.toggle('fw94', on);
+    ['fcxFrame', 'ctFrame'].forEach(id => {
+      const f = document.getElementById(id); if (!f) return;
+      if (!f.dataset.fw94) { f.dataset.fw94 = '1'; f.addEventListener('load', () => this.aplicar()); }
+      try { const d = f.contentDocument; if (d && d.documentElement) { d.documentElement.classList.toggle('fw94', on); if (on) this.observar(d); } } catch { }
+    });
+    if (on) { this.observar(document); this.agendar(document); }
+  },
+};
+window.Layout94 = Layout94;
+
 const App = {
   rota: 'menu', _raf: null, navAberto: false,
   /** v13.13: um módulo pode ter regra própria de visibilidade (ex.: Liberação Remota também para gestores diretos). */
@@ -18601,7 +19380,7 @@ const App = {
     const main = $('#main');
     const ativo = document.activeElement, idAtivo = ativo && ativo.id, sel = ativo && 'selectionStart' in ativo ? [ativo.selectionStart, ativo.selectionEnd] : null;
     const crumbs = this.rota === 'menu' ? '' : `<div class="crumbs"><button data-a="nav" data-r="menu">Painel de Gestão</button><span>/</span><span>${esc(([...MODULOS, ...ADMIN].find(m => m.id === this.rota) || {}).titulo || '')}</span></div>`;
-    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
+    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), parceiros: () => Parceiros.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
     Acesso.ajustarAba(this.rota); // v13.83: aba não liberada → primeira liberada
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
     main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
@@ -18620,6 +19399,7 @@ const App = {
     FCX.sincronizar(); // o iframe do FCX vive fora de #main e não é recriado
     ModContabil.sincronizar(); // v13.86: idem para o Módulo Contábil
     Rodape.atualizar(); // v13.20: rodapé "centro de comando"
+    Layout94.aplicar(); // v13.94: layout 100% da largura e tabelas adaptativas
   },
   /** Barra superior + navegação global. No celular/tablet (≤ 900px) a navegação vira gaveta (hambúrguer). */
   /** v13.18: o menu lateral começa logo abaixo da barra superior (altura medida, muda com o tamanho da tela). */
@@ -18733,6 +19513,72 @@ const Aud = {
   entrada(a, el) { if (a === 'aud-busca') { this.ui.busca = el.value; App.render(); } },
 };
 
+/* =====================================================================
+   v13.94 · BANCO DE DADOS · MIGRAÇÕES (Master · sites do Netlify · recurso gestao_v1394)
+   O Netlify já aplica sozinho a pasta de migrações a cada publicação, e o build roda scripts/run-migrations.mjs antes de compilar.
+   Este bloco é o "plano B por um clique": GET /api/migracoes mostra o que está aplicado/pendente e se o esquema que o painel exige
+   está completo; POST /api/migracoes roda agora as migrações REPETÍVEIS pendentes (só criam o que falta). O esquema inicial, a semente
+   e as demais ficam com o deploy do Netlify — nada é apagado nem sobrescrito. A função recusa quem não é Master.
+   ===================================================================== */
+const MigracoesBanco = {
+  ui: { aberto: false, dados: null, erro: '', ocupado: false },
+  pode() { return g94() && !!Cloud.base?.netlify && GestaoAmbientes.pode(); }, /* mesmo critério da Gestão de Ambientes: Master de verdade (não simulado) */
+  render() {
+    if (!this.pode()) return '';
+    const u = this.ui, d = u.dados;
+    return `<details class="panel mig-banco" id="migBanco"${u.aberto ? ' open' : ''}>
+      <summary data-a="mig-abrir"><span>Banco de dados · Migrações</span><span class="pill neutral">avançado · só Master</span></summary>
+      <div class="mig-corpo">
+        <p class="sub">O Netlify já aplica as migrações a cada publicação, e o build também roda as repetíveis antes de compilar o site. Este botão faz o mesmo agora, sem esperar uma nova publicação: ele roda só as migrações <b>repetíveis</b> que estiverem pendentes (criam tabelas, colunas e índices “se não existirem”). Nada é apagado nem sobrescrito; o esquema inicial, a semente de dados e as demais migrações continuam sendo do deploy do Netlify.</p>
+        <div class="row mig-acoes"><button class="btn" data-a="mig-exec"${u.ocupado ? ' disabled' : ''}>Executar Migrações do Banco</button><button class="btn sec" data-a="mig-status"${u.ocupado ? ' disabled' : ''}>Verificar situação</button></div>
+        ${u.erro ? `<div class="note warn" role="alert">${esc(u.erro)}</div>` : ''}
+        ${d ? this.resultado(d) : `<p class="hint">${u.ocupado ? 'Consultando o banco…' : 'Use “Verificar situação” para ver o que está aplicado e o que está pendente.'}</p>`}
+      </div></details>`;
+  },
+  resultado(d) {
+    const r = d.resumo || {}, ROT = { aplicada: ['ok', 'aplicada'], pendente: ['warn', 'pendente'], adiada: ['info', 'adiada'], netlify: ['neutral', 'do Netlify'], falhou: ['bad', 'falhou'] };
+    const lin = m => {
+      const [cl, tx] = ROT[m.estado] || ['neutral', m.estado], obs = m.aviso || m.motivo || (m.origem ? 'rodada por ' + (m.origem === 'botao' ? 'este botão' : 'o build') : '');
+      return `<tr><td data-label="Migração"><span class="mono">${esc(m.nome)}</span></td><td data-label="Tipo">${m.tipo === 'aditiva' ? 'Repetível' : 'Do deploy do Netlify'}</td>
+        <td data-label="Situação"><span class="pill ${cl}">${tx}${m.agora ? ' agora' : ''}</span>${m.em ? ` <span class="hint">${esc(Fmt.dataHora(m.em))}</span>` : ''}</td><td data-label="Observação" class="hint">${esc(obs)}</td></tr>`;
+    };
+    const esq = (d.esquema || []).map(e => `<li>${e.ok ? '<span class="pill ok">ok</span>' : '<span class="pill bad">falta</span>'} <span>${esc(e.rotulo)}${e.ok ? '' : ` <span class="hint mono">(${esc((e.falta || []).join(', '))})</span>`}</span></li>`).join('');
+    const incompleto = (d.esquema || []).some(e => !e.ok);
+    return `${d.base === false ? '<div class="note warn">Este banco ainda não tem o esquema inicial: o deploy do Netlify monta tudo na próxima publicação.</div>' : ''}
+      ${d.falhou ? `<div class="note warn" role="alert"><b>${esc(d.falhou.nome)}</b> falhou${d.falhou.codigo ? ` (código ${esc(d.falhou.codigo)})` : ''}: ${esc(d.falhou.mensagem || '')}<br>Nada ficou pela metade (a migração é desfeita por inteiro). Corrija o arquivo e publique de novo.</div>` : ''}
+      ${d.erroLivro ? `<div class="note warn" role="alert">Não consegui criar o livro-razão das migrações: ${esc(d.erroLivro)}</div>` : ''}
+      <p class="mig-resumo"><span><b>${r.aplicadas || 0}</b> aplicada(s)</span><span><b>${r.pendentes || 0}</b> pendente(s)</span>${r.adiadas ? `<span><b>${r.adiadas}</b> adiada(s)</span>` : ''}<span><b>${r.netlify || 0}</b> do deploy do Netlify</span>${r.falhas ? `<span><b>${r.falhas}</b> com falha</span>` : ''}</p>
+      ${esq ? `<h3 class="pe-h4" style="margin-top:10px">Esquema que o painel exige</h3><ul class="mig-esq">${esq}</ul>${incompleto ? '<p class="hint">O que estiver faltando vem das migrações do deploy do Netlify (esquema inicial, contábil…): publique de novo e confira o log do deploy.</p>' : ''}` : ''}
+      <div class="tbl-wrap"><table class="resp"><thead><tr><th>Migração</th><th>Tipo</th><th>Situação</th><th>Observação</th></tr></thead><tbody>${(d.migracoes || []).map(lin).join('') || '<tr><td colspan="4" class="hint">Nenhuma migração encontrada na pasta do projeto.</td></tr>'}</tbody></table></div>
+      <p class="hint" style="margin:8px 0 0">Ambiente: ${esc(Ambiente.ROT_SITE?.[d.ambiente] || d.ambiente || '—')}. Cada execução fica no log de auditoria.</p>`;
+  },
+  pintar() { const el = $('#migBanco'); if (!el) return; const t = document.createElement('div'); t.innerHTML = this.render().trim(); if (t.firstElementChild) el.replaceWith(t.firstElementChild); },
+  async acao(a, el) {
+    if (!this.pode()) return;
+    if (a === 'mig-abrir') { this.ui.aberto = !el.parentElement.open; if (this.ui.aberto && !this.ui.dados && !this.ui.ocupado) return this.carregar(); return; }
+    if (a === 'mig-status') return this.carregar();
+    if (a === 'mig-exec') return this.executar();
+  },
+  async carregar() {
+    this.ui.ocupado = true; this.ui.erro = ''; this.ui.aberto = true; this.pintar();
+    try { this.ui.dados = await Cloud.base._req('GET', '/api/migracoes'); }
+    catch (e) { this.ui.erro = 'Não consegui consultar o banco: ' + (e.message || e); }
+    this.ui.ocupado = false; this.pintar();
+  },
+  async executar() {
+    if (!(await UI.confirmar('Executar Migrações do Banco', 'Roda agora as migrações <b>repetíveis</b> que estiverem pendentes: elas só criam o que falta (tabelas, colunas e índices “se não existirem”). Nada é apagado nem sobrescrito, e o que o Netlify aplica na publicação não é refeito.<br>Deseja continuar?', 'Executar'))) return;
+    const ld = UI.carregando('Executando as migrações do banco…'); let r;
+    this.ui.ocupado = true; this.ui.erro = ''; this.ui.aberto = true;
+    try { r = await Cloud.base._req('POST', '/api/migracoes', {}); }
+    catch (e) { ld.fechar(); this.ui.ocupado = false; this.ui.erro = 'Não consegui executar as migrações: ' + (e.message || e); this.pintar(); return UI.toast(this.ui.erro); }
+    ld.fechar(); this.ui.ocupado = false; this.ui.dados = r; this.pintar();
+    const n = (r.executadas || []).length, falta = (r.esquema || []).some(e => !e.ok);
+    Audit.registrar({ modulo: 'backup', acao: 'executou', entidade: 'migracoes', entidadeId: Datas.hojeISO(), rotulo: 'Executar Migrações do Banco', mudancas: [{ campo: 'migrações aplicadas', de: '', para: n ? r.executadas.join(', ') : 'nenhuma (tudo em dia)' }, ...(r.falhou ? [{ campo: 'falhou', de: '', para: r.falhou.nome }] : [])] });
+    UI.toast(r.falhou ? `A migração ${r.falhou.nome} falhou: veja o detalhe no quadro.` : r.erroLivro ? 'Não consegui criar o livro-razão das migrações: veja o quadro.'
+      : n ? `${n} migração(ões) aplicada(s).${falta ? ' O esquema ainda tem itens faltando (veja o quadro).' : ' Esquema completo.'}` : falta ? 'Nada a aplicar por aqui; o esquema ainda tem itens faltando (veja o quadro).' : 'Nada a aplicar: as migrações repetíveis já estavam em dia e o esquema está completo.');
+  },
+};
+
 /* ------------------------------ Backup ------------------------------ */
 const Bkp = {
   // v13.1: backup completo — todas as coleções de negócio (o log de auditoria segue opcional, na caixa abaixo)
@@ -18760,6 +19606,7 @@ const Bkp = {
       ${Auth.can('backup.restaurar') ? `<div class="panel"><h2>Restaurar backup</h2><p class="sub">Grava de volta registros de um arquivo .json gerado aqui (aceita backups de versões antigas, como a v13.2). Você escolhe as coleções e se quer só o que falta ou substituir; nada é apagado e o log de auditoria nunca é sobrescrito. A restauração fica registrada no log.</p>
         <label class="btn danger" style="cursor:pointer">Escolher arquivo de backup<input type="file" accept=".json,application/json" hidden data-a="bkp-restaurar"></label></div>` : ''}
       ${GestaoAmbientes.render()}
+      ${MigracoesBanco.render()}
       <div class="panel"><h2>Rotina recomendada</h2><p class="sub" style="margin-bottom:0">Backup completo toda sexta-feira e antes de importações grandes; mantenha as 8 últimas cópias numa pasta com acesso restrito (ex.: OneDrive/SharePoint da diretoria).</p></div>`;
   },
   async json() {
@@ -18842,6 +19689,8 @@ const Bkp = {
 /* --------------------------- Eventos globais --------------------------- */
 const ROTEADOR = [
   [/^sol-/, () => Solicitacoes], // v13.60
+  [/^par-/, () => Parceiros], // v13.94
+  [/^mig-/, () => MigracoesBanco], // v13.94 · botão "Executar Migrações do Banco"
   [/^cmp-/, () => ConcMP], // v13.69
   [/^(pes|func|sal|pdi|plano|folha)-/, () => Pessoal], [/^rt-/, () => Retaguarda], [/^(fcx|fd)-/, () => FCX], [/^(lj|adq|ti|desp|seg|doc)-/, () => Lojas], [/^ct-/, () => Contratos], [/^alg-/, () => ProjecaoOcupacao],
   [/^aud-/, () => Aud], [/^bkp-/, () => Bkp], [/^sess-/, () => Sessao], [/^acc-/, () => Acessos], [/^cs-/, () => Credsystem], [/^rhm-/, () => ModRH], [/^org-/, () => Organograma], [/^lib-/, () => Liberacao], [/^arq-/, () => Arquivos], [/^ini-/, () => Inicio], [/^pe-/, () => PontoEquilibrio], [/^vg-/, () => Viagens], [/^rod$/, () => Rodape],

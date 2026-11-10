@@ -1,7 +1,7 @@
 # Painel de Gestão Esposende · Netlify
 [build]
   publish = "public"
-  command = "node scripts/preparar-ambiente.mjs"
+  command = "node scripts/run-migrations.mjs && node scripts/preparar-ambiente.mjs"
 
 [build.environment]
   NODE_VERSION = "22"

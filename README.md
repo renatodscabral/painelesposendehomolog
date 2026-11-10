@@ -1,6 +1,6 @@
 # Painel de Gestão Esposende · Netlify + Netlify Database (Postgres)
 
-Versão v13.76. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
+Versão v13.94. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
 **Netlify Functions**. Os dados ficam no servidor: valem em qualquer computador e são sincronizados entre quem está usando.
 
 ## Como funciona
@@ -34,9 +34,10 @@ Netlify Functions (netlify/functions)            Netlify Database (Postgres)
 netlify.toml                         publish = public, funções em netlify/functions
 package.json                         dependência @netlify/database (provisiona o banco no deploy)
 public/                              index.html (painel), fcx.html (Fluxo de Caixa), logos
-netlify/functions/                   saude, sessao, docs, mudancas, arquivos, ambientes, inter (rotas /api/*)
+netlify/functions/                   saude, sessao, docs, mudancas, arquivos, ambientes, inter, consulta-cnpj, migracoes (rotas /api/*)
 netlify/lib/                         db (getDatabase), ambiente (v13.76), inter, regras de acesso, sessão, senha, usuários, documentos
 public/marca-rc/                     logos da RC Consultoria (aplicadas no build quando PAINEL_AMBIENTE=rc)
+scripts/run-migrations.mjs           etapa de build (v13.94): aplica as migrações repetíveis pendentes antes de compilar o site
 scripts/preparar-ambiente.mjs        etapa de build: logos do ambiente
 netlify/database/migrations/
   20261027120000_esquema_inicial.sql tabelas, índices e views
@@ -172,6 +173,8 @@ SELECT * FROM vw_conc_fechamento WHERE modalidade = 'credito';
 ## Mudanças no banco
 
 Nunca edite uma migração já aplicada. Crie uma nova em `netlify/database/migrations/`, com prefixo de data e hora (`AAAAMMDDHHMMSS_descricao.sql`).
+
+**Automação (v13.94):** o build roda `scripts/run-migrations.mjs` antes de compilar o site e o Master tem o botão **Executar Migrações do Banco** (Backup e dados). Ninguém precisa abrir console SQL. A regra de segurança, o que roda e o que fica com o Netlify estão na seção "v13.94 · Automação de migrações do banco", mais abaixo. **Escreva as migrações novas como "só cria o que falta"** (`CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`): assim a automação também as roda.
 
 ## Segurança e LGPD
 
@@ -474,3 +477,99 @@ O botão só aparece para o Master no site da Falco. Ao terminar, a empresa de t
   numa linha "IBS/CBS (escriturados)".
 - **Radar, disponibilidades, Livro Caixa e DFC:** agora reconhecem planos de contas próprios pelo nome das contas (ex.:
   1.1.01 Caixa, 1.1.02 Bancos, 1.1.04–06 Estoques), além do plano padrão.
+
+## v13.93 · RH, Viagens, Retaguarda e Lojas (recurso `gestao_v1393`)
+
+Tudo fica atrás do recurso `gestao_v1393`: ativo na Homologação; Produção e Falco só depois de **Liberar Versão em Produção**.
+Não há migração de banco, rota nova nem variável de ambiente nova. Para atualizar, descompacte o ZIP na raiz do projeto e envie pelo GitHub Desktop.
+
+**1 · Permissão isolada de salários**
+- Nova opção **Pode ver salários** (`rh.ver_salarios`) no módulo RH da Gestão de Acessos. Só quem a recebe (ou o Master) vê salário, líquido e custo.
+- O perfil Gestor de Área/Setor deixa de herdar essa visão: continua vendo a equipe, sem os valores.
+- No servidor, `salarios` e `rh_folhas` só são lidos com `rh.ver_salarios` (403 sem ela ou com o recurso desligado); a gravação segue só do Master.
+- O relatório da equipe ganhou a opção "Incluir salário base, líquido e custo", que só aparece para quem tem a permissão.
+
+**2 · Férias em períodos**
+- Até 3 períodos, somando no máximo 30 dias (20 se vender 1/3): um com 14 dias ou mais e os demais com 5 ou mais (CLT, art. 134, §1º), sem sobreposição e sem datas no passado.
+- Antes das datas, duas opções: vender 1/3 (abono pecuniário de 10 dias, art. 143 da CLT) e adiantar a 1ª parcela do 13º (art. 2º da Lei 4.749/1965).
+- Atenção: **10 + 10 + 10 não passa** (falta um período de 14 dias); 15 + 15, 20 + 10 e 14 + 8 + 8 passam. Não cobre a regra do art. 134, §3º (início das férias nos 2 dias antes de feriado ou descanso semanal).
+
+**3 · Folga por período:** Data Inicial e Data Final, com contagem automática dos dias (até 31).
+
+**4 · Hierarquia transitiva:** o gestor do setor vê e aprova férias, folga e a solicitação de viagem de toda a árvore abaixo dele
+(liderados dos liderados, departamentos e sub-departamentos), sem decidir o próprio pedido. Prestação, exclusão de viagem e zerar FCX seguem só do Master.
+
+**5 · Depósitos "Parcialmente":** Check 1 com Sim = 100% dos pontos mantidos, Parcialmente = 50% e Não = 0%. Registros antigos continuam valendo.
+
+**6 · Gestão de Lojas › Máquinas POS Consolidado:** Filial, Adquirente, Qtd de POS, valor unitário de aluguel e custo total, por filial e para a rede (Excel e PDF).
+
+**7 · Gestão de Lojas › Indicadores & KPIs Operacionais:** venda, custo operacional e resultado por m² (área de vendas cadastrada). Custos restritos a quem acessa Contratos; folha só com `rh.ver_salarios`.
+
+**8 · Viagens:** selo vermelho **PRAZO EXCEDIDO - PRESTAÇÃO PENDENTE** quando o prazo da prestação passou, com filtro "Prazo excedido".
+
+**Arquivos do backend alterados:** `netlify/lib/permissoes.mjs` e `netlify/lib/matriz-acessos.mjs` (regerado do painel). `public/index.html` é a v13.93.
+
+**Como conceder a permissão:** Gestão de Acessos › editar o usuário › módulo RH › marque **Pode ver salários**.
+
+**Testes:** `tests/teste-contabil.mjs`, `teste-contabil-v1391.mjs`, `teste-adiantamentos.mjs`, `teste-carga-falco.mjs` e `teste-ambiente-falco.mjs` seguem verdes (rode cada um com o banco recriado por `tests/preparar-banco.sh`).
+
+## v13.94 · Layout 100% da largura e consulta automática de CNPJ/CPF (recurso `gestao_v1394`)
+
+Tudo fica atrás do recurso `gestao_v1394`: ativo na Homologação; Produção e Falco só depois de **Liberar Versão em Produção**.
+Há **uma migração nova** (`20261110120000_esquema_empresas_receita.sql`: coluna `receita` em `contab_empresas`, sem perda de dados) e **nenhuma variável de ambiente obrigatória**.
+Para atualizar, descompacte o ZIP na raiz do projeto e envie pelo GitHub Desktop (o Netlify aplica a migração no deploy; o build e o botão do Master também sabem aplicá-la — veja "Automação de migrações", abaixo).
+
+**1 · Layout responsivo, 100% da largura, sem rolagem horizontal** (painel, FCX e Módulo Contábil)
+- Sem largura máxima nos contêineres principais; respiro lateral fluido de 1,5 a 2 rem (1 rem no celular). Vale para laptop 1366/1440, Full HD 1920 e ultra-wide.
+- Grades e cartões (`.g2` a `.g5`, formulários, módulos, FCX, Contábil) se redistribuem sozinhos conforme a largura.
+- Tabelas: densidade menor (fonte e espaçamento proporcionais). Se mesmo assim não couberem, o painel mede e troca a barra de rolagem por **cartões**: um cartão por linha, com o nome da coluna acima de cada valor. A medição é refeita a cada render, ao redimensionar e ao abrir/fechar o menu. Vale para Gestão de Pessoal, Rateio de Faturamento por Loja (Ponto de Equilíbrio), Lojas, Contratos, Fornecedores e Clientes etc.
+- Fica com rolagem só dentro do próprio quadro: mapas de calor/matrizes (`.heat`), relatórios A4 e impressão, e tabelas marcadas com `data-rt94="off"`.
+- O FCX ganhou apenas um bloco `<style id="fw94">` (CSS, só na tela). Nenhuma função do FCX mudou (Regra de Ouro).
+
+**2 · Consulta automática de CNPJ (Receita Federal)**
+- Nova função `GET /api/consulta-cnpj?cnpj=…` (`netlify/functions/consulta-cnpj.mjs` + `netlify/lib/consulta-cnpj.mjs`): consulta a **BrasilAPI** e, se ela falhar (erro, tempo esgotado ou resposta vazia), a **MinhaReceita**. Exige sessão aberta (401 sem login), valida os dígitos (400), devolve 404 se o CNPJ não existe, 429 após 40 consultas por minuto por sessão e 502 se as duas fontes estiverem fora. Cache de 10 min em memória (por instância). O navegador nunca chama as APIs públicas.
+- Ao digitar o 14º dígito (ou ao sair do campo) o painel mostra "Buscando dados do CNPJ..." e preenche Razão Social, Nome Fantasia, CEP, Logradouro/número/complemento, Bairro, Cidade, UF, Capital Social e Situação Cadastral. Campos vazios na resposta não apagam o que já foi digitado; se a Receita não responder, o formulário segue livre para preencher à mão.
+- Onde vale: Gestão de Lojas (CNPJ da loja), Empresa da Conciliação de Meios de Pagamento, **CNPJ do TEF**, Módulo Contábil › Empresas (botão "Consultar Receita") e o novo cadastro de Fornecedores e Clientes.
+- Variáveis opcionais (só para testes ou troca de provedor): `CNPJ_URL_BRASILAPI`, `CNPJ_URL_MINHARECEITA` (com `{cnpj}`) e `CNPJ_TIMEOUT_MS`.
+- No painel hospedado no claude.ai (sem servidor) a consulta direta fica bloqueada: o painel avisa e o formulário segue livre. A consulta funciona na versão Netlify.
+
+**3 · CPF:** máscara automática 000.000.000-00, conferência dos dígitos verificadores ao sair do campo e alerta (campo vermelho + mensagem) antes de salvar; CPF inválido não grava.
+
+**4 · Novo módulo 13 · Fornecedores e Clientes** (pessoa jurídica pelo CNPJ, pessoa física pelo CPF; papéis fornecedor e/ou cliente; busca e filtros; inativar/reativar; excluir com confirmação; CNPJ/CPF repetido é barrado).
+- Permissões na Gestão de Acessos: Ler (`parceiros.ver`), Modificar (`parceiros.editar`) e Excluir (`parceiros.excluir`).
+- No servidor, a coleção `parceiros` só é lida/gravada com essas permissões (contém CPF de pessoa física); o perfil Loja nunca acessa; excluir exige `parceiros.excluir`.
+
+**Arquivos do backend alterados/novos:** `netlify/functions/consulta-cnpj.mjs`, `netlify/lib/consulta-cnpj.mjs`, `netlify/functions/contabil.mjs` (empresa guarda o bloco `receita`), `netlify/lib/regras.mjs`, `netlify/lib/permissoes.mjs`, `netlify/lib/documentos.mjs`, `netlify/lib/matriz-acessos.mjs` (regerado), migração `20261110120000_esquema_empresas_receita.sql`. `public/` é a v13.94.
+
+**Testes novos:** `tests/teste-consulta-cnpj.mjs` (API da consulta com a Receita simulada). Para rodá-lo:
+`bash tests/preparar-banco.sh` e suba `tests/servidor-local.mjs 8890` com `CNPJ_URL_BRASILAPI='http://127.0.0.1:8895/brasil/{cnpj}' CNPJ_URL_MINHARECEITA='http://127.0.0.1:8895/minha/{cnpj}' CNPJ_TIMEOUT_MS=700`.
+
+### v13.94 · Automação de migrações do banco (revisão do pacote v13.94)
+
+O banco é gerenciado pelo Netlify (Netlify Database) e ninguém usa console SQL. Duas peças aplicam as migrações sozinhas:
+
+1. **Build:** o `netlify.toml` agora roda `node scripts/run-migrations.mjs && node scripts/preparar-ambiente.mjs`. O script lê `netlify/database/migrations/`, conecta com `NETLIFY_DB_URL` (a mesma que as funções usam; se ela não existir, usa `DATABASE_URL`) e aplica as migrações pendentes **antes** de compilar o site.
+2. **Botão do Master:** em **Sistema & Segurança › Backup e dados**, logo abaixo da Gestão de Ambientes, há o bloco recolhido **Banco de dados · Migrações** (etiqueta "avançado · só Master"). Ao abrir, ele mostra o que está aplicado e pendente e se o esquema que o painel exige está completo; **Executar Migrações do Banco** pede confirmação e roda na hora, pela função `POST /api/migracoes`. Só aparece para o Master (não simulado), só nos sites do Netlify e só com o recurso `gestao_v1394` ligado. Cada execução vai para o log de auditoria. A função recusa quem não é Master (401/403).
+
+**Por que só as migrações "repetíveis".** O Netlify também aplica essa pasta no deploy, antes de publicar, e a documentação dele manda usar outra pasta quando se quer um sistema próprio, para não haver conflito. Se o script rodasse o esquema inicial ou a semente e depois o Netlify tentasse de novo, o deploy seria bloqueado por duplicidade. Por isso:
+
+- O script só executa migrações **aditivas**, que podem rodar duas vezes sem alterar nada: `CREATE TABLE IF NOT EXISTS`, `CREATE [UNIQUE] INDEX IF NOT EXISTS`, `ALTER TABLE … ADD COLUMN IF NOT EXISTS` e `CREATE EXTENSION IF NOT EXISTS`. Quando o Netlify aplicar a mesma migração no deploy, ela é um "não faz nada".
+- Todo o resto (esquema inicial, semente, INSERT/UPDATE/DELETE, funções, gatilhos, views, DROP…) continua sendo do Netlify. O script lista essas migrações como "geridas pelo Netlify" e **nunca** as executa. Hoje, das 7 migrações do projeto, 2 são repetíveis (`20261107120000_esquema_adiantamentos.sql` e `20261110120000_esquema_empresas_receita.sql`) e 5 são do Netlify.
+- Banco novo (ainda sem o esquema inicial): o script não toca em nada; o esquema inicial é do deploy do Netlify.
+- Pré-requisito ausente (tabela ou coluna que o Netlify ainda não criou): a migração fica "adiada", sem erro.
+- Cada migração roda numa transação (ou entra inteira, ou nada), com trava consultiva: build e botão ao mesmo tempo não se atropelam. `lock_timeout` e `statement_timeout` impedem o build de ficar pendurado.
+- Erro de SQL: o build **falha** (sai com 1), mostra o arquivo, o código e a primeira linha da mensagem, e não publica código que depende da migração. Sem conexão com o banco: avisa e segue (o deploy do Netlify aplica); com `MIGRACOES_ESTRITO=1` falha.
+- Livro-razão próprio: tabela `painel_migracoes` (nome do arquivo, hash, origem `build`/`botao`, data). Não guarda dado pessoal. Migração já aplicada **não é refeita** mesmo que o arquivo mude (o status avisa "alterado depois de aplicado").
+- A saída do script e as respostas da função nunca mostram a URL do banco, host, usuário ou o texto SQL.
+
+**Variáveis (todas opcionais):** `MIGRACOES_DESLIGADAS=1` (pula tudo), `MIGRACOES_ESTRITO=1` (falha o build também sem conexão), `MIGRACOES_LOCK_MS` e `MIGRACOES_STMT_MS` (esperas máximas em ms).
+
+**Comandos:** `npm run migrar` (aplica as pendentes), `npm run migrar:status` (só lista, não altera o banco) e `node scripts/run-migrations.mjs --embutir` (só regenera o módulo embutido).
+
+**Módulo embutido.** As Netlify Functions não leem arquivos .sql no servidor; por isso o build gera `netlify/lib/migracoes-embutidas.mjs` com o SQL **só das migrações repetíveis** (da semente vai só o nome). O arquivo é refeito a cada build e já vem no ZIP; não o edite.
+
+**Quando criar uma migração nova:** escreva-a como "só cria o que falta" (veja acima). Se uma migração precisar de INSERT/UPDATE ou de um `CREATE` sem `IF NOT EXISTS`, ela continua valendo: fica por conta do deploy do Netlify, como sempre. Quando a migração passar a ser exigida pelo painel, acrescente o item em `VERIFICACOES`, em `netlify/lib/migracoes.mjs`, para o bloco do Master mostrar se o esquema está completo.
+
+**Arquivos novos/alterados:** `scripts/run-migrations.mjs`, `netlify/lib/migracoes.mjs`, `netlify/lib/migracoes-embutidas.mjs` (gerado), `netlify/functions/migracoes.mjs`, `netlify.toml` (comando de build), `package.json` (scripts `migrar` e `migrar:status`), `tests/teste-migracoes.mjs`, painel (`public/index.html`).
+
+**Teste:** `tests/teste-migracoes.mjs` (43 verificações: análise do SQL, banco novo e existente, migração pendente da v13.94, idempotência, falha com desfazer, execução simultânea, `lock_timeout`, o script de build com todas as variáveis e a API com 401/403/405/200). Com o servidor local no `painel_teste` (`bash tests/preparar-banco.sh`, `NETLIFY_DB_URL=… node tests/servidor-local.mjs 8890`): `NETLIFY_DB_URL=… node tests/teste-migracoes.mjs`. Ele cria e apaga bancos temporários `painel_mig_*` no mesmo Postgres.

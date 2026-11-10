@@ -132,6 +132,42 @@ tr.tit td{font-weight:800;text-transform:uppercase;font-size:11.5px;letter-spaci
 @media (max-width:560px){ .topo-disp{grid-template-columns:1fr 1fr;gap:6px} .dcard b{font-size:16px} .atalhos{grid-template-columns:1fr} .radar-top{grid-template-columns:1fr;justify-items:center} .subnotas{grid-template-columns:1fr} .sug{grid-template-columns:1fr} .lin-soc{grid-template-columns:1fr 1fr} }
 @media print{ body{background:#fff;color:#000;padding:0} .no-print,.tabs,.topo,.toast,.topo-disp,.empcard,.subtabs{display:none!important} .panel{border:0;padding:0} .tbl{max-height:none;overflow:visible;border:0} th{position:static} }
 </style>
+<style id="fw94-ind">
+.cnpj94-st{display:flex;align-items:center;gap:6px;min-height:18px;margin:4px 0 0;font-size:12.5px;color:var(--ink-soft)}
+.cnpj94-st.ok{color:var(--ok)} .cnpj94-st.warn{color:var(--warn)} .cnpj94-st.bad{color:var(--bad)}
+.cnpj94-spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent);display:inline-block;flex:none;animation:cnpj94giro .7s linear infinite}
+@keyframes cnpj94giro{to{transform:rotate(360deg)}}
+</style>
+<style id="fw94">
+/* v13.94 · layout 100% da largura (html.fw94 = recurso gestao_v1394; o painel liga a classe neste quadro). Só CSS de tela. */
+@media screen{
+html.fw94{--fw-pad:clamp(1.5rem,2vw,2rem);}
+@media (max-width:720px){html.fw94{--fw-pad:1rem;}}
+html.fw94 body{padding-left:var(--fw-pad);padding-right:var(--fw-pad);}
+html.fw94[data-embed] body{padding:4px 2px 24px;}
+html.fw94 .grid2{grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));}
+html.fw94 .cmp,html.fw94 .topo-disp{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));}
+html.fw94 .emp-corpo{grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));}
+html.fw94 .atalhos,html.fw94 .subnotas{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));}
+html.fw94 table{font-size:clamp(12px,.2vw + 10px,13.5px);}
+html.fw94 th,html.fw94 td{padding:6px 8px;}
+html.fw94 table.rt94-compact{font-size:12px;}
+html.fw94 table.rt94-compact th{padding:5px 6px;white-space:normal;font-size:11px;}
+html.fw94 table.rt94-compact td{padding:5px 6px;}
+html.fw94 .rt94-w{overflow:visible!important;border:0!important;max-height:none!important;border-radius:0;}
+html.fw94 table.rt94-card,html.fw94 table.rt94-card tbody,html.fw94 table.rt94-card tfoot,html.fw94 table.rt94-card tr,html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{display:block;width:100%;}
+html.fw94 table.rt94-card thead{display:none;}
+html.fw94 table.rt94-card tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px 16px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);}
+html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{padding:0;border:0;text-align:left!important;min-width:0;overflow-wrap:anywhere;white-space:normal;}
+html.fw94 table.rt94-card td::before,html.fw94 table.rt94-card tbody th::before,html.fw94 table.rt94-card tfoot th::before{content:attr(data-label);display:block;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:2px;}
+html.fw94 table.rt94-card td[data-label=""]::before,html.fw94 table.rt94-card td.span-all::before{display:none;}
+html.fw94 table.rt94-card td:first-child,html.fw94 table.rt94-card td.span-all,html.fw94 table.rt94-card td.rt94-acts{grid-column:1/-1;}
+html.fw94 table.rt94-card td.rt94-acts{display:flex;gap:6px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:8px;}
+html.fw94 table.rt94-card td.rt94-acts::before{display:none;}
+html.fw94 table.rt94-card tr.tot,html.fw94 table.rt94-card tr.sub{background:var(--panel-2);}
+html.fw94 table.rt94-card td.num,html.fw94 table.rt94-card td.num::before{text-align:left;}
+}
+</style>
 </head>
 <body>
 <div class="topo"><div><h1>Módulo Contábil</h1><p class="muted" style="margin:0">Painel executivo multiempresas: disponibilidades, relatórios, Radar de Saúde e laudo técnico.</p></div><a class="btn sec sm" href="./">Voltar ao painel</a></div>
@@ -537,15 +573,44 @@ async function laudoHTML() {
 }
 
 /* ---------- v13.91 · aba: Empresas (cadastro por CNPJ, QSA e contador) ---------- */
-function novaEmpresa() { return { id: null, cnpj: '', razaoSocial: '', nomeFantasia: '', regime: 'presumido', capitalSocial: '', endereco: '', socios: [{ nome: '', documento: '', qualificacao: 'Sócio-Administrador', participacao: '' }], contador: { nome: '', crc: '', uf: '', email: '' }, ativa: true }; }
+function novaEmpresa() { return { id: null, cnpj: '', razaoSocial: '', nomeFantasia: '', regime: 'presumido', capitalSocial: '', endereco: '', socios: [{ nome: '', documento: '', qualificacao: 'Sócio-Administrador', participacao: '' }], contador: { nome: '', crc: '', uf: '', email: '' }, receita: { cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '', situacao: '', consultadoEm: '', fonte: '' }, ativa: true }; }
+/* v13.94 · consulta automática do CNPJ (Function /api/consulta-cnpj: BrasilAPI → MinhaReceita) no cadastro de empresas: só com o layout da v13.94 ativo (classe fw94 ligada pelo painel) */
+const FW94 = () => document.documentElement.classList.contains('fw94');
+const cepF = v => { const d = String(v || '').replace(/\D/g, '').slice(0, 8); return d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d; };
+const mascaraCnpj = v => { const d = String(v || '').replace(/\D/g, '').slice(0, 14); return d.length > 12 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/, '$1.$2.$3/$4-$5') : d.length > 8 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/, '$1.$2.$3/$4') : d.length > 5 ? d.replace(/^(\d{2})(\d{3})(\d{0,3}).*/, '$1.$2.$3') : d.length > 2 ? d.replace(/^(\d{2})(\d{0,3}).*/, '$1.$2') : d; };
+const cnpjDvOk = v => { const d = String(v || '').replace(/\D/g, ''); if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false; const dv = n => { let t = 0, p = n - 7; for (let i = 0; i < n; i++) { t += +d[i] * p--; if (p < 2) p = 9; } const r = t % 11; return r < 2 ? 0 : 11 - r; }; return dv(12) === +d[12] && dv(13) === +d[13]; };
+let efUlt = '', efSeq = 0;
+function efStatus(t, txt, giro) { S.efSt = txt ? { t, txt, giro: !!giro } : null; const el = $('#ef-st'); if (el) { el.className = 'cnpj94-st ' + (t || ''); el.innerHTML = txt ? (giro ? '<i class="cnpj94-spin" aria-hidden="true"></i>' : '') + '<span>' + esc(txt) + '</span>' : ''; } }
+async function consultarCnpj(forcar) {
+  const F = S.ef; if (!F) return; const d = String(F.cnpj || '').replace(/\D/g, '');
+  if (d.length !== 14) return efStatus('bad', 'CNPJ incompleto: informe os 14 dígitos.');
+  if (!cnpjDvOk(d)) return efStatus('bad', 'CNPJ inválido — confira os dígitos verificadores.');
+  if (!forcar && d === efUlt) return; efUlt = d; const meu = ++efSeq;
+  efStatus('', 'Buscando dados do CNPJ...', true);
+  let r, j; try { r = await fetch('/api/consulta-cnpj?cnpj=' + d, { credentials: 'same-origin', cache: 'no-store', headers: { 'x-painel': '1' } }); j = await r.json().catch(() => ({})); }
+  catch (e) { if (meu === efSeq) efStatus('warn', 'Sem conexão com o servidor do painel. Preencha os dados à mão.'); return; }
+  if (meu !== efSeq || !S.ef) return;
+  if (!r.ok || !j.ok) return efStatus(r.status === 404 ? 'bad' : 'warn', r.status === 404 ? 'CNPJ não encontrado na base da Receita Federal.' : (j.erro || 'Erro ' + r.status + ' na consulta.'));
+  const x = j.dados, jaTem = empresas().find(e => e.id !== F.id && String(e.cnpj || '').replace(/\D/g, '') === d), fonte = j.fonte === 'minhareceita' ? 'MinhaReceita' : 'BrasilAPI';
+  F.razaoSocial = x.razaoSocial || F.razaoSocial; F.nomeFantasia = x.nomeFantasia || F.nomeFantasia; if (x.capitalSocial) F.capitalSocial = fmtN(x.capitalSocial);
+  F.receita = { cep: cepF(x.cep), logradouro: x.logradouro, numero: x.numero, complemento: x.complemento, bairro: x.bairro, cidade: x.municipio, uf: x.uf, situacao: x.situacao, consultadoEm: new Date().toISOString(), fonte };
+  S.efSt = { t: (x.situacao && !/ativa/i.test(x.situacao)) || jaTem ? 'warn' : 'ok', txt: `${x.razaoSocial}${x.situacao ? ' · ' + x.situacao : ''} — dados preenchidos pela Receita Federal (${fonte}). Revise e salve.${jaTem ? ' Atenção: este CNPJ já está cadastrado (' + jaTem.razaoSocial + ').' : ''}` };
+  render();
+}
 function vEmpresas() {
   const ed = pode('contabil.parametros'), F = S.ef;
   const linhas = empresas().map(e => `<tr class="${e.ativa === false ? 'inativa' : ''}"><td><b>${esc(e.razaoSocial)}</b>${e.nomeFantasia ? `<div class="hint">${esc(e.nomeFantasia)}</div>` : ''}${e.principal ? ' <span class="pill">principal</span>' : ''}${e.id === empAtual().id ? ' <span class="pill info">ativa</span>' : ''}</td><td class="mono">${esc(cnpjF(e.cnpj))}</td><td>${esc(REGIME[e.regime] || e.regime)}</td><td class="num">${fmtN(e.capitalSocial)}</td><td>${(e.socios || []).length}</td><td>${crcTxt(e.contador) ? esc(crcTxt(e.contador)) : '<span class="muted">—</span>'}</td>
     <td class="no-print" style="white-space:nowrap">${e.id !== empAtual().id && e.ativa !== false ? `<button class="btn sec sm" data-a="emp-sel" data-v="${esc(e.id)}">Tornar ativa</button> ` : ''}${ed ? `<button class="btn sec sm" data-a="ef-editar" data-v="${esc(e.id)}">Editar</button>` : ''}</td></tr>`).join('');
   const inp = (rot, k, v, extra = '') => `<label class="campo" ${extra}><span>${rot}</span><input data-ef="${k}" value="${esc(v == null ? '' : v)}"></label>`;
   const form = F ? `<div class="panel"><h2>${F.id ? 'Editar empresa' : 'Nova empresa'}</h2>
-      <div class="row">${inp('CNPJ', 'cnpj', F.cnpj, 'style="flex:1 1 170px"')}${inp('Razão social', 'razaoSocial', F.razaoSocial, 'style="flex:3 1 300px"')}${inp('Nome fantasia', 'nomeFantasia', F.nomeFantasia, 'style="flex:2 1 200px"')}</div>
-      <div class="row" style="margin-top:8px">${seg(Object.entries(REGIME), F.regime, 'ef-regime', 'Regime tributário')}${inp('Capital social (R$)', 'capitalSocial', F.capitalSocial, 'style="flex:0 1 160px"')}${inp('Endereço', 'endereco', F.endereco, 'style="flex:3 1 280px"')}</div>
+      ${FW94() ? `<div class="row"><label class="campo" style="flex:1 1 250px"><span>CNPJ</span><div class="row" style="flex-wrap:nowrap;gap:6px"><input data-ef="cnpj" value="${esc(F.cnpj || '')}" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" autocomplete="off" style="flex:1;min-width:0"><button type="button" class="btn sec sm" data-a="ef-consultar">Consultar Receita</button></div></label>${inp('Razão social', 'razaoSocial', F.razaoSocial, 'style="flex:3 1 300px"')}${inp('Nome fantasia', 'nomeFantasia', F.nomeFantasia, 'style="flex:2 1 200px"')}</div>
+      <div id="ef-st" class="cnpj94-st ${S.efSt ? S.efSt.t || '' : ''}" role="status" aria-live="polite">${S.efSt ? (S.efSt.giro ? '<i class="cnpj94-spin" aria-hidden="true"></i>' : '') + '<span>' + esc(S.efSt.txt) + '</span>' : ''}</div>
+      <div class="row" style="margin-top:8px">${seg(Object.entries(REGIME), F.regime, 'ef-regime', 'Regime tributário')}${inp('Capital social (R$)', 'capitalSocial', F.capitalSocial, 'style="flex:0 1 160px"')}${inp('Situação cadastral', 'receita.situacao', (F.receita || {}).situacao, 'style="flex:0 1 170px"')}</div>
+      <div class="row" style="margin-top:8px"><label class="campo" style="flex:0 1 120px"><span>CEP</span><input data-ef="receita.cep" value="${esc(cepF((F.receita || {}).cep))}" inputmode="numeric" maxlength="9" placeholder="00000-000"></label>${inp('Logradouro', 'receita.logradouro', (F.receita || {}).logradouro, 'style="flex:3 1 260px"')}${inp('Número', 'receita.numero', (F.receita || {}).numero, 'style="flex:0 1 90px"')}${inp('Complemento', 'receita.complemento', (F.receita || {}).complemento, 'style="flex:1 1 150px"')}</div>
+      <div class="row" style="margin-top:8px">${inp('Bairro', 'receita.bairro', (F.receita || {}).bairro, 'style="flex:2 1 180px"')}${inp('Cidade', 'receita.cidade', (F.receita || {}).cidade, 'style="flex:2 1 200px"')}${inp('UF', 'receita.uf', (F.receita || {}).uf, 'style="flex:0 1 70px"')}</div>
+      ${F.endereco && !(F.receita || {}).logradouro ? `<p class="hint">Endereço atual (texto): ${esc(F.endereco)} — preencha os campos acima para substituí-lo.</p>` : ''}`
+      : `<div class="row">${inp('CNPJ', 'cnpj', F.cnpj, 'style="flex:1 1 170px"')}${inp('Razão social', 'razaoSocial', F.razaoSocial, 'style="flex:3 1 300px"')}${inp('Nome fantasia', 'nomeFantasia', F.nomeFantasia, 'style="flex:2 1 200px"')}</div>
+      <div class="row" style="margin-top:8px">${seg(Object.entries(REGIME), F.regime, 'ef-regime', 'Regime tributário')}${inp('Capital social (R$)', 'capitalSocial', F.capitalSocial, 'style="flex:0 1 160px"')}${inp('Endereço', 'endereco', F.endereco, 'style="flex:3 1 280px"')}</div>`}
       <h3>Quadro de sócios e administradores (QSA)</h3>${F.socios.map((x, k) => `<div class="lin-soc"><input data-si="${k}" data-f="nome" value="${esc(x.nome)}" placeholder="Nome do sócio" aria-label="Nome do sócio ${k + 1}"><input data-si="${k}" data-f="documento" value="${esc(x.documento)}" placeholder="CPF/CNPJ (pode mascarar)" aria-label="Documento do sócio ${k + 1}"><input data-si="${k}" data-f="qualificacao" value="${esc(x.qualificacao)}" placeholder="Qualificação" aria-label="Qualificação do sócio ${k + 1}"><input data-si="${k}" data-f="participacao" value="${esc(x.participacao)}" inputmode="decimal" placeholder="%" aria-label="Participação do sócio ${k + 1} em %" style="text-align:right"><button class="btn sec sm" data-a="ef-tirar" data-v="${k}" aria-label="Remover sócio ${k + 1}">×</button></div>`).join('')}
       <button class="btn sec sm" data-a="ef-mais">+ sócio</button>
       <h3>Contador responsável</h3><div class="row">${inp('Nome', 'contador.nome', F.contador.nome, 'style="flex:2 1 220px"')}${inp('CRC', 'contador.crc', F.contador.crc, 'style="flex:1 1 150px"')}${inp('UF', 'contador.uf', F.contador.uf, 'style="flex:0 1 70px"')}${inp('E-mail', 'contador.email', F.contador.email, 'style="flex:2 1 220px"')}</div>
@@ -681,14 +746,18 @@ const acoes = {
   'emp-socios'() { const e = empAtual(), so = e.socios || []; abrirModal('Quadro de sócios e administradores', `<p class="hint" style="margin-top:0">${esc(e.razaoSocial)} · CNPJ ${esc(cnpjF(e.cnpj))} · capital social ${fmt(e.capitalSocial)}</p>${so.length ? `<div class="tbl"><table><thead><tr><th>Sócio</th><th>Documento</th><th>Qualificação</th><th class="num">Participação</th><th class="num">Capital</th></tr></thead><tbody>${so.map(x => `<tr><td>${esc(x.nome)}</td><td class="mono">${esc(x.documento || '—')}</td><td>${esc(x.qualificacao || '')}</td><td class="num">${fmtN(x.participacao)}%</td><td class="num">${fmtN((Number(e.capitalSocial) || 0) * (Number(x.participacao) || 0) / 100)}</td></tr>`).join('')}<tr class="tot"><td colspan="3">Total</td><td class="num">${fmtN(so.reduce((a, x) => a + (Number(x.participacao) || 0), 0))}%</td><td class="num">${fmtN(e.capitalSocial)}</td></tr></tbody></table></div>` : '<p>Nenhum sócio cadastrado.</p>'}<p class="hint">Responsável técnico: ${esc(crcTxt(e.contador) || 'não cadastrado')}</p>${pode('contabil.parametros') ? `<button class="btn sec sm" data-a="ef-editar" data-v="${esc(e.id)}">Editar na aba Empresas</button>` : ''}`); },
   async 'emp-escr'() { const es = S.disp && S.disp.escrituracao, ig = await api('GET', '/integridade'); abrirModal('Resumo da escrituração', `<div class="kpis">${K('Lançamentos no período', es ? es.lancamentos : '—')}${K('Σ Débitos', es ? fmt(es.debitos) : '—')}${K('Σ Créditos', es ? fmt(es.creditos) : '—')}${K('Partidas dobradas', es && es.confere ? 'Σ D = Σ C' : 'Diferença', '', es && es.confere ? 'ok' : 'bad')}</div><p>${ig.cadeiaIntegra && ig.equilibrados ? `<span class="pill ok">Íntegro</span> ${ig.lancamentos} lançamento(s) no banco: cadeia de conferência sem quebras e todos com D = C.` : `<span class="pill bad">Atenção</span> ${ig.quebras.length ? 'quebra na cadeia nos nº ' + ig.quebras.join(', ') + '. ' : ''}${ig.desequilibrados.length ? 'Desequilibrados: nº ' + ig.desequilibrados.join(', ') : ''}`}</p><p class="hint">${esc(empAtual().razaoSocial)} · ${dataBR(S.rl.de)} a ${dataBR(S.rl.ate)}</p>`); },
   async 'pg-aplicar'() { const de = $('#pg-de').value, ate = $('#pg-ate').value; if (!de || !ate || de > ate) return toast('Período inválido.'); S.rl.de = S.ls.de = de; S.rl.ate = S.ls.ate = ate; await aoMudarContexto(); },
-  'ef-nova'() { S.ef = novaEmpresa(); render(); $('[data-ef="cnpj"]')?.focus(); },
-  'ef-editar'(el) { const e = empresas().find(x => x.id === el.dataset.v); if (!e) return; fecharModal(); S.ef = JSON.parse(JSON.stringify({ ...novaEmpresa(), ...e, capitalSocial: fmtN(e.capitalSocial), socios: (e.socios || []).length ? e.socios.map(x => ({ ...x, participacao: fmtN(x.participacao) })) : novaEmpresa().socios, contador: { ...novaEmpresa().contador, ...(e.contador || {}) } })); if (S.aba !== 'empresas') return irAba('empresas'); render(); },
-  'ef-cancelar'() { S.ef = null; render(); },
+  'ef-nova'() { S.ef = novaEmpresa(); S.efSt = null; efUlt = ''; render(); $('[data-ef="cnpj"]')?.focus(); },
+  'ef-consultar'() { return consultarCnpj(true); },
+  'ef-editar'(el) { const e = empresas().find(x => x.id === el.dataset.v); if (!e) return; fecharModal(); S.ef = JSON.parse(JSON.stringify({ ...novaEmpresa(), ...e, capitalSocial: fmtN(e.capitalSocial), socios: (e.socios || []).length ? e.socios.map(x => ({ ...x, participacao: fmtN(x.participacao) })) : novaEmpresa().socios, contador: { ...novaEmpresa().contador, ...(e.contador || {}) }, receita: { ...novaEmpresa().receita, ...(e.receita || {}) } })); S.efSt = null; efUlt = String(e.cnpj || '').replace(/\D/g, ''); if (S.aba !== 'empresas') return irAba('empresas'); render(); },
+  'ef-cancelar'() { S.ef = null; S.efSt = null; render(); },
   'ef-regime'(el) { S.ef.regime = el.dataset.v; render(); },
   'ef-mais'() { S.ef.socios.push({ nome: '', documento: '', qualificacao: 'Sócio', participacao: '' }); render(); },
   'ef-tirar'(el) { S.ef.socios.splice(Number(el.dataset.v), 1); render(); },
   async 'ef-salvar'() {
-    const F = S.ef, d = { cnpj: F.cnpj, razaoSocial: F.razaoSocial, nomeFantasia: F.nomeFantasia, regime: F.regime, capitalSocial: lerValor(F.capitalSocial) || 0, endereco: F.endereco, contador: F.contador, ativa: F.ativa,
+    const F = S.ef;
+    if (FW94() && String(F.cnpj || '').trim() && !cnpjDvOk(F.cnpj)) { toast('CNPJ inválido: confira os dígitos verificadores antes de salvar.'); efStatus('bad', 'CNPJ inválido — confira os dígitos verificadores.'); return; }
+    const rc = F.receita || {}, linha = [rc.logradouro, rc.numero, rc.complemento].filter(Boolean).join(', '), composto = [linha, rc.bairro, [rc.cidade, rc.uf].filter(Boolean).join('/'), rc.cep ? 'CEP ' + cepF(rc.cep) : ''].filter(Boolean).join(' — ');
+    const d = { cnpj: F.cnpj, razaoSocial: F.razaoSocial, nomeFantasia: F.nomeFantasia, regime: F.regime, capitalSocial: lerValor(F.capitalSocial) || 0, endereco: FW94() && composto ? composto : F.endereco, ...(FW94() ? { receita: rc } : {}), contador: F.contador, ativa: F.ativa,
       socios: F.socios.filter(x => String(x.nome || '').trim()).map(x => ({ ...x, participacao: lerValor(x.participacao) || 0 })) };
     const r = F.id ? await api('PUT', '/empresas?id=' + encodeURIComponent(F.id), d) : await api('POST', '/empresas', d);
     S.ef = null; await carregarBase(); render(); toast(`${r.empresa.razaoSocial} salva.`); if (r.empresa.id === empAtual().id) { await carregarDisp(); render(); }
@@ -724,11 +793,14 @@ document.addEventListener('input', e => {
   if (t.id === 'pl-busca') { S.pl.busca = t.value; return render(); }
   if (t.id === 'dp-busca') { S.dp.busca = t.value; return render(); }
   if (t.id === 'lf-data') S.lf.data = t.value; if (t.id === 'lf-hist') S.lf.historico = t.value; if (t.id === 'lf-doc') S.lf.docRef = t.value;
+  if (FW94() && S.ef && t.dataset.ef === 'cnpj') { if (t.selectionStart === t.value.length) t.value = mascaraCnpj(t.value); S.ef.cnpj = t.value; const n = t.value.replace(/\D/g, '').length; if (n === 14) consultarCnpj(); else { efUlt = ''; efSeq++; efStatus('', ''); } }
+  if (FW94() && S.ef && t.dataset.ef === 'receita.cep') t.value = cepF(t.value);
   if (t.dataset.ef != null && S.ef) { const [a, b] = t.dataset.ef.split('.'); if (b) S.ef[a][b] = t.value; else if (t.type !== 'checkbox') S.ef[a] = t.value; }
   if (t.dataset.si != null && S.ef) S.ef.socios[Number(t.dataset.si)][t.dataset.f] = t.value;
   if (t.dataset.li != null) { const i = S.lf.itens[Number(t.dataset.li)]; i[t.dataset.f] = t.value; if (t.dataset.f === 'conta') { const x = porCodigo().get(t.value.trim()), h = t.parentElement.querySelector('.opc.hint, span.hint'); if (h) h.textContent = x ? x.nome : t.value ? 'conta não encontrada' : ''; } }
   if (S.aba === 'lancamentos') atualizarTotais();
 });
+document.addEventListener('focusout', e => { const t = e.target; if (FW94() && S.ef && t.dataset && t.dataset.ef === 'cnpj') { const n = String(t.value || '').replace(/\D/g, '').length; if (n === 14) consultarCnpj(); else if (n) efStatus('bad', 'CNPJ incompleto: informe os 14 dígitos.'); } });
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'pl-tipo') { S.pl.tipo = t.value; render(); } if (t.id === 'pl-grupo') { S.pl.grupo = t.value; render(); } if (t.id === 'pl-inativas') { S.pl.inativas = t.checked; render(); }

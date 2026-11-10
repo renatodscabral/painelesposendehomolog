@@ -73,7 +73,7 @@ export function permissoesEfetivas(usuario, recursoAtivo = () => true) {
   for (const mod of MATRIZ.modulos) {
     if ((mod.v1383 && !v83) || (mod.rec && !recursoAtivo(mod.rec))) continue;
     let n = NIVEIS.indexOf(m[mod.id] ?? (mod.id === 'solicitacoes' ? 'modificar' : '')); if (n < 0) n = 0;
-    mod.extras.forEach(([k, livre]) => { if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); });
+    mod.extras.forEach(([k, livre, rec]) => { if (rec && !recursoAtivo(rec)) return; if (m[k] === true && (n > 0 || (livre && v83))) out.add(k); }); /* v13.93: extra também pode depender de um recurso liberado */
     if (n <= 0) continue;
     if (loja) n = mod.id === 'solicitacoes' ? Math.min(n, 2) : 1;
     const { fora, acoes } = recorte(mod.id, sub[mod.id] || {}), pode = (p, acao) => !fora.has(p) && (!acao || !acoes || acoes.has(p));
@@ -99,12 +99,22 @@ export const COLECOES_MATRIZ = {
   ieo_fechamentos: [[], ['retaguarda.ieo.fechar']],
   ieo_laudos: [[], ['retaguarda.ieo.laudo']],
   ieo_auto: [[], ['retaguarda.ieo.lancar', 'retaguarda.ieo.fechar']],
+  /* v13.93: salários só para quem tem a permissão isolada "Pode ver salários" (rh.ver_salarios) — leitura apenas; gravação segue só do Master */
+  salarios: [['rh.ver_salarios'], []],
+  rh_folhas: [['rh.ver_salarios'], []],
+  /* v13.94: Fornecedores e Clientes (Módulo 13) — contêm CPF de pessoa física: leitura só com a permissão; Loja nunca acessa */
+  parceiros: [['parceiros.ver', 'parceiros.editar', 'parceiros.excluir'], ['parceiros.editar', 'parceiros.excluir']],
 };
 const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
 /** A matriz libera esta leitura ('r') ou gravação ('w')? (só para as coleções da lista acima; Loja nunca grava por aqui) */
 export function acessoPorMatriz(sess, caminho, op) {
   if (!sess || sess.trocaPendente || !sess.perms) return false;
   const r = COLECOES_MATRIZ[semAmb(caminho).split('/')[0]]; if (!r) return false;
-  if (op === 'w' && sess.perfil === 'LOJA') return false;
+  if ((op === 'w' || semAmb(caminho).startsWith('parceiros')) && sess.perfil === 'LOJA') return false;
   return (op === 'r' ? r[0] : r[1]).some(p => tem(sess.perms, p));
+}
+/** v13.94: excluir exige a permissão própria de exclusão nas coleções liberadas pela matriz (editar não basta). Master sempre pode. */
+export function exclusaoPermitida(sess, caminho) {
+  if (semAmb(caminho).split('/')[0] !== 'parceiros') return true;
+  return !!sess && sess.nivel >= 3 || tem(sess?.perms, 'parceiros.excluir');
 }

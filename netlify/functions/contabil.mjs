@@ -37,7 +37,8 @@
    v13.91 · multiempresas, disponibilidades, Radar de Saúde e Motor de Crítica (todas as rotas de leitura e de lançamento
    aceitam ?empresa=<id>; sem ela vale a "Empresa principal" — os lançamentos anteriores à v13.91 ficam nela):
    GET    /api/contabil/empresas                      → empresas (CNPJ, razão social, regime, capital, QSA e contador/CRC)
-   POST   /api/contabil/empresas                      { cnpj, razaoSocial, nomeFantasia?, regime, capitalSocial?, socios?, contador?, endereco? }
+   POST   /api/contabil/empresas                      { cnpj, razaoSocial, nomeFantasia?, regime, capitalSocial?, socios?, contador?, endereco?, receita? }
+                                                       (v13.94: receita = { cep, logradouro, numero, complemento, bairro, cidade, uf, situacao, consultadoEm, fonte } da consulta de CNPJ)
    PUT    /api/contabil/empresas?id=…                 { … , ativa? } → edita (contabil.parametros)
    GET    /api/contabil/disponibilidades?empresa=&de=&ate=  → Caixa, Bancos, Estoque (entradas/saídas), consolidado e Σ D × Σ C
    GET    /api/contabil/radar?empresa=&de=&ate=       → score 0-100, indicadores, sugestões de ação e correção, parecer
@@ -124,7 +125,7 @@ async function lerLancamentos({ de, ate, conta, limite = 2000, ids, empresa } = 
 }
 
 /* ---------------------------------------------------------------- v13.91 · empresas */
-const empresaDbx = r => ({ id: r.id, cnpj: r.cnpj, razaoSocial: r.razao_social, nomeFantasia: r.nome_fantasia, regime: r.regime, capitalSocial: M.reais(r.capital_social_centavos), socios: r.socios || [], contador: r.contador || {}, endereco: r.endereco, ativa: r.ativa, principal: r.id === EMP0, atualizadoEm: r.atualizado_em });
+const empresaDbx = r => ({ id: r.id, cnpj: r.cnpj, razaoSocial: r.razao_social, nomeFantasia: r.nome_fantasia, regime: r.regime, capitalSocial: M.reais(r.capital_social_centavos), socios: r.socios || [], contador: r.contador || {}, endereco: r.endereco, receita: r.receita || {}, ativa: r.ativa, principal: r.id === EMP0, atualizadoEm: r.atualizado_em });
 async function lerEmpresas(t = q) { return (await t('SELECT * FROM contab_empresas ORDER BY (id = $1) DESC, razao_social', [EMP0])).map(empresaDbx); }
 async function empresaDe(urlOuId, t = q) {
   const id = typeof urlOuId === 'string' ? urlOuId : (urlOuId.searchParams.get('empresa') || EMP0);
@@ -145,7 +146,10 @@ function validarEmpresa(d, atual = {}) {
   if (socios.reduce((a, s2) => a + s2.participacao, 0) > 100.0001) throw new ErroHttp(422, 'A soma das participações dos sócios passa de 100%.');
   const c = x.contador || {}, contador = { nome: String(c.nome || '').trim().slice(0, 150), crc: String(c.crc || '').trim().toUpperCase().slice(0, 30), uf: String(c.uf || '').trim().toUpperCase().slice(0, 2), email: String(c.email || '').trim().slice(0, 120) };
   if (contador.crc && !/^[A-Z]{2}[-\s]?\d{3,7}(\/[OPST])?(-\d)?$|^\d{3,7}(\/[OPST])?$/.test(contador.crc)) throw new ErroHttp(422, 'CRC inválido: use o formato UF-000000/O (ex.: PE-012345/O).');
-  return { cnpj, razaoSocial: razao, nomeFantasia: String(x.nomeFantasia || '').trim().slice(0, 150) || null, regime: x.regime || 'presumido', capital: M.centavos(x.capitalSocial ?? 0, { permitirZero: true }), socios, contador, endereco: String(x.endereco || '').trim().slice(0, 300) || null, ativa: x.ativa === undefined ? true : !!x.ativa };
+  /* v13.94 · campos separados da consulta automática do CNPJ (CEP, logradouro, bairro, cidade, UF e situação cadastral) */
+  const rc = x.receita && typeof x.receita === 'object' ? x.receita : {}, t = (v, n) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
+  const receita = { cep: t(rc.cep, 12).replace(/\D/g, '').slice(0, 8), logradouro: t(rc.logradouro, 150), numero: t(rc.numero, 20), complemento: t(rc.complemento, 100), bairro: t(rc.bairro, 80), cidade: t(rc.cidade, 80), uf: t(rc.uf, 2).toUpperCase(), situacao: t(rc.situacao, 40), consultadoEm: t(rc.consultadoEm, 40), fonte: t(rc.fonte, 20) };
+  return { cnpj, razaoSocial: razao, nomeFantasia: String(x.nomeFantasia || '').trim().slice(0, 150) || null, receita, regime: x.regime || 'presumido', capital: M.centavos(x.capitalSocial ?? 0, { permitirZero: true }), socios, contador, endereco: String(x.endereco || '').trim().slice(0, 300) || null, ativa: x.ativa === undefined ? true : !!x.ativa };
 }
 /** Radar de Saúde: tudo o que o painel executivo mostra, calculado do banco na hora. */
 async function radar(url, params) {
@@ -622,15 +626,15 @@ export default rota(async req => {
       exigir(perms, 'contabil.parametros');
       if (met === 'POST') {
         const e = validarEmpresa(await corpo(req)), id = 'emp_' + randomUUID().slice(0, 8);
-        await q(`INSERT INTO contab_empresas (id, cnpj, razao_social, nome_fantasia, regime, capital_social_centavos, socios, contador, endereco, ativa, criado_por, atualizado_por) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)`,
-          [id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid]);
+        await q(`INSERT INTO contab_empresas (id, cnpj, razao_social, nome_fantasia, regime, capital_social_centavos, socios, contador, endereco, ativa, criado_por, atualizado_por, receita) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11,$12)`,
+          [id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid, JSON.stringify(e.receita)]);
         return json(201, { empresa: await empresaDe(id) });
       }
       if (met === 'PUT') {
         const atual = await empresaDe(url.searchParams.get('id') || ''), e = validarEmpresa(await corpo(req), atual);
         if (atual.principal && e.ativa === false) throw new ErroHttp(422, 'A empresa principal não pode ser inativada.');
-        await q(`UPDATE contab_empresas SET cnpj=$2, razao_social=$3, nome_fantasia=$4, regime=$5, capital_social_centavos=$6, socios=$7, contador=$8, endereco=$9, ativa=$10, atualizado_em=now(), atualizado_por=$11 WHERE id=$1`,
-          [atual.id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid]);
+        await q(`UPDATE contab_empresas SET cnpj=$2, razao_social=$3, nome_fantasia=$4, regime=$5, capital_social_centavos=$6, socios=$7, contador=$8, endereco=$9, ativa=$10, atualizado_em=now(), atualizado_por=$11, receita=$12 WHERE id=$1`,
+          [atual.id, e.cnpj, e.razaoSocial, e.nomeFantasia, e.regime, e.capital, JSON.stringify(e.socios), JSON.stringify(e.contador), e.endereco, e.ativa, sess.uid, JSON.stringify(e.receita)]);
         return json(200, { empresa: await empresaDe(atual.id) });
       }
     }

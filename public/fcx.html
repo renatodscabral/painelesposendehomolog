@@ -337,6 +337,41 @@ tfoot td{border-top:1.5px solid var(--line);background:#FAFAFD;position:sticky;b
   a[href]:after{ content:""; }
 }
 </style>
+<style id="fw94">
+/* v13.94 · layout 100% da largura (html.fw94 = recurso gestao_v1394: o painel liga a classe neste quadro). Só CSS: nenhuma função do FCX muda.
+   Teto de 1220px removido, respiro lateral fluido de 1,5 a 2 rem, grades que se repartem sozinhas e tabelas mais densas que, se ainda
+   não couberem, viram cartões (o painel mede e aplica as classes rt94-compact / rt94-card). Impressão e relatórios A4 não mudam. */
+@media screen{
+html.fw94{--fw-pad:clamp(1.5rem,2vw,2rem);}
+@media (max-width:720px){html.fw94{--fw-pad:1rem;}}
+html.fw94 #app{max-width:none;padding-left:var(--fw-pad);padding-right:var(--fw-pad);}
+html.fw94 .topbar-inner{max-width:none;}
+html.fw94 .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));}
+html.fw94 .grid-3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));}
+html.fw94 .grid-4{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));}
+html.fw94 .landing{grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));}
+html.fw94 .landing.landing-4,html.fw94 .landing.landing-4.com-rd{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));}
+html.fw94 .pa-filtros{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));}
+html.fw94 .rd-campos{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));}
+html.fw94 .rd-grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));}
+html.fw94 table{font-size:clamp(12px,.2vw + 10px,13.5px);}
+html.fw94 th{padding:8px 8px;} html.fw94 td{padding:7px 8px;}
+html.fw94 table.rt94-compact{font-size:12px;}
+html.fw94 table.rt94-compact th{padding:6px 6px;white-space:normal;font-size:10px;letter-spacing:.03em;}
+html.fw94 table.rt94-compact td{padding:6px 6px;}
+html.fw94 .rt94-w{overflow:visible!important;border:0!important;max-height:none!important;border-radius:0;}
+html.fw94 table.rt94-card,html.fw94 table.rt94-card tbody,html.fw94 table.rt94-card tfoot,html.fw94 table.rt94-card tr,html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{display:block;width:100%;}
+html.fw94 table.rt94-card thead{display:none;}
+html.fw94 table.rt94-card tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px 16px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);}
+html.fw94 table.rt94-card td,html.fw94 table.rt94-card tbody th,html.fw94 table.rt94-card tfoot th{padding:0;border:0;text-align:left!important;min-width:0;overflow-wrap:anywhere;white-space:normal;}
+html.fw94 table.rt94-card td::before,html.fw94 table.rt94-card tbody th::before,html.fw94 table.rt94-card tfoot th::before{content:attr(data-label);display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin-bottom:2px;}
+html.fw94 table.rt94-card td[data-label=""]::before,html.fw94 table.rt94-card td.span-all::before{display:none;}
+html.fw94 table.rt94-card td:first-child,html.fw94 table.rt94-card td.span-all,html.fw94 table.rt94-card td.rt94-acts{grid-column:1/-1;}
+html.fw94 table.rt94-card td.rt94-acts{display:flex;gap:6px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:8px;}
+html.fw94 table.rt94-card td.rt94-acts::before{display:none;}
+html.fw94 table.rt94-card input,html.fw94 table.rt94-card select{max-width:100%!important;}
+}
+</style>
 </head>
 <body>
 <div id="app"></div>

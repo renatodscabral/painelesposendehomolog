@@ -113,7 +113,13 @@ export default {
     "rh.importar"
    ],
    "excluir": [],
-   "extras": []
+   "extras": [
+    [
+     "rh.ver_salarios",
+     true,
+     "gestao_v1393"
+    ]
+   ]
   },
   {
    "id": "viagens",
@@ -171,6 +177,20 @@ export default {
    ],
    "extras": [],
    "rec": "contabil_v1386"
+  },
+  {
+   "id": "parceiros",
+   "ler": [
+    "parceiros.ver"
+   ],
+   "modificar": [
+    "parceiros.editar"
+   ],
+   "excluir": [
+    "parceiros.excluir"
+   ],
+   "extras": [],
+   "rec": "gestao_v1394"
   },
   {
    "id": "visao",
