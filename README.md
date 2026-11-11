@@ -1,6 +1,6 @@
 # Painel de Gestão Esposende · Netlify + Netlify Database (Postgres)
 
-Versão v13.99. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
+Versão v14.00. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
 **Netlify Functions**. Os dados ficam no servidor: valem em qualquer computador e são sincronizados entre quem está usando.
 
 ## Como funciona
@@ -709,3 +709,58 @@ Tudo fica atrás do recurso `gestao_v1399`: ativo na Homologação; Produção e
 **Como o recurso é lido.** O painel usa `Recursos.ativo('gestao_v1399')`; o FCX consulta `window.parent.Recursos.ativo('gestao_v1399')` e o Módulo Contábil faz o mesmo. Sem o painel pai (FCX ou Contábil abertos sozinhos), ficam no comportamento da v13.98.
 
 **Testes:** `test1399.js` (101 verificações: o popup em si — verde, amarelo e vermelho, copiar, fechar, rolagem, tema escuro e celular —, cada importação com arquivos fictícios (Credsystem, Faltas, Caixas, Ocupação, Planejamento, Backup, ERP, adquirentes, OFX, RH, Folha, Metas, Viagens, Conciliação, FCX e anexos), ordenação de todas as colunas da aba Vendas como Consumidor e de Faltas, Cofre, Depósitos, Ocorrências, Pendências, IEO e Gestão de Lojas (inclusive busca e filtro redesenhando só o corpo), persistência da ordem, teclado, exportação em CSV e PDF A4 com filtro e ordem, linhas de detalhe e total, celular, recurso desligado e guardas da Regra de Ouro) e `test1399c.js` (3 verificações do Módulo Contábil com o servidor local e o Postgres). Os testes antigos passam a rodar com o recurso novo desligado (é o que prova que nada mudou) e os que comparam o FCX e o Contábil desfazem primeiro as trocas da v13.99; o smoke espera 40 atualizações (v13.65 a v13.99). Todos os dados de teste são fictícios.
+
+## v14.00 · Central de Notificações: alertas automáticos por e-mail e WhatsApp (recurso `gestao_v1400`)
+
+Tudo fica atrás do recurso `gestao_v1400`: ativo na Homologação; Produção e Falco só depois de **Liberar Versão em Produção**. Desligado, a tela some do menu, o painel não faz nenhuma chamada nova e o servidor responde `403 recurso_desligado`: o painel, o FCX e o Módulo Contábil ficam exatamente como na v13.99.
+**Esta versão muda o backend:** 1 migração aditiva, 2 funções novas, 7 módulos novos em `netlify/lib` e **4 variáveis de ambiente** (a lista está abaixo). Para atualizar, descompacte o ZIP na raiz do projeto e envie pelo GitHub Desktop; o build do Netlify aplica a migração sozinho (`node scripts/run-migrations.mjs`). O FCX e o Módulo Contábil não mudaram.
+
+**Regra de ouro das notificações: faltar chave não trava nada.** Sem as variáveis de ambiente o painel continua igual; a Central mostra "Não configurado" com o **nome** das variáveis que faltam, o teste e o envio automático registram uma linha de **Erro · Configuração** no log com o aviso em português, e o cron simplesmente segue. As regras nascem **todas desligadas**: nada é enviado até o Master ligar.
+
+**1 · Variáveis de ambiente do Netlify** (cada site, ou seja, cada ambiente, tem as suas; nunca vão para o painel, o log ou o ZIP):
+
+| Variável | Para quê |
+|---|---|
+| `NOTIFICACAO_EMAIL_API_KEY` | Chave da API de e-mail (padrão: Resend, `Authorization: Bearer`). |
+| `NOTIFICACAO_EMAIL_FROM` | Remetente, ex.: `Painel de Gestão <alertas@seudominio.com.br>` (domínio verificado no provedor). |
+| `NOTIFICACAO_WHATSAPP_ENDPOINT` | URL `https://` completa do envio de texto do provedor de WhatsApp. |
+| `NOTIFICACAO_WHATSAPP_TOKEN` | Token/chave do provedor de WhatsApp. |
+| `NOTIFICACAO_EMAIL_ENDPOINT` (opcional) | Troca o endereço da API de e-mail (outro provedor REST compatível). Padrão: `https://api.resend.com/emails`. |
+| `NOTIFICACAO_WHATSAPP_PROVEDOR` (opcional) | Força `evolution`, `zapi`, `meta` ou `generico` quando a URL não deixa claro. |
+
+O provedor de WhatsApp é reconhecido pela URL: **Evolution API** (`/message/sendText/<instância>`, cabeçalho `apikey`), **Z-API** (`z-api.io`, cabeçalho `Client-Token`), **Meta Cloud API** (`graph.facebook.com`, `Authorization: Bearer`) ou **genérico** (POST JSON com `number`, `phone`, `to`, `text` e `message`, cabeçalhos `Authorization: Bearer` e `apikey`). Endereço que não seja `https://` (exceto localhost, para testes) é recusado. **Meta Cloud API:** texto livre só chega a quem falou com o número nas últimas 24 h; fora dessa janela a Meta exige mensagem de modelo (template) aprovada, e a Central mostra o erro devolvido pelo provedor.
+
+**2 · Banco (migração aditiva `20261112120000_esquema_notificacoes.sql`):**
+- `painel_notificacoes_regras` (id, `evento_chave` único, `canal` EMAIL/WHATSAPP/AMBOS, `ativo`, `destinatarios_json`, `parametros_json`, `frequencia`, `ultimo_envio`, mais `ultima_rodada_em`, resumo da rodada e quem alterou).
+- `painel_notificacoes_log` (id, `data_hora`, `canal`, `evento_chave`, `destinatario`, `titulo`, `payload_mensagem`, `status` SUCESSO/ERRO, `detalhe_erro`, mais `referencia` (evita envio em dobro), `teste`, `tentativa`, `reenvio_de`). Guarda 120 dias.
+- `painel_notificacoes_instantaneo`: o último Resumo do Recebível publicado pelo painel (usado pelo Relatório matinal executivo).
+- Só cria tabelas e índices; não mexe em nada existente (o teste de migrações agora confere 9 arquivos, 4 aditivos).
+
+**3 · Funções:**
+- `netlify/functions/notificar.mjs` · `/api/notificar` (só o Master): `estado`, `salvar-regra`, `testar`, `logs`, `log` (detalhe), `reenviar` e `instantaneo` (recebe o snapshot do painel). Exige o cabeçalho do painel (CSRF) e o recurso ligado.
+- `netlify/functions/notificacoes-agendadas.mjs`: cron `*/5 * * * *` (UTC; a lógica compara no horário de Brasília). Cada rodada: trava (advisory lock) para não rodar duas ao mesmo tempo, avalia as regras ligadas, **janela de 3 horas** depois do horário marcado (se o cron atrasar, ainda envia no mesmo dia), no máximo **60 envios** e **24 s** por rodada (o limite do Netlify é 30 s; o resto fica para a próxima), cada envio é registrado antes de contar como feito (nunca duplica: mesmo evento + referência + canal + destinatário). Falha de rede, 429 ou 5xx tenta de novo até 3 vezes, de 15 em 15 minutos; erro de configuração, destino inválido ou recusa do provedor não repete (aparece no log com o motivo). Só roda no deploy publicado (limite do Netlify para funções agendadas).
+- E-mail: HTML limpo (marca, título, tabela de dados, rodapé "Painel de Gestão"), com **PDF A4 anexado** quando o evento tem PDF (gerado no servidor, sem biblioteca externa). Na Homologação o assunto ganha "[Homologação]"; nos testes, "[TESTE]".
+
+**4 · Eventos (9, todos desligados de início):**
+- **Adiantamentos de Viagens:** *Lembrete de prestação de contas* (todo dia 09:00; 3 e 1 dia antes do prazo; ao colaborador, e-mail e/ou WhatsApp do cadastro) e *Prazo excedido · prestação pendente* (08:00; quando a viagem vira "PRAZO EXCEDIDO - PRESTAÇÃO PENDENTE": alerta ao colaborador e **resumo à Tesouraria/Financeiro**, só com as viagens ainda não resumidas).
+- **Relatório IEO por Gerente Regional:** segunda-feira 08:00; cada Gerente Regional recebe **só os indicadores das lojas da sua regional**, e-mail com **PDF A4** e resumo no WhatsApp. É o mês corrente até a data (na primeira semana do mês, acrescenta o fechamento do mês anterior). Os valores seguem a mesma conta do IEO da tela (conferido no teste contra o código do painel). Regional sem Gerente cadastrado vai só para a cópia (e aparece como Erro · Destino no log).
+- **Solicitações Operacionais:** resumo matinal 08:30 para os gestores de controle de loja com as solicitações pendentes acima do SLA (só envia se houver).
+- **Relatório matinal executivo (Diretoria/Master):** 07:30; WhatsApp com texto resumido e e-mail com **PDF consolidado**: entradas do dia anterior (vendas + prestações por adquirente), saldo de caixa, faltas de caixa e pendências da Retaguarda.
+- **RH:** *Risco de dobra de férias* (60 e 30 dias antes do vencimento do 2º período aquisitivo, para RH e loja) e *Aviso de início de férias* (5 dias antes, ao colaborador).
+- **Tesouraria:** *Falta de caixa acima da tolerância*: WhatsApp na hora (verificado a cada 5 min; cada falta é avisada uma vez).
+- **TI/Master:** *Confirmação diária do Backup na Nuvem* (07:00): confirma o ponto de restauração da noite (23:59) ou avisa que não foi criado.
+
+**5 · Central de Notificações (Sistema & Segurança, só o Master real; não aparece na simulação de perfil):**
+- **Painel de Regras:** faixa de status (E-mail e WhatsApp configurados ou não, envios dos últimos 7 dias, "Como configurar"), um cartão por evento com **liga/desliga**, **Configurar** (canal E-mail, WhatsApp ou Ambos, horário e parâmetros do evento, destinatários automáticos como o colaborador ou o Gerente Regional, destinatários fixos com nome, e-mail e WhatsApp), **Salvar / Descartar alterações** (o rascunho não se perde ao recolher o cartão) e **Testar Disparo** (manda um exemplo marcado como teste para o e-mail/telefone digitado ou para os destinatários salvos; máximo 20 testes por hora).
+- **Auditoria de Logs:** tabela dos últimos envios (data e hora, evento, canal, destinatário **mascarado**, mensagem, status) com filtros de status, canal, evento, testes, período e busca; 50 por página com **Carregar mais**; **Detalhes** (motivo do erro, conteúdo enviado, anexos) e **Reenviar Notificação** (com confirmação; grava uma linha nova ligada à original).
+- Ligar, salvar, testar e reenviar entram na **Auditoria** do painel só com contagens (sem e-mail, telefone ou chave).
+
+**6 · Resumo do Recebível para o relatório executivo.** O motor do FCX roda só no navegador; por isso o painel, ao calcular o Resumo do Recebível do dia (e a cada 20 minutos quando há alteração), publica o resultado já agregado em `/api/notificar` (`instantaneo`). O relatório matinal usa o instantâneo **de hoje**; se o painel ainda não foi aberto hoje, usa o último publicado e **avisa no próprio relatório** de quando é ("Os valores de entradas e saldo vêm do Resumo do Recebível calculado em …"); se nunca foi publicado, as entradas e o saldo saem vazios com a explicação. Para os números do dia aparecerem às 07:30, o painel (Master ou quem usa o FCX) precisa ter sido aberto antes, e o dinheiro/PIX do dia anterior digitado no FCX (senão entra como R$ 0,00, com aviso). Os instantâneos com mais de 30 dias são apagados.
+
+**7 · Suposições assumidas** (ajustáveis na Central): "falta acima da tolerância" = mais de **10%** das vendas em dinheiro do dia da loja (Credsystem); sem base de comparação, a partir de **R$ 100,00**; janela de 3 dias; "imediato" = até 5 minutos.
+
+**Testes (dados fictícios):** `tests/teste-notificacoes.mjs` **134** (esquema, provedores falsos, PDF, mensagens, paridade do IEO com o painel, cada evento, repetição, limite de tempo, trava, API e permissões, função agendada, segredos); `tests/teste-migracoes.mjs` **43**; `test1400.js` **50** (tela: recurso desligado, menu, 9 cartões, ligar/desligar, configurar e validar, Testar Disparo, logs com filtros, paginação, detalhes e reenvio, servidor **sem chaves**, Resumo do Recebível, celular e escuro). Testes antigos rodam com o recurso novo desligado (`qa_login.js`).
+
+**Regra de Ouro:** região `ADQ_CFG` → `CS_INDICADORES` idêntica à v13.82; OFX/DFC da v13.74.2 intactos; `buildCashBook`/`buildAggregated`/`drawChart` do FCX idênticos à v13.77; `fcx.html`, `contabilidade.html` e `contabilidade_v1391.html` **iguais aos da v13.99**.
+
+**Segurança:** a chave entre ambientes (`PAINEL_CHAVE_AMBIENTES`) deve ser trocada (rotacionada) por quem a divulgou; as chaves de e-mail e WhatsApp ficam só nas variáveis do Netlify; o painel nunca mostra a chave (erros do provedor saem com `***`).

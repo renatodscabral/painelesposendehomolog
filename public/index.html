@@ -1715,6 +1715,70 @@ html.fw94 .amb-acao .btn{white-space:normal;max-width:100%;text-align:center;}
 .bkn-conting-corpo{padding:0 20px 20px;}
 .bkn-conting-corpo .panel{box-shadow:none;}
 @media (max-width:720px){.bkn-conting>summary{padding:14px 16px;} .bkn-conting-corpo{padding:0 16px 16px;} .bkn .bkn-acao{text-align:left;}}
+/* v14.00 · Central de Notificações (Sistema & Segurança) */
+.nt-ev [hidden],.nt-logs [hidden]{display:none !important;}
+.nt-faixa{margin-bottom:14px;}
+.nt-provs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.nt-prov{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);padding:12px 14px;min-width:0;}
+.nt-prov.ok{border-color:var(--ok-soft);}
+.nt-prov.warn{border-color:var(--warn-soft);}
+.nt-prov-t{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.nt-vars{margin-top:6px;font-size:12px;line-height:1.7;overflow-wrap:anywhere;}
+.nt-num{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px;}
+.nt-aviso{margin:12px 0 0;}
+.nt-como{margin-top:12px;}
+.nt-como>summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--accent);padding:4px 0;}
+.nt-passos{margin:8px 0;padding-left:20px;display:grid;gap:6px;font-size:13px;line-height:1.5;}
+.nt-grupo{margin-bottom:6px;}
+.nt-gt{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:18px 2px 8px;font-family:var(--font-display);}
+.nt-ev{margin-bottom:10px;padding:16px 18px;}
+.nt-ev.on{border-left:3px solid var(--ok);}
+.nt-ev-top{display:flex;gap:14px;align-items:flex-start;}
+.nt-ev-tit{flex:1 1 auto;min-width:0;}
+.nt-ev-tit h3{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:0 0 3px;font-size:15.5px;}
+.nt-desc{margin:0 0 8px;font-size:13px;line-height:1.5;}
+.nt-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.nt-abre{flex:0 0 auto;}
+.nt-sw{position:relative;flex:0 0 auto;display:inline-block;width:42px;height:24px;margin-top:2px;cursor:pointer;}
+.nt-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1;}
+.nt-sw-i{position:absolute;inset:0;border-radius:24px;background:var(--line);border:1px solid var(--ink-faint);transition:background .18s var(--ease),border-color .18s var(--ease);}
+.nt-sw-i::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .18s var(--ease);}
+.nt-sw input:checked+.nt-sw-i{background:var(--ok);border-color:var(--ok);}
+.nt-sw input:checked+.nt-sw-i::after{transform:translateX(18px);}
+.nt-sw input:focus-visible+.nt-sw-i{outline:3px solid var(--accent-soft);outline-offset:2px;box-shadow:0 0 0 2px var(--accent);}
+.nt-sw input:disabled{cursor:progress;}
+.nt-sw input:disabled+.nt-sw-i{opacity:.55;}
+.nt-gat{margin:10px 0 0;}
+.nt-corpo{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:grid;gap:16px;}
+.nt-params{align-items:start;}
+.nt-auto{display:grid;gap:8px;}
+.nt-auto .check{align-items:flex-start;}
+.nt-dests-t{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.nt-dest{display:grid;grid-template-columns:24px repeat(3,minmax(0,1fr)) 34px;gap:10px;align-items:end;padding:10px 0;border-top:1px solid var(--line-soft);}
+.nt-dest:has(.field:nth-of-type(4)){grid-template-columns:24px repeat(4,minmax(0,1fr)) 34px;}
+.nt-dest-n{align-self:center;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;margin-bottom:0;}
+.nt-dest-x{margin-bottom:2px;}
+.nt-rodape{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;}
+.nt-ult{flex:1 1 280px;min-width:0;}
+.nt-rod-b{gap:8px;flex-wrap:wrap;}
+.nt-logs .toolbar .field{min-width:140px;}
+.nt-nw{white-space:nowrap;}
+.nt-erro{color:var(--bad);max-width:480px;}
+.nt-acts{white-space:nowrap;text-align:right;}
+.nt-pag{margin-top:10px;gap:10px;flex-wrap:wrap;}
+.nt-tab td{vertical-align:top;}
+.nt-t-aviso,.nt-t-res{margin-top:6px;}
+.nt-res-l{display:grid;gap:8px;margin-top:12px;}
+.nt-res{padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);font-size:13px;overflow-wrap:anywhere;}
+.nt-res.ok{border-color:var(--ok-soft);}
+.nt-res.bad{border-color:var(--bad-soft);}
+.nt-det-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 16px;margin-bottom:10px;font-size:13px;}
+.nt-pre{margin:4px 0 0;padding:12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--font-body);font-size:13px;line-height:1.5;max-height:340px;overflow:auto;}
+.nt-anexos{margin:4px 0 0;padding-left:18px;font-size:13px;}
+@media (max-width:960px){.nt-provs{grid-template-columns:minmax(0,1fr);} .nt-dest,.nt-dest:has(.field:nth-of-type(4)){grid-template-columns:24px minmax(0,1fr) 34px;} .nt-dest .field{grid-column:2/3;} .nt-dest-x{grid-column:3/4;grid-row:1;}}
+@media (max-width:620px){.nt-ev{padding:14px;} .nt-ev-top{flex-wrap:wrap;} .nt-abre{margin-left:56px;} .nt-acts{text-align:left;white-space:normal;}}
+.nt-ev input[type=time]{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);color:var(--ink);font-family:var(--font-body);font-size:13.5px;transition:border-color .15s,box-shadow .15s;}
+.nt-ev input[type=time]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--panel);}
 </style>
 <header id="topbar" class="topbar"></header>
 <main class="wrap" id="main"></main>
@@ -3391,6 +3455,7 @@ const ICON = {
   cartao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>',
   sair: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>',
   log: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.4 3 8 7 10 4-2 7-5.6 7-10V6z"/><path d="M9.5 12h5M9.5 15h3M9.5 9h5"/></svg>',
+  sino: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   backup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 12v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6"/></svg>',
   cadeado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg>',
   retaguarda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M3.5 10h17"/><path d="M7 14.5h4"/><path d="m15 14 1.5 1.5L19 13"/></svg>',
@@ -3978,6 +4043,8 @@ function g97() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g98() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1398') && g97(); }
 /** v13.99 · o recurso da versão está ativo neste ambiente? (popup de crítica de carga; ordenação e exportação de tabelas) */
 function g99() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1399'); }
+/** v14.00 · o recurso da versão está ativo neste ambiente? (Central de Notificações e publicação do Resumo do Recebível) */
+function g00() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1400'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -3991,7 +4058,7 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1400: { versao: 'v14.00', titulo: 'Central de Notificações (Sistema & Segurança): alertas automáticos por e-mail e WhatsApp — lembrete e prazo excedido de prestação de contas, IEO semanal por Gerente Regional (PDF), solicitações acima do SLA, relatório matinal executivo, férias, falta de caixa acima da tolerância e confirmação do Backup na Nuvem — com regras por evento, Testar Disparo e auditoria de envios com Reenviar Notificação' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -18969,7 +19036,7 @@ const ResumoRecebivel = {
   async atualizar(forcar = false) {
     const d = this.hoje(); if (this._carregando || (!forcar && this._r && this._r.d === d && Date.now() - Date.parse(this._r.em) < this.TTL && this._v === FCX.versao)) return;
     this._carregando = true; this._erro = ''; this._v = FCX.versao;
-    try { this._r = await this.calcular(d); } catch (e) { this._erro = e?.message || String(e); console.warn('resumo recebível', e); }
+    try { this._r = await this.calcular(d); try { SnapshotRecebivel.publicar(this._r); } catch { /* v14.00: publicação nunca atrapalha a tela */ } } catch (e) { this._erro = e?.message || String(e); console.warn('resumo recebível', e); }
     this._carregando = false; if (App.rota === 'menu') App.agendarRender();
   },
   html() {
@@ -19383,6 +19450,8 @@ const ADMIN = [
   { id: 'acessos', titulo: 'Gestão de Acessos', curto: 'Acessos', icon: 'cadeado', perm: 'acessos.gerir', desc: 'Login por CPF dos funcionários do Módulo 1: ativar, resetar senha e definir a matriz Ler/Modificar/Excluir por módulo.' },
   { id: 'auditoria', titulo: 'Auditoria', icon: 'log', perm: 'auditoria.ver', desc: 'Log oculto de todas as alterações: quem fez, o que fez, data e hora. Usuários e perfis de acesso.' },
   { id: 'backup', titulo: 'Backup e dados', curto: 'Backup', icon: 'backup', perm: 'backup.exportar', desc: 'Cópia completa em arquivo (.json), planilhas (.xlsx) e restauração de backup.' },
+  { id: 'notificacoes', titulo: 'Central de Notificações', curto: 'Notificações', icon: 'sino', perm: 'backup.restaurar', ver: () => CentralNotif.pode(), stat: () => CentralNotif.stat(), // v14.00 · só o Master, sites do Netlify
+    desc: 'Alertas automáticos por e-mail e WhatsApp: prestação de contas, IEO por Gerente Regional, solicitações acima do SLA, relatório matinal executivo, férias, falta de caixa e backup — regras por evento, Testar Disparo e auditoria de envios.' },
 ];
 
 /**
@@ -19392,7 +19461,7 @@ const ADMIN = [
 const NAV_GRUPOS = [
   { titulo: 'Pessoas & Operação', ids: ['menu', 'pessoal', 'rh', 'lojas', 'contratos', 'solicitacoes'] },
   { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'parceiros', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
-  { titulo: 'Sistema & Segurança', ids: ['liberacao', 'acessos', 'auditoria', 'backup'] },
+  { titulo: 'Sistema & Segurança', ids: ['liberacao', 'acessos', 'auditoria', 'backup', 'notificacoes'] },
 ];
 const NAV_SUB = {
   pessoal: { itens: () => [['equipe', 'Equipe'], ...(Auth.can('pdi.ver') ? [['pdi', 'PDI · Matriz de competências']] : [])], ir: v => { Pessoal.ui.aba = v; Pessoal.ui.pdiSel = null; }, atual: () => Pessoal.ui.aba },
@@ -20043,6 +20112,7 @@ const App = {
     try { history.replaceState(null, '', rota === 'menu' ? location.pathname : '#' + rota); } catch { }
     this.render(); window.scrollTo({ top: 0, behavior: 'smooth' });
     if (rota === 'auditoria') Aud.carregar();
+    if (rota === 'notificacoes') CentralNotif.abrir(); // v14.00: atualiza a Central em segundo plano
   },
   /** v13.58 · aviso amigável quando uma tela não consegue ser montada (dado/parâmetro ausente), com a mensagem técnica recolhida. */
   telaErro(e) {
@@ -20059,7 +20129,7 @@ const App = {
     const main = $('#main');
     const ativo = document.activeElement, idAtivo = ativo && ativo.id, sel = ativo && 'selectionStart' in ativo ? [ativo.selectionStart, ativo.selectionEnd] : null;
     const crumbs = this.rota === 'menu' ? '' : `<div class="crumbs"><button data-a="nav" data-r="menu">Painel de Gestão</button><span>/</span><span>${esc(([...MODULOS, ...ADMIN].find(m => m.id === this.rota) || {}).titulo || '')}</span></div>`;
-    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), parceiros: () => Parceiros.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render() }[this.rota];
+    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), parceiros: () => Parceiros.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render(), notificacoes: () => CentralNotif.render() }[this.rota];
     Acesso.ajustarAba(this.rota); // v13.83: aba não liberada → primeira liberada
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
     main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
@@ -20367,6 +20437,361 @@ const BackupNuvem = {
   },
 };
 
+/* =====================================================================
+   v14.00 · CENTRAL DE NOTIFICAÇÕES (Sistema & Segurança · só o Master · sites do Netlify · recurso gestao_v1400)
+   Alertas automáticos por e-mail (Resend ou outro provedor REST) e WhatsApp (Evolution API, Z-API ou Meta Cloud API). Quem envia é o servidor:
+   a rotina agendada notificacoes-agendadas roda a cada 5 minutos, vê o horário de Brasília de cada evento e manda só o que está LIGADO aqui.
+   Esta tela tem duas abas — Painel de Regras (liga/desliga cada evento, canal, destinatários, parâmetros e "Testar Disparo") e
+   Auditoria de Logs (últimos envios com filtros e "Reenviar Notificação"). As chaves dos provedores ficam só nas variáveis de ambiente do
+   Netlify: esta tela mostra apenas se estão configuradas e, se faltar algo, o NOME da variável. Sem as chaves nada quebra: cada tentativa
+   vira um aviso amigável no log. Também publica o Resumo do Recebível do dia (SnapshotRecebivel) para o relatório matinal executivo.
+   ===================================================================== */
+const CentralNotif = {
+  ui: { aba: 'regras', estado: null, erro: '', codigoErro: '', carregando: false, ts: 0, abertos: {}, rasc: {}, avisos: {}, ocupados: {},
+    logs: { itens: [], total: 0, proximo: null, carregando: false, erro: '', carregado: false, seq: 0 },
+    f: { status: '', canal: '', evento: '', teste: '', de: '', ate: '', busca: '' }, teste: { email: '', telefone: '' } },
+  DIAS: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+  CANAIS: [['EMAIL', 'E-mail'], ['WHATSAPP', 'WhatsApp'], ['AMBOS', 'E-mail e WhatsApp']],
+  TIPO_ERRO: { CONFIG: 'Configuração', DESTINO: 'Destinatário', RECUSADO: 'Recusado pelo provedor', TRANSITORIO: 'Falha temporária' },
+  nuvem() { return g00() && !!Cloud.base?.netlify; },
+  pode() { return this.nuvem() && GestaoAmbientes.pode(); }, /* Master de verdade (não simulado) */
+  rotCanal(c) { return (this.CANAIS.find(x => x[0] === c) || [, c])[1]; },
+  stat() {
+    const e = this.ui.estado; if (!e) return 'E-mail e WhatsApp automáticos';
+    const n = e.eventos.filter(x => x.regra.ativo).length, er = e.ultimos7dias?.erro || 0;
+    return `${n} evento${n === 1 ? '' : 's'} ligado${n === 1 ? '' : 's'}${er ? ` · ${er} erro${er === 1 ? '' : 's'} em 7 dias` : ''}`;
+  },
+  /** ao abrir a tela (App.ir): atualiza em segundo plano, sem apagar o que já está na tela */
+  abrir() { if (this.pode()) this.carregar(true); },
+  ev(ch) { return (this.ui.estado?.eventos || []).find(e => e.chave === ch); },
+
+  /* ---------- rascunho de cada evento (o que está nos campos × o que está salvo) ---------- */
+  fmtParam(c, v) { return c.tipo === 'lista' ? (Array.isArray(v) ? v : []).join(', ') : v == null ? '' : String(v); },
+  base(e) {
+    const r = e.regra;
+    return { canal: r.canal,
+      parametros: Object.fromEntries([...(e.campos || []).map(c => [c.k, this.fmtParam(c, r.parametros[c.k])]), ...(e.automaticos || []).map(a => [a.k, !!r.parametros[a.k]])]),
+      destinatarios: (r.destinatarios || []).map(d => ({ papel: d.papel, nome: d.nome || '', email: d.email || '', telefone: d.telefone || '' })) };
+  },
+  rasc(e) { return this.ui.rasc[e.chave] || this.base(e); },
+  editar(e) { return (this.ui.rasc[e.chave] ||= JSON.parse(JSON.stringify(this.base(e)))); },
+  sujo(e) { const r = this.ui.rasc[e.chave]; return !!r && JSON.stringify(r) !== JSON.stringify(this.base(e)); },
+  /** atualiza só o selo "Alterações não salvas" e os botões do cartão (sem redesenhar a tela, para não perder o foco) */
+  marcar(ch) {
+    const e = this.ev(ch), card = document.querySelector(`[data-nt-ev="${ch}"]`); if (!e || !card) return;
+    const sujo = this.sujo(e), p = card.querySelector('.nt-sujo'), sv = card.querySelector('[data-a="nt-salvar"]'), ds = card.querySelector('[data-a="nt-descartar"]');
+    if (p) p.hidden = !sujo; if (sv) sv.disabled = !sujo; if (ds) ds.hidden = !sujo;
+  },
+
+  /* ---------- textos ---------- */
+  horarioTxt(e) {
+    const p = e.regra.parametros;
+    return e.frequencia === 'IMEDIATA' ? 'na hora (a cada rodada de 5 min)' : e.frequencia === 'SEMANAL' ? `${this.DIAS[p.diaSemana] || ''} às ${p.horario}` : `todo dia às ${p.horario}`;
+  },
+  quando(iso) { return iso ? Fmt.dataHora(iso) : ''; },
+
+  /* ---------- tela ---------- */
+  render() {
+    if (!this.pode()) return '<div class="panel"><p class="muted" style="margin:0">A Central de Notificações é exclusiva do Master e só existe nos sites do Netlify com a versão v14.00 liberada.</p></div>';
+    const u = this.ui, est = u.estado;
+    if (!est && !u.carregando && !u.erro) setTimeout(() => this.carregar(), 0);
+    const head = `<div class="page-head"><div><h1>Central de Notificações</h1><p>Alertas automáticos por e-mail e WhatsApp: ligue só o que precisar, escolha quem recebe e acompanhe cada envio. Só o Master vê esta tela.</p></div>
+      <div class="row"><button class="btn sec" data-a="nt-atualizar"${u.carregando ? ' disabled' : ''}>${u.carregando ? 'Atualizando…' : 'Atualizar'}</button></div></div>`;
+    if (!est) {
+      if (u.erro) return head + `<div class="panel"><div class="note warn" role="alert" style="margin:0 0 10px">${esc(u.erro)}</div><div class="row" style="gap:8px"><button class="btn" data-a="nt-atualizar">Tentar de novo</button>${u.codigoErro === 'sem_esquema' ? '<button class="btn sec" data-a="nav" data-r="backup">Abrir Backup e dados</button>' : ''}</div></div>`;
+      return head + '<div class="panel"><p class="muted" style="margin:0">Carregando a Central de Notificações…</p></div>';
+    }
+    const tabs = `<div class="tabs"><button class="${u.aba === 'regras' ? 'on' : ''}" data-a="nt-aba" data-v="regras">Painel de Regras</button><button class="${u.aba === 'logs' ? 'on' : ''}" data-a="nt-aba" data-v="logs">Auditoria de Logs${est.ultimos7dias?.erro ? ` <span class="pill bad">${est.ultimos7dias.erro}</span>` : ''}</button></div>`;
+    return head + this.faixa(est) + tabs + (u.aba === 'logs' ? this.renderLogs(est) : this.renderRegras(est));
+  },
+  faixa(est) {
+    const c = est.config, amb = { homolog: 'Homologação', prod: 'Produção', rc: 'Falco' }[est.ambiente] || est.ambiente;
+    const prov = (rot, x, sub) => `<div class="nt-prov ${x.configurado ? 'ok' : 'warn'}"><div class="nt-prov-t"><b>${rot}</b><span class="pill ${x.configurado ? 'ok' : 'warn'}">${x.configurado ? 'Configurado' : 'Não configurado'}</span></div>
+      <div class="hint">${esc(sub)}</div>${x.configurado ? '' : `<div class="nt-vars">Faltam as variáveis: ${x.faltam.map(v => `<span class="mono">${esc(v)}</span>`).join(' · ')}</div>`}</div>`;
+    const semChave = !c.email.configurado || !c.whatsapp.configurado;
+    return `<div class="panel nt-faixa"><div class="nt-provs">${prov('E-mail', c.email, 'Provedor: ' + c.email.provedor)}${prov('WhatsApp', c.whatsapp, 'Provedor: ' + c.whatsapp.provedorRotulo)}
+      <div class="nt-prov"><div class="nt-prov-t"><b>Últimos 7 dias</b></div><div class="nt-num"><span class="pill ok">${Fmt.num(est.ultimos7dias?.sucesso || 0)} enviados</span> <span class="pill ${est.ultimos7dias?.erro ? 'bad' : 'neutral'}">${Fmt.num(est.ultimos7dias?.erro || 0)} com erro</span></div>
+        <div class="hint">Rodada a cada 5 minutos · ${esc(amb)} · agora são ${esc(est.agora?.hora || '')} em Brasília${est.ambiente === 'homolog' ? ' · as mensagens saem com o prefixo [Homologação]' : ''}</div></div></div>
+      ${semChave ? '<div class="note warn nt-aviso" role="status">As chaves de envio ainda não estão completas neste ambiente. Nada trava: os eventos ligados continuam sendo avaliados e cada tentativa aparece como um aviso amigável na Auditoria de Logs até as variáveis serem configuradas.</div>' : ''}
+      <details class="nt-como"><summary>Como configurar os envios (variáveis de ambiente do Netlify)</summary>
+        <ol class="nt-passos"><li>No Netlify: <b>Site configuration › Environment variables</b>. Crie as quatro variáveis abaixo. Os valores ficam só lá — esta tela nunca os mostra.</li>
+          <li><span class="mono">NOTIFICACAO_EMAIL_API_KEY</span> — chave da API do Resend (ou do provedor REST escolhido) · <span class="mono">NOTIFICACAO_EMAIL_FROM</span> — remetente de um domínio verificado, ex.: Painel &lt;alertas@seudominio.com.br&gt;.</li>
+          <li><span class="mono">NOTIFICACAO_WHATSAPP_ENDPOINT</span> — URL de envio de texto da Evolution API, da Z-API ou da Meta Cloud API · <span class="mono">NOTIFICACAO_WHATSAPP_TOKEN</span> — token ou apikey desse serviço. O provedor é reconhecido pela URL.</li>
+          <li>Publique de novo (o Netlify só lê variáveis novas no deploy seguinte) e confirme com <b>Testar Disparo</b>.</li></ol>
+        <p class="hint" style="margin:0">Meta Cloud API: texto livre só chega a quem conversou com o número nas últimas 24 horas; fora disso a Meta exige mensagens-modelo aprovadas.</p></details></div>`;
+  },
+
+  /* ----- Painel de Regras ----- */
+  renderRegras(est) {
+    const grupos = []; est.eventos.forEach(e => { let g = grupos.find(x => x.nome === e.grupo); if (!g) grupos.push(g = { nome: e.grupo, itens: [] }); g.itens.push(e); });
+    return grupos.map(g => `<section class="nt-grupo"><h2 class="nt-gt">${esc(g.nome)}</h2>${g.itens.map(e => this.cartao(e)).join('')}</section>`).join('');
+  },
+  campo(e, c, d) {
+    const id = `nt_${e.chave}_${c.k}`, v = d.parametros[c.k], at = `data-a="nt-campo" data-ev="${e.chave}" data-k="${c.k}"`, aj = c.ajuda ? `<span class="hint">${esc(c.ajuda)}</span>` : '';
+    let ctl;
+    if (c.tipo === 'hora') ctl = `<input id="${id}" type="time" ${at} value="${esc(v)}" required>`;
+    else if (c.tipo === 'dia') ctl = `<select id="${id}" ${at}>${this.DIAS.map((n, i) => `<option value="${i}"${String(v) === String(i) ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
+    else if (c.tipo === 'lista') ctl = `<input id="${id}" type="text" ${at} value="${esc(v)}" inputmode="numeric" autocomplete="off" placeholder="ex.: 3, 1">`;
+    else ctl = `<input id="${id}" type="number" ${at} value="${esc(v)}" min="${c.min ?? ''}" max="${c.max ?? ''}" step="any" inputmode="decimal">`;
+    return `<div class="field"><label class="lbl" for="${id}">${esc(c.rot)}</label>${ctl}${aj}</div>`;
+  },
+  destinatario(e, d, i) {
+    const at = k => `data-a="nt-dest" data-ev="${e.chave}" data-i="${i}" data-k="${k}"`, id = k => `nt_${e.chave}_d${i}_${k}`, papeis = e.papeis || [];
+    return `<div class="nt-dest"><span class="nt-dest-n" aria-hidden="true">${i + 1}</span>
+      ${papeis.length > 1 ? `<div class="field"><label class="lbl" for="${id('papel')}">Função</label><select id="${id('papel')}" ${at('papel')}>${papeis.map(p => `<option value="${esc(p.k)}"${p.k === d.papel ? ' selected' : ''}>${esc(p.rot)}</option>`).join('')}</select></div>` : ''}
+      <div class="field"><label class="lbl" for="${id('nome')}">Nome</label><input id="${id('nome')}" type="text" ${at('nome')} value="${esc(d.nome)}" maxlength="80" autocomplete="off" placeholder="Quem recebe"></div>
+      <div class="field"><label class="lbl" for="${id('email')}">E-mail</label><input id="${id('email')}" type="email" ${at('email')} value="${esc(d.email)}" maxlength="120" autocomplete="off" placeholder="nome@empresa.com.br"></div>
+      <div class="field"><label class="lbl" for="${id('telefone')}">WhatsApp</label><input id="${id('telefone')}" type="tel" ${at('telefone')} value="${esc(d.telefone)}" maxlength="24" autocomplete="off" placeholder="(11) 99999-0000"></div>
+      <button class="iconbtn nt-dest-x" data-a="nt-dest-rem" data-ev="${e.chave}" data-i="${i}" aria-label="Remover este destinatário" title="Remover">✕</button></div>`;
+  },
+  cartao(e) {
+    const r = e.regra, d = this.rasc(e), aberto = !!this.ui.abertos[e.chave], sujo = this.sujo(e), av = this.ui.avisos[e.chave] || [], ocup = !!this.ui.ocupados[e.chave];
+    const rotAuto = (e.automaticos || []).filter(a => r.parametros[a.k]).map(a => a.rot.split(' (')[0].replace(/^O /, 'o ').replace(/^A /, 'a ')), nDest = r.destinatarios.length;
+    const quem = [...(nDest ? [`${nDest} destinatário${nDest > 1 ? 's' : ''} fixo${nDest > 1 ? 's' : ''}`] : []), ...rotAuto].join(' + ') || 'nenhum destinatário ainda';
+    const corpo = !aberto ? '' : `<div class="nt-corpo">
+      <div class="form-grid nt-params"><div class="field"><label class="lbl" for="nt_${e.chave}_canal">Canal de envio</label><select id="nt_${e.chave}_canal" data-a="nt-campo" data-ev="${e.chave}" data-k="canal">${this.CANAIS.map(([v, l]) => `<option value="${v}"${d.canal === v ? ' selected' : ''}>${l}</option>`).join('')}</select>
+          ${d.canal === 'AMBOS' ? '<span class="hint">Cada pessoa recebe pelos canais em que tem contato cadastrado.</span>' : ''}</div>
+        ${(e.campos || []).map(c => this.campo(e, c, d)).join('')}</div>
+      ${(e.automaticos || []).length ? `<div class="nt-auto"><div class="lbl">Destinatários automáticos (vêm do cadastro)</div>${e.automaticos.map(a => `<label class="check"><input type="checkbox" data-a="nt-campo" data-ev="${e.chave}" data-k="${a.k}" data-auto="1"${d.parametros[a.k] ? ' checked' : ''}><span>${esc(a.rot)}</span></label>`).join('')}</div>` : ''}
+      <div class="nt-dests"><div class="nt-dests-t"><div class="lbl" style="margin:0">Destinatários fixos${(e.papeis || []).length === 1 ? ` · ${esc(e.papeis[0].rot)}` : ''}</div><button class="btn sec sm" data-a="nt-dest-add" data-ev="${e.chave}">+ Adicionar destinatário</button></div>
+        ${d.destinatarios.length ? d.destinatarios.map((x, i) => this.destinatario(e, x, i)).join('') : '<p class="hint" style="margin:6px 0 0">Nenhum destinatário fixo. Use “Adicionar destinatário” para cadastrar e-mails e telefones.</p>'}</div>
+      <div class="nt-rodape"><div class="hint nt-ult">${r.ultimaRodadaEm ? `Última rodada: ${esc(this.quando(r.ultimaRodadaEm))}${r.ultimaRodadaResumo ? ' · ' + esc(r.ultimaRodadaResumo) : ''}` : 'Ainda não rodou.'}${r.ultimoEnvio ? ` · Último envio: ${esc(this.quando(r.ultimoEnvio))}` : ''}${r.atualizadoPor ? ` · Regra alterada por ${esc(r.atualizadoPor)}` : ''}</div>
+        <div class="row nt-rod-b"><button class="btn ghost sm" data-a="nt-descartar" data-ev="${e.chave}"${sujo ? '' : ' hidden'}>Descartar alterações</button><button class="btn sec sm" data-a="nt-testar" data-ev="${e.chave}">Testar Disparo</button><button class="btn sm" data-a="nt-salvar" data-ev="${e.chave}"${sujo && !ocup ? '' : ' disabled'}>${ocup ? 'Salvando…' : 'Salvar regra'}</button></div></div></div>`;
+    return `<div class="panel nt-ev${r.ativo ? ' on' : ''}" data-nt-ev="${e.chave}">
+      <div class="nt-ev-top"><label class="nt-sw" title="${r.ativo ? 'Ligado — clique para desligar' : 'Desligado — clique para ligar'}"><input type="checkbox" data-a="nt-toggle" data-ev="${e.chave}"${r.ativo ? ' checked' : ''}${ocup ? ' disabled' : ''} aria-label="${r.ativo ? 'Desligar' : 'Ligar'}: ${esc(e.nome)}"><span class="nt-sw-i" aria-hidden="true"></span></label>
+        <div class="nt-ev-tit"><h3>${esc(e.nome)} <span class="pill ${r.ativo ? 'ok' : 'neutral'}">${r.ativo ? 'Ligado' : 'Desligado'}</span><span class="pill nt-sujo warn"${sujo ? '' : ' hidden'}>Alterações não salvas</span></h3>
+          <p class="sub nt-desc">${esc(e.descricao)}</p>
+          <div class="nt-pills"><span class="pill info">${esc(this.rotCanal(r.canal))}</span><span class="pill neutral">${esc(this.horarioTxt(e))}</span>${e.pdf ? '<span class="pill neutral">PDF A4 em anexo</span>' : ''}<span class="pill neutral">${esc(quem)}</span></div></div>
+        <button class="btn sec sm nt-abre" data-a="nt-abrir" data-ev="${e.chave}" aria-expanded="${aberto}">${aberto ? 'Recolher' : 'Configurar'}</button></div>
+      ${av.length ? `<div class="note warn nt-aviso" role="status">${av.map(a => `<div>${esc(a)}</div>`).join('')}</div>` : ''}${aberto ? `<p class="hint nt-gat">${esc(e.gatilho)}</p>` : ''}${corpo}</div>`;
+  },
+
+  /* ----- Auditoria de Logs ----- */
+  renderLogs(est) {
+    const u = this.ui, L = u.logs, f = u.f;
+    if (!L.carregado && !L.carregando && !L.erro) setTimeout(() => this.carregarLogs(true), 0);
+    const sel = (k, rot, ops) => `<div class="field"><label class="lbl" for="ntf_${k}">${rot}</label><select id="ntf_${k}" data-a="nt-flog" data-k="${k}">${ops.map(([v, l]) => `<option value="${esc(v)}"${f[k] === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
+    const dt = (k, rot) => `<div class="field"><label class="lbl" for="ntf_${k}">${rot}</label><input id="ntf_${k}" type="date" data-a="nt-flog" data-k="${k}" value="${esc(f[k])}"></div>`;
+    const lin = l => {
+      const ok = l.status === 'SUCESSO', ra = /^\(/.test(l.destinatario);
+      return `<tr><td data-label="Data e hora" class="mono nt-nw">${esc(Fmt.dataHora(l.dataHora))}<div class="cell-sub">#${l.id}</div></td>
+        <td data-label="Evento"><div class="cell-main">${esc(l.eventoNome)}</div>${l.teste ? '<span class="pill neutral">Teste</span> ' : ''}${l.reenvioDe ? `<span class="hint">reenvio do #${l.reenvioDe}</span>` : ''}</td>
+        <td data-label="Canal"><span class="pill info">${l.canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</span></td>
+        <td data-label="Destinatário"><div class="cell-main">${esc(l.destinatario)}</div>${l.destinatarioNome ? `<div class="cell-sub">${esc(l.destinatarioNome)}</div>` : ''}</td>
+        <td data-label="Mensagem"><div class="cell-main">${esc(l.titulo)}</div>${ok ? '' : `<div class="cell-sub nt-erro">${esc(l.detalheErro || 'Falha no envio.')}</div>`}</td>
+        <td data-label="Status"><span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'Sucesso' : 'Erro'}</span>${!ok && l.tipoErro ? `<div class="cell-sub">${esc(this.TIPO_ERRO[l.tipoErro] || l.tipoErro)}${l.tentativa > 1 ? ` · tentativa ${l.tentativa}` : ''}</div>` : ''}</td>
+        <td data-label="" class="acts nt-acts"><button class="btn sec sm" data-a="nt-log-ver" data-id="${l.id}">Detalhes</button> <button class="btn sm" data-a="nt-reenviar" data-id="${l.id}"${ra ? ' disabled title="Sem e-mail/telefone cadastrado: corrija o cadastro e o envio automático tenta de novo."' : ''}>Reenviar Notificação</button></td></tr>`;
+    };
+    const filtrando = Object.values(f).some(Boolean);
+    return `<div class="panel nt-logs"><div class="toolbar">
+        ${sel('status', 'Status', [['', 'Todos'], ['SUCESSO', 'Sucesso'], ['ERRO', 'Erro']])}${sel('canal', 'Canal', [['', 'Todos'], ['EMAIL', 'E-mail'], ['WHATSAPP', 'WhatsApp']])}
+        ${sel('evento', 'Evento', [['', 'Todos'], ...est.eventos.map(e => [e.chave, e.nome])])}${sel('teste', 'Testes', [['', 'Todos'], ['nao', 'Sem testes'], ['sim', 'Só testes']])}
+        ${dt('de', 'De')}${dt('ate', 'Até')}
+        <div class="field grow"><label class="lbl" for="ntf_busca">Buscar</label><input id="ntf_busca" type="search" data-a="nt-busca" value="${esc(f.busca)}" placeholder="Título, nome ou destinatário…"></div>
+        <div class="field" style="flex:0 0 auto;min-width:0"><button class="btn ghost" data-a="nt-logs-atualizar"${L.carregando ? ' disabled' : ''}>${L.carregando ? 'Carregando…' : 'Atualizar'}</button>${filtrando ? '<button class="btn ghost" data-a="nt-logs-limpar">Limpar filtros</button>' : ''}</div></div>
+      ${L.erro ? `<div class="note warn" role="alert">${esc(L.erro)}</div>` : ''}
+      ${L.itens.length ? `<div class="tbl-wrap"><table class="resp nt-tab"><thead><tr><th>Data e hora</th><th>Evento</th><th>Canal</th><th>Destinatário</th><th>Mensagem</th><th>Status</th><th></th></tr></thead><tbody>${L.itens.map(lin).join('')}</tbody></table></div>
+        <div class="row between nt-pag"><span class="hint">Mostrando ${Fmt.num(L.itens.length)} de ${Fmt.num(L.total)} registro${L.total === 1 ? '' : 's'}. O log guarda ${est.retencaoDias} dias; o endereço aparece parcialmente por privacidade.</span>${L.proximo ? `<button class="btn sec sm" data-a="nt-logs-mais"${L.carregando ? ' disabled' : ''}>Carregar mais</button>` : ''}</div>`
+        : `<div class="empty">${L.carregando ? 'Carregando os envios…' : filtrando ? 'Nenhum envio com estes filtros.' : 'Nenhum envio registrado ainda. Ligue um evento no Painel de Regras ou use “Testar Disparo”.'}</div>`}</div>`;
+  },
+
+  /* ---------- carregamento ---------- */
+  async carregar(silencioso = false) {
+    const u = this.ui; if (u.carregando) return;
+    u.carregando = true; if (!silencioso || !u.estado) App.render();
+    try { u.estado = await Cloud.base._req('GET', '/api/notificar'); u.erro = ''; u.codigoErro = ''; }
+    catch (e) { u.erro = e.message || String(e); u.codigoErro = e.dados?.codigo || ''; if (!silencioso) u.estado = null; }
+    u.carregando = false; u.ts = Date.now(); if (App.rota === 'notificacoes') App.render();
+  },
+  async carregarLogs(reiniciar = true) {
+    const L = this.ui.logs, f = this.ui.f, n = ++L.seq;
+    L.carregando = true; L.erro = ''; if (reiniciar) { L.itens = []; L.proximo = null; } App.render();
+    try {
+      const r = await Cloud.base._req('POST', '/api/notificar', { acao: 'logs', status: f.status, canal: f.canal, evento: f.evento, teste: f.teste, de: f.de, ate: f.ate, busca: f.busca, limite: 50, ...(reiniciar || !L.proximo ? {} : { antes: L.proximo }) });
+      if (n !== L.seq) return; /* chegou uma resposta mais nova */
+      L.itens = reiniciar ? r.logs : L.itens.concat(r.logs); L.total = r.total; L.proximo = r.proximo; L.carregado = true;
+    } catch (e) { if (n !== L.seq) return; L.erro = e.message || String(e); L.carregado = true; }
+    L.carregando = false; if (App.rota === 'notificacoes') App.render();
+  },
+
+  /* ---------- ações ---------- */
+  acao(a, el) {
+    if (!this.pode()) return;
+    const ch = el.dataset.ev, u = this.ui;
+    if (a === 'nt-aba') { u.aba = el.dataset.v; return App.render(); }
+    if (a === 'nt-atualizar') { u.logs.carregado = false; return this.carregar(); }
+    if (a === 'nt-abrir') { u.abertos[ch] = !u.abertos[ch]; return App.render(); }
+    if (a === 'nt-salvar') return this.salvar(ch);
+    if (a === 'nt-descartar') { delete u.rasc[ch]; return App.render(); }
+    if (a === 'nt-testar') return this.testar(ch);
+    if (a === 'nt-dest-add') { const e = this.ev(ch); if (!e) return; this.editar(e).destinatarios.push({ papel: (e.papeis || [])[0]?.k || '', nome: '', email: '', telefone: '' }); u.abertos[ch] = true; return App.render(); }
+    if (a === 'nt-dest-rem') { const e = this.ev(ch); if (!e) return; this.editar(e).destinatarios.splice(Number(el.dataset.i), 1); return App.render(); }
+    if (a === 'nt-logs-atualizar') return this.carregarLogs(true);
+    if (a === 'nt-logs-mais') return this.carregarLogs(false);
+    if (a === 'nt-logs-limpar') { u.f = { status: '', canal: '', evento: '', teste: '', de: '', ate: '', busca: '' }; return this.carregarLogs(true); }
+    if (a === 'nt-log-ver') return this.detalhes(Number(el.dataset.id));
+    if (a === 'nt-reenviar') return this.reenviar(Number(el.dataset.id));
+  },
+  mudanca(a, el) {
+    if (!this.pode()) return;
+    const ch = el.dataset.ev, e = ch ? this.ev(ch) : null;
+    if (a === 'nt-toggle' && e) return this.ligar(e, el.checked);
+    if (a === 'nt-campo' && e) {
+      const d = this.editar(e), k = el.dataset.k;
+      if (k === 'canal') { d.canal = el.value; this.marcar(ch); return App.render(); }
+      d.parametros[k] = el.dataset.auto ? el.checked : el.value; return this.marcar(ch);
+    }
+    if (a === 'nt-dest' && e) { const d = this.editar(e).destinatarios[Number(el.dataset.i)]; if (d) d[el.dataset.k] = el.value; return this.marcar(ch); }
+    if (a === 'nt-flog') { this.ui.f[el.dataset.k] = el.value; return this.carregarLogs(true); }
+  },
+  entrada(a, el) {
+    if (!this.pode()) return;
+    const ch = el.dataset.ev, e = ch ? this.ev(ch) : null;
+    if (a === 'nt-campo' && e && el.type !== 'checkbox' && el.tagName !== 'SELECT') { this.editar(e).parametros[el.dataset.k] = el.value; return this.marcar(ch); }
+    if (a === 'nt-dest' && e && el.tagName !== 'SELECT') { const d = this.editar(e).destinatarios[Number(el.dataset.i)]; if (d) d[el.dataset.k] = el.value; return this.marcar(ch); }
+    if (a === 'nt-busca') { this.ui.f.busca = el.value; return this.carregarLogs(true); }
+  },
+  /** valida o que está nos campos antes de enviar ao servidor (o servidor valida de novo) */
+  validar(d) {
+    for (const x of d.destinatarios) {
+      const em = String(x.email || '').trim(), tel = String(x.telefone || '').replace(/\D/g, '');
+      if (!em && !tel) return 'Cada destinatário precisa de um e-mail ou de um telefone (ou remova a linha vazia).';
+      if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) return `E-mail inválido: ${em}`;
+      if (tel && (tel.length < 10 || tel.length > 13)) return `Telefone inválido: ${x.telefone}. Use DDD + número, ex.: (11) 99999-0000.`;
+    }
+    return '';
+  },
+  async gravar(e, corpo) {
+    const r = await Cloud.base._req('POST', '/api/notificar', { acao: 'salvar-regra', evento: e.chave, ...corpo });
+    e.regra = r.regra; this.ui.avisos[e.chave] = r.avisos || []; if (this.ui.estado) this.ui.estado.eventos = this.ui.estado.eventos.map(x => (x.chave === e.chave ? e : x));
+    return r;
+  },
+  auditar(e, mudancas, acao = 'alterou') {
+    try { Audit.registrar({ modulo: 'notificacoes', acao, entidade: 'regra_notificacao', entidadeId: e.chave, rotulo: `Central de Notificações · ${e.nome}`, mudancas }); } catch { /* auditoria nunca trava a tela */ }
+  },
+  async ligar(e, ligado) {
+    const u = this.ui; u.ocupados[e.chave] = true; App.render();
+    try {
+      const antes = e.regra.ativo, r = await this.gravar(e, { ativo: ligado });
+      this.auditar(e, [{ campo: 'ativo', de: antes ? 'ligado' : 'desligado', para: ligado ? 'ligado' : 'desligado' }]);
+      UI.toast(`${e.nome}: ${ligado ? 'ligado' : 'desligado'}.${ligado && (r.avisos || []).length ? ' Veja o aviso no cartão.' : ''}`);
+    } catch (er) { UI.toast(er.message || String(er)); }
+    delete u.ocupados[e.chave]; if (!u.estado) return; try { await this.carregar(true); } catch { /* segue */ } App.render();
+  },
+  async salvar(ch) {
+    const e = this.ev(ch); if (!e || !this.sujo(e) || this.ui.ocupados[ch]) return;
+    const d = this.rasc(e), msg = this.validar(d); if (msg) return UI.toast(msg);
+    this.ui.ocupados[ch] = true; App.render();
+    try {
+      const b = this.base(e), mud = [];
+      if (d.canal !== b.canal) mud.push({ campo: 'canal', de: b.canal, para: d.canal });
+      for (const k of Object.keys(d.parametros)) if (String(d.parametros[k]) !== String(b.parametros[k])) mud.push({ campo: 'parâmetro ' + k, de: String(b.parametros[k]), para: String(d.parametros[k]) });
+      if (JSON.stringify(d.destinatarios) !== JSON.stringify(b.destinatarios)) mud.push({ campo: 'destinatários', de: `${b.destinatarios.length}`, para: `${d.destinatarios.length}` }); /* só a quantidade: o log de auditoria não guarda e-mails nem telefones */
+      const r = await this.gravar(e, { canal: d.canal, destinatarios: d.destinatarios.map(x => ({ papel: x.papel, nome: x.nome, email: x.email, telefone: x.telefone })), parametros: d.parametros });
+      delete this.ui.rasc[ch]; this.auditar(e, mud);
+      UI.toast(`Regra “${e.nome}” salva.${(r.avisos || []).length ? ' Veja o aviso no cartão.' : ''}`);
+    } catch (er) { UI.toast(er.message || String(er)); }
+    delete this.ui.ocupados[ch]; App.render();
+  },
+
+  /* ---------- Testar Disparo ---------- */
+  testar(ch) {
+    const e = this.ev(ch); if (!e) return;
+    const d = this.rasc(e), t = this.ui.teste, cfg = this.ui.estado.config, fixos = e.regra.destinatarios.length, self = this;
+    const faltas = c => { const x = c === 'EMAIL' ? cfg.email : cfg.whatsapp; return x.configurado ? '' : `${c === 'EMAIL' ? 'E-mail' : 'WhatsApp'} ainda não configurado (faltam ${x.faltam.join(' e ')}): o teste vai aparecer como aviso na Auditoria de Logs.`; };
+    UI.modal({ titulo: 'Testar Disparo', largo: false,
+      corpo: `<p style="margin:0 0 10px">Envia a mensagem de <b>exemplo</b> do evento <b>${esc(e.nome)}</b> — dados fictícios, marcada como [TESTE]. A regra não é alterada e nenhuma informação real é usada.</p>
+        <div class="form-grid">
+          <div class="field"><label class="lbl" for="ntTEmail">E-mail para o teste</label><input id="ntTEmail" type="email" autocomplete="off" placeholder="nome@empresa.com.br" value="${esc(t.email)}"></div>
+          <div class="field"><label class="lbl" for="ntTTel">WhatsApp para o teste</label><input id="ntTTel" type="tel" autocomplete="off" placeholder="(11) 99999-0000" value="${esc(t.telefone)}"></div>
+          <div class="field full"><label class="lbl" for="ntTCanal">Canal</label><select id="ntTCanal">${this.CANAIS.map(([v, l]) => `<option value="${v}"${d.canal === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div></div>
+        ${fixos ? `<label class="check" style="margin-top:10px"><input type="checkbox" id="ntTReg"><span>Enviar o teste aos ${fixos} destinatário${fixos > 1 ? 's' : ''} fixo${fixos > 1 ? 's' : ''} já salvo${fixos > 1 ? 's' : ''} nesta regra (em vez do e-mail/WhatsApp acima)</span></label>` : ''}
+        <div id="ntTAviso" class="nt-t-aviso"></div><div id="ntTRes" class="nt-t-res" aria-live="polite"></div>`,
+      acoes: [{ rotulo: 'Fechar', classe: 'sec' }, { rotulo: 'Enviar teste', acao: async m => {
+        const em = ($('#ntTEmail', m).value || '').trim(), tel = ($('#ntTTel', m).value || '').trim(), canal = $('#ntTCanal', m).value, reg = !!$('#ntTReg', m)?.checked, res = $('#ntTRes', m), btn = m.querySelector('footer [data-i="1"]');
+        if (!reg && !em && !tel) { UI.toast('Informe um e-mail ou um WhatsApp para receber o teste.'); return false; }
+        if (!reg && em && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { UI.toast('E-mail de teste inválido.'); return false; }
+        if (!reg && tel && (tel.replace(/\D/g, '').length < 10)) { UI.toast('WhatsApp de teste inválido. Use DDD + número.'); return false; }
+        self.ui.teste = { email: em, telefone: tel }; btn.disabled = true; res.innerHTML = '<p class="hint" style="margin:10px 0 0">Enviando o teste…</p>';
+        try {
+          const r = await Cloud.base._req('POST', '/api/notificar', { acao: 'testar', evento: e.chave, canal, para: reg ? {} : { email: em, telefone: tel } });
+          res.innerHTML = `<div class="nt-res-l">${r.resultados.map(x => `<div class="nt-res ${x.status === 'SUCESSO' ? 'ok' : 'bad'}"><span class="pill ${x.status === 'SUCESSO' ? 'ok' : 'bad'}">${x.status === 'SUCESSO' ? 'Enviado' : 'Erro'}</span> <b>${x.canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</b> · ${esc(x.destinatario)}${x.status === 'SUCESSO' ? '' : `<div class="hint">${esc(x.erro || 'Falha no envio.')}</div>`}</div>`).join('') || '<p class="hint">Nenhum destinatário com contato para este canal.</p>'}</div>`;
+          if (self.ui.estado && r.config) self.ui.estado.config = r.config;
+          self.ui.logs.carregado = false; self.auditar(e, [{ campo: 'teste de disparo', de: '', para: `${canal} · ${r.resultados.filter(x => x.status === 'SUCESSO').length}/${r.resultados.length} enviado(s)` }], 'testou');
+        } catch (er) { res.innerHTML = `<div class="note warn" role="alert" style="margin:10px 0 0">${esc(er.message || String(er))}</div>`; }
+        btn.disabled = false; return false;
+      } }],
+      aoAbrir: m => { const c = $('#ntTCanal', m), av = $('#ntTAviso', m), mostrar = () => { const x = c.value === 'AMBOS' ? [faltas('EMAIL'), faltas('WHATSAPP')] : [faltas(c.value)]; av.innerHTML = x.filter(Boolean).map(z => `<div class="note warn" style="margin:10px 0 0">${esc(z)}</div>`).join(''); }; c.addEventListener('change', mostrar); mostrar(); } });
+  },
+
+  /* ---------- Auditoria: detalhes e Reenviar Notificação ---------- */
+  async detalhes(id) {
+    const ld = UI.carregando('Abrindo o envio…'); let d;
+    try { d = await Cloud.base._req('POST', '/api/notificar', { acao: 'log', id }); } catch (e) { ld.fechar(); return UI.toast(e.message || String(e)); }
+    ld.fechar(); const ok = d.status === 'SUCESSO';
+    UI.modal({ titulo: `Envio #${d.id}`, largo: true,
+      corpo: `<div class="nt-det"><div class="nt-det-g"><div><div class="lbl">Evento</div>${esc(d.eventoNome)}${d.teste ? ' <span class="pill neutral">Teste</span>' : ''}</div><div><div class="lbl">Data e hora</div>${esc(Fmt.dataHora(d.dataHora))}</div>
+        <div><div class="lbl">Canal</div>${d.canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</div><div><div class="lbl">Destinatário</div>${esc(d.destinatario)}${d.destinatarioNome ? ` · ${esc(d.destinatarioNome)}` : ''}</div>
+        <div><div class="lbl">Status</div><span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'Sucesso' : 'Erro'}</span>${!ok && d.tipoErro ? ` <span class="hint">${esc(this.TIPO_ERRO[d.tipoErro] || d.tipoErro)}${d.tentativa > 1 ? ` · tentativa ${d.tentativa}` : ''}</span>` : ''}</div></div>
+        ${ok ? '' : `<div class="note warn" role="alert">${esc(d.detalheErro || 'Falha no envio.')}</div>`}
+        <div class="lbl" style="margin-top:12px">Assunto / título</div><p style="margin:0 0 8px"><b>${esc(d.titulo)}</b></p>
+        <div class="lbl">Conteúdo enviado</div><pre class="nt-pre">${esc(d.texto || '(sem texto guardado)')}</pre>
+        ${(d.anexos || []).length ? `<div class="lbl" style="margin-top:10px">Anexos</div><ul class="nt-anexos">${d.anexos.map(a => `<li>${esc(a.nome)} <span class="hint">· ${Fmt.num(Math.max(1, Math.round(a.bytes / 1024)))} KB</span></li>`).join('')}</ul>` : ''}
+        ${(d.anexoOmitidoNomes || []).length ? `<div class="note warn" style="margin-top:10px">O anexo ${d.anexoOmitidoNomes.map(esc).join(', ')} não foi guardado no log (tamanho): um reenvio sai sem ele.</div>` : ''}</div>`,
+      acoes: [{ rotulo: 'Fechar', classe: 'sec' }, { rotulo: 'Reenviar Notificação', desabilitado: /^\(/.test(d.destinatario) ? 'Sem e-mail/telefone cadastrado para este destinatário.' : '', acao: () => { setTimeout(() => this.reenviar(d.id, d), 60); } }] });
+  },
+  reenviar(id, d) {
+    const l = d || this.ui.logs.itens.find(x => x.id === id); if (!l) return UI.toast('Atualize a lista: esse envio não está mais disponível.');
+    UI.modal({ titulo: 'Reenviar Notificação',
+      corpo: `<p style="margin:0 0 8px">Reenviar <b>${esc(l.titulo)}</b> para <b>${esc(l.destinatario)}</b> por ${l.canal === 'EMAIL' ? 'e-mail' : 'WhatsApp'}?</p>
+        <p class="hint" style="margin:0">O conteúdo guardado é enviado de novo exatamente como estava e o resultado entra no log como um novo registro ligado a este (#${l.id}).${l.anexoOmitido ? ' O anexo não foi guardado no log: o reenvio sai sem ele.' : ''}</p>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Reenviar agora', acao: async m => {
+        const b = m.querySelector('footer [data-i="1"]'); b.disabled = true; let r;
+        try { r = await Cloud.base._req('POST', '/api/notificar', { acao: 'reenviar', id: l.id }); } catch (e) { b.disabled = false; UI.toast(e.message || String(e)); return false; }
+        try { Audit.registrar({ modulo: 'notificacoes', acao: 'reenviou', entidade: 'notificacao', entidadeId: String(l.id), rotulo: `Reenvio de notificação · ${l.eventoNome}`, mudancas: [{ campo: 'resultado', de: '', para: r.status }] }); } catch { /* segue */ }
+        UI.toast(r.status === 'SUCESSO' ? 'Notificação reenviada com sucesso.' : 'O reenvio falhou: ' + (r.erro || 'veja o motivo na Auditoria de Logs.'));
+        this.carregarLogs(true); this.carregar(true); return true;
+      } }] });
+  },
+};
+window.CentralNotif = CentralNotif;
+
+/* =====================================================================
+   v14.00 · RESUMO DO RECEBÍVEL → relatório matinal executivo
+   O servidor não calcula o FCX (ele vive no navegador). Por isso o painel publica, em segundo plano, o resultado do Resumo do Recebível
+   do dia (quem é Master ou vê o FCX): entradas por meio e por adquirente, saídas e saldo. O relatório das 07:30 usa o do dia; se ainda
+   ninguém abriu o painel, usa o mais recente e avisa que está defasado. Só números agregados: nada de dados pessoais.
+   ===================================================================== */
+const SnapshotRecebivel = {
+  _h: '', _ts: 0, _i: false, INTERVALO: 20 * 60e3,
+  ativo() { return g00() && !!Cloud.base?.netlify && !!Auth.id && (Auth.perfilReal === 'GESTOR' || Auth.can('fcx.ver')); },
+  txt(v) { return String(v == null ? '' : v).replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim().slice(0, 40); },
+  normalizar(r) {
+    const n2 = v => (v == null ? null : Math.round((Number(v) || 0) * 100) / 100), c = r.cons97;
+    return { d: r.d, ant: r.ant, em: r.em, informado: !!r.informado, entradas: n2(r.entradas) || 0, saidas: n2(r.saidas), saldo: n2(r.saldo), nSaidas: r.nSaidas || 0,
+      meios: [['Dinheiro', r.din, r.pDin, r.tDin], ['PIX', r.pix, r.pPix, r.tPix], ['Cartão', r.vCart, r.pLote, r.tCart]].map(([rot, v, p, t]) => ({ rot, vendas: n2(v) || 0, prestacao: n2(p) || 0, total: n2(t != null ? t : (Number(v) || 0) + (Number(p) || 0)) || 0 })),
+      adquirentes: c && Array.isArray(c.resumo) ? c.resumo.map(x => ({ rot: this.txt(x.rot), deb: n2(x.deb), cre: n2(x.cre), total: n2(x.total) || 0 })) : (r.adqs || []).map(([rot, v]) => ({ rot: this.txt(rot), deb: null, cre: null, total: n2(v) || 0 })),
+      porConta: (r.porConta || []).map(([rot, valor, n]) => [this.txt(rot), n2(valor) || 0, n || 0]),
+      carga: r.carga ? { ok: !!r.carga.ok, dia: r.carga.dia || '', arquivo: this.txt(r.carga.arquivo) } : null,
+      avisos: [...(r.avisos || []), ...(c && Array.isArray(c.avisos) ? c.avisos.map(a => a.texto) : [])].map(a => this.txt(a)).filter(Boolean).slice(0, 8) };
+  },
+  async publicar(r) {
+    if (!this.ativo() || !r || !r.d) return;
+    const n = this.normalizar(r), h = JSON.stringify({ ...n, em: '' });
+    if (h === this._h && Date.now() - this._ts < this.INTERVALO) return; /* nada mudou desde o último envio */
+    this._h = h; this._ts = Date.now();
+    try { await Cloud.base._req('POST', '/api/notificar', { acao: 'instantaneo', dados: n }); }
+    catch (e) { this._h = ''; console.warn('[painel] resumo do recebível não publicado:', e?.message || e); }
+  },
+  /** logo depois do login (App.iniciarPainel): calcula e publica uma vez e repete enquanto o painel estiver aberto */
+  iniciar() {
+    if (this._i) return; this._i = true;
+    const rodar = async () => { if (!Sessao.ativa) return; if (!this.ativo()) return; try { await this.publicar(await ResumoRecebivel.calcular()); } catch (e) { console.warn('[painel] resumo do recebível:', e?.message || e); } };
+    setTimeout(rodar, 25000); setInterval(rodar, this.INTERVALO);
+  },
+};
+window.SnapshotRecebivel = SnapshotRecebivel;
+
 /* ------------------------------ Backup ------------------------------ */
 const Bkp = {
   // v13.1: backup completo — todas as coleções de negócio (o log de auditoria segue opcional, na caixa abaixo)
@@ -20507,7 +20932,7 @@ const ROTEADOR = [
   [/^mig-/, () => MigracoesBanco], // v13.94 · botão "Executar Migrações do Banco"
   [/^cmp-/, () => ConcMP], // v13.69
   [/^(pes|func|sal|pdi|plano|folha)-/, () => Pessoal], [/^rt-/, () => Retaguarda], [/^(fcx|fd)-/, () => FCX], [/^(lj|adq|ti|desp|seg|doc)-/, () => Lojas], [/^ct-/, () => Contratos], [/^alg-/, () => ProjecaoOcupacao],
-  [/^aud-/, () => Aud], [/^bkn-/, () => BackupNuvem], [/^bkp-/, () => Bkp], [/^sess-/, () => Sessao], [/^acc-/, () => Acessos], [/^cs-/, () => Credsystem], [/^rhm-/, () => ModRH], [/^org-/, () => Organograma], [/^lib-/, () => Liberacao], [/^arq-/, () => Arquivos], [/^ini-/, () => Inicio], [/^pe-/, () => PontoEquilibrio], [/^vg-/, () => Viagens], [/^rod$/, () => Rodape],
+  [/^aud-/, () => Aud], [/^bkn-/, () => BackupNuvem], [/^nt-/, () => CentralNotif], [/^bkp-/, () => Bkp], [/^sess-/, () => Sessao], [/^acc-/, () => Acessos], [/^cs-/, () => Credsystem], [/^rhm-/, () => ModRH], [/^org-/, () => Organograma], [/^lib-/, () => Liberacao], [/^arq-/, () => Arquivos], [/^ini-/, () => Inicio], [/^pe-/, () => PontoEquilibrio], [/^vg-/, () => Viagens], [/^rod$/, () => Rodape],
 ];
 const alvo = a => (ROTEADOR.find(([re]) => re.test(a)) || [])[1]?.();
 document.addEventListener('click', e => {
@@ -20555,6 +20980,7 @@ App.iniciarPainel = function () {
   ContratosManutencao._feito = false; ContratosManutencao.iniciar(); // GESTOR: migra apólices antigas das lojas e confere o espelho de vigência
   BackupDiario.iniciar(); // v13.64: trava do backup diário obrigatório
   BackupNuvem.primeiroAcesso(); // v13.95: ponto de restauração do primeiro acesso do dia, em segundo plano (qualquer perfil)
+  SnapshotRecebivel.iniciar(); // v14.00: publica o Resumo do Recebível para o relatório matinal executivo (Master ou quem vê o FCX; só com o recurso ativo)
   Recursos.garantirHomolog(); // v13.65: correções novas ficam ativas na Homologação até a liberação
 };
 

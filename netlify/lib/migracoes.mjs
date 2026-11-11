@@ -134,6 +134,7 @@ export const VERIFICACOES = [
   { rotulo: 'Empresas: dados da Receita Federal (v13.94)', colunas: [['contab_empresas', 'receita']] },
   { rotulo: 'Índice de documentos dos lançamentos', indices: ['contab_lanc_doc_ref_ix'] },
   { rotulo: 'Pontos de restauração na nuvem (v13.95)', tabelas: ['painel_backups_historico'], indices: ['painel_backups_hist_data_ix'] },
+  { rotulo: 'Central de Notificações: regras, log de envios e resumo do recebível (v14.00)', tabelas: ['painel_notificacoes_regras', 'painel_notificacoes_log', 'painel_notificacoes_instantaneo'], indices: ['painel_notif_log_data_ix', 'painel_notif_log_ref_ix'] },
 ];
 
 export async function verificarEsquema(c) {
