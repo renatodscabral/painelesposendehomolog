@@ -1434,6 +1434,7 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 @media(max-width:1000px){.rr-blocos{flex-direction:column;} .rr-bloco{flex-basis:auto;width:100%;}}
 .rr-tab{width:100%;font-size:13px;} .rr-tab td.num,.rr-tab th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;} .rr-tab tr.rr-grupo td{font-weight:600;} .rr-tab tr.rr-sub td{color:var(--ink-soft);font-size:12.5px;} .rr-tab tr.rr-sub td:first-child{padding-left:22px;}
 .rr-tab tr.rr-total td{font-weight:700;background:var(--navy-soft);color:var(--ink);} .rr-h3{font-size:13.5px;margin:12px 0 6px;} .rr-bloco h2{margin-bottom:10px;}
+.rr-tab tr[hidden]{display:none !important;} .rr-tgl{border:0;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1;padding:2px 6px;margin:0 2px 0 -6px;border-radius:6px;} .rr-tgl:hover{background:var(--navy-soft);} .rr-tgl:focus-visible{outline:2px solid var(--navy);outline-offset:1px;} .rr-resumo td:first-child{padding-left:12px;}
 .acc-matriz tr.acc-sub td{padding-top:0;border-top:0;} .acc-sub details{margin:0 0 8px 4px;border:1px dashed var(--line);border-radius:8px;padding:4px 10px;background:var(--panel-2);color:var(--ink);} /* v13.83.1: fundo do tema (antes ficava branco no escuro) */
 .acc-sub summary{cursor:pointer;font-size:12.5px;color:var(--ink-soft);padding:3px 0;} .acc-sub-g .lbl{color:var(--ink-soft);} .acc-sub-g .check{color:var(--ink);} .acc-sub summary b{color:var(--ink);font-weight:600;}
 .acc-sub-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 18px;padding:6px 0 4px;} .acc-sub-g .lbl{grid-column:1/-1;margin:6px 0 0;}
@@ -1660,6 +1661,26 @@ html.fw94 .mig-esq li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
 html.fw94 .amb-acao{min-width:0;}
 html.fw94 .amb-acao .btn{white-space:normal;max-width:100%;text-align:center;}
 @media (max-width:720px){html.fw94 .tbl-wrap:has(>table.nolabel){overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}}
+/* v13.95 · Pontos de Restauração na Nuvem (Backup e dados) */
+.bkn-topo{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.bkn-topo>div:first-child{flex:1 1 360px;min-width:0;}
+.bkn-topo .row{flex:0 0 auto;gap:8px;flex-wrap:wrap;}
+.bkn .tbl-wrap{margin-top:10px;}
+.bkn td.num{white-space:nowrap;}
+.bkn .bkn-acao{text-align:right;white-space:nowrap;}
+.bkn .btn{white-space:normal;}
+.bkn-esc{margin:12px 0 0;}
+.bkn-lista{margin:10px 0;padding-left:20px;display:grid;gap:6px;font-size:13.5px;line-height:1.45;}
+.bkn-conf{margin-top:12px;}
+.bkn-conf input{font-family:var(--font-mono);letter-spacing:.08em;text-transform:none;}
+.bkn-conting{padding:0;}
+.bkn-conting>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px;cursor:pointer;list-style:none;font-family:var(--font-display);font-size:16.5px;font-weight:650;border-radius:var(--radius);}
+.bkn-conting>summary::-webkit-details-marker{display:none;}
+.bkn-conting>summary::before{content:'';flex:none;width:8px;height:8px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);transform:rotate(-45deg);transition:transform .15s var(--ease);}
+.bkn-conting[open]>summary::before{transform:rotate(45deg);}
+.bkn-conting-corpo{padding:0 20px 20px;}
+.bkn-conting-corpo .panel{box-shadow:none;}
+@media (max-width:720px){.bkn-conting>summary{padding:14px 16px;} .bkn-conting-corpo{padding:0 16px 16px;} .bkn .bkn-acao{text-align:left;}}
 </style>
 <header id="topbar" class="topbar"></header>
 <main class="wrap" id="main"></main>
@@ -2308,7 +2329,7 @@ const Auth = {
     this.recalcular();
   },
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
-  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
+  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394') + '|' + Recursos.ativo('backup_nuvem_v1395'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
   recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; try { Repo._salarios93(); } catch { } /* v13.93 */ },
   loja: false,
   limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
@@ -3915,6 +3936,12 @@ const GestaoAmbientes = {
 
 
 /** v13.94 · o recurso da versão está ativo neste ambiente? (layout 100% da largura, consulta de CNPJ/CPF, Fornecedores e Clientes) */
+/** v13.95 · o recurso dos Pontos de Restauração na Nuvem está ativo neste ambiente? */
+/** v13.96 · o recurso da versão está ativo neste ambiente? (rótulos do Recebível, partidas dobradas e Biblioteca CPC & Regras Fiscais) */
+/** v13.97 · o recurso da versão está ativo neste ambiente? (Consolidado de Entradas por Crédito e Débito e Resumo por Adquirente) */
+function g97() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1397'); }
+function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
+function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
 /** v13.93 · o recurso da versão está ativo neste ambiente? (declaração com hoisting: vale em qualquer ponto do arquivo) */
 function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1393'); }
@@ -3926,7 +3953,7 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -18778,9 +18805,9 @@ const ResumoRecebivel = {
   /** Os números do dia (pura leitura). */
   async calcular(d = this.hoje()) {
     const ant = this.ontem(d), r2 = v => Math.round((Number(v) || 0) * 100) / 100;
-    const [form, futuros, saidasFcx, carga] = await Promise.all([this.ler('esp2:recebivelDiario', {}), this.ler('esp2:recebiveisCredsystem', {}), this.ler('esp2:saidas', []), this.ler('esp2:cargaSaidas', null)]);
+    const [form, futuros, saidasFcx, carga, hist] = await Promise.all([this.ler('esp2:recebivelDiario', {}), this.ler('esp2:recebiveisCredsystem', {}), this.ler('esp2:saidas', []), this.ler('esp2:cargaSaidas', null), g97() ? this.ler('esp2:salesHistory', []) : Promise.resolve([])]);
     const pn = await window.PainelFCX.recebiveis(ant), f = (form || {})[d] || {}, cart = pn.cartao || {}, pr = pn.prestacao || {};
-    const din = Number(f.dinheiro) || 0, pix = Number(f.pix) || 0, cartao = Number(cart.liquido) || 0, pDin = Number(pr.din) || 0, pPix = Number(pr.pix) || 0, pLote = Number(pr.lote) || 0;
+    const pixR = g97() ? window.PainelFCX.pixReal1397(f.pix, window.PainelFCX.pixDoHistorico1397(hist, ant)) : null, din = Number(f.dinheiro) || 0, pix = pixR ? pixR.valor : Number(f.pix) || 0, cartao = Number(cart.liquido) || 0, pDin = Number(pr.din) || 0, pPix = Number(pr.pix) || 0, pLote = Number(pr.lote) || 0;
     const credHoje = Object.values(futuros || {}).filter(x => x.vencimento === d), cred = r2(credHoje.reduce((a, x) => a + (Number(x.valor) || 0), 0));
     const adqs = Object.entries(cart.porAdquirente || {}).filter(([, v]) => Math.abs(Number(v) || 0) > 0.004).sort((a, b) => b[1] - a[1]);
     const isoLocal = t => { const x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }, cargaDia = carga && carga.em ? isoLocal(carga.em) : '';
@@ -18789,8 +18816,25 @@ const ResumoRecebivel = {
     const agrupar = (k, max) => { const m = {}; lista.forEach(s => { const c = String(s[k] || '').trim() || '(não informado)'; const g = (m[c] ||= [c, 0, 0]); g[1] += s.liquido; g[2]++; }); let a = Object.values(m).sort((x, y) => y[1] - x[1]); if (a.length > max) { const resto = a.slice(max - 1); a = a.slice(0, max - 1).concat([[`Outros (${resto.length})`, resto.reduce((t, x) => t + x[1], 0), resto.reduce((t, x) => t + x[2], 0)]]); } return a; };
     const tDin = r2(din + pDin), tPix = r2(pix + pPix), vCart = r2(cartao + cred), tCart = r2(vCart + pLote), entradas = r2(tDin + tPix + tCart), saidas = cargaOk ? r2(lista.reduce((a, s) => a + s.liquido, 0)) : null;
     return { d, ant, em: new Date().toISOString(), informado: f.dinheiro != null || f.pix != null, din, pix, cartao, pDin, pPix, pLote, cred, credN: credHoje.length, adqs, tDin, tPix, vCart, tCart, entradas,
-      saidas, saldo: saidas == null ? null : r2(entradas - saidas), porConta: cargaOk ? agrupar('conta', 6) : [], porForma: cargaOk ? agrupar('formaPagamento', 5) : [], nSaidas: lista.length,
+      pixFonte: pixR ? pixR.fonte : null, cons97: g97() ? window.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred, credN: credHoje.length, pn, liquido: false }) : null,
+      saidas, saldo: saidas == null ? null : r2(entradas - saidas), prestLinhas: g96() ? window.PainelFCX.linhasPrestacao(pn, pLote, false) : null, porConta: cargaOk ? agrupar('conta', 6) : [], porForma: cargaOk ? agrupar('formaPagamento', 5) : [], nSaidas: lista.length,
       carga: carga && carga.em ? { ok: cargaOk, dia: cargaDia, arquivo: carga.arquivo || '', linhas: carga.linhas || 0 } : null, avisos: pn.avisos || [] };
+  },
+  _col: { cred: false, deb: false },
+  /** v13.97 · linhas do Consolidado de Entradas: Dinheiro, PIX e os grupos Crédito e Débito com o detalhamento por adquirente (recolhível). */
+  linhas97(r) {
+    const B = v => Fmt.brl(v), pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—', c = r.cons97;
+    return c.linhas.map(x => {
+      const fechado = x.g ? this._col[x.g] : false, abre = x.tgl ? !this._col[x.tgl] : false, soma = (x.v || 0) + (x.p || 0);
+      const tg = x.tgl ? `<button type="button" class="rr-tgl" data-a="ini-rec-tgl" data-g="${x.tgl}" aria-expanded="${abre}" aria-label="${abre ? 'Recolher' : 'Mostrar'} o detalhamento por adquirente" title="${abre ? 'Recolher' : 'Mostrar'} o detalhamento">${abre ? '▾' : '▸'}</button>` : '';
+      return `<tr class="${x.nivel === 'sub' ? 'rr-sub' : 'rr-grupo'}"${x.g ? ` data-g="${x.g}"` : ''}${fechado ? ' hidden' : ''}><td>${tg}${x.rot}</td><td class="num">${x.v == null ? '—' : B(x.v)}</td><td class="num">${x.p == null ? '—' : B(x.p)}</td><td class="num">${B(soma)}</td><td class="num">${pct(soma, c.total)}</td></tr>`;
+    }).join('');
+  },
+  /** v13.97 · quadro "Resumo por Adquirente" (Débito + Crédito de cada adquirente; a Credsystem à parte). */
+  resumo97(r) {
+    const B = v => v == null ? '—' : Fmt.brl(v), c = r.cons97, pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—', tot = k => c.resumo.reduce((a, x) => a + (x[k] || 0), 0);
+    const linha = x => `<tr><td>${x.rot}</td><td class="num">${B(x.deb)}</td><td class="num">${B(x.cre)}</td><td class="num">${B(x.total)}</td><td class="num">${pct(x.total, c.total)}</td></tr>`;
+    return `<h3 class="rr-h3">Resumo por Adquirente</h3><div class="tbl-wrap"><table class="rr-tab rr-resumo"><thead><tr><th>Adquirente</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>${c.resumo.map(linha).join('')}<tr class="rr-total"><td>Total em cartões</td><td class="num">${B(tot('deb'))}</td><td class="num">${B(tot('cre'))}</td><td class="num">${B(tot('total'))}</td><td class="num">${pct(tot('total'), c.total)}</td></tr></tbody></table></div><p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). O Débito inclui as prestações recebidas no cartão de débito (arquivo do ERP), na adquirente de cada uma. A Credsystem entra só no dia do vencimento.${r.pixFonte === 'historico' ? ' PIX das vendas: histórico de vendas do FCX (nada foi digitado no Recebível Diário).' : ''}</p>`;
   },
   async atualizar(forcar = false) {
     const d = this.hoje(); if (this._carregando || (!forcar && this._r && this._r.d === d && Date.now() - Date.parse(this._r.em) < this.TTL && this._v === FCX.versao)) return;
@@ -18805,7 +18849,7 @@ const ResumoRecebivel = {
     const lin = (rot, v, pr, cls = '') => `<tr class="${cls}"><td>${rot}</td><td class="num">${v == null ? '—' : B(v)}</td><td class="num">${pr == null ? '—' : B(pr)}</td><td class="num">${B((v || 0) + (pr || 0))}</td><td class="num">${pct((v || 0) + (pr || 0), r.entradas)}</td></tr>`;
     const kpi = (t, v, cls, sub) => `<div class="ini-kpi rr-kpi e-${cls}"><div class="ini-top"><span class="ini-tit">${t}</span></div><div class="ini-v">${v == null ? '—' : B(v)}</div><div class="ini-sub">${sub}</div></div>`;
     const grupo = (tit, g, total) => `<h3 class="rr-h3">${tit}</h3><div class="tbl-wrap"><table class="rr-tab"><thead><tr><th>${tit.includes('forma') ? 'Forma de pagamento' : 'Conta contábil'}</th><th class="num">Qtd.</th><th class="num">Valor</th><th class="num">%</th></tr></thead><tbody>${g.map(([k, v, n]) => `<tr><td>${esc(k)}</td><td class="num">${n}</td><td class="num">${B(v)}</td><td class="num">${pct(v, total)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nenhuma conta a pagar hoje.</td></tr>'}</tbody></table></div>`;
-    const avisos = [...r.avisos, ...(!r.informado ? [`Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
+    const avisos = [...r.avisos, ...(r.cons97 ? r.cons97.avisos.map(a => a.texto) : []), ...(!r.informado ? [`Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
       ...(!r.carga ? ['Saídas: nenhum arquivo de Entradas e Saídas foi importado no FCX (Gerenciar dados › Saídas).'] : !r.carga.ok ? [`Saídas: o último arquivo de Entradas e Saídas é de ${Fmt.data(r.carga.dia)} — importe o arquivo de hoje no FCX para ver as saídas e o saldo.`] : [])];
     const podeFcx = Auth.can('fcx.ver') && App.pode(MODULOS.find(m => m.id === 'fcx'));
     return `<div class="rr">
@@ -18816,14 +18860,15 @@ const ResumoRecebivel = {
       <div class="rr-blocos">
         <div class="panel rr-bloco"><h2>Consolidado de Entradas (Vendas + Prestações)</h2>
           <div class="tbl-wrap"><table class="rr-tab rr-cons"><thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
-            ${lin('Total em Dinheiro', r.din, r.pDin, 'rr-grupo')}${lin('Total em PIX', r.pix, r.pPix, 'rr-grupo')}${lin('Total em Cartão', r.vCart, r.pLote, 'rr-grupo')}
-            ${r.adqs.map(([a, v]) => lin(esc(a), v, null, 'rr-sub')).join('')}${r.cred ? lin(`CREDSYSTEM (vence hoje · ${r.credN})`, r.cred, null, 'rr-sub') : ''}${r.pLote ? lin('Débito (LOTE) da prestação', null, r.pLote, 'rr-sub') : ''}
+            ${r.cons97 ? this.linhas97(r) : `${lin('Total em Dinheiro', r.din, r.pDin, 'rr-grupo')}${lin('Total em PIX', r.pix, r.pPix, 'rr-grupo')}${lin('Total em Cartão', r.vCart, r.pLote, 'rr-grupo')}
+            ${r.adqs.map(([a, v]) => lin(esc(a), v, null, 'rr-sub')).join('')}${r.cred ? lin(`CREDSYSTEM (vence hoje · ${r.credN})`, r.cred, null, 'rr-sub') : ''}${r.pLote ? (r.prestLinhas ? r.prestLinhas.map(x => lin(esc(x.rotulo), null, x.valor, 'rr-sub')).join('') : lin('Débito (LOTE) da prestação', null, r.pLote, 'rr-sub')) : ''}`}
             <tr class="rr-total"><td>Total Geral de Entradas do Dia</td><td class="num">${B(r.din + r.pix + r.vCart)}</td><td class="num">${B(r.pDin + r.pPix + r.pLote)}</td><td class="num">${B(r.entradas)}</td><td class="num">${r.entradas > 0 ? '100%' : '—'}</td></tr>
-          </tbody></table></div><p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). A Credsystem entra só no dia do vencimento.</p></div>
+          </tbody></table></div>${r.cons97 ? this.resumo97(r) : '<p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). A Credsystem entra só no dia do vencimento.</p>'}</div>
         <div class="panel rr-bloco"><h2>Saídas do dia</h2>${r.saidas == null ? '<p class="muted" style="margin:0">As saídas aparecem quando o arquivo de Entradas e Saídas de hoje estiver importado no FCX.</p>' : grupo('Por conta contábil', r.porConta, r.saidas) + grupo('Por forma de pagamento', r.porForma, r.saidas)}</div>
       </div></div>`;
   },
-  acao(a) {
+  acao(a, el) {
+    if (a === 'ini-rec-tgl') { const g = el && el.dataset ? el.dataset.g : ''; if (g in this._col) { this._col[g] = !this._col[g]; App.render(); } return; }
     if (a === 'ini-rec-atualizar') { this.atualizar(true); return App.render(); }
     if (a === 'ini-rec-fcx') { FCX.ui.aba = 'fcx'; App.ir('fcx'); let n = 0; const t = setInterval(() => { const w = $('#fcxFrame')?.contentWindow; try { if (w && w.FCXAPI && w.FCXAPI.pronto() && w.eval('state').loaded) { clearInterval(t); if (typeof w.goto === 'function') w.goto('recebivel'); } } catch { } if (++n > 150) clearInterval(t); }, 200); }
   },
@@ -19579,6 +19624,114 @@ const MigracoesBanco = {
   },
 };
 
+/* =====================================================================
+   v13.95 · PONTOS DE RESTAURAÇÃO NA NUVEM (Cloud Snapshots & Versioning · recurso backup_nuvem_v1395 · sites do Netlify)
+   O servidor (/api/backup-nuvem) guarda fotografias dos dados do painel na tabela painel_backups_historico: automática no primeiro acesso
+   do dia (qualquer perfil, em segundo plano, logo depois do login), automática às 23:59 de Brasília (função agendada), ou manual (botão).
+   A tela lista os 30 últimos pontos. Só o Master restaura — digitando RESTAURAR — e o servidor cria sozinho um ponto preventivo antes de
+   sobrescrever. Usuários e senhas só voltam se o Master marcar a opção; log de auditoria, anexos e livro contábil nunca são tocados.
+   ===================================================================== */
+const BackupNuvem = {
+  ui: { dados: null, erro: '', ocupado: false, criando: false, falhou: false, ts: 0 },
+  PALAVRA: 'RESTAURAR', _pa: false,
+  TIPO: { AUTOMATICO: ['info', 'Agendado'], PRIMEIRO_ACESSO: ['neutral', '1º Acesso'], MANUAL: ['ok', 'Manual'] },
+  nuvem() { return g95() && !!Cloud.base?.netlify; },
+  pode() { return this.nuvem() && Auth.can('backup.exportar'); },
+  podeRestaurar() { return this.nuvem() && GestaoAmbientes.pode(); }, /* Master de verdade (não simulado) */
+  tam(b) { b = Number(b) || 0; return b < 1024 ? b + ' B' : b < 1048576 ? Fmt.num(b / 1024, 1) + ' KB' : Fmt.num(b / 1048576, 1) + ' MB'; },
+  /** logo depois do login (App.iniciarPainel), qualquer perfil: se ainda não há ponto hoje, o servidor cria o de "primeiro acesso" — sem avisar nem travar nada */
+  primeiroAcesso() {
+    if (this._pa) return; this._pa = true;
+    const tentar = n => {
+      if (!Sessao.ativa) { this._pa = false; return; }
+      if (!Repo.prontas.has('config') && n < 30) return setTimeout(() => tentar(n + 1), 500); /* espera as configurações (a lista de recursos liberados) chegarem; no máximo ~15 s */
+      if (!this.nuvem()) { this._pa = false; return; } /* recurso desligado neste ambiente: nenhuma chamada */
+      Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'verificar-primeiro-acesso' })
+        .then(r => { this.ui.primeiro = r; if (r?.criado) this.ui.ts = 0; if (r?.criado && App.rota === 'backup') this.carregar(); })
+        .catch(() => { this._pa = false; }); /* sem rede / sem sessão: tenta de novo na próxima inicialização */
+    };
+    setTimeout(() => tentar(0), 1200);
+  },
+  render() {
+    if (!this.pode()) return '';
+    const u = this.ui, d = u.dados, r = this.podeRestaurar();
+    if (!u.ocupado && !u.criando && !u.falhou && (!d || Date.now() - u.ts > 20000)) setTimeout(() => this.carregar(), 0);
+    const lin = p => {
+      const t = p.preventivo ? ['warn', 'Preventivo'] : this.TIPO[p.tipo] || ['neutral', p.tipo];
+      const quem = p.criador ? `${esc(p.criador.nome || '—')}${p.criador.cpf ? ` <span class="hint mono">${esc(p.criador.cpf)}</span>` : ''}` : '<span class="hint">Sistema (automático)</span>';
+      return `<tr><td data-label="Data / Hora"><b>${esc(Fmt.dataHora(p.dataHora))}</b> <span class="hint">#${p.id}</span></td>
+        <td data-label="Tipo"><span class="pill ${t[0]}">${t[1]}</span>${p.nota ? `<div class="hint">${esc(p.nota)}</div>` : ''}</td>
+        <td data-label="Criador">${quem}</td><td data-label="Registros · Tamanho" class="num">${Fmt.num(p.registros)} registros · ${this.tam(p.tamanho)}</td>
+        ${r ? `<td data-label="" class="bkn-acao acts"><button class="btn sm danger" data-a="bkn-restaurar" data-id="${p.id}">Restaurar esta versão</button></td>` : ''}</tr>`;
+    };
+    const corpo = !d ? `<p class="hint">${u.ocupado ? 'Carregando os pontos de restauração…' : ''}</p>`
+      : !d.pontos.length ? '<p class="hint">Nenhum ponto de restauração ainda. O primeiro é criado no primeiro acesso do dia e a rotina das 23:59 cria um por noite; você também pode criar um agora.</p>'
+      : `<div class="tbl-wrap"><table class="resp"><thead><tr><th>Data / Hora</th><th>Tipo</th><th>Criador</th><th>Registros · Tamanho</th>${r ? '<th></th>' : ''}</tr></thead><tbody>${d.pontos.map(lin).join('')}</tbody></table></div>`;
+    return `<div class="panel bkn" id="bknNuvem">
+      <div class="bkn-topo"><div><h2>Pontos de Restauração na Nuvem</h2>
+        <p class="sub">Fotografias dos dados do painel guardadas no banco: uma no primeiro acesso do dia (de qualquer usuário), uma todo dia às 23:59 (horário de Brasília) e as que você criar na hora. ${r ? 'Restaurar volta o painel a como estava naquele ponto — o sistema cria antes um ponto preventivo com o estado atual, então dá para desfazer.' : 'Só o Master restaura um ponto.'}</p></div>
+        <div class="row"><button class="btn" data-a="bkn-criar"${u.criando ? ' disabled' : ''}>${u.criando ? 'Criando o ponto…' : 'Criar Ponto de Restauração Agora'}</button><button class="btn sec sm" data-a="bkn-atualizar"${u.ocupado ? ' disabled' : ''}>Atualizar</button></div></div>
+      ${u.erro ? `<div class="note warn" role="alert">${esc(u.erro)}</div>` : ''}
+      ${corpo}
+      <p class="hint bkn-esc">${d ? `Mostrando os ${d.pontos.length} mais recentes de ${d.guardados} guardados (a retenção mantém ${d.retencao}). ` : ''}Cada ponto guarda os dados do painel deste ambiente; <b>não</b> inclui o log de auditoria, a presença, os arquivos anexos (PDFs e imagens) nem o livro contábil — os lançamentos contábeis são intangíveis e só se corrigem por estorno.</p></div>`;
+  },
+  pintar() { const el = $('#bknNuvem'); if (!el) return; const t = document.createElement('div'); t.innerHTML = this.render().trim(); if (t.firstElementChild) el.replaceWith(t.firstElementChild); },
+  acao(a, el) {
+    if (!this.pode()) return;
+    if (a === 'bkn-criar') return this.criar();
+    if (a === 'bkn-atualizar') { this.ui.falhou = false; return this.carregar(); }
+    if (a === 'bkn-restaurar') return this.restaurar(Number(el.dataset.id));
+  },
+  async carregar() {
+    this.ui.ocupado = true; this.ui.falhou = false; this.pintar();
+    try { this.ui.dados = await Cloud.base._req('GET', '/api/backup-nuvem'); this.ui.erro = ''; }
+    catch (e) { this.ui.falhou = true; this.ui.erro = e.dados?.codigo === 'sem_esquema' ? e.message : 'Não consegui carregar os pontos de restauração: ' + (e.message || e); }
+    this.ui.ocupado = false; this.ui.ts = Date.now(); this.pintar();
+  },
+  async criar() {
+    if (this.ui.criando) return; this.ui.criando = true; this.ui.erro = ''; this.pintar();
+    try {
+      const r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'criar' });
+      UI.toast(`Ponto de restauração #${r.ponto.id} criado: ${Fmt.num(r.ponto.registros)} registros (${this.tam(r.ponto.tamanho)}).`);
+      try { Audit.registrar({ modulo: 'backup', acao: 'criou', entidade: 'ponto_restauracao', entidadeId: String(r.ponto.id), rotulo: 'Ponto de Restauração na Nuvem (manual)', mudancas: [{ campo: 'registros', de: '', para: String(r.ponto.registros) }] }); } catch { }
+    } catch (e) { UI.toast(e.message || String(e)); this.ui.erro = e.message || ''; }
+    this.ui.criando = false; await this.carregar();
+  },
+  restaurar(id) {
+    if (!this.podeRestaurar()) return;
+    const p = (this.ui.dados?.pontos || []).find(x => x.id === id); if (!p) return UI.toast('Atualize a lista: esse ponto não está mais disponível.');
+    const tipo = p.preventivo ? 'preventivo' : (this.TIPO[p.tipo] || [, p.tipo])[1];
+    UI.modal({ titulo: 'Restaurar esta versão',
+      corpo: `<p style="margin:0 0 8px">Você vai restaurar o ponto <b>#${p.id}</b> de <b>${esc(Fmt.dataHora(p.dataHora))}</b> (${esc(tipo)} · ${Fmt.num(p.registros)} registros).</p>
+        <div class="note warn" role="alert" style="margin:0 0 8px"><b>Os dados atuais serão substituídos</b> pelos desse ponto: tudo o que foi criado, alterado ou excluído depois dele se perde (lojas, colaboradores, FCX, Retaguarda, configurações…).</div>
+        <ul class="bkn-lista"><li>Antes de sobrescrever, o sistema cria sozinho um <b>ponto preventivo</b> com o estado de agora — para desfazer, é só restaurá-lo.</li>
+          <li>Não mudam: o log de auditoria, a presença, os arquivos anexos e o livro contábil.</li>
+          <li><b>Usuários e senhas ficam como estão hoje</b> (uma senha trocada depois do ponto não volta), a não ser que você marque a opção abaixo.</li></ul>
+        <label class="check"><input type="checkbox" id="bknUsr"><span>Restaurar também <b>usuários e acessos</b> (senhas e permissões voltam às da época do ponto; quem foi criado depois some)</span></label>
+        <div class="field bkn-conf"><label for="bknConf">Para confirmar, digite <b>${this.PALAVRA}</b></label><input id="bknConf" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${this.PALAVRA}"></div>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Restaurar agora', classe: 'danger', acao: async m => {
+        const conf = ($('#bknConf', m)?.value || '').trim(), usr = !!$('#bknUsr', m)?.checked;
+        if (conf !== this.PALAVRA) { UI.toast(`Digite ${this.PALAVRA} (em maiúsculas) para confirmar.`); return false; }
+        const ld = UI.carregando('Criando o ponto preventivo e restaurando… não feche esta janela.'); let r;
+        try { r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'restaurar', id: p.id, confirmacao: conf, incluirUsuarios: usr }); }
+        catch (e) { ld.fechar(); UI.toast(e.message || String(e)); return false; }
+        ld.fechar(); setTimeout(() => this.concluido(p, r, usr), 60);
+      } }],
+      aoAbrir: m => { const b = m.querySelector('footer [data-i="1"]'), i = $('#bknConf', m); b.disabled = true; i.addEventListener('input', () => { b.disabled = i.value.trim() !== this.PALAVRA; }); } });
+  },
+  async concluido(p, r, usr) {
+    const s = r.resumo || {};
+    try { await Audit.registrar({ modulo: 'backup', acao: 'restaurou', entidade: 'ponto_restauracao', entidadeId: String(p.id), rotulo: `Restauração do ponto de restauração #${p.id}`,
+      mudancas: [{ campo: 'ponto', de: '', para: `#${p.id} de ${Fmt.dataHora(p.dataHora)}` }, { campo: 'registros', de: '', para: `${s.criados} criados · ${s.atualizados} atualizados · ${s.removidos} removidos` }, { campo: 'ponto preventivo', de: '', para: '#' + (r.preventivo?.id ?? '') }, ...(usr ? [{ campo: 'usuários e acessos', de: '', para: 'restaurados' }] : [])] }); } catch { }
+    try { for (const c of Object.keys(Repo.cols || {})) await Repo.recarregar(c).catch(() => { }); } catch { }
+    UI.modal({ titulo: 'Ponto de restauração aplicado',
+      corpo: `<p style="margin:0 0 8px">O painel voltou ao ponto <b>#${p.id}</b> (${esc(Fmt.dataHora(p.dataHora))}): <b>${Fmt.num(s.criados)}</b> registro(s) recriado(s), <b>${Fmt.num(s.atualizados)}</b> atualizado(s) e <b>${Fmt.num(s.removidos)}</b> removido(s), em ${Fmt.num(s.colecoes)} coleção(ões).${usr ? ' Usuários e acessos também voltaram.' : ''}</p>
+        <p class="hint" style="margin:0">Antes disso foi criado o ponto preventivo <b>#${esc(String(r.preventivo?.id ?? ''))}</b> (${esc(Fmt.dataHora(r.preventivo?.dataHora))}), com o estado de antes da restauração: para desfazer, restaure-o. Recarregue o painel para ver tudo atualizado.</p>`,
+      acoes: [{ rotulo: 'Recarregar o painel', acao: () => { location.reload(); return false; } }] });
+    this.ui.falhou = false; this.carregar();
+  },
+};
+
 /* ------------------------------ Backup ------------------------------ */
 const Bkp = {
   // v13.1: backup completo — todas as coleções de negócio (o log de auditoria segue opcional, na caixa abaixo)
@@ -19595,7 +19748,22 @@ const Bkp = {
         <div class="kpi"><div class="k">Lojas · colaboradores</div><div class="v">${cont('lojas')} · ${cont('funcionarios')}</div><div class="d">registros no cadastro</div></div>
         ${Auth.can('pdi.ver') ? `<div class="kpi"><div class="k">Avaliações PDI</div><div class="v">${Repo.todos('pdi').reduce((a, p) => a + (p.avaliacoes || []).length, 0)}</div><div class="d">em ${cont('pdi')} colaboradores</div></div>` : `<div class="kpi"><div class="k">PDI</div><div class="v" style="font-size:18px">Restrito</div><div class="d">exclusivo do Master (fora deste backup)</div></div>`}
       </div>
+      ${BackupNuvem.pode() ? `${BackupNuvem.render()}
       <div class="grid g2">
+        <div class="panel"><h2>Planilhas (.xlsx)</h2><p class="sub">Lojas, adquirentes e equipe em abas separadas, para conferência no Excel.${Auth.can('pessoal.salario.ver') ? ' Salários só entram se você marcar.' : ''}</p>
+          ${Auth.can('pessoal.salario.ver') ? '<label class="check"><input type="checkbox" id="bkpSal"> Incluir salários</label>' : ''}
+          <div class="row" style="margin-top:14px"><button class="btn sec" data-a="bkp-xlsx">Baixar planilhas</button></div></div>
+      </div>
+      <details class="panel bkn-conting" id="bknConting"><summary><span>Contingência · cópia em arquivo local (.json)</span><span class="pill neutral">secundária</span></summary>
+        <div class="bkn-conting-corpo"><p class="sub">A proteção principal são os pontos de restauração na nuvem, acima. O arquivo .json é só uma contingência: uma cópia que você leva para fora do painel e, se um dia precisar, grava de volta.</p>
+        <div class="grid g2">
+        <div class="panel"><h2>Backup completo (.json)</h2><p class="sub">Todas as coleções: lojas, equipe${Auth.can('pdi.ver') ? ', PDI' : ''}${Auth.can('pessoal.salario.ver') ? ', salários' : ''}, cargos e centros de custo, contratos e apólices, FCX e DFC (contas, extratos), Retaguarda (Credsystem, faltas, caixas, IEO, alertas) Auditoria de Adquirentes as metas e campanhas da Credsystem e os acessos do login por CPF. Guarde em local seguro (contém dados pessoais).</p>
+          <label class="check"><input type="checkbox" id="bkpLog"> Incluir log de auditoria</label>
+          <div class="row" style="margin-top:14px"><button class="btn" data-a="bkp-json">Baixar backup completo</button></div></div>
+        </div>
+        ${Auth.can('backup.restaurar') ? `<div class="panel"><h2>Restaurar backup</h2><p class="sub">Grava de volta registros de um arquivo .json gerado aqui (aceita backups de versões antigas, como a v13.2). Você escolhe as coleções e se quer só o que falta ou substituir; nada é apagado e o log de auditoria nunca é sobrescrito. A restauração fica registrada no log.</p>
+        <label class="btn danger" style="cursor:pointer">Escolher arquivo de backup<input type="file" accept=".json,application/json" hidden data-a="bkp-restaurar"></label></div>` : ''}</div></details>`
+      : `<div class="grid g2">
         <div class="panel"><h2>Backup completo (.json)</h2><p class="sub">Todas as coleções: lojas, equipe${Auth.can('pdi.ver') ? ', PDI' : ''}${Auth.can('pessoal.salario.ver') ? ', salários' : ''}, cargos e centros de custo, contratos e apólices, FCX e DFC (contas, extratos), Retaguarda (Credsystem, faltas, caixas, IEO, alertas) Auditoria de Adquirentes as metas e campanhas da Credsystem e os acessos do login por CPF. Guarde em local seguro (contém dados pessoais).</p>
           <label class="check"><input type="checkbox" id="bkpLog"> Incluir log de auditoria</label>
           <div class="row" style="margin-top:14px"><button class="btn" data-a="bkp-json">Baixar backup completo</button></div></div>
@@ -19604,10 +19772,10 @@ const Bkp = {
           <div class="row" style="margin-top:14px"><button class="btn sec" data-a="bkp-xlsx">Baixar planilhas</button></div></div>
       </div>
       ${Auth.can('backup.restaurar') ? `<div class="panel"><h2>Restaurar backup</h2><p class="sub">Grava de volta registros de um arquivo .json gerado aqui (aceita backups de versões antigas, como a v13.2). Você escolhe as coleções e se quer só o que falta ou substituir; nada é apagado e o log de auditoria nunca é sobrescrito. A restauração fica registrada no log.</p>
-        <label class="btn danger" style="cursor:pointer">Escolher arquivo de backup<input type="file" accept=".json,application/json" hidden data-a="bkp-restaurar"></label></div>` : ''}
+        <label class="btn danger" style="cursor:pointer">Escolher arquivo de backup<input type="file" accept=".json,application/json" hidden data-a="bkp-restaurar"></label></div>` : ''}`}
       ${GestaoAmbientes.render()}
       ${MigracoesBanco.render()}
-      <div class="panel"><h2>Rotina recomendada</h2><p class="sub" style="margin-bottom:0">Backup completo toda sexta-feira e antes de importações grandes; mantenha as 8 últimas cópias numa pasta com acesso restrito (ex.: OneDrive/SharePoint da diretoria).</p></div>`;
+      <div class="panel"><h2>Rotina recomendada</h2><p class="sub" style="margin-bottom:0">${BackupNuvem.pode() ? 'Os pontos de restauração são criados sozinhos (primeiro acesso do dia e 23:59). Antes de uma importação grande ou de uma mudança de configuração, crie um ponto agora; o arquivo .json fica como cópia extra, guardada numa pasta com acesso restrito (ex.: OneDrive/SharePoint da diretoria).' : 'Backup completo toda sexta-feira e antes de importações grandes; mantenha as 8 últimas cópias numa pasta com acesso restrito (ex.: OneDrive/SharePoint da diretoria).'}</p></div>`;
   },
   async json() {
     const out = { app: 'painel-gestao-esposende', versao: 1, geradoEm: new Date().toISOString(), geradoPor: Auth.id, colecoes: {} };
@@ -19693,7 +19861,7 @@ const ROTEADOR = [
   [/^mig-/, () => MigracoesBanco], // v13.94 · botão "Executar Migrações do Banco"
   [/^cmp-/, () => ConcMP], // v13.69
   [/^(pes|func|sal|pdi|plano|folha)-/, () => Pessoal], [/^rt-/, () => Retaguarda], [/^(fcx|fd)-/, () => FCX], [/^(lj|adq|ti|desp|seg|doc)-/, () => Lojas], [/^ct-/, () => Contratos], [/^alg-/, () => ProjecaoOcupacao],
-  [/^aud-/, () => Aud], [/^bkp-/, () => Bkp], [/^sess-/, () => Sessao], [/^acc-/, () => Acessos], [/^cs-/, () => Credsystem], [/^rhm-/, () => ModRH], [/^org-/, () => Organograma], [/^lib-/, () => Liberacao], [/^arq-/, () => Arquivos], [/^ini-/, () => Inicio], [/^pe-/, () => PontoEquilibrio], [/^vg-/, () => Viagens], [/^rod$/, () => Rodape],
+  [/^aud-/, () => Aud], [/^bkn-/, () => BackupNuvem], [/^bkp-/, () => Bkp], [/^sess-/, () => Sessao], [/^acc-/, () => Acessos], [/^cs-/, () => Credsystem], [/^rhm-/, () => ModRH], [/^org-/, () => Organograma], [/^lib-/, () => Liberacao], [/^arq-/, () => Arquivos], [/^ini-/, () => Inicio], [/^pe-/, () => PontoEquilibrio], [/^vg-/, () => Viagens], [/^rod$/, () => Rodape],
 ];
 const alvo = a => (ROTEADOR.find(([re]) => re.test(a)) || [])[1]?.();
 document.addEventListener('click', e => {
@@ -19740,6 +19908,7 @@ App.iniciarPainel = function () {
   if (Auth.can('fcx.ver')) setTimeout(() => { if (Sessao.ativa) FCX.preparar(); }, 1200); // cache + iframe do FCX em segundo plano
   ContratosManutencao._feito = false; ContratosManutencao.iniciar(); // GESTOR: migra apólices antigas das lojas e confere o espelho de vigência
   BackupDiario.iniciar(); // v13.64: trava do backup diário obrigatório
+  BackupNuvem.primeiroAcesso(); // v13.95: ponto de restauração do primeiro acesso do dia, em segundo plano (qualquer perfil)
   Recursos.garantirHomolog(); // v13.65: correções novas ficam ativas na Homologação até a liberação
 };
 
@@ -19873,6 +20042,92 @@ window.PainelFCX = {
   planoAlterado() { ModContabil._st = null; try { const w = $('#fcxFrame')?.contentWindow; if (w && w.fcx1386Plano) w.fcx1386Plano(); } catch { } },
   /** v13.82 · o Recebível Diário monta o próprio documento de impressão (só as páginas do relatório) e abre a prévia do painel. */
   imprimirDocumento(titulo, html, nome) { Documento.previa(titulo, html, nome); },
+  /** v13.96 · rótulo da prestação recebida no cartão de débito: "<ADQUIRENTE> Débito · <Bandeira>". Nunca exibe o identificador interno LOTE do ERP. */
+  rotuloPrestacao(adq, band) {
+    const BAND = { MASTERCARD: 'Mastercard', VISA: 'Visa', ELO: 'Elo', AMEX: 'Amex', HIPERCARD: 'Hipercard', CABAL: 'Cabal', DINERS: 'Diners', JCB: 'JCB', DISCOVER: 'Discover', SOROCRED: 'Sorocred', BANESCARD: 'Banescard', OUTRAS: 'Outras bandeiras' };
+    const A = String(adq == null ? '' : adq).trim(), a = !A || A === '—' || /^lote$/i.test(A) ? '' : A, B = String(band == null ? '' : band).trim().toUpperCase(), b = !B || B === '—' || B === 'LOTE' ? '' : (BAND[B] || B.charAt(0) + B.slice(1).toLowerCase());
+    return a ? a + ' Débito' + (b ? ' · ' + b : '') : b ? 'Débito ' + b : 'Cartão de Débito · prestação';
+  },
+  /** v13.96 · linhas [{ rotulo, valor }] do Consolidado de Entradas para a prestação no débito. `total` = valor da coluna Prestação do cartão; com `liquido`, usa o líquido do MDR por bandeira (FCX · v13.87). */
+  linhasPrestacao(pn, total, liquido) {
+    const r2 = v => Math.round((Number(v) || 0) * 100) / 100, t = r2(total), pc = pn && pn.prestacaoCartao;
+    if (!t) return [];
+    if (liquido && pc && pc.detalhado) return pc.porBandeira.map(b => ({ rotulo: this.rotuloPrestacao(b.adquirente, b.bandeira), valor: r2(b.liquido) }));
+    const it = ((pn && pn.prestacaoRotulos) || []).filter(x => x.adquirente && x.adquirente !== '—'), soma = r2(it.reduce((a, x) => a + x.bruto, 0)), adqs = [...new Set(it.map(x => x.adquirente))];
+    if (it.length && Math.abs(soma - t) <= 0.05) return it.map(x => ({ rotulo: this.rotuloPrestacao(x.adquirente, x.bandeira), valor: x.bruto }));
+    return [{ rotulo: this.rotuloPrestacao(adqs.length === 1 ? adqs[0] : '', ''), valor: t }];
+  },
+  /**
+   * v13.97 · PIX real das vendas do dia anterior: o valor digitado no Recebível Diário; sem digitação, o PIX do dia no histórico de vendas do FCX.
+   * `digitado` e `historico` podem ser null/undefined. Devolve { valor, fonte: 'digitado' | 'historico' | 'nenhum' }.
+   */
+  pixReal1397(digitado, historico) {
+    const num = v => (v == null || v === '' || !isFinite(Number(v)) ? null : Number(v)), d = num(digitado), h = num(historico), r2 = v => Math.round(v * 100) / 100;
+    if (d != null) return { valor: r2(d), fonte: 'digitado' };
+    if (h != null) return { valor: r2(h), fonte: 'historico' };
+    return { valor: 0, fonte: 'nenhum' };
+  },
+  /** v13.97 · PIX de um dia no histórico de vendas do FCX (esp2:salesHistory = [{ date, values: { pix, … } }]); null se o dia ou o PIX não existem. */
+  pixDoHistorico1397(lista, dia) {
+    const r = (Array.isArray(lista) ? lista : []).find(x => x && x.date === dia), v = r && r.values ? r.values.pix : null;
+    return v == null || v === '' || !isFinite(Number(v)) ? null : Number(v);
+  },
+  /**
+   * v13.97 · estrutura do Consolidado de Entradas (Vendas + Prestações): Dinheiro, PIX, Total Cartões de Crédito (Credsystem, Getnet, Safra),
+   * Total Cartões de Débito (Getnet e Safra, com as vendas e as prestações juntas) e o Resumo por Adquirente. O identificador LOTE do ERP só
+   * classifica o valor na coluna Prestação; ele é agrupado no Débito da própria adquirente.
+   * Entrada: { din, pix, pDin, pPix, pLote, cred, credN, pn (resultado de recebiveis), liquido (prestação pelo líquido do MDR, FCX) }.
+   * Saída: { linhas [{ id, rot, v, p, nivel: 'grupo'|'sub', tgl?, g? }], resumo [{ rot, deb, cre, total }], totV, totP, total, vCre, vDeb, pDeb, avisos [{ tipo, texto }] }.
+   * Os rótulos (rot) já saem escapados para HTML. Nada aqui altera os totais: só reparte o que já entrava no cartão.
+   */
+  consolidado1397(o) {
+    const r2 = v => Math.round((Number(v) || 0) * 100) / 100, n = v => Number(v) || 0, pn = o.pn || {}, cart = pn.cartao || {}, porAdq = cart.porAdquirente || {}, bands = cart.porBandeira || [];
+    const chave = a => { const A = String(a == null ? '' : a).trim().toUpperCase(); return /GETNET/.test(A) ? 'GETNET' : /SAFRA/.test(A) ? 'SAFRA' : (!A || A === '—') ? '—' : A; };
+    const nome = k => k === 'GETNET' ? 'Getnet' : k === 'SAFRA' ? 'Safra' : k === '—' ? 'Adquirente não identificada' : k.charAt(0) + k.slice(1).toLowerCase();
+    const ad = new Map(), get = k => { if (!ad.has(k)) ad.set(k, { k, vDeb: 0, vCre: 0, pDeb: 0 }); return ad.get(k); };
+    get('GETNET'); get('SAFRA');
+    const tot = {}, deb = {};
+    Object.entries(porAdq).forEach(([a, v]) => { const k = chave(a); tot[k] = r2((tot[k] || 0) + n(v)); });
+    bands.forEach(b => { if (b.modalidade === 'debito') { const k = chave(b.adquirente); deb[k] = r2((deb[k] || 0) + n(b.liquido)); } });
+    Object.keys(tot).forEach(k => { const x = get(k); x.vDeb = r2(deb[k] || 0); x.vCre = r2(tot[k] - x.vDeb); });
+    const pLote = r2(o.pLote), prest = new Map(), avisos = []; let semAdq = 0, aprox = false;
+    if (pLote) {
+      const pc = pn.prestacaoCartao, base = new Map(), add = (k, v) => base.set(k, r2((base.get(k) || 0) + n(v)));
+      if (o.liquido && pc && pc.detalhado) (pc.porBandeira || []).forEach(b => add(chave(b.adquirente), b.liquido));
+      else (pn.prestacaoRotulos || []).forEach(x => add(chave(x.adquirente), x.bruto));
+      const todos = [...base.entries()].filter(([, v]) => Math.abs(v) > 0.004), soma = r2(todos.reduce((a, [, v]) => a + v, 0));
+      if (todos.length && soma > 0.004) {
+        const fator = pLote / soma; aprox = Math.abs(soma - pLote) > 0.05;
+        todos.forEach(([k, v]) => { const x = r2(v * fator); if (k === '—') semAdq = r2(semAdq + x); else prest.set(k, x); });
+      } else {
+        const cand = [...ad.values()].filter(x => Math.abs(x.vDeb) > 0.004);
+        if (cand.length === 1) prest.set(cand[0].k, pLote); else semAdq = pLote;
+      }
+      const sp = r2([...prest.values()].reduce((a, v) => a + v, 0) + semAdq), dif = r2(pLote - sp);
+      if (Math.abs(dif) > 0.004) { const maior = [...prest.entries()].sort((a, b) => b[1] - a[1])[0]; if (maior) prest.set(maior[0], r2(maior[1] + dif)); else semAdq = r2(semAdq + dif); }
+    }
+    prest.forEach((v, k) => { get(k).pDeb = v; });
+    const peso = k => k === 'GETNET' ? 0 : k === 'SAFRA' ? 1 : 2;
+    const ordem = [...ad.values()].filter(x => x.k === 'GETNET' || x.k === 'SAFRA' || Math.abs(x.vDeb) + Math.abs(x.vCre) + Math.abs(x.pDeb) > 0.004).sort((a, b) => peso(a.k) - peso(b.k) || nome(a.k).localeCompare(nome(b.k), 'pt-BR'));
+    const cred = r2(o.cred), vCre = r2(cred + ordem.reduce((a, x) => a + x.vCre, 0)), vDeb = r2(ordem.reduce((a, x) => a + x.vDeb, 0)), pDeb = pLote, e = s => esc(s);
+    const L = [];
+    L.push({ id: 'din', rot: 'Total em Dinheiro', v: r2(o.din), p: r2(o.pDin), nivel: 'grupo' });
+    L.push({ id: 'pix', rot: 'Total em PIX', v: r2(o.pix), p: r2(o.pPix), nivel: 'grupo' });
+    L.push({ id: 'cred', rot: 'Total Cartões de Crédito', v: vCre, p: null, nivel: 'grupo', tgl: 'cred' });
+    L.push({ id: 'cred-cs', rot: 'Credsystem (Cartão da Loja)' + (cred ? ' · vence hoje' + (o.credN ? ' (' + o.credN + ')' : '') : ''), v: cred, p: null, nivel: 'sub', g: 'cred' });
+    ordem.forEach(x => L.push({ id: 'cred-' + x.k, rot: e(nome(x.k)) + ' - Crédito', v: x.vCre, p: null, nivel: 'sub', g: 'cred' }));
+    L.push({ id: 'deb', rot: 'Total Cartões de Débito', v: vDeb, p: pDeb, nivel: 'grupo', tgl: 'deb' });
+    ordem.forEach(x => L.push({ id: 'deb-' + x.k, rot: e(nome(x.k)) + ' - Débito', v: x.vDeb, p: x.pDeb, nivel: 'sub', g: 'deb' }));
+    if (semAdq) L.push({ id: 'deb-sem', rot: 'Débito · adquirente não identificada', v: null, p: semAdq, nivel: 'sub', g: 'deb' });
+    const R = ordem.map(x => ({ rot: x.k === 'GETNET' ? 'Getnet' : x.k === 'SAFRA' ? 'SafraPay (Safra)' : e(nome(x.k)), deb: r2(x.vDeb + x.pDeb), cre: x.vCre, total: r2(x.vDeb + x.pDeb + x.vCre) }));
+    if (semAdq) R.push({ rot: 'Débito · adquirente não identificada', deb: semAdq, cre: null, total: semAdq });
+    R.push({ rot: 'Credsystem (Cartão da Loja)', deb: null, cre: cred, total: cred });
+    const totV = r2(n(o.din) + n(o.pix) + vCre + vDeb), totP = r2(n(o.pDin) + n(o.pPix) + pDeb);
+    if (bands.some(b => !b.modalidade && !b.semBandeira)) avisos.push({ tipo: 'semModalidade', texto: 'Cartão: fechamento gravado sem separar débito e crédito; por enquanto tudo entra em Crédito. Regrave o Cruzamento na Auditoria de Adquirentes para abrir por operação.' });
+    if (aprox) avisos.push({ tipo: 'prestacaoAprox', texto: 'Prestação no débito: o fechamento da Auditoria de Adquirentes e a Conciliação dos recebimentos não fecham; o valor foi repartido entre as adquirentes na proporção do fechamento.' });
+    if (semAdq) avisos.push({ tipo: 'prestacaoSemAdq', texto: 'Prestação no débito sem adquirente identificada no fechamento (Auditoria de Adquirentes › Conciliação e Cruzamento › Gravar).' });
+    return { linhas: L, resumo: R, totV, totP, total: r2(totV + totP), vCre, vDeb, pDeb, avisos };
+  },
   async recebiveis(dia) {
     const r2 = v => Math.round((Number(v) || 0) * 100) / 100, out = { dia, cartao: null, prestacao: null, avisos: [] };
     const motivo = e => (e?.status === 403 || /permiss|denied/i.test(String(e?.code || e?.message || '')) ? 'seu acesso não lê este dado (restrito ao Master/editor)' : (e?.message || String(e)));
@@ -19888,6 +20143,11 @@ window.PainelFCX = {
         const itensP = [...pb.values()].map(x => { if (!x.mdr && x.bruto) { const ref = out.cartao.porBandeira.find(v => v.adquirente === x.adquirente && v.bandeira === x.bandeira && v.modalidade === 'debito' && v.bruto > 0); if (ref) { x.mdr = r2(x.bruto * ref.mdr / ref.bruto); x.mdrEstimado = true; } } x.liquido = r2(x.bruto - x.mdr); return x; }) /* sem taxa no ERP: MDR % das vendas no débito da mesma adquirente e bandeira */
           .sort((a, b) => a.adquirente.localeCompare(b.adquirente) || b.bruto - a.bruto);
         const sp = k => r2(itensP.reduce((a, x) => a + x[k], 0)); out.prestacaoCartao = { detalhado: itensP.length > 0, bruto: sp('bruto'), mdr: sp('mdr'), liquido: sp('liquido'), porBandeira: itensP, mdrEstimado: itensP.some(x => x.mdrEstimado) };
+      }
+      if (g96() || g97()) { /* v13.96 e v13.97 · prestações no débito por adquirente (e bandeira): só para o rótulo; o identificador LOTE do ERP apenas classifica o valor na coluna Prestação */
+        const pr96 = new Map(), add96 = (adq, band, bruto, mdr) => { const k = adq + '|' + band, x = pr96.get(k) || { adquirente: adq, bandeira: band, bruto: 0, mdr: 0 }; x.bruto = r2(x.bruto + (Number(bruto) || 0)); x.mdr = r2(x.mdr + (Number(mdr) || 0)); pr96.set(k, x); };
+        terc.forEach(l => { const adq = l.adquirente || '—', lb = l.loteBandeiras || []; if (lb.length) lb.forEach(b => add96(adq, b.bandeira && b.bandeira !== '—' ? b.bandeira : '', b.bruto, b.mdr)); else if ((Number(l.brutoLote) || 0) > 0.004) add96(adq, '', l.brutoLote, 0); });
+        out.prestacaoRotulos = [...pr96.values()].filter(x => Math.abs(x.bruto) > 0.004).sort((a, b) => a.adquirente.localeCompare(b.adquirente) || b.bruto - a.bruto);
       }
       const itens = []; cred.forEach(l => linhaBand(l).forEach(b => { const venc = b.vencimentos && b.vencimentos.length ? b.vencimentos : null; itens.push({ dataVenda: l.data, lojaId: l.lojaId, bandeira: b.bandeira, bruto: r2(b.bruto), mdr: r2(b.mdr), antecip: r2(b.antecip), pos: r2(b.pos), liquido: r2(b.liquido), vencimentos: venc, vencFonte: venc ? (b.vencFonte || 'vencimento') : 'sem', semBandeira: !!b._sem }); }));
       out.credsystem = { linhas: cred.length, bruto: soma('bruto', cred), mdr: soma('custoMdr', cred), liquido: soma('liquido', cred), itens };

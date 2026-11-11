@@ -1,6 +1,6 @@
 # Painel de Gestão Esposende · Netlify + Netlify Database (Postgres)
 
-Versão v13.94. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
+Versão v13.97. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
 **Netlify Functions**. Os dados ficam no servidor: valem em qualquer computador e são sincronizados entre quem está usando.
 
 ## Como funciona
@@ -34,7 +34,7 @@ Netlify Functions (netlify/functions)            Netlify Database (Postgres)
 netlify.toml                         publish = public, funções em netlify/functions
 package.json                         dependência @netlify/database (provisiona o banco no deploy)
 public/                              index.html (painel), fcx.html (Fluxo de Caixa), logos
-netlify/functions/                   saude, sessao, docs, mudancas, arquivos, ambientes, inter, consulta-cnpj, migracoes (rotas /api/*)
+netlify/functions/                   saude, sessao, docs, mudancas, arquivos, ambientes, inter, consulta-cnpj, migracoes, backup-nuvem (rotas /api/*) e backup-agendado (rotina das 23:59, sem rota)
 netlify/lib/                         db (getDatabase), ambiente (v13.76), inter, regras de acesso, sessão, senha, usuários, documentos
 public/marca-rc/                     logos da RC Consultoria (aplicadas no build quando PAINEL_AMBIENTE=rc)
 scripts/run-migrations.mjs           etapa de build (v13.94): aplica as migrações repetíveis pendentes antes de compilar o site
@@ -554,7 +554,7 @@ O banco é gerenciado pelo Netlify (Netlify Database) e ninguém usa console SQL
 **Por que só as migrações "repetíveis".** O Netlify também aplica essa pasta no deploy, antes de publicar, e a documentação dele manda usar outra pasta quando se quer um sistema próprio, para não haver conflito. Se o script rodasse o esquema inicial ou a semente e depois o Netlify tentasse de novo, o deploy seria bloqueado por duplicidade. Por isso:
 
 - O script só executa migrações **aditivas**, que podem rodar duas vezes sem alterar nada: `CREATE TABLE IF NOT EXISTS`, `CREATE [UNIQUE] INDEX IF NOT EXISTS`, `ALTER TABLE … ADD COLUMN IF NOT EXISTS` e `CREATE EXTENSION IF NOT EXISTS`. Quando o Netlify aplicar a mesma migração no deploy, ela é um "não faz nada".
-- Todo o resto (esquema inicial, semente, INSERT/UPDATE/DELETE, funções, gatilhos, views, DROP…) continua sendo do Netlify. O script lista essas migrações como "geridas pelo Netlify" e **nunca** as executa. Hoje, das 7 migrações do projeto, 2 são repetíveis (`20261107120000_esquema_adiantamentos.sql` e `20261110120000_esquema_empresas_receita.sql`) e 5 são do Netlify.
+- Todo o resto (esquema inicial, semente, INSERT/UPDATE/DELETE, funções, gatilhos, views, DROP…) continua sendo do Netlify. O script lista essas migrações como "geridas pelo Netlify" e **nunca** as executa. Hoje, das 8 migrações do projeto, 3 são repetíveis (`20261107120000_esquema_adiantamentos.sql`, `20261110120000_esquema_empresas_receita.sql` e, desde a v13.95, `20261111120000_esquema_backups_nuvem.sql`) e 5 são do Netlify.
 - Banco novo (ainda sem o esquema inicial): o script não toca em nada; o esquema inicial é do deploy do Netlify.
 - Pré-requisito ausente (tabela ou coluna que o Netlify ainda não criou): a migração fica "adiada", sem erro.
 - Cada migração roda numa transação (ou entra inteira, ou nada), com trava consultiva: build e botão ao mesmo tempo não se atropelam. `lock_timeout` e `statement_timeout` impedem o build de ficar pendurado.
@@ -573,3 +573,94 @@ O banco é gerenciado pelo Netlify (Netlify Database) e ninguém usa console SQL
 **Arquivos novos/alterados:** `scripts/run-migrations.mjs`, `netlify/lib/migracoes.mjs`, `netlify/lib/migracoes-embutidas.mjs` (gerado), `netlify/functions/migracoes.mjs`, `netlify.toml` (comando de build), `package.json` (scripts `migrar` e `migrar:status`), `tests/teste-migracoes.mjs`, painel (`public/index.html`).
 
 **Teste:** `tests/teste-migracoes.mjs` (43 verificações: análise do SQL, banco novo e existente, migração pendente da v13.94, idempotência, falha com desfazer, execução simultânea, `lock_timeout`, o script de build com todas as variáveis e a API com 401/403/405/200). Com o servidor local no `painel_teste` (`bash tests/preparar-banco.sh`, `NETLIFY_DB_URL=… node tests/servidor-local.mjs 8890`): `NETLIFY_DB_URL=… node tests/teste-migracoes.mjs`. Ele cria e apaga bancos temporários `painel_mig_*` no mesmo Postgres.
+
+## v13.95 · Pontos de Restauração na Nuvem (recurso `backup_nuvem_v1395`)
+
+O backup deixa de depender de um arquivo `.json` baixado no computador: o próprio banco guarda **fotografias (snapshots) versionadas** dos dados do painel, e o Master volta a qualquer uma delas. O arquivo `.json` continua existindo, mas como **contingência secundária** (bloco recolhido na tela).
+
+**Onde fica.** Sistema & Segurança › **Backup e dados**, seção **Pontos de Restauração na Nuvem** (acima das planilhas): botão **Criar Ponto de Restauração Agora**, tabela dos 30 pontos mais recentes (Data/Hora, Tipo, Criador, Registros · Tamanho) e, só para o Master, **Restaurar esta versão**. Abaixo, o bloco recolhido **Contingência · cópia em arquivo local (.json)** guarda o download e o upload do `.json`. Só aparece nos sites do Netlify, e só com o recurso ligado: a Homologação já nasce com ele; Produção e Falco recebem em **Liberar Versão** (marque Configurações gerais).
+
+**Banco.** Tabela `painel_backups_historico` (migração repetível `20261111120000_esquema_backups_nuvem.sql`, criada no deploy, no build e pelo botão Executar Migrações do Banco): `id`, `data_hora`, `usuario_cpf`, `tipo_backup` (`AUTOMATICO`, `MANUAL` ou `PRIMEIRO_ACESSO`), `payload_json`, `total_registros`, `versao_painel`, e ainda `usuario_nome`, `tamanho_bytes`, `sha256` (integridade), `preventivo` e `nota`. Cada site do Netlify tem o seu banco e, portanto, o seu histórico.
+
+**Quando um ponto é criado.**
+
+- **Primeiro acesso do dia (`PRIMEIRO_ACESSO`):** logo depois do login de **qualquer** usuário (Master, Operacional, Loja…), o painel chama em segundo plano `verificar-primeiro-acesso`. Se ainda não existe ponto de hoje (dia de Brasília), o servidor cria um, sem aviso nem espera na tela. Várias pessoas entrando juntas geram um único ponto (trava consultiva no banco). Se o banco estiver ocupado ou a tabela ainda não existir, o servidor só adia (a tela não é afetada) e a próxima entrada tenta de novo.
+- **Agendado (`AUTOMATICO`):** a função `netlify/functions/backup-agendado.mjs` roda todo dia às **23:59 de Brasília**. Como o agendador do Netlify usa UTC, o cron é `59 2 * * *` (Brasília não tem horário de verão). É idempotente: se já houve um ponto agendado nas últimas 20 h, não cria outro.
+- **Manual (`MANUAL`):** botão **Criar Ponto de Restauração Agora** (Master). No máximo um a cada 20 s e 20 por dia, para rajadas não empurrarem os pontos antigos para fora da retenção.
+
+**O que entra e o que não entra.** Entram todas as coleções de documentos (lojas, colaboradores, FCX, Retaguarda, contratos, configurações, usuários…). Ficam de fora: log de auditoria, presença, marcadores do sistema, os arquivos anexos (PDFs e imagens) e o livro contábil (os lançamentos contábeis são intangíveis e só se corrigem por estorno). O ponto é montado inteiro dentro do Postgres (sem trazer os dados para a função), com SHA-256 do conteúdo.
+
+**Retenção.** Mantém os 60 pontos mais recentes (variável opcional `BACKUP_NUVEM_RETENCAO`, de 30 a 365). A poda roda depois de cada criação e nunca apaga o ponto recém-criado nem o preventivo da restauração em andamento.
+
+**Restaurar (só Master).** O modal explica o que acontece e só libera **Restaurar agora** quando a palavra **RESTAURAR** é digitada (exata, em maiúsculas); o servidor confere de novo e recusa sem ela. O servidor:
+
+1. cria antes, e grava de forma definitiva, um **ponto preventivo** com o estado de agora (para desfazer, é só restaurá-lo);
+2. confere a integridade do ponto escolhido (SHA-256), o formato e se é do mesmo ambiente; recusa ponto vazio ou adulterado;
+3. aplica tudo **numa única transação**: o que existe no ponto é recriado ou voltado, o que foi criado depois some, e cada coleção entra no log de mudanças (os outros computadores se atualizam sozinhos pela sincronização). Ou tudo é aplicado, ou nada;
+4. antes de confirmar, checa duas travas: precisa continuar existindo ao menos um Master ativo e **quem está restaurando precisa continuar sendo Master ativo** (senão a transação é desfeita e a tela explica);
+5. por padrão, **usuários e senhas ficam como estão hoje** (uma senha trocada depois do ponto não volta e ninguém perde o acesso); a caixa "Restaurar também usuários e acessos" muda isso. Sessões abertas continuam válidas.
+
+Depois, a tela mostra o resumo (criados, atualizados, removidos), o número do ponto preventivo e o botão **Recarregar o painel**. Criar e restaurar ficam no log de auditoria (módulo backup). O CPF do criador aparece mascarado (`•••.•••.•••-NN`) e o `payload_json` nunca vai para a tela.
+
+**Função agendada no Netlify.** O Netlify só executa funções agendadas no deploy **publicado** (não em previews e branch deploys). Em **Logs › Functions › backup-agendado** aparecem as execuções, e é possível rodar na hora com **Run now** (pelo painel do Netlify, nunca pelo painel do Esposende). O limite de uma função agendada é de 30 s. Em cada um dos três sites a rotina age sobre o banco do próprio site.
+
+**Limite de tempo da restauração.** A restauração roda na função `/api/backup-nuvem` (limite padrão de 10 s no Netlify, ajustável nas configurações do site para bases grandes). A transação é atômica: se o tempo estourar, a tela mostra o erro do servidor e nada fica aplicado pela metade; o ponto preventivo já foi gravado antes. Se isso acontecer, confira em **Atualizar** se o ponto preventivo apareceu, aumente o limite da função nas configurações do site e tente de novo.
+
+**Arquivos novos/alterados:** `netlify/database/migrations/20261111120000_esquema_backups_nuvem.sql`, `netlify/lib/backup-nuvem.mjs` (núcleo: criar, listar, restaurar, primeiro acesso, agendado), `netlify/functions/backup-nuvem.mjs` (`/api/backup-nuvem`: GET listar; POST `criar`, `listar`, `restaurar`, `verificar-primeiro-acesso`), `netlify/functions/backup-agendado.mjs`, `netlify/lib/migracoes.mjs` (item no `VERIFICACOES`), `netlify/lib/migracoes-embutidas.mjs` (regenerado), `tests/servidor-local.mjs` (ignora funções sem rota), `tests/teste-backup-nuvem.mjs`, `tests/teste-migracoes.mjs`, painel (`public/index.html`).
+
+**Teste:** `tests/teste-backup-nuvem.mjs` (54 verificações: tabela e restrições, 401/403/405/429, ponto de primeiro acesso com 6 pedidos simultâneos gerando 1 ponto, dia de Brasília, agendado idempotente, retenção, restauração completa, preventivo, travas de Master, adulteração, outro ambiente e restaurações simultâneas). Mesmo preparo do `teste-migracoes.mjs`: `bash tests/preparar-banco.sh`, `NETLIFY_DB_URL=… node tests/servidor-local.mjs` e `NETLIFY_DB_URL=… node tests/teste-backup-nuvem.mjs`.
+
+## v13.96 · Recebível sem "LOTE", partidas dobradas coloridas e Biblioteca CPC & Regras Fiscais (recurso `gestao_v1396`)
+
+Tudo fica atrás do recurso `gestao_v1396`: ativo na Homologação; Produção e Falco só depois de **Liberar Versão em Produção**. Desligado, a tela fica exatamente como era na v13.95.
+**Não há migração nova, função nova nem variável de ambiente nova.** Para atualizar, descompacte o ZIP na raiz do projeto e envie pelo GitHub Desktop (mudam só `public/index.html`, `public/fcx.html`, `public/contabilidade_v1391.html` e este README).
+
+**1 · Consolidado de Entradas (Vendas + Prestações): rótulo da prestação sem "LOTE"** (painel inicial e FCX · Recebível Diário)
+- O identificador interno `LOTE` do arquivo de cartões do ERP continua sendo usado **apenas** para classificar o valor na coluna **Prestação**. Ele não aparece mais para o usuário.
+- O rótulo mostra a adquirente e a forma de recebimento, por exemplo **GETNET Débito**, e a bandeira quando o arquivo traz uma (**GETNET Débito · Visa**). Se o arquivo não identifica uma única adquirente, aparece "Cartão de Débito · prestação".
+- Os totais não mudam; só o texto. Com o recurso desligado, os rótulos antigos permanecem.
+
+**2 · Módulo Contábil: partidas dobradas redesenhadas**
+- Cada linha mostra **[Código] - [Nome da conta]** na primeira coluna; o nome repetido depois do valor foi removido.
+- **Débito** e **Crédito** por extenso, em selo (badge) destacado, no lançamento, na lista de lançamentos e no Livro Diário. No Razão e no Balancete, o saldo aparece como Devedor/Credor.
+- Cores por grupo contábil (selos e indicadores): **verde** Ativo (grupo 1), **vermelho** Passivo (grupo 2), **azul** Patrimônio Líquido (grupo 3), **laranja** Resultado/DRE (grupos 4, 5 e 6). Indicadores usam #059669, #DC2626, #2563EB e #EA580C no tema claro e #10B981, #EF4444, #3B82F6 e #F97316 nos temas escuros; o texto dos selos usa tons ajustados para contraste mínimo de 4,5:1 (WCAG AA) em todos os temas.
+- Layout responsivo (980 e 760 px, e celular), sem rolagem horizontal, com regras de impressão no CSS.
+
+**3 · Módulo Contábil › aba "Biblioteca CPC & Regras Fiscais"**
+- Busca por palavra-chave (sem diferenciar acentos) e filtro por categoria (Contábil, Fiscal, Todos), com contador de resultados; com até 3 resultados os cartões abrem sozinhos.
+- Oito cartões expansíveis com resumos práticos para varejo de calçados e lojas: **CPC 00** (estrutura conceitual, débito/crédito, ativo/passivo), **CPC 06 (R2)** (aluguéis de lojas em shopping e rua), **CPC 16** (estoques e custo de aquisição), **CPC 27** (imobilizado, benfeitorias em lojas alugadas e depreciação) e o **Guia Fiscal Varejo** (consumidor final × contribuinte, ICMS-ST, PIS/COFINS e tabela rápida de CFOPs de entrada e saída).
+- Conteúdo **orientativo**, com data de revisão (novembro de 2026); não substitui a análise do contador. Pontos de atenção do conteúdo: calçados (NCM 64) **não** são monofásicos de PIS/COFINS; o ICMS-ST de calçados depende do estado; a Reforma Tributária (EC 132/2023 e LC 214/2025) tem calendário de transição (CBS/IBS de teste em 2026, PIS/COFINS dando lugar à CBS em 2027, ICMS/ISS dando lugar ao IBS de 2029 a 2032); empresas sob a NBC TG 1000 / ITG 1000 não aplicam o CPC 06 (R2).
+- Só aparece dentro do painel (iframe embutido); o Módulo Contábil aberto sozinho trata o recurso como desligado.
+
+**Como o recurso é lido.** O FCX e o Módulo Contábil (que rodam em iframe) consultam `window.parent.Recursos.ativo('gestao_v1396')`; sem o painel pai, ficam no comportamento antigo.
+
+**Testes:** `test1396.js` (Recebível no painel e no FCX, com recurso ligado e desligado, mais as guardas da Regra de Ouro) e `test1396c.js` (Contábil com o servidor Netlify: partidas, cores, selos, Biblioteca, contraste, 5 larguras de tela). Todos os dados de teste são fictícios.
+
+## v13.97 · Consolidado de Entradas reestruturado: PIX real, Crédito e Débito por adquirente e Resumo por Adquirente (recurso `gestao_v1397`)
+
+Tudo fica atrás do recurso `gestao_v1397`: ativo na Homologação; Produção e Falco só depois de **Liberar Versão em Produção**. Desligado, o quadro fica exatamente como na v13.96.
+**Não há migração nova, função nova nem variável de ambiente nova.** Para atualizar, descompacte o ZIP na raiz do projeto e envie pelo GitHub Desktop (mudam só `public/index.html`, `public/fcx.html` e este README).
+O quadro **Consolidado de Entradas (Vendas + Prestações)** vale no painel (tela inicial › Resumo do Recebível do Dia) e no FCX (Recebível Diário). Os dois usam o mesmo cálculo, então mostram os mesmos números e a mesma estrutura.
+
+**1 · Estrutura** (colunas Meio de pagamento | Vendas | Prestação | Total | Part.)
+- **Total em Dinheiro**: como era.
+- **Total em PIX**: o valor real do dia nas duas colunas. Vendas: o valor digitado no Recebível Diário; se nada foi digitado, o PIX do dia no **histórico de vendas do FCX** (com aviso da origem). Um R$ 0,00 digitado de propósito é respeitado. Prestação: o PIX da Conciliação dos recebimentos (Retaguarda). Desligado, o histórico não entra.
+- **Total Cartões de Crédito** (linha de soma e detalhamento): Credsystem (Cartão da Loja; entra só no dia do vencimento), Getnet - Crédito e Safra - Crédito (já líquidos de MDR, antecipação e POS, como antes).
+- **Total Cartões de Débito** (linha de soma e detalhamento): Getnet - Débito e Safra - Débito, com as vendas na coluna Vendas e as prestações na coluna Prestação, na mesma linha. Outra adquirente que apareça no fechamento ganha as próprias linhas de Crédito e Débito.
+- **Total Geral de Entradas do Dia**: igual ao de antes. A v13.97 só reparte o que já entrava no cartão; o total do dia não muda (salvo o PIX, quando o histórico do FCX é usado).
+- Os grupos Crédito e Débito têm um botão ▾/▸ para recolher e mostrar o detalhamento (começa aberto). Na impressão e no PDF o relatório sai sempre aberto e sem os botões.
+
+**2 · Resumo por Adquirente** (logo abaixo da tabela): Getnet, SafraPay (Safra) e Credsystem (Cartão da Loja), com Débito (vendas + prestação), Crédito, Total e Part., e o total em cartões. A Credsystem fica na coluna Crédito, como na tabela principal.
+
+**3 · Regras de consolidação**
+- O identificador `LOTE` do arquivo de cartões do ERP continua sendo só a marca interna de "prestação": ele nunca aparece para o usuário e o valor vai para o Débito da adquirente que o recebeu (Getnet ou Safra), na coluna Prestação.
+- A adquirente de cada prestação vem do fechamento da Auditoria de Adquirentes (Conciliação e Cruzamento › Gravar). Se esse fechamento e a Conciliação dos recebimentos não fecham, o valor da Conciliação é repartido na proporção do fechamento e aparece um aviso. Se o fechamento não identifica a adquirente: com uma só adquirente com débito, ela recebe o valor; com mais de uma, aparece a linha "Débito · adquirente não identificada" (e um aviso), sem chutar.
+- Débito × Crédito vem da operação gravada no fechamento. Fechamentos gravados antes da v13.87, sem separar débito e crédito, entram em Crédito, com aviso para regravar o Cruzamento.
+- No FCX, a prestação continua pelo líquido de MDR (como na v13.87); no painel, pelo valor bruto da Conciliação.
+- O rótulo da Credsystem é "Credsystem (Cartão da Loja)", sem o nome da empresa, para o FCX continuar neutro na marca.
+
+**4 · Impressão (A4 paisagem):** a capa continua em uma página. No quadro novo o gráfico "Entradas × Saídas" passa para a coluna das Saídas, e as linhas ficam um pouco mais compactas.
+
+**Como o recurso é lido.** O FCX consulta `window.parent.Recursos.ativo('gestao_v1397')` e usa as funções `PainelFCX.consolidado1397`, `pixReal1397` e `pixDoHistorico1397` do painel; sem o painel pai (FCX aberto sozinho), ele fica no comportamento antigo.
+
+**Testes:** `test1397.js` (38 verificações: estrutura, ordem e valores do quadro no FCX e no painel; Resumo; recolher/mostrar; Credsystem do dia; PIX digitado × histórico × zero; prestação por adquirente, proporcional, sem adquirente e com bandeira "LOTE"; recurso desligado; impressão em A4 com o mesmo número de páginas; celular sem rolagem lateral e com o botão de recolher; guardas da Regra de Ouro, incluindo o patch reverso do FCX). Os testes antigos de Recebível (1382, 1383, 1387 e 1396) passam a rodar com os recursos novos desligados, e os guardas do FCX comparam com `fcx_v1397.html`. Todos os dados de teste são fictícios.

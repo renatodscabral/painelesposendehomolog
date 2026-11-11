@@ -7,10 +7,10 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), porta = Number(process.argv[2] || 8890), pub = process.env.PAINEL_PUBLIC || path.join(raiz, 'public');
-const funcoes = [];
+const funcoes = []; /* v13.95: funções agendadas (config.schedule) não têm rota: são puladas */
 for (const f of fs.readdirSync(path.join(raiz, 'netlify/functions')).filter(f => f.endsWith('.mjs'))) {
   const m = await import(pathToFileURL(path.join(raiz, 'netlify/functions', f)).href);
-  for (const p of [].concat(m.config.path)) funcoes.push({ re: new RegExp('^' + p.replace(/[.]/g, '\\.').replace(/\*/g, '.*') + '$'), fn: m.default });
+  for (const p of [].concat(m.config?.path || [])) funcoes.push({ re: new RegExp('^' + p.replace(/[.]/g, '\\.').replace(/\*/g, '.*') + '$'), fn: m.default });
 }
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.js': 'text/javascript', '.json': 'application/json' };
 http.createServer(async (req, res) => {

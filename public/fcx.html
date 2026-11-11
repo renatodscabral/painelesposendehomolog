@@ -247,6 +247,8 @@ tfoot td{border-top:1.5px solid var(--line);background:#FAFAFD;position:sticky;b
 .rd-avisos{background:var(--gold-soft,#FBF3E2);border:1px solid #EAD6A8;border-radius:8px;padding:6px 10px;font-size:11px;margin-bottom:8px;}
 .rd-criterios{margin-top:10px;font-size:9.5px;color:var(--ink-soft);line-height:1.4;}
 /* v13.80 */ .rd-tab tr.rd-sub td{font-size:11px;color:var(--ink-soft);} .rd-tab tr.rd-sub td:first-child{padding-left:20px;} .rd-tab tr.rd-grupo td{font-weight:600;}
+/* v13.97 */ .rd-tgl{border:0;background:transparent;color:inherit;cursor:pointer;font-size:12px;line-height:1;padding:1px 5px;margin:0 2px 0 -5px;border-radius:5px;} .rd-tgl:hover{background:rgba(27,35,98,.12);} .rd-tgl:focus-visible{outline:2px solid #1B2362;outline-offset:1px;} .rd-tab.rd-col-cred tr[data-g="cred"],.rd-tab.rd-col-deb tr[data-g="deb"]{display:none;} .rd-capa .rd-resumo-wrap h3{font-size:12.5px;margin:12px 0 4px;}
+.rd-impressao .rd-capa.rd-capa97 .rd-tab td{padding:2px 6px;} .rd-impressao .rd-capa.rd-capa97 .rd-tab tr.rd-sub td{padding:1px 6px;font-size:11.5px;} .rd-impressao .rd-capa.rd-capa97 .rd-resumo-wrap h3{margin:10px 0 3px;font-size:12px;} .rd-impressao .rd-capa.rd-capa97 .rd-graf-ent{margin-top:10px;}
 .rd-tab tr.rd-hoje td{background:var(--green-soft) !important;font-weight:700;} .rd-graf{position:relative;margin-top:8px;} .rd-graf-ent{height:150px;} .rd-graf-sem{height:250px;margin-top:12px;}
 .rd-graf-img{display:block;max-width:100%;margin:0 auto;}
 /* v13.82 · formulário: rótulos e campos na mesma linha de base, mesma altura; moeda à direita */
@@ -1541,6 +1543,28 @@ const ROTULOS_SALDO = {
    do caixa do dia e guardada como Recebível Futuro até o vencimento; prestação "Débito"; Resumo Consolidado de Entradas
    com gráfico; gráfico de barras da previsão semanal (o mesmo da visão do FCX).
    ========================================================= */
+function fcxV1397(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1397') && P.PainelFCX && typeof P.PainelFCX.consolidado1397 === 'function' && typeof P.PainelFCX.pixReal1397 === 'function'); }catch(e){ return false; } } // v13.97: Consolidado de Entradas por Crédito e Débito, PIX real e Resumo por Adquirente
+function rdPixHistorico1397(iso){ const r = (state.salesHistory||[]).find(x=>x && x.date===iso), v = r && r.values ? r.values.pix : null; return v == null || v === '' || !isFinite(Number(v)) ? null : Number(v); }
+function rdColClasses1397(v){ const c = state._rdCol97; return v && c ? (c.cred ? ' rd-col-cred' : '') + (c.deb ? ' rd-col-deb' : '') : ''; }
+function rdTgl1397(btn, g){ const t = btn.closest('table'); if(!t) return; state._rdCol97 ||= { cred:false, deb:false }; state._rdCol97[g] = !state._rdCol97[g]; t.classList.toggle('rd-col-' + g, !!state._rdCol97[g]); btn.setAttribute('aria-expanded', state._rdCol97[g] ? 'false' : 'true'); btn.textContent = state._rdCol97[g] ? '▸' : '▾'; }
+window.rdTgl1397 = rdTgl1397;
+function rdLinhas1397(c, total){
+  return c.linhas.map(x=>{
+    const soma = (x.v||0) + (x.p||0), abre = x.tgl ? !(state._rdCol97 && state._rdCol97[x.tgl]) : false;
+    const tg = x.tgl ? `<button type="button" class="rd-tgl no-print" onclick="rdTgl1397(this,'${x.tgl}')" aria-expanded="${abre}" aria-label="Recolher ou mostrar o detalhamento por adquirente" title="Recolher ou mostrar o detalhamento">${abre ? '▾' : '▸'}</button>` : '';
+    return `<tr class="${x.nivel==='sub' ? 'rd-sub' : 'rd-grupo'}"${x.g ? ` data-g="${x.g}"` : ''}><td>${tg}${x.rot}</td><td class="num">${x.v==null ? '—' : BRL2(x.v)}</td><td class="num">${x.p==null ? '—' : BRL2(x.p)}</td><td class="num">${BRL2(soma)}</td><td class="num">${rdPct(soma, total)}</td></tr>`;
+  }).join('');
+}
+function rdResumo1397(c, total){
+  const B = v => v==null ? '—' : BRL2(v), tot = k => c.resumo.reduce((a,x)=>a+(x[k]||0),0);
+  return `<div class="rd-resumo-wrap"><h3>Resumo por Adquirente</h3>
+        <table class="rd-tab rd-zebra rd-resumo97"><colgroup><col><col style="width:18%"><col style="width:16%"><col style="width:19%"><col style="width:10%"></colgroup>
+        <thead><tr><th>Adquirente</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
+          ${c.resumo.map(x=>`<tr><td>${x.rot}</td><td class="num">${B(x.deb)}</td><td class="num">${B(x.cre)}</td><td class="num">${B(x.total)}</td><td class="num">${rdPct(x.total, total)}</td></tr>`).join('')}
+          <tr class="rd-total"><td>Total em cartões</td><td class="num">${B(tot('deb'))}</td><td class="num">${B(tot('cre'))}</td><td class="num">${B(tot('total'))}</td><td class="num">${rdPct(tot('total'), total)}</td></tr>
+        </tbody></table></div>`;
+}
+function fcxV1396(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1396') && P.PainelFCX && typeof P.PainelFCX.linhasPrestacao === 'function'); }catch(e){ return false; } } // v13.96: rótulo da prestação no débito = adquirente + forma de recebimento (+ bandeira), sem o identificador interno do ERP
 function fcxV1387(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('rd_cartao_v1387')); }catch(e){ return false; } } // v13.87: Recebível Diário · débito × crédito, prestação no débito por bandeira, Credsystem consolidada
 function fcxV1386(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('contabil_v1386')); }catch(e){ return false; } } // v13.86: plano de contas lido do Módulo Contábil (somente leitura)
 function fcxV1385(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_periodo_v1385')); }catch(e){ return false; } } // v13.85: período por calendário + detalhamento diário em agrupadores
@@ -1688,7 +1712,7 @@ function rdDocumentoImpressao(){
     .rd-impressao .rd-pagina { break-before:page; page-break-before:always; break-after:auto; page-break-after:auto; }
     .rd-impressao .rd-pagina:first-child { break-before:auto; page-break-before:auto; }
     @media screen { body.rd-doc { padding:18px 22px; } .rd-impressao .rd-pagina { margin-bottom:34px !important; } }`;
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Recebível Diário · ${fmtDate(u.data)}</title>${estilos}<style>${css}</style></head><body class="rd-doc"><div class="rd-impressao">${rdPaginarImpressao().join('\n')}</div></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Recebível Diário · ${fmtDate(u.data)}</title>${estilos}<style>${css}</style></head><body class="rd-doc"><div class="rd-impressao">${rdPaginarImpressao().join('\n').replace(/<button type="button" class="rd-tgl[\s\S]*?<\/button>/g, '').replace(/ rd-col-(?:cred|deb)(?=[\s"])/g, '')}</div></body></html>`;
 }
 function imprimirRecebivel(){
   const u = rdUi(); if(!document.querySelector('.rd-relatorio')) return;
@@ -1757,7 +1781,7 @@ const rdTabAgrupada = (titulo, grupos, total) => `
    • Credsystem (private label): só o consolidado e a agenda do Recebível Futuro.
    ========================================================= */
 const RD_BAND = { MASTERCARD:'Mastercard', VISA:'Visa', ELO:'Elo', AMEX:'Amex', HIPERCARD:'Hipercard', CABAL:'Cabal', DINERS:'Diners', JCB:'JCB', DISCOVER:'Discover', SOROCRED:'Sorocred', BANESCARD:'Banescard', OUTRAS:'Outras bandeiras' };
-function rdBandNome(b){ const k = String(b == null ? '' : b).trim().toUpperCase(); if(!k || k === '—') return 'bandeira não informada'; return RD_BAND[k] || (k.charAt(0) + k.slice(1).toLowerCase()); }
+function rdBandNome(b){ const k = String(b == null ? '' : b).trim().toUpperCase(); if(!k || k === '—' || (k === 'LOTE' && fcxV1396())) return 'bandeira não informada'; return RD_BAND[k] || (k.charAt(0) + k.slice(1).toLowerCase()); }
 function rdOperDe(b){ return b && b.modalidade === 'debito' ? 'debito' : b && b.modalidade === 'credito' ? 'credito' : ''; }
 function rdRotDebito(b, lista){ const varias = new Set(lista.map(x => x.adquirente)).size > 1; return 'Débito ' + rdBandNome(b.bandeira) + (varias ? ' · ' + b.adquirente : ''); }
 /** Resumo de Fechamento por Adquirente: débito (vendas + prestações no débito) e crédito; aluguel de POS por adquirente. */
@@ -1853,8 +1877,9 @@ function renderRecebivelScreen(){
 
   /* ---------- números ---------- */
   const pn = u.painel || {}, cart = pn.cartao || { liquido:0, bruto:0, linhas:0 }, pr = pn.prestacao || { din:0, pix:0, lote:0, lojas:0 }, csy = pn.credsystem || { itens:[], bruto:0, mdr:0, liquido:0 };
-  const din = Number(f.dinheiro)||0, pix = Number(f.pix)||0, cartao = Number(cart.liquido)||0, vendas = din+pix+cartao;
-  const v87 = fcxV1387(), pc = (v87 && pn.prestacaoCartao) || null, pcDet = !!(pc && pc.detalhado), pLoteBruto = Number(pr.lote)||0; // v13.87: prestação no débito pelo líquido do MDR (com abertura por bandeira)
+  const v97 = fcxV1397(), pixR = v97 ? window.parent.PainelFCX.pixReal1397(f.pix, rdPixHistorico1397(ant)) : null; // v13.97: PIX real das vendas
+  const din = Number(f.dinheiro)||0, pix = pixR ? pixR.valor : Number(f.pix)||0, cartao = Number(cart.liquido)||0, vendas = din+pix+cartao;
+  const v96 = fcxV1396(), v87 = fcxV1387(), pc = (v87 && pn.prestacaoCartao) || null, pcDet = !!(pc && pc.detalhado), pLoteBruto = Number(pr.lote)||0; // v13.87: prestação no débito pelo líquido do MDR (com abertura por bandeira)
   const pDin = Number(pr.din)||0, pPix = Number(pr.pix)||0, pLote = pcDet ? Number(pc.liquido)||0 : pLoteBruto, prest = pDin+pPix+pLote;
   const credHoje = rdCredsystemVencendo(d), credHojeV = credHoje.reduce((a,r)=>a+r.valor,0), entradas = vendas+prest+credHojeV; // v13.80: Credsystem só no vencimento
   const bands = cart.porBandeira || [], grupos = {}; bands.forEach(b=>{ (grupos[b.adquirente] ||= []).push(b); });
@@ -1869,6 +1894,8 @@ function renderRecebivelScreen(){
     if(!pcDet && pLoteBruto) avisosL.push('Prestação no cartão de débito sem abertura por bandeira (cruzamento gravado antes da v13.87): regrave a Conciliação e Cruzamento na Auditoria de Adquirentes para aplicar o MDR de cada bandeira. Até lá, o valor entra bruto.');
     if((cart.porBandeira||[]).some(b=>!rdOperDe(b) && !b.semBandeira)) avisosL.push('Cartão: fechamento gravado antes da v13.87, sem separar débito e crédito. Regrave o Cruzamento para abrir por operação (por enquanto entra em Crédito).');
   }
+  const c97 = v97 ? window.parent.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred: credHojeV, credN: credHoje.length, pn, liquido: pcDet }) : null; // v13.97
+  if(c97){ c97.avisos.forEach(a=>{ if(!(v87 && a.tipo === 'semModalidade')) avisosL.push(a.texto); }); if(pixR && pixR.fonte === 'historico') avisosL.push('PIX das vendas: usado o valor do histórico de vendas do FCX (nada foi digitado em Vendas em PIX).'); }
   const avisos = avisosL.length ? `<div class="rd-avisos">${avisosL.map(a=>`<div>⚠ ${a}</div>`).join('')}</div>` : '';
   const COLS5 = '<colgroup><col><col style="width:21%"><col style="width:11%"><col style="width:21%"><col style="width:20%"></colgroup>';
 
@@ -1878,7 +1905,7 @@ function renderRecebivelScreen(){
   const kpi = (rot, real, prev, cls, fav) => `<div class="rd-kpi"><div class="rd-kpi-rot">${rot}</div><div class="rd-kpi-val ${cls}">${BRL2(real)}</div><div class="rd-kpi-prev">Previsto FCX ${BRL2(prev)} · <b class="${fav>=0?'pos':'neg'}">${fav>0?'+':''}${BRL2(fav)}</b></div></div>`;
   const linhaC = (rot, v, pr, cls='') => `<tr${cls?` class="${cls}"`:''}><td>${rot}</td><td class="num">${v==null?'—':BRL2(v)}</td><td class="num">${pr==null?'—':BRL2(pr)}</td><td class="num">${BRL2((v||0)+(pr||0))}</td><td class="num">${rdPct((v||0)+(pr||0), entradas)}</td></tr>`;
   const capa = `
-  <section class="rd-pagina panel rd-capa">
+  <section class="rd-pagina panel rd-capa${v97 ? ' rd-capa97' : ''}">
     ${titulo}${avisos}
     <div class="rd-kpis">
       ${kpi('Entradas do dia', entradas, metaEntradas, 'pos', entradas-metaEntradas)}
@@ -1889,17 +1916,18 @@ function renderRecebivelScreen(){
       <div class="rd-bloco rd-bloco-ent">
         <h3>Consolidado de Entradas (Vendas + Prestações)</h3>
         <div class="rd-bloco-sub">Vendas de ${fmtDate(ant)} e prestações recebidas · entram em ${fmtDate(d)}</div>
-        <table class="rd-tab rd-zebra rd-consolidado"><colgroup><col><col style="width:18%"><col style="width:16%"><col style="width:19%"><col style="width:10%"></colgroup>
+        <table class="rd-tab rd-zebra rd-consolidado${rdColClasses1397(v97)}"><colgroup><col><col style="width:18%"><col style="width:16%"><col style="width:19%"><col style="width:10%"></colgroup>
         <thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
-          ${linhaC('Total em Dinheiro', din, pDin, 'rd-grupo')}
+          ${v97 ? rdLinhas1397(c97, entradas) : `${linhaC('Total em Dinheiro', din, pDin, 'rd-grupo')}
           ${linhaC('Total em PIX', pix, pPix, 'rd-grupo')}
           ${linhaC('Total em Cartão', vCart, pLote, 'rd-grupo')}
           ${adqs.map(([a,v])=>linhaC(a, v, null, 'rd-sub')).join('')}
           ${credHojeV ? linhaC('CREDSYSTEM (vence hoje)', credHojeV, null, 'rd-sub') : ''}
-          ${v87 ? (pcDet ? pc.porBandeira.map(b=>linhaC(rdRotDebito(b, pc.porBandeira), null, b.liquido, 'rd-sub')).join('') : (pLote ? linhaC('Cartão de Débito · bandeira não informada', null, pLote, 'rd-sub') : '')) : (pLote ? linhaC('Débito (LOTE) da prestação', null, pLote, 'rd-sub') : '')}
+          ${v96 ? (pLote ? window.parent.PainelFCX.linhasPrestacao(pn, pLote, true).map(x=>linhaC(x.rotulo, null, x.valor, 'rd-sub')).join('') : '') : v87 ? (pcDet ? pc.porBandeira.map(b=>linhaC(rdRotDebito(b, pc.porBandeira), null, b.liquido, 'rd-sub')).join('') : (pLote ? linhaC('Cartão de Débito · bandeira não informada', null, pLote, 'rd-sub') : '')) : (pLote ? linhaC('Débito (LOTE) da prestação', null, pLote, 'rd-sub') : '')}`}
           <tr class="rd-total rd-total-geral"><td>Total Geral de Entradas do Dia</td><td class="num">${BRL2(vendas+credHojeV)}</td><td class="num">${BRL2(prest)}</td><td class="num">${BRL2(entradas)}</td><td class="num">${entradas>0?'100%':'—'}</td></tr>
         </tbody></table>
-        <div class="rd-graf rd-graf-ent"><canvas id="rdGrafEntradas" role="img" aria-label="Entradas por meio de pagamento × saídas do dia"></canvas></div>
+        ${v97 ? rdResumo1397(c97, entradas) : ''}
+        ${v97 ? '' : '<div class="rd-graf rd-graf-ent"><canvas id="rdGrafEntradas" role="img" aria-label="Entradas por meio de pagamento × saídas do dia"></canvas></div>'}
         <div class="rd-nota rd-linha">${v87 ? 'Cartão líquido de MDR, antecipação e POS; prestações no Cartão de Débito pelo líquido do MDR. Abertura por adquirente, operação e bandeira, Resumo de Fechamento por Adquirente e Credsystem na página do cartão.' : 'Cartão líquido de MDR, antecipação e POS; abertura por bandeira e Credsystem (Recebível Futuro) na página 3.'}</div>
       </div>
       <div class="rd-bloco rd-bloco-sai">
@@ -1907,6 +1935,7 @@ function renderRecebivelScreen(){
         <div class="rd-bloco-sub">Contas autorizadas / a pagar em ${fmtDate(d)} · detalhamento a partir da página 4</div>
         ${rdTabAgrupada('Por conta contábil', rdAgrupar(lista, 'conta', 8), saidas)}
         ${rdTabAgrupada('Por forma de pagamento', rdAgrupar(lista, 'formaPagamento', 6), saidas)}
+        ${v97 ? '<div class="rd-graf rd-graf-ent"><canvas id="rdGrafEntradas" role="img" aria-label="Entradas por meio de pagamento × saídas do dia"></canvas></div>' : ''}
       </div>
     </div>
     <div class="rd-criterios">Previsto = meta do FCX para as vendas e a prestação de ${fmtDate(ant)} e saídas projetadas para ${fmtDate(d)}; variação positiva = favorável. ${crit.msg}.</div>

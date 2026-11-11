@@ -133,6 +133,7 @@ export const VERIFICACOES = [
   { rotulo: 'Cadastro de empresas (multiempresas)', tabelas: ['contab_empresas'], colunas: [['contab_lancamentos', 'empresa_id']] },
   { rotulo: 'Empresas: dados da Receita Federal (v13.94)', colunas: [['contab_empresas', 'receita']] },
   { rotulo: 'Índice de documentos dos lançamentos', indices: ['contab_lanc_doc_ref_ix'] },
+  { rotulo: 'Pontos de restauração na nuvem (v13.95)', tabelas: ['painel_backups_historico'], indices: ['painel_backups_hist_data_ix'] },
 ];
 
 export async function verificarEsquema(c) {

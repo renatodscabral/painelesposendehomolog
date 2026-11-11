@@ -132,6 +132,67 @@ tr.tit td{font-weight:800;text-transform:uppercase;font-size:11.5px;letter-spaci
 @media (max-width:560px){ .topo-disp{grid-template-columns:1fr 1fr;gap:6px} .dcard b{font-size:16px} .atalhos{grid-template-columns:1fr} .radar-top{grid-template-columns:1fr;justify-items:center} .subnotas{grid-template-columns:1fr} .sug{grid-template-columns:1fr} .lin-soc{grid-template-columns:1fr 1fr} }
 @media print{ body{background:#fff;color:#000;padding:0} .no-print,.tabs,.topo,.toast,.topo-disp,.empcard,.subtabs{display:none!important} .panel{border:0;padding:0} .tbl{max-height:none;overflow:visible;border:0} th{position:static} }
 </style>
+<style id="ct96">
+/* v13.96 · Módulo Contábil: partidas dobradas por extenso (Débito/Crédito em selo), código - nome na mesma coluna e cores por grupo contábil
+   (Ativo verde · Passivo vermelho · Patrimônio Líquido azul · Resultado/DRE laranja) + aba Biblioteca CPC & Regras Fiscais.
+   Tudo atrás da classe html.ct96 (recurso gestao_v1396): sem o recurso nada muda. Texto dos selos com contraste AA sobre o próprio fundo. */
+html.ct96{--g1:#059669;--g1b:#D1FAE5;--g1t:#065F46;--g2:#DC2626;--g2b:#FEE2E2;--g2t:#991B1B;--g3:#2563EB;--g3b:#DBEAFE;--g3t:#1E40AF;--g4:#EA580C;--g4b:#FFEDD5;--g4t:#9A3412;--g0:#64748B;--g0b:#E2E8F0;--g0t:#334155}
+html.ct96[data-escuro]{--g1:#10B981;--g1b:#064E3B;--g1t:#A7F3D0;--g2:#EF4444;--g2b:#7F1D1D;--g2t:#FECACA;--g3:#3B82F6;--g3b:#1E3A8A;--g3t:#BFDBFE;--g4:#F97316;--g4b:#7C2D12;--g4t:#FED7AA;--g0:#94A3B8;--g0b:#1E293B;--g0t:#E2E8F0}
+html.ct96 .g0{--gi:var(--g0);--gb:var(--g0b);--gt:var(--g0t)} html.ct96 .g1{--gi:var(--g1);--gb:var(--g1b);--gt:var(--g1t)} html.ct96 .g2{--gi:var(--g2);--gb:var(--g2b);--gt:var(--g2t)}
+html.ct96 .g3{--gi:var(--g3);--gb:var(--g3b);--gt:var(--g3t)} html.ct96 .g4{--gi:var(--g4);--gb:var(--g4b);--gt:var(--g4t)}
+html.ct96 .dcb{display:inline-block;font:700 12px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.2px;padding:3px 12px;border-radius:999px;background:var(--gb);color:var(--gt);border:1px solid var(--gi);white-space:nowrap}
+html.ct96 .dcsel{position:relative;display:block;min-width:0}
+html.ct96 .dcsel select.dcb{display:block;width:100%;height:36px;appearance:none;-webkit-appearance:none;cursor:pointer;padding:0 26px 0 14px;font-size:13px}
+html.ct96 .dcsel select.dcb option{background:var(--panel);color:var(--ink);font-weight:600}
+html.ct96 .dcsel::after{content:"\25BE";position:absolute;right:11px;top:50%;transform:translateY(-52%);color:var(--gt);pointer-events:none;font-size:12px}
+html.ct96 .lin-lanc{grid-template-columns:minmax(220px,3fr) 128px minmax(110px,1fr) minmax(150px,1.6fr) 34px;border-left:4px solid var(--gi,var(--line));padding-left:8px;border-radius:4px}
+html.ct96 .lin-cab96{display:grid;grid-template-columns:minmax(220px,3fr) 128px minmax(110px,1fr) minmax(150px,1.6fr) 34px;gap:6px;padding-left:12px;margin:0 0 4px;font-size:11.5px;font-weight:700;color:var(--ink-soft)}
+html.ct96 .lin-cab96 .v{text-align:right}
+html.ct96 .lin-lanc input.cta96{font-weight:600}
+html.ct96 .lin-lanc input.cta96.inv{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+html.ct96 .leg96{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:4px 0 8px;font-size:12px;color:var(--ink-soft)}
+html.ct96 .leg96 .dcb{font-size:11.5px;padding:2px 10px}
+html.ct96 .pts96{display:grid;gap:3px;margin-top:6px}
+html.ct96 .pt96{display:grid;grid-template-columns:minmax(0,1fr) 88px 118px;align-items:center;gap:8px;border-left:4px solid var(--gi);padding:2px 0 2px 8px;max-width:680px}
+html.ct96 .pt96.cr{margin-left:20px}
+html.ct96 .pt96 .pt-cta{overflow-wrap:anywhere;font-size:13px;font-weight:600;color:var(--ink)}
+html.ct96 .pt96 .dcb{justify-self:start;font-size:11.5px;padding:2px 10px}
+html.ct96 .pt96 .pt-val{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+html.ct96 td.dia96{border-left:4px solid var(--gi)}
+html.ct96 td.dia96 .dcb{margin-left:8px;font-size:11px;padding:1px 9px}
+html.ct96 .ex96{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:13px}
+html.ct96 .ex96 td{padding:4px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+html.ct96 .ex96 td.v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+html.ct96 .ex96 td:nth-child(2){width:104px} html.ct96 .ex96 td.v{width:120px}
+html.ct96 .ex96 tr.cr td:first-child{padding-left:26px}
+html.ct96 .bib-barra{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0 6px}
+html.ct96 .bib-barra .campo{flex:1 1 300px}
+html.ct96 .bib-card{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--r);background:var(--panel);margin:0 0 10px;overflow:hidden}
+html.ct96 .bib-card.fiscal{border-left-color:var(--warn)}
+html.ct96 .bib-card>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;padding:12px 14px;font-weight:400}
+html.ct96 .bib-card>summary::-webkit-details-marker{display:none}
+html.ct96 .bib-card>summary::before{content:"\25B8";color:var(--ink-soft);font-size:13px;width:14px}
+html.ct96 .bib-card[open]>summary::before{content:"\25BE"}
+html.ct96 .bib-card .bib-tit{font-weight:700;font-size:14.5px;color:var(--ink)}
+html.ct96 .bib-card .bib-res{flex:1 1 100%;padding-left:24px;color:var(--ink-soft);font-size:12.5px}
+html.ct96 .bib-corpo{padding:4px 18px 16px;border-top:1px solid var(--line-soft);max-width:1000px;line-height:1.55}
+html.ct96 .bib-corpo h4{margin:16px 0 4px;font-size:13.5px;color:var(--ink)}
+html.ct96 .bib-corpo p{margin:0 0 8px}
+html.ct96 .bib-corpo ul{margin:4px 0 8px;padding-left:20px} html.ct96 .bib-corpo li{margin:3px 0}
+html.ct96 .bib-corpo .tbl{margin:6px 0 10px}
+html.ct96 .bib-corpo .alerta{border-left:4px solid var(--warn);background:var(--warn-soft);color:var(--ink);padding:8px 12px;border-radius:8px;margin:8px 0}
+html.ct96 .bib-vazio{padding:22px;text-align:center;color:var(--ink-soft);border:1px dashed var(--line);border-radius:var(--r)}
+@media (max-width:980px){
+  html.ct96 .lin-lanc,html.ct96 .lin-cab96{grid-template-columns:minmax(0,1fr) 124px minmax(96px,150px) 34px}
+  html.ct96 .lin-lanc .opc{grid-column:1/-1;order:5} html.ct96 .lin-lanc>button{order:4} html.ct96 .lin-cab96 .h{display:none}
+}
+@media (max-width:760px){
+  html.ct96 .lin-lanc{grid-template-columns:124px minmax(0,1fr) 34px} html.ct96 .lin-lanc>.cta96{grid-column:1/-1} html.ct96 .lin-cab96{display:none}
+  html.ct96 .pt96{grid-template-columns:auto minmax(0,1fr)} html.ct96 .pt96 .pt-cta{grid-column:1/-1} html.ct96 .pt96.cr{margin-left:12px}
+  html.ct96 .bib-card .bib-res{padding-left:0} html.ct96 .bib-corpo{padding:4px 12px 14px}
+}
+@media print{ html.ct96 .dcb{-webkit-print-color-adjust:exact;print-color-adjust:exact} html.ct96 .bib-card{break-inside:avoid} }
+</style>
 <style id="fw94-ind">
 .cnpj94-st{display:flex;align-items:center;gap:6px;min-height:18px;margin:4px 0 0;font-size:12.5px;color:var(--ink-soft)}
 .cnpj94-st.ok{color:var(--ok)} .cnpj94-st.warn{color:var(--warn)} .cnpj94-st.bad{color:var(--bad)}
@@ -230,6 +291,7 @@ const S = {
   lf: null, ls: { lista: null, de: '', ate: '', conta: '', estorno: null },
   rl: { tipo: 'diario', de: '', ate: '', modelo: '', anoReforma: '', conta: '', regime: '', dados: null, cmp: null, comparar: true, carregando: false },
   pr: { lalur: null, ano: new Date().getFullYear(), integ: null },
+  bib: { busca: '', cat: 'todos', abertos: new Set() },
 };
 const ABAS = [['radar', 'Radar de Saúde'], ['relatorios', 'Relatórios'], ['lancamentos', 'Lançamentos'], ['plano', 'Plano de contas'], ['depara', 'De-para do FCX'], ['empresas', 'Empresas'], ['parametros', 'Parâmetros']];
 const KEMP = 'contabil:empresa';
@@ -278,12 +340,12 @@ function render() {
   if (S.erro) { app.innerHTML = `<div class="panel"><h2>Módulo Contábil indisponível</h2><p>${esc(S.erro)}</p><button class="btn sec" data-a="recarregar">Tentar de novo</button></div>`; return; }
   if (!S.st) return;
   const st = S.st, ro = !['contabil.lancar', 'contabil.plano', 'contabil.estornar', 'contabil.parametros'].some(pode);
-  const corpo = { radar: vRadar, plano: vPlano, depara: vDepara, lancamentos: vLancamentos, relatorios: vRelatorios, empresas: vEmpresas, parametros: vParametros }[S.aba]();
+  const corpo = { radar: vRadar, plano: vPlano, depara: vDepara, lancamentos: vLancamentos, relatorios: vRelatorios, empresas: vEmpresas, parametros: vParametros, biblioteca: vBiblioteca }[S.aba]();
   app.innerHTML = `${vTopo()}<div class="tabs no-print" role="tablist" aria-label="Seções do Módulo Contábil">${ABAS.map(([k, r]) => `<button role="tab" id="tab-${k}" aria-selected="${S.aba === k}" data-a="aba" data-v="${k}">${r}${k === 'depara' && st.depara && st.depara.pendente ? ` <span class="pill warn">${st.depara.pendente}</span>` : ''}</button>`).join('')}</div>
     <p class="hint no-print" style="margin:-4px 0 10px">Empresa ativa: <b>${esc(empAtual().nomeFantasia || empAtual().razaoSocial)}</b> · ${st.plano.criado ? `Plano: <b>${st.plano.contas}</b> contas (${st.plano.analiticas} analíticas)` : 'Plano de contas ainda não criado'} · <b>${st.lancamentos.total}</b> lançamento(s) · Regime: <b>${st.parametros.regime === 'real' ? 'Lucro Real' : 'Lucro Presumido'}</b> · DRE padrão: <b>${st.parametros.dreModelo === 'reforma' ? 'Nova Reforma' : 'Modelo Atual'}</b>${st.parametros.fechadoAte ? ` · período fechado até ${dataBR(st.parametros.fechadoAte)}` : ''}${ro ? ' · <span class="pill">somente consulta</span>' : ''}</p>
     <section role="tabpanel" aria-labelledby="tab-${S.aba}">${corpo}</section>
     <datalist id="dlA">${analiticas().map(c => `<option value="${esc(c.codigo)}">${esc(c.nome)}</option>`).join('')}</datalist>
-    <datalist id="dlS">${S.contas.filter(c => c.tipo === 'S' && c.ativa).map(c => `<option value="${esc(c.codigo)}">${esc(c.nome)}</option>`).join('')}</datalist>`;
+    <datalist id="dlS">${S.contas.filter(c => c.tipo === 'S' && c.ativa).map(c => `<option value="${esc(c.codigo)}">${esc(c.nome)}</option>`).join('')}</datalist>${CT96() ? `<datalist id="dlP">${analiticas().map(c => `<option value="${esc(contaRot(c.codigo, c.nome))}"></option>`).join('')}</datalist>` : ''}`;
   if (id) { const el = document.getElementById(id); if (el) { el.focus(); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { } } }
 }
 
@@ -316,6 +378,306 @@ function fecharModal() { const d = $('#mdl'); if (d) d.remove(); }
 const opts = (lista, v) => lista.map(([k, r]) => `<option value="${esc(k)}" ${String(v) === String(k) ? 'selected' : ''}>${esc(r)}</option>`).join('');
 const tribChecks = (sel, pref) => { const c = cat(); return [...c.tributosAtuais, ...c.tributosReforma, ...c.outrosTributos].map(t => `<label style="margin-right:10px;white-space:nowrap"><input type="checkbox" data-trib="${pref}" value="${t}" ${sel.includes(t) ? 'checked' : ''}> ${t}${c.tributosReforma.includes(t) ? ' <small class="muted">(reforma)</small>' : ''}</label>`).join(''); };
 const nat = n => (n === 'D' ? 'Devedora' : 'Credora');
+
+/* ---------- v13.96 · partidas dobradas: código - nome, Débito/Crédito por extenso e cores por grupo (recurso gestao_v1396) ---------- */
+const CT96 = () => document.documentElement.classList.contains('ct96');
+const ctV1396 = () => { try { return !!(PAI && PAI.Recursos && PAI.Recursos.ativo('gestao_v1396')); } catch (e) { return false; } };
+const norm96 = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+let mapa96 = [null, null];
+const mapaContas = () => { if (mapa96[0] !== S.contas) mapa96 = [S.contas, porCodigo()]; return mapa96[1]; };
+const GRUPO_ROT = { g1: 'Ativo', g2: 'Passivo', g3: 'Patrimônio Líquido', g4: 'Resultado (DRE)', g0: 'Sem grupo' };
+/** Ativo (1) verde · Passivo (2) vermelho · Patrimônio Líquido (3) azul · Receitas, Custos e Despesas (4, 5 e 6) laranja */
+const grupoDe = cod => { const c = mapaContas().get(String(cod == null ? '' : cod).trim()), g = c ? Number(c.grupo) : parseInt(String(cod == null ? '' : cod).trim().charAt(0), 10); return g === 1 ? 'g1' : g === 2 ? 'g2' : g === 3 ? 'g3' : g >= 4 && g <= 6 ? 'g4' : 'g0'; };
+const dcRot = d => (d === 'C' ? 'Crédito' : 'Débito');
+const contaRot = (cod, nome) => (cod ? (nome ? `${cod} - ${nome}` : String(cod)) : '');
+const codDeTexto = t => String(t == null ? '' : t).split(' - ')[0].trim();
+const badgeDC = (d, g) => `<span class="dcb ${g}">${dcRot(d)}</span>`;
+const sufDC96 = d => (CT96() ? (d === 'D' ? 'Devedor' : d === 'C' ? 'Credor' : d) : d);
+const legenda96 = () => `<div class="leg96" role="note" aria-label="Cores por grupo contábil"><span>Cores por grupo:</span>${['g1', 'g2', 'g3', 'g4'].map(g => `<span class="dcb ${g}">${GRUPO_ROT[g]}</span>`).join('')}</div>`;
+const cab96 = () => '<div class="lin-cab96" aria-hidden="true"><span>Conta (código - nome)</span><span>Natureza</span><span class="v">Valor (R$)</span><span class="h">Histórico da partida</span><span></span></div>';
+function linha96(i, k, x) {
+  const g = x ? grupoDe(x.codigo) : 'g0', ok = x && x.tipo === 'A' && x.ativa, txt = x ? contaRot(x.codigo, x.nome) : i.conta, inv = !!String(i.conta || '').trim() && !ok;
+  const dica = x ? `${GRUPO_ROT[g]} · ${contaRot(x.codigo, x.nome)}${ok ? '' : ' (conta sintética ou inativa: não recebe lançamento)'}` : inv ? 'Conta não encontrada: escolha uma conta analítica do plano' : '';
+  return `<div class="lin-lanc ${g}"><input data-li="${k}" data-f="conta" list="dlP" value="${esc(txt)}" class="mono cta96${inv ? ' inv' : ''}" placeholder="Digite o código ou o nome da conta" aria-label="Conta da partida ${k + 1} (código - nome)" ${inv ? 'aria-invalid="true" ' : ''}title="${esc(dica)}" autocomplete="off"><span class="dcsel"><select class="dcb ${g}" data-li="${k}" data-f="dc" aria-label="Débito ou crédito da partida ${k + 1}">${opts([['D', 'Débito'], ['C', 'Crédito']], i.dc)}</select></span><input data-li="${k}" data-f="valor" value="${esc(i.valor)}" inputmode="decimal" placeholder="0,00" style="text-align:right" aria-label="Valor da partida ${k + 1}"><input class="opc" data-li="${k}" data-f="historico" value="${esc(i.historico)}" placeholder="Histórico da partida (opcional)" aria-label="Histórico da partida ${k + 1}"><button class="btn sec sm" data-a="lf-tirar" data-v="${k}" aria-label="Remover partida ${k + 1}" ${S.lf.itens.length <= 2 ? 'disabled' : ''}>×</button></div>`;
+}
+/** repinta a linha (cor do grupo, selo e aviso de conta inválida) quando o campo da conta muda; `final` marca como inválida só ao sair do campo */
+function pintar96(inp, final) {
+  const row = inp.closest('.lin-lanc'); if (!row) return;
+  const bruto = String(inp.value || '').trim(), x = mapaContas().get(codDeTexto(bruto)), g = x ? grupoDe(x.codigo) : 'g0', ok = !!(x && x.tipo === 'A' && x.ativa), inv = !!final && !!bruto && !ok;
+  ['g0', 'g1', 'g2', 'g3', 'g4'].forEach(c => row.classList.remove(c)); row.classList.add(g);
+  const sel = row.querySelector('select.dcb'); if (sel) sel.className = 'dcb ' + g;
+  inp.classList.toggle('inv', inv); if (inv) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid');
+  inp.title = x ? `${GRUPO_ROT[g]} · ${contaRot(x.codigo, x.nome)}${ok ? '' : ' (conta sintética ou inativa: não recebe lançamento)'}` : inv ? 'Conta não encontrada: escolha uma conta analítica do plano' : '';
+}
+/** ao sair do campo: aceita o código digitado ou um trecho do nome que identifique uma única conta analítica e grava "código - nome" */
+function resolver96(inp) {
+  const i = S.lf.itens[Number(inp.dataset.li)]; if (!i) return;
+  const bruto = String(inp.value || '').trim(); let x = mapaContas().get(codDeTexto(bruto));
+  if (!x && bruto) { const n = norm96(bruto), ach = analiticas().filter(c => norm96(contaRot(c.codigo, c.nome)).includes(n)); if (ach.length === 1) x = ach[0]; }
+  if (x) { i.conta = x.codigo; inp.value = contaRot(x.codigo, x.nome); } else i.conta = bruto;
+  pintar96(inp, true);
+}
+function partidas96(itens, m) {
+  return `<div class="pts96" role="list" aria-label="Partidas do lançamento">${itens.map(i => { const g = grupoDe(i.conta); return `<div class="pt96 ${g}${i.dc === 'C' ? ' cr' : ''}" role="listitem"><span class="pt-cta">${esc(contaRot(i.conta, i.contaNome))}</span>${badgeDC(i.dc, g)}<span class="pt-val">${fmtN(i.valor)}</span></div>`; }).join('')}</div>`;
+}
+const celDia96 = i => { const g = grupoDe(i.conta); return `<td class="dia96 ${g} ${i.dc === 'C' ? 'ind1' : ''}"><span class="mono">${esc(contaRot(i.conta, i.contaNome))}</span> ${badgeDC(i.dc, g)}</td>`; };
+/** exemplo de lançamento para a Biblioteca: [[D|C, grupo, conta, valor], ...] */
+const ex96 = linhas => `<table class="ex96"><tbody>${linhas.map(([d, g, conta, v]) => `<tr class="${d === 'C' ? 'cr' : ''}"><td>${esc(conta)}</td><td>${badgeDC(d, g)}</td><td class="v">${esc(v)}</td></tr>`).join('')}</tbody></table>`;
+
+/* ---------- v13.96 · aba Biblioteca CPC & Regras Fiscais (conteúdo orientativo, varejo de calçados) ---------- */
+let bibCache96 = null;
+const CAT_BIB = { contabil: 'Contábil (CPC)', fiscal: 'Fiscal' };
+function bibCartoes() {
+  if (bibCache96) return bibCache96;
+  const GRUPOS = `<div class="tbl"><table><thead><tr><th>Grupo do plano</th><th>Aumenta com</th><th>Diminui com</th><th>Cor no painel</th></tr></thead><tbody>
+    <tr><td>Ativo (1)</td><td>${badgeDC('D', 'g1')}</td><td>${badgeDC('C', 'g1')}</td><td><span class="dcb g1">Verde</span></td></tr>
+    <tr><td>Passivo (2)</td><td>${badgeDC('C', 'g2')}</td><td>${badgeDC('D', 'g2')}</td><td><span class="dcb g2">Vermelho</span></td></tr>
+    <tr><td>Patrimônio líquido (3)</td><td>${badgeDC('C', 'g3')}</td><td>${badgeDC('D', 'g3')}</td><td><span class="dcb g3">Azul</span></td></tr>
+    <tr><td>Receitas (4)</td><td>${badgeDC('C', 'g4')}</td><td>${badgeDC('D', 'g4')}</td><td><span class="dcb g4">Laranja</span></td></tr>
+    <tr><td>Custos e despesas (5 e 6)</td><td>${badgeDC('D', 'g4')}</td><td>${badgeDC('C', 'g4')}</td><td><span class="dcb g4">Laranja</span></td></tr></tbody></table></div>`;
+  const lista = [
+    { id: 'cpc00', cat: 'contabil', tag: 'CPC 00 (R2)', titulo: 'Estrutura Conceitual para Relatório Financeiro',
+      resumo: 'Ativo, passivo, patrimônio líquido, receita e despesa · como funcionam o débito e o crédito nas partidas dobradas',
+      chaves: 'conceitual conceito estrutura ativo passivo patrimonio liquido debito credito partidas dobradas receita despesa competencia balanco equacao natureza saldo devedor credor lancamento',
+      corpo: `<h4>Em uma frase</h4>
+<p>O CPC 00 (R2) é a base da contabilidade: define o que é ativo, passivo, patrimônio líquido, receita e despesa e quais qualidades a informação contábil precisa ter. Todos os outros CPCs partem dele.</p>
+<h4>Os cinco elementos, com exemplos da loja</h4>
+<ul>
+<li><b>Ativo</b>: recurso controlado pela empresa, resultado de fatos passados, que deve gerar benefícios futuros. Ex.: caixa, bancos, vendas no cartão a receber, estoque de calçados, móveis e vitrines, benfeitorias da loja.</li>
+<li><b>Passivo</b>: obrigação atual da empresa, resultado de fatos passados, que exigirá a entrega de recursos. Ex.: fornecedores, aluguel e condomínio a pagar, salários e encargos, tributos a recolher, empréstimos.</li>
+<li><b>Patrimônio líquido</b>: o que sobra dos ativos depois de descontados os passivos (capital social, reservas, lucros acumulados). Ativo = Passivo + Patrimônio líquido.</li>
+<li><b>Receitas</b>: aumentos do patrimônio líquido que não vêm de aporte dos sócios (vendas, receitas financeiras).</li>
+<li><b>Despesas e custos</b>: reduções do patrimônio líquido que não são distribuição aos sócios (custo das mercadorias vendidas, aluguel, salários, tarifas das maquininhas).</li>
+</ul>
+<h4>Débito e crédito (partidas dobradas)</h4>
+<p>Todo fato contábil é registrado com pelo menos um débito e um crédito de valores iguais; por isso, em qualquer lançamento, o total dos débitos é igual ao total dos créditos. Débito é o lado esquerdo da conta e crédito, o direito. O efeito depende do grupo da conta:</p>
+${GRUPOS}
+<h4>Lançamentos-modelo no varejo de calçados</h4>
+<p><b>1) Venda no cartão de débito</b> de R$ 1.000,00, com custo das mercadorias de R$ 600,00:</p>
+${ex96([['D', 'g1', 'Bancos / cartões a receber', '1.000,00'], ['C', 'g4', 'Receita de vendas de mercadorias', '1.000,00'], ['D', 'g4', 'Custo das mercadorias vendidas (CMV)', '600,00'], ['C', 'g1', 'Estoque de mercadorias', '600,00']])}
+<p><b>2) Compra de mercadorias a prazo</b> de R$ 5.000,00, sem tributos recuperáveis:</p>
+${ex96([['D', 'g1', 'Estoque de mercadorias', '5.000,00'], ['C', 'g2', 'Fornecedores', '5.000,00']])}
+<p><b>3) Pagamento do aluguel do mês</b> de R$ 8.000,00 (se a empresa aplica a norma de arrendamentos, veja o cartão do CPC 06 (R2)):</p>
+${ex96([['D', 'g4', 'Despesa de aluguel', '8.000,00'], ['C', 'g1', 'Bancos', '8.000,00']])}
+<h4>Qualidades da informação</h4>
+<ul>
+<li><b>Fundamentais</b>: relevância e representação fidedigna (os números refletem o que realmente aconteceu).</li>
+<li><b>De melhoria</b>: comparabilidade, verificabilidade, tempestividade e compreensibilidade.</li>
+<li><b>Regime de competência</b>: receitas e despesas entram no período em que ocorrem, e não quando o dinheiro entra ou sai (a venda de dezembro recebida em janeiro é receita de dezembro).</li>
+</ul>
+<p class="alerta">Empresas do Simples Nacional e de pequeno porte costumam seguir a ITG 1000 ou a NBC TG 1000 (CPC PME): os conceitos acima são os mesmos, mas alguns pronunciamentos específicos (como o CPC 06 (R2)) não se aplicam a elas. Confirme com o contador qual norma a empresa adota.</p>` },
+
+    { id: 'cpc06', cat: 'contabil', tag: 'CPC 06 (R2)', titulo: 'Arrendamentos: aluguel de loja em shopping e na rua',
+      resumo: 'Direito de uso, passivo de arrendamento, aluguel mínimo × percentual sobre vendas, luvas e reajustes',
+      chaves: 'leasing arrendamento arrendamentos aluguel aluguéis loja shopping rua direito de uso passivo de arrendamento ifrs 16 luvas cessao de ponto percentual faturamento condominio fundo de promocao igpm ipca reajuste valor presente juros contrato locacao',
+      corpo: `<h4>Em uma frase</h4>
+<p>Pelo CPC 06 (R2), equivalente ao IFRS 16, quem aluga um ponto comercial por prazo determinado passa a registrar no balanço o <b>direito de usar a loja</b> (ativo) e a <b>obrigação de pagar os aluguéis</b> (passivo), em vez de lançar o aluguel apenas como despesa do mês.</p>
+<h4>Quando se aplica</h4>
+<ul>
+<li>Contrato que dá à empresa o direito de controlar o uso de um imóvel identificado (loja, depósito, escritório) por um período, em troca de pagamento: vale para loja de shopping e para loja de rua.</li>
+<li><b>Isenções práticas</b>: contratos de curto prazo (até 12 meses) e de ativos de baixo valor podem continuar como despesa linear.</li>
+<li>Empresas que adotam a NBC TG 1000 (CPC PME) ou a ITG 1000 seguem o modelo antigo, com o aluguel como despesa do período. Confirme com o contador qual norma a empresa adota.</li>
+</ul>
+<h4>Como registrar (locatário)</h4>
+<ul>
+<li><b>No início do contrato</b>: o passivo de arrendamento é o valor presente dos pagamentos fixos futuros, descontados pela taxa implícita ou, na falta dela, pela taxa incremental de empréstimo da empresa. O direito de uso é o passivo mais pagamentos antecipados e custos iniciais (inclusive luvas e cessão de ponto), menos incentivos recebidos do locador.</li>
+<li><b>Todo mês</b>: depreciação linear do direito de uso (pelo prazo do contrato) e juros sobre o passivo (despesa financeira). O pagamento do aluguel reduz o passivo.</li>
+</ul>
+<p>Reconhecimento inicial (valores ilustrativos: 60 parcelas de R$ 5.000,00 trazidas a valor presente):</p>
+${ex96([['D', 'g1', 'Direito de uso do imóvel da loja (ativo)', '240.000,00'], ['C', 'g2', 'Arrendamentos a pagar (passivo)', '240.000,00']])}
+<p>Mês a mês:</p>
+${ex96([['D', 'g4', 'Depreciação do direito de uso', '4.000,00'], ['C', 'g1', '(−) Depreciação acumulada do direito de uso', '4.000,00'], ['D', 'g4', 'Juros sobre arrendamentos (despesa financeira)', '1.800,00'], ['C', 'g2', 'Arrendamentos a pagar', '1.800,00'], ['D', 'g2', 'Arrendamentos a pagar', '5.000,00'], ['C', 'g1', 'Bancos (pagamento do aluguel)', '5.000,00']])}
+<h4>Shopping: aluguel mínimo mais percentual sobre as vendas</h4>
+<ul>
+<li>O <b>aluguel mínimo fixo</b> e os reajustes já previstos entram no cálculo do passivo.</li>
+<li>O <b>percentual sobre o faturamento</b> que exceder o mínimo é pagamento variável: não entra no passivo e vira despesa no mês em que a venda ocorre.</li>
+<li><b>Condomínio, fundo de promoção e taxas de serviços</b> são, em geral, componentes que não são arrendamento. A norma permite separá-los (despesa do período) ou, por política contábil, tratá-los junto com o aluguel.</li>
+<li><b>Reajuste por índice (IGP-M, IPCA)</b>: quando o índice muda o valor das parcelas futuras, o passivo é remensurado e o ajuste vai para o direito de uso.</li>
+<li><b>Luvas e cessão de ponto</b> pagas no início integram o direito de uso.</li>
+</ul>
+<h4>Reflexo fiscal</h4>
+<p>No Lucro Presumido e no Simples Nacional, o CPC 06 (R2) não altera a base de cálculo dos tributos. No Lucro Real, a neutralidade tributária exige ajustes no e-LALUR/e-LACS (adições e exclusões) para que a dedução continue refletindo as contraprestações de aluguel efetivamente pagas; peça esse controle ao contador.</p>
+<p class="alerta">Resumo orientativo. A mensuração (taxa de desconto, prazo com renovações prováveis, remensurações) exige julgamento técnico: valide com o contador antes de contabilizar.</p>` },
+
+    { id: 'cpc16', cat: 'contabil', tag: 'CPC 16 (R1)', titulo: 'Estoques: valoração e custo de aquisição',
+      resumo: 'O que compõe o custo do calçado, tributos recuperáveis, custo médio × PEPS, método do varejo e perdas',
+      chaves: 'estoque estoques mercadoria mercadorias custo de aquisicao frete icms recuperavel peps fifo custo medio ponderado ueps varejo valor realizavel liquido vrl perdas quebra inventario cmv desconto colecao liquidacao provisao',
+      corpo: `<h4>Regra de ouro</h4>
+<p>O estoque fica no balanço pelo <b>menor valor entre o custo e o valor realizável líquido (VRL)</b>. O VRL é o preço estimado de venda no curso normal dos negócios menos os custos necessários para vender.</p>
+<h4>O que entra no custo de aquisição do calçado</h4>
+<ul>
+<li><b>Soma</b>: preço de compra, impostos de importação e outros tributos <b>não recuperáveis</b> (inclusive o ICMS-ST cobrado na compra), frete e seguro da compra, manuseio e outros gastos diretamente ligados à aquisição.</li>
+<li><b>Subtrai</b>: descontos comerciais, abatimentos e os <b>tributos recuperáveis</b> (por exemplo, ICMS, PIS e COFINS que a empresa pode compensar nos regimes que dão crédito).</li>
+<li><b>Fica fora</b> (vai para despesa): frete e comissões da venda, armazenagem depois da compra, desperdícios e despesas administrativas e de vendas.</li>
+<li>Quais tributos são recuperáveis <b>depende do regime tributário</b>: no Simples Nacional, em regra, não há crédito de ICMS na compra e o imposto integra o custo.</li>
+</ul>
+<p>Exemplo: compra de R$ 10.000,00 com ICMS recuperável de R$ 1.200,00 destacado na nota e frete de R$ 500,00 sem crédito. Custo do estoque = 10.000,00 − 1.200,00 + 500,00 = R$ 9.300,00.</p>
+${ex96([['D', 'g1', 'Estoque de mercadorias', '8.800,00'], ['D', 'g1', 'ICMS a recuperar', '1.200,00'], ['C', 'g2', 'Fornecedores', '10.000,00'], ['D', 'g1', 'Estoque de mercadorias (frete da compra)', '500,00'], ['C', 'g2', 'Transportadora a pagar', '500,00']])}
+<h4>Como dar baixa no estoque (CMV)</h4>
+<ul>
+<li><b>Custo médio ponderado móvel</b>: recalcula o custo médio a cada compra. Simples e muito usado.</li>
+<li><b>PEPS (primeiro que entra, primeiro que sai)</b>: a baixa segue a ordem de compra; combina com coleções por temporada.</li>
+<li><b>Identificação específica</b>: indicada para itens únicos ou de alto valor.</li>
+<li><b>UEPS (último que entra, primeiro que sai) não é permitido</b> pelo CPC 16 (R1).</li>
+<li>Use o mesmo critério para estoques de natureza e uso semelhantes e mantenha-o de um período para o outro.</li>
+</ul>
+<h4>Método do varejo</h4>
+<p>O CPC 16 admite o método do varejo para grande número de itens com margens parecidas e que mudam rápido, como as grades de numeração e cores de calçados. O custo é estimado deduzindo do preço de venda uma margem bruta percentual apropriada, ajustada por departamento ou linha (e por remarcações e promoções). Exige controle do preço de venda de cada lote.</p>
+<h4>Perdas e ajuste ao valor realizável líquido</h4>
+<ul>
+<li><b>Coleção encalhada, fora de linha ou com preço de liquidação abaixo do custo</b>: reduza o estoque ao VRL com uma provisão (conta redutora do estoque) e reconheça a perda no resultado; se o VRL se recuperar, a provisão é revertida.</li>
+<li><b>Quebras, extravios, furtos e diferenças de inventário</b>: baixa do estoque contra o resultado no período em que forem identificadas.</li>
+<li>Faça inventário físico periódico por loja e concilie com o estoque contábil.</li>
+</ul>
+${ex96([['D', 'g4', 'Perdas estimadas em estoques (resultado)', '3.500,00'], ['C', 'g1', '(−) Provisão para perdas em estoques', '3.500,00']])}
+<p class="alerta">Valores ilustrativos. O crédito de ICMS depende do regime do imposto na empresa e da operação; confirme com o contador.</p>` },
+
+    { id: 'cpc27', cat: 'contabil', tag: 'CPC 27', titulo: 'Ativo imobilizado: benfeitorias em lojas alugadas e depreciação',
+      resumo: 'O que ativar, benfeitorias em imóvel de terceiros, vida útil × prazo do contrato, taxas fiscais e baixa por fechamento de loja',
+      chaves: 'imobilizado depreciacao benfeitoria benfeitorias loja alugada imovel de terceiros reforma obra vida util valor residual taxas receita federal moveis utensilios computadores baixa fechamento impairment manutencao reparo capitalizar equipamentos',
+      corpo: `<h4>O que é imobilizado na loja</h4>
+<p>Bens tangíveis usados na operação por mais de um período: móveis, expositores e vitrines, equipamentos (PDV, computadores, ar-condicionado, câmeras), veículos, instalações e <b>benfeitorias em imóveis de terceiros</b>.</p>
+<h4>Ativar ou lançar como despesa?</h4>
+<ul>
+<li><b>Ativar</b>: preço de compra, tributos não recuperáveis e gastos para colocar o bem em uso (frete, instalação, montagem), além de reformas que ampliam a vida útil, a capacidade ou a qualidade.</li>
+<li><b>Despesa</b>: manutenção e reparos rotineiros (pintura de conservação, troca de lâmpadas, conserto de prateleira) e bens de baixo valor, conforme a política de capitalização (valor mínimo) da empresa.</li>
+</ul>
+<h4>Benfeitorias em loja alugada</h4>
+<ul>
+<li>Obras de adaptação do ponto (forro, piso, fachada, instalações elétricas e hidráulicas, divisórias, marcenaria sob medida) pagas pelo inquilino são ativo imobilizado, na conta “Benfeitorias em imóveis de terceiros”.</li>
+<li><b>Prazo de depreciação</b>: o menor entre a vida útil econômica da benfeitoria e o prazo do contrato de aluguel (incluindo renovações que a empresa tenha certeza razoável de exercer), porque, ao devolver o imóvel, o benefício acaba. Exemplo: obra de R$ 120.000,00 em contrato de 5 anos = R$ 2.000,00 por mês.</li>
+<li><b>Shopping</b>: se o locador dá verba de obra, carência ou outro incentivo, o tratamento contábil depende do contrato e do CPC 06 (R2); consulte o contador.</li>
+</ul>
+<h4>Depreciação</h4>
+<ul>
+<li>Começa quando o bem está disponível para uso (abertura da loja) e, na maioria dos casos, é linear (existem também saldos decrescentes e unidades produzidas).</li>
+<li>Vida útil, valor residual e método devem ser revistos pelo menos ao fim de cada exercício.</li>
+<li><b>Contábil × fiscal</b>: a contabilidade usa a vida útil estimada (CPC 27). Para o Lucro Real, a Receita Federal tem taxas usuais (tabela de vida útil da IN SRF 162/1998): móveis e utensílios 10% ao ano, máquinas e equipamentos 10%, veículos 20%, computadores e periféricos 20% e edificações 4%. As diferenças entre a depreciação contábil e a fiscal são controladas no e-LALUR. No Lucro Presumido e no Simples Nacional, a depreciação não muda a base dos tributos.</li>
+</ul>
+<h4>Lançamentos-modelo</h4>
+<p>Obra paga pelo inquilino e depreciação mensal (valores ilustrativos):</p>
+${ex96([['D', 'g1', 'Benfeitorias em imóveis de terceiros (imobilizado)', '120.000,00'], ['C', 'g1', 'Bancos', '120.000,00'], ['D', 'g4', 'Despesa de depreciação', '2.000,00'], ['C', 'g1', '(−) Depreciação acumulada de benfeitorias', '2.000,00']])}
+<h4>Fechamento ou mudança de loja</h4>
+<p>Ao encerrar o contrato ou fechar a loja, baixe o saldo residual das benfeitorias (custo menos depreciação acumulada) contra o resultado, como perda na baixa. Lojas com resultado persistentemente negativo podem exigir teste de recuperabilidade (CPC 01) para reduzir o valor do imobilizado.</p>
+${ex96([['D', 'g1', '(−) Depreciação acumulada de benfeitorias', '90.000,00'], ['D', 'g4', 'Perda na baixa de imobilizado (resultado)', '30.000,00'], ['C', 'g1', 'Benfeitorias em imóveis de terceiros', '120.000,00']])}
+<p class="alerta">Resumo orientativo: a política de capitalização, as vidas úteis e as taxas fiscais devem ser definidas com o contador responsável.</p>` },
+
+    { id: 'fis-cf', cat: 'fiscal', tag: 'Guia Fiscal Varejo', titulo: 'Consumidor final × Contribuinte',
+      resumo: 'Quem é quem na nota fiscal, NFC-e × NF-e, DIFAL e CFOP por tipo de cliente',
+      chaves: 'consumidor final contribuinte icms inscricao estadual nfc-e nf-e difal indfinal indiedest nao contribuinte cpf cnpj venda interestadual revenda lojista atacado',
+      corpo: `<h4>Quem é quem</h4>
+<div class="tbl"><table><thead><tr><th></th><th>Consumidor final</th><th>Contribuinte que compra para revender</th></tr></thead><tbody>
+<tr><td><b>Quem é</b></td><td>Pessoa física (CPF) ou empresa que compra para uso ou consumo próprio e não revende.</td><td>Empresa com inscrição estadual ativa que compra o calçado para revenda (outra loja, lojista, atacado).</td></tr>
+<tr><td><b>Documento</b></td><td>NFC-e (modelo 65) no balcão; NF-e (modelo 55) quando o cliente pedir, na venda a distância ou para pessoa jurídica, conforme a regra do estado.</td><td>NF-e (modelo 55) com a inscrição estadual do destinatário.</td></tr>
+<tr><td><b>Campos da NF-e</b></td><td>Operação com consumidor final = 1; indicador de IE do destinatário = 9 (não contribuinte) ou 2 (isento).</td><td>Operação com consumidor final = 0; indicador de IE = 1 (contribuinte).</td></tr>
+<tr><td><b>CFOP no mesmo estado</b></td><td>5.102 (5.405 se a mercadoria tem ST).</td><td>5.102 (5.405 se a mercadoria tem ST).</td></tr>
+<tr><td><b>CFOP em outro estado</b></td><td>6.108 (venda a não contribuinte).</td><td>6.102 (6.404 se a ST já foi retida).</td></tr>
+<tr><td><b>ICMS entre estados</b></td><td>Alíquota interestadual da origem mais o DIFAL (diferença de alíquota) em favor do estado de destino.</td><td>Alíquota interestadual da origem. Sem DIFAL na compra para revenda; se o contribuinte comprar para uso, consumo ou ativo, o DIFAL é dele.</td></tr>
+</tbody></table></div>
+<h4>Pontos de atenção</h4>
+<ul>
+<li>A alíquota interestadual do ICMS é 7% ou 12%, conforme origem e destino, e 4% para produtos importados ou com conteúdo de importação acima de 40% (Resolução do Senado 13/2012).</li>
+<li>O DIFAL na venda a consumidor final de outro estado decorre da EC 87/2015 e da LC 190/2022 e é recolhido pelo remetente, com regras de cada estado.</li>
+<li>Optantes do Simples Nacional recolhem o ICMS no DAS e seguem regras próprias para o DIFAL: confirme com o contador.</li>
+<li>Antes de emitir NF-e para empresa, consulte a situação da inscrição estadual (habilitada). A classificação errada entre consumidor final e contribuinte muda o CFOP, o cálculo do ICMS e o DIFAL, e pode gerar rejeição na SEFAZ.</li>
+</ul>
+<p class="alerta">Regras de NFC-e, NF-e e DIFAL variam por estado: confirme no RICMS e com o contador.</p>` },
+
+    { id: 'fis-st', cat: 'fiscal', tag: 'Guia Fiscal Varejo', titulo: 'ICMS-ST (substituição tributária)',
+      resumo: 'Como a loja compra e vende mercadoria com ICMS já retido: CST/CSOSN, CFOP e custo do estoque',
+      chaves: 'icms st substituicao tributaria substituido retido cest ncm cst 60 csosn 500 5.405 1.403 restituicao ressarcimento pgdas simples calcado calcados',
+      corpo: `<h4>Como funciona</h4>
+<p>Na substituição tributária, o fabricante, o importador ou o atacadista (substituto) recolhe antecipadamente o ICMS de toda a cadeia até o consumidor final. A loja que compra com ST (substituída) já recebe o imposto embutido no preço e, <b>na revenda daquela mercadoria, não destaca nem recolhe novamente o ICMS</b>.</p>
+<p class="alerta"><b>Calçados:</b> estar ou não no regime de ST depende do estado de destino e dos protocolos e convênios entre os estados. Confira o NCM (capítulo 64) e o CEST do produto no anexo de ST do RICMS do seu estado ou com o contador; não presuma.</p>
+<h4>Como lançar na loja</h4>
+<div class="tbl"><table><thead><tr><th>Etapa</th><th>CFOP</th><th>Situação tributária</th></tr></thead><tbody>
+<tr><td>Compra com ST retida pelo fornecedor</td><td>1.403 (mesmo estado) · 2.403 (outro estado)</td><td>CST 60 no regime normal · CSOSN 500 no Simples Nacional</td></tr>
+<tr><td>Venda ao cliente</td><td>5.405 (mesmo estado) · 6.404 (outro estado, imposto já retido)</td><td>Mesmo CST 60 ou CSOSN 500; não destacar ICMS</td></tr>
+<tr><td>Devolução do cliente</td><td>1.411 · 2.411</td><td>Mantém a situação da venda</td></tr>
+<tr><td>Devolução ao fornecedor</td><td>5.411 · 6.411</td><td>Mantém a situação da compra</td></tr>
+</tbody></table></div>
+<h4>Contabilidade e tributos</h4>
+<ul>
+<li>O ICMS-ST pago na compra <b>integra o custo do estoque</b> (CPC 16): não é imposto recuperável.</li>
+<li><b>Simples Nacional</b>: no PGDAS-D, segregue a receita de mercadorias com ICMS-ST para não pagar o ICMS duas vezes dentro do DAS.</li>
+<li>Quando a mercadoria é vendida por preço menor que a base presumida na ST, o STF (RE 593.849, 2016) reconheceu o direito à restituição da diferença; o procedimento varia por estado e deve ser conduzido pelo contador.</li>
+<li>Confira sempre o CST/CSOSN e o valor de ICMS-ST na nota de entrada: mercadoria sujeita à ST recebida sem a retenção pode gerar recolhimento pela loja.</li>
+</ul>
+<p class="alerta">Regras de ST (produtos, margens de valor agregado, benefícios) mudam com frequência e variam por estado: confirme antes de aplicar.</p>` },
+
+    { id: 'fis-pc', cat: 'fiscal', tag: 'Guia Fiscal Varejo', titulo: 'PIS/COFINS monofásico e calçados',
+      resumo: 'Calçados não são monofásicos; itens monofásicos na loja; regimes cumulativo e não cumulativo; calendário da Reforma Tributária',
+      chaves: 'pis cofins monofasico monofasica calcado calcados ncm 64 aliquota zero cst 04 perfumaria higiene cosmeticos cumulativo nao cumulativo lucro presumido lucro real simples reforma tributaria cbs ibs 2026 2027 2033 lc 214 transicao',
+      corpo: `<p class="alerta"><b>Atenção:</b> calçados (NCM do capítulo 64) <b>não estão no regime monofásico</b> de PIS/COFINS. Na loja de calçados, PIS e COFINS incidem normalmente sobre a receita da revenda. Não classifique calçado como “monofásico” para tirar a receita do cálculo.</p>
+<h4>O que é o regime monofásico</h4>
+<p>A tributação de PIS/COFINS é concentrada no fabricante ou importador (com alíquotas maiores) e a revenda, no atacado e no varejo, sai com alíquota zero (CST 04 na nota). A lista é por produto (NCM) e fixada em lei: por exemplo, combustíveis, medicamentos, perfumaria, higiene pessoal e cosméticos (Lei 10.147/2000), autopeças, pneus, veículos e bebidas frias.</p>
+<h4>O que fazer na loja</h4>
+<ul>
+<li>Revise o cadastro de produtos item a item pelo NCM: se a loja vende cosméticos, produtos de higiene ou outros itens da lista, a receita deles pode ser separada (alíquota zero na revenda). O calçado e as demais mercadorias seguem a regra geral.</li>
+<li><b>Lucro Presumido</b>: PIS 0,65% e COFINS 3% (cumulativo) sobre a receita, sem crédito nas compras.</li>
+<li><b>Lucro Real</b>: PIS 1,65% e COFINS 7,6% (não cumulativo), com crédito sobre compras e despesas permitidas.</li>
+<li><b>Simples Nacional</b>: PIS e COFINS fazem parte do DAS; havendo receita monofásica, ela é segregada no PGDAS-D para excluir esses tributos daquela parcela.</li>
+</ul>
+<h4>Reforma Tributária: calendário</h4>
+<ul>
+<li><b>2026 (ano de teste)</b>: destaque de CBS 0,9% e IBS 0,1% nos documentos fiscais, com compensação prevista com tributos já devidos, sem aumento da carga efetiva neste ano. Acompanhe as regras do seu regime.</li>
+<li><b>2027</b>: PIS e COFINS são substituídos pela CBS.</li>
+<li><b>2029 a 2032</b>: ICMS e ISS diminuem gradualmente e o IBS cresce. <b>2033</b>: ICMS e ISS são extintos. Base legal: Emenda Constitucional 132/2023 e Lei Complementar 214/2025.</li>
+</ul>
+<p class="alerta">Durante a transição, o tratamento de ST e de monofásico também muda. Confirme as regras vigentes com o contador e a SEFAZ do seu estado.</p>` },
+
+    { id: 'fis-cfop', cat: 'fiscal', tag: 'Guia Fiscal Varejo', titulo: 'Tabela rápida de CFOPs (entradas e saídas)',
+      resumo: 'CFOPs mais usados por loja de calçados: compra, venda, devolução, transferência, ST, perdas, bonificação e conserto',
+      chaves: 'cfop tabela entrada entradas saida saidas compra venda devolucao transferencia bonificacao brinde 1.102 2.102 5.102 6.102 6.108 5.405 5.202 5.152 5.927 5.929 uso consumo ativo imobilizado conserto demonstracao',
+      corpo: `<h4>Entradas (compras e devoluções recebidas)</h4>
+<div class="tbl"><table><thead><tr><th>Operação</th><th>Mesmo estado</th><th>Outro estado</th><th>Observação</th></tr></thead><tbody>
+<tr><td>Compra de mercadoria para revenda</td><td>1.102</td><td>2.102</td><td>Operação normal de calçados</td></tr>
+<tr><td>Compra para revenda de mercadoria com ST (substituído)</td><td>1.403</td><td>2.403</td><td>O ICMS-ST integra o custo</td></tr>
+<tr><td>Devolução de venda (cliente devolve)</td><td>1.202</td><td>2.202</td><td>Mercadoria com ST: 1.411 / 2.411</td></tr>
+<tr><td>Transferência de outra loja para revenda</td><td>1.152</td><td>2.152</td><td>Entre filiais da mesma empresa</td></tr>
+<tr><td>Material de uso e consumo (sacolas, embalagens, limpeza)</td><td>1.556</td><td>2.556</td><td>Crédito de ICMS conforme a regra do estado</td></tr>
+<tr><td>Bem para o ativo imobilizado (móveis, expositores, equipamentos)</td><td>1.551</td><td>2.551</td><td>Veja o cartão do CPC 27</td></tr>
+<tr><td>Bonificação, doação ou brinde recebido</td><td>1.910</td><td>2.910</td><td>Valor com custo de aquisição a definir com o contador</td></tr>
+<tr><td>Retorno de mercadoria enviada para conserto</td><td>1.916</td><td>2.916</td><td>Par da remessa 5.915 / 6.915</td></tr>
+<tr><td>Outra entrada não especificada</td><td>1.949</td><td>2.949</td><td>Só quando nenhuma outra servir</td></tr>
+</tbody></table></div>
+<h4>Saídas (vendas e remessas)</h4>
+<div class="tbl"><table><thead><tr><th>Operação</th><th>Mesmo estado</th><th>Outro estado</th><th>Observação</th></tr></thead><tbody>
+<tr><td>Venda de mercadoria adquirida de terceiros</td><td>5.102</td><td>6.102</td><td>Para contribuinte (revenda) fora do estado: 6.102</td></tr>
+<tr><td>Venda a consumidor final não contribuinte em outro estado</td><td>—</td><td>6.108</td><td>Com DIFAL</td></tr>
+<tr><td>Venda de mercadoria com ST (substituído)</td><td>5.405</td><td>6.404</td><td>CST 60 / CSOSN 500, sem destaque de ICMS</td></tr>
+<tr><td>Devolução de compra (ao fornecedor)</td><td>5.202</td><td>6.202</td><td>Mercadoria com ST: 5.411 / 6.411</td></tr>
+<tr><td>Transferência para outra loja</td><td>5.152</td><td>6.152</td><td>Entre filiais da mesma empresa</td></tr>
+<tr><td>NF-e emitida para operação também registrada em cupom fiscal</td><td>5.929</td><td>6.929</td><td>Evita duplicidade na apuração</td></tr>
+<tr><td>Remessa em bonificação, doação ou brinde</td><td>5.910</td><td>6.910</td><td></td></tr>
+<tr><td>Remessa para demonstração ou mostruário</td><td>5.912</td><td>6.912</td><td>Retorno pela entrada correspondente</td></tr>
+<tr><td>Remessa para conserto ou reparo</td><td>5.915</td><td>6.915</td><td>Retorno: 1.916 / 2.916</td></tr>
+<tr><td>Baixa de estoque por perda, roubo ou deterioração</td><td>5.927</td><td>—</td><td>Estorno de crédito conforme a legislação do estado</td></tr>
+<tr><td>Outra saída não especificada</td><td>5.949</td><td>6.949</td><td>Evite: prefira o CFOP específico</td></tr>
+</tbody></table></div>
+<p class="hint">Operações com o exterior usam os CFOPs iniciados em 3 (entradas) e 7 (saídas).</p>
+<p class="alerta">Tabela de referência. O CFOP deve combinar com o NCM, o CST/CSOSN e a natureza da operação; confira a tabela oficial do CONFAZ (Ajustes SINIEF) e as regras do seu estado.</p>` },
+  ];
+  bibCache96 = lista.map(c => ({ ...c, palha: norm96([c.tag, c.titulo, c.resumo, c.chaves, CAT_BIB[c.cat], c.corpo.replace(/<[^>]+>/g, ' ')].join(' ')) }));
+  return bibCache96;
+}
+function vBiblioteca() {
+  const B = S.bib, todos = bibCartoes(), toks = norm96(B.busca).split(/\s+/).filter(Boolean);
+  const lista = todos.filter(c => (B.cat === 'todos' || c.cat === B.cat) && toks.every(t => c.palha.includes(t)));
+  const auto = toks.length > 0 && lista.length <= 3, aberto = c => auto || B.abertos.has(c.id);
+  const chip = (k, r) => `<button class="${B.cat === k ? 'on' : ''}" data-a="bib-cat" data-v="${k}" aria-pressed="${B.cat === k}">${r}</button>`;
+  const card = c => `<details class="bib-card ${c.cat}" data-bib="${c.id}" ${auto ? 'data-auto="1"' : ''} ${aberto(c) ? 'open' : ''}><summary><span class="pill ${c.cat === 'fiscal' ? 'warn' : 'info'}">${CAT_BIB[c.cat]}</span><span class="pill">${esc(c.tag)}</span><span class="bib-tit">${esc(c.titulo)}</span><span class="bib-res">${esc(c.resumo)}</span></summary><div class="bib-corpo">${c.corpo}</div></details>`;
+  const todosAbertos = lista.length > 0 && lista.every(aberto);
+  return `<div class="panel"><h2>Biblioteca CPC &amp; Regras Fiscais</h2>
+    <p class="hint" style="margin:0 0 6px">Resumos práticos, em linguagem de loja, sobre os pronunciamentos do CPC e as regras fiscais mais comuns no varejo de calçados (lojas de rua e de shopping). Busque por palavra-chave ou filtre por categoria e abra o cartão para ler.</p>
+    <div class="bib-barra no-print"><label class="campo"><span>Buscar</span><input id="bib-busca" type="search" value="${esc(B.busca)}" placeholder="Ex.: aluguel, estoque, ICMS-ST, 5.102, depreciação" autocomplete="off"></label>
+      <div><span class="hint" style="display:block;margin-bottom:2px">Categoria</span><div class="seg" role="group" aria-label="Filtrar por categoria">${chip('todos', 'Todos')}${chip('contabil', 'Contábil (CPC)')}${chip('fiscal', 'Fiscal')}</div></div>
+      <button class="btn sec sm" data-a="bib-todos" data-v="${todosAbertos ? 'fechar' : 'abrir'}" ${lista.length ? '' : 'disabled'}>${todosAbertos ? 'Recolher todos' : 'Expandir todos'}</button></div>
+    <p class="hint" id="bib-cont" aria-live="polite" style="margin:0 0 8px">${lista.length} de ${todos.length} cartões${B.busca.trim() ? ' para “' + esc(B.busca.trim()) + '”' : ''}</p>
+    ${lista.length ? lista.map(card).join('') : '<div class="bib-vazio">Nenhum cartão encontrado. Tente outra palavra (por exemplo: aluguel, estoque, depreciação, ICMS, CFOP) ou mude a categoria.</div>'}
+    <p class="note" style="margin-top:12px"><b>Conteúdo orientativo.</b> Os resumos não substituem os pronunciamentos do CPC, a legislação vigente (federal, estadual e municipal) nem a orientação do contador responsável. Alíquotas, benefícios e regras de substituição tributária variam por estado e mudam com frequência: confirme sempre antes de aplicar. Revisão do conteúdo: novembro de 2026.</p></div>`;
+}
+
 
 /* ---------- aba: plano de contas ---------- */
 function vPlano() {
@@ -396,22 +758,22 @@ function lancValido() {
   if (d !== c) prob.push('débitos = créditos');
   return { ok: !prob.length, prob, d, c };
 }
-function htmlTotais() { const v = lancValido(), dif = v.d - v.c; return `<span>Débitos: ${fmt(v.d / 100)}</span><span>Créditos: ${fmt(v.c / 100)}</span><span class="${dif ? 'dif' : 'ok'}">${dif ? 'Diferença: ' + fmt(Math.abs(dif) / 100) : '✓ Partidas dobradas: D = C'}</span>${v.ok ? '' : `<span class="hint" style="font-weight:400">Falta: ${esc([...new Set(v.prob)].slice(0, 4).join(', '))}</span>`}`; }
+function htmlTotais() { const v = lancValido(), dif = v.d - v.c; return `<span>Débitos: ${fmt(v.d / 100)}</span><span>Créditos: ${fmt(v.c / 100)}</span><span class="${dif ? 'dif' : 'ok'}">${dif ? 'Diferença: ' + fmt(Math.abs(dif) / 100) : (CT96() ? '✓ Partidas dobradas: Débito = Crédito' : '✓ Partidas dobradas: D = C')}</span>${v.ok ? '' : `<span class="hint" style="font-weight:400">Falta: ${esc([...new Set(v.prob)].slice(0, 4).join(', '))}</span>`}`; }
 function atualizarTotais() { const t = $('#lf-tot'); if (t) t.innerHTML = htmlTotais(); const b = $('#lf-gravar'); if (b) b.disabled = !lancValido().ok; }
 function vLancamentos() {
   const f = S.lf, L = S.ls, m = porCodigo();
   if (!S.st.plano.criado) return '<div class="panel"><p style="margin:0">Crie o plano de contas antes de lançar (aba Plano de contas).</p></div>';
-  const form = pode('contabil.lancar') ? `<div class="panel no-print"><h2>Novo lançamento (partidas dobradas)</h2>
+  const form = pode('contabil.lancar') ? `<div class="panel no-print"><h2>Novo lançamento (partidas dobradas)</h2>${CT96() ? legenda96() : ''}
     <div class="row"><label class="campo"><span>Data</span><input type="date" id="lf-data" value="${esc(f.data)}"></label><label class="campo" style="flex:3 1 320px"><span>Histórico</span><input id="lf-hist" value="${esc(f.historico)}" placeholder="Ex.: Compra de mercadorias NF 1234"></label><label class="campo" style="flex:1 1 140px"><span>Documento (opcional)</span><input id="lf-doc" value="${esc(f.docRef)}"></label></div>
-    <div style="margin-top:10px">${f.itens.map((i, k) => { const x = m.get(i.conta.trim()); return `<div class="lin-lanc"><input data-li="${k}" data-f="conta" list="dlA" value="${esc(i.conta)}" class="mono" placeholder="Conta analítica" aria-label="Conta da partida ${k + 1}" title="${esc(x ? x.nome : '')}"><select data-li="${k}" data-f="dc" aria-label="Débito ou crédito da partida ${k + 1}">${opts([['D', 'D'], ['C', 'C']], i.dc)}</select><input data-li="${k}" data-f="valor" value="${esc(i.valor)}" inputmode="decimal" placeholder="0,00" style="text-align:right" aria-label="Valor da partida ${k + 1}"><span class="hint opc">${esc(x ? x.nome : i.conta ? 'conta não encontrada' : '')}</span><input class="opc" data-li="${k}" data-f="historico" value="${esc(i.historico)}" placeholder="Histórico da partida (opcional)" aria-label="Histórico da partida ${k + 1}"><button class="btn sec sm" data-a="lf-tirar" data-v="${k}" aria-label="Remover partida ${k + 1}" ${f.itens.length <= 2 ? 'disabled' : ''}>×</button></div>`; }).join('')}</div>
+    <div style="margin-top:10px">${CT96() ? cab96() : ''}${f.itens.map((i, k) => { const x = m.get(i.conta.trim()); if (CT96()) return linha96(i, k, x); return `<div class="lin-lanc"><input data-li="${k}" data-f="conta" list="dlA" value="${esc(i.conta)}" class="mono" placeholder="Conta analítica" aria-label="Conta da partida ${k + 1}" title="${esc(x ? x.nome : '')}"><select data-li="${k}" data-f="dc" aria-label="Débito ou crédito da partida ${k + 1}">${opts([['D', 'D'], ['C', 'C']], i.dc)}</select><input data-li="${k}" data-f="valor" value="${esc(i.valor)}" inputmode="decimal" placeholder="0,00" style="text-align:right" aria-label="Valor da partida ${k + 1}"><span class="hint opc">${esc(x ? x.nome : i.conta ? 'conta não encontrada' : '')}</span><input class="opc" data-li="${k}" data-f="historico" value="${esc(i.historico)}" placeholder="Histórico da partida (opcional)" aria-label="Histórico da partida ${k + 1}"><button class="btn sec sm" data-a="lf-tirar" data-v="${k}" aria-label="Remover partida ${k + 1}" ${f.itens.length <= 2 ? 'disabled' : ''}>×</button></div>`; }).join('')}</div>
     <div class="row"><button class="btn sec sm" data-a="lf-mais">+ partida</button></div>
     <div class="tot-lanc" id="lf-tot" aria-live="polite">${htmlTotais()}</div>
     <div class="row"><button class="btn" id="lf-gravar" data-a="lf-gravar" ${lancValido().ok ? '' : 'disabled'}>Gravar lançamento</button><button class="btn sec" data-a="lf-limpar">Limpar</button><span class="hint">Depois de gravado, o lançamento não se altera nem se exclui: correções são feitas por estorno (ligado ao original).</span></div></div>` : '';
   const lista = L.lista ? [...L.lista].reverse() : null;
   const linhas = lista ? lista.map(l => {
     const sit = l.estornoDe ? `<span class="pill info">Estorno do nº ${esc((L.lista.find(x => x.id === l.estornoDe) || {}).numero || '')}</span>` : l.estornadoPor ? '<span class="pill warn">Estornado</span>' : l.origem === 'encerramento' ? '<span class="pill">Encerramento</span>' : '';
-    const est = L.estorno === l.id ? `<tr class="edit-row"><td colspan="6"><div class="row"><label class="campo" style="flex:2 1 300px"><span>Motivo do estorno</span><input id="le-motivo" placeholder="Ex.: valor digitado errado"></label><label class="campo"><span>Data do estorno</span><input type="date" id="le-data" value="${hoje()}"></label><button class="btn danger" data-a="le-confirmar" data-v="${esc(l.id)}">Estornar o nº ${l.numero}</button><button class="btn sec" data-a="le-abrir" data-v="">Cancelar</button></div><p class="hint">O estorno inverte todas as partidas (D↔C) e fica ligado ao lançamento original.</p></td></tr>` : '';
-    return `<tr><td class="num mono">${l.numero}</td><td>${dataBR(l.data)}</td><td>${esc(l.historico)}${l.docRef ? ` <span class="hint">· ${esc(l.docRef)}</span>` : ''}<div class="hint">${l.itens.map(i => `${i.dc} ${esc(i.conta)} ${esc(i.contaNome)} ${fmtN(i.valor)}`).join(' · ')}</div></td><td class="num">${fmtN(l.total)}</td><td>${sit}</td><td class="no-print">${pode('contabil.estornar') && !l.estornoDe && !l.estornadoPor ? `<button class="btn sec sm" data-a="le-abrir" data-v="${esc(l.id)}">Estornar</button>` : ''}</td></tr>${est}`;
+    const est = L.estorno === l.id ? `<tr class="edit-row"><td colspan="6"><div class="row"><label class="campo" style="flex:2 1 300px"><span>Motivo do estorno</span><input id="le-motivo" placeholder="Ex.: valor digitado errado"></label><label class="campo"><span>Data do estorno</span><input type="date" id="le-data" value="${hoje()}"></label><button class="btn danger" data-a="le-confirmar" data-v="${esc(l.id)}">Estornar o nº ${l.numero}</button><button class="btn sec" data-a="le-abrir" data-v="">Cancelar</button></div><p class="hint">O estorno inverte todas as partidas (${CT96() ? 'Débito ↔ Crédito' : 'D↔C'}) e fica ligado ao lançamento original.</p></td></tr>` : '';
+    return `<tr><td class="num mono">${l.numero}</td><td>${dataBR(l.data)}</td><td>${esc(l.historico)}${l.docRef ? ` <span class="hint">· ${esc(l.docRef)}</span>` : ''}${CT96() ? partidas96(l.itens, m) : `<div class="hint">${l.itens.map(i => `${i.dc} ${esc(i.conta)} ${esc(i.contaNome)} ${fmtN(i.valor)}`).join(' · ')}</div>`}</td><td class="num">${fmtN(l.total)}</td><td>${sit}</td><td class="no-print">${pode('contabil.estornar') && !l.estornoDe && !l.estornadoPor ? `<button class="btn sec sm" data-a="le-abrir" data-v="${esc(l.id)}">Estornar</button>` : ''}</td></tr>${est}`;
   }).join('') : '';
   return `${form}<div class="panel" id="lista-lanc"><div class="row between"><h2>Lançamentos · ${esc(empAtual().nomeFantasia || empAtual().razaoSocial)}</h2><div class="row no-print"><label class="campo"><span>De</span><input type="date" id="ls-de" value="${esc(L.de)}"></label><label class="campo"><span>Até</span><input type="date" id="ls-ate" value="${esc(L.ate)}"></label><label class="campo"><span>Conta (e filhas)</span><input id="ls-conta" list="dlA" value="${esc(L.conta)}" class="mono" style="width:140px"></label><button class="btn sec" data-a="ls-filtrar">Filtrar</button></div></div>
     <div class="tbl" style="margin-top:10px"><table><thead><tr><th class="num">Nº</th><th>Data</th><th>Histórico e partidas</th><th class="num">Total</th><th>Situação</th><th class="no-print"><span class="sr">Ações</span></th></tr></thead><tbody>${lista ? linhas || '<tr><td colspan="6" class="vazio">Nenhum lançamento no período.</td></tr>' : '<tr><td colspan="6" class="vazio">Carregando…</td></tr>'}</tbody></table></div></div>`;
@@ -460,13 +822,13 @@ function kpisRel(d) {
   return '';
 }
 const vl = v => `<td class="num">${fmtN(v)}</td>`;
-const dc = (v, natureza) => { const n = Number(v) || 0; return n ? `${fmtN(Math.abs(n))} ${n > 0 ? 'D' : 'C'}` : '0,00'; };
+const dc = (v, natureza) => { const n = Number(v) || 0; return n ? `${fmtN(Math.abs(n))} ${sufDC96(n > 0 ? 'D' : 'C')}` : '0,00'; };
 function relHTML(d) {
   const tit = (RELS.find(r => r[0] === d.tipo) || [0, d.tipo])[1], e = empAtual(), cab = `<div class="rel-cab"><h2 style="margin:0">${esc(tit)}${d.tipo === 'dre' ? ' · ' + (d.modelo === 'reforma' ? 'Nova Reforma (simulação)' : 'Modelo Atual') : ''}</h2><span class="hint">${esc(e.razaoSocial)} · CNPJ ${esc(cnpjF(e.cnpj))} · ${rotPer(d.de, d.ate)} · gerado em ${new Date(d.geradoEm).toLocaleString('pt-BR')}</span></div>`;
   const C = S.rl.cmp && S.rl.comparar && CMP.has(d.tipo) ? S.rl.cmp : null, colA = rotPer(d.de, d.ate), colB = C ? rotPer(C.de, C.ate) : '';
   const notas = l => (l && l.length ? `<ul class="hint" style="margin:10px 0 0;padding-left:18px">${l.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '');
   const tabela = (th, tr) => `<div class="tbl"><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></div>`;
-  if (d.tipo === 'diario') return cab + tabela('<th>Nº</th><th>Data</th><th>Conta</th><th>Histórico</th><th class="num">Débito</th><th class="num">Crédito</th>', d.lancamentos.map(l => `<tr class="sub"><td class="mono">${l.numero}</td><td>${dataBR(l.data)}</td><td colspan="2">${esc(l.historico)}${l.estornoDe ? ' <span class="pill info">estorno</span>' : ''}</td><td></td><td></td></tr>${l.itens.map(i => `<tr><td></td><td></td><td class="mono ${i.dc === 'C' ? 'ind1' : ''}">${esc(i.conta)} · ${esc(i.contaNome)}</td><td class="hint">${esc(i.historico || '')}</td>${i.dc === 'D' ? vl(i.valor) + '<td></td>' : '<td></td>' + vl(i.valor)}</tr>`).join('')}`).join('') + `<tr class="tot"><td colspan="4">${d.totais.lancamentos} lançamento(s)</td>${vl(d.totais.valor)}${vl(d.totais.valor)}</tr>`);
+  if (d.tipo === 'diario') return cab + tabela('<th>Nº</th><th>Data</th><th>Conta</th><th>Histórico</th><th class="num">Débito</th><th class="num">Crédito</th>', d.lancamentos.map(l => `<tr class="sub"><td class="mono">${l.numero}</td><td>${dataBR(l.data)}</td><td colspan="2">${esc(l.historico)}${l.estornoDe ? ' <span class="pill info">estorno</span>' : ''}</td><td></td><td></td></tr>${l.itens.map(i => `<tr><td></td><td></td>${CT96() ? celDia96(i) : `<td class="mono ${i.dc === 'C' ? 'ind1' : ''}">${esc(i.conta)} · ${esc(i.contaNome)}</td>`}<td class="hint">${esc(i.historico || '')}</td>${i.dc === 'D' ? vl(i.valor) + '<td></td>' : '<td></td>' + vl(i.valor)}</tr>`).join('')}`).join('') + `<tr class="tot"><td colspan="4">${d.totais.lancamentos} lançamento(s)</td>${vl(d.totais.valor)}${vl(d.totais.valor)}</tr>`);
   if (d.tipo === 'caixa') return cab + `<p><b class="mono">${esc(d.conta.codigo)}</b> · ${esc(d.conta.nome)} · saldo inicial ${fmt(d.saldoAnterior)}</p>` + tabela('<th>Data</th><th>Nº</th><th>Histórico</th><th>Contrapartida</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th>', `<tr class="sub"><td colspan="6">Saldo inicial</td>${vl(d.saldoAnterior)}</tr>` + d.linhas.map(l => `<tr><td>${dataBR(l.data)}</td><td class="mono">${l.numero}</td><td>${esc(l.historico)}</td><td class="mono">${esc(l.contrapartidas.join(', '))}</td>${vl(l.debito)}${vl(l.credito)}<td class="num">${fmtN(l.saldo)}</td></tr>`).join('') + `<tr class="tot"><td colspan="4">Totais e saldo final</td>${vl(d.entradas)}${vl(d.saidas)}${vl(d.saldoFinal)}</tr>`);
   if (d.tipo === 'dfc') return cab + tabela('<th>Demonstração dos Fluxos de Caixa (método direto)</th><th class="num">Valor</th>', `<tr class="sub"><td>Caixa e equivalentes no início do período</td>${vl(d.caixaInicial)}</tr>` + d.blocos.map(b => `<tr class="tit"><td colspan="2">${esc(b.rotulo)}</td></tr>${b.linhas.map(l => `<tr><td class="ind1"><span class="mono">${esc(l.codigo)}</span> · ${esc(l.nome)}</td>${vl(l.valor)}</tr>`).join('') || '<tr><td class="ind1 hint" colspan="2">Sem movimento</td></tr>'}<tr class="sub"><td>Caixa líquido das ${esc(b.rotulo.toLowerCase())}</td>${vl(b.total)}</tr>`).join('') + `<tr class="sub"><td>Variação do caixa no período</td>${vl(d.variacao)}</tr><tr class="tot"><td>Caixa e equivalentes no fim do período</td>${vl(d.caixaFinal)}</tr>`) + notas(d.notas);
   if ((d.tipo === 'dre' || d.tipo === 'dre51') && C) { const m = new Map(C.linhas.map(l => [l.chave, l.valor])); return cab + tabela(`<th>${d.tipo === 'dre51' ? 'DRE · CPC 51 (IFRS 18)' : 'DRE · CPC 26'}</th><th class="num">${esc(colA)}</th><th class="num">${esc(colB)}</th><th class="num">Variação</th>`, d.linhas.map(l => l.tipo === 'titulo' ? `<tr class="tit"><td colspan="4">${esc(l.rotulo)}</td></tr>` : `<tr class="${l.tipo === 'total' ? 'tot' : l.tipo === 'subtotal' ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}${vl(m.get(l.chave) || 0)}${(() => { const v = varPct(l.valor, m.get(l.chave) || 0); return `<td class="num var ${v > 0 ? 'up' : v < 0 ? 'dn' : ''}">${pctTxt(v)}</td>`; })()}</tr>`).join('')).replace('<table>', '<table class="cmp-t">') + notas(d.notas); }
@@ -477,8 +839,8 @@ function relHTML(d) {
     return cab + `<p>${d.confere ? '<span class="pill ok">Confere: Ativo = Passivo + PL</span>' : `<span class="pill bad">Diferença de ${fmt(d.diferenca)}</span>`}</p>` + tabela(`<th>Balanço Patrimonial</th><th class="num">${esc(colA)}</th><th class="num">${esc(colB)}</th><th class="num">Variação</th>`,
       `<tr class="tit"><td colspan="4">Ativo</td></tr>` + bloco('Ativo circulante', d.ativo.circulante, C.ativo.circulante) + bloco('Ativo não circulante', d.ativo.naoCirculante, C.ativo.naoCirculante) + lin('Total do Ativo', d.ativo.total, C.ativo.total, 'tot')
       + `<tr class="tit"><td colspan="4">Passivo e Patrimônio Líquido</td></tr>` + bloco('Passivo circulante', d.passivo.circulante, C.passivo.circulante) + bloco('Passivo não circulante', d.passivo.naoCirculante, C.passivo.naoCirculante) + bloco('Patrimônio líquido', d.patrimonioLiquido, C.patrimonioLiquido) + lin('Total do Passivo + PL', d.passivoMaisPL, C.passivoMaisPL, 'tot')).replace('<table>', '<table class="cmp-t">'); }
-  if (d.tipo === 'razao') return cab + `<p><b class="mono">${esc(d.conta.codigo)}</b> · ${esc(d.conta.nome)} · natureza ${nat(d.conta.natureza).toLowerCase()} · saldo anterior ${dc(d.saldoAnterior)}</p>` + tabela('<th>Data</th><th>Nº</th><th>Histórico</th><th>Contrapartida</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Saldo</th>', d.linhas.map(l => `<tr><td>${dataBR(l.data)}</td><td class="mono">${l.numero}</td><td>${esc(l.historico)}</td><td class="mono">${esc(l.contrapartidas.join(', '))}</td>${vl(l.debito)}${vl(l.credito)}<td class="num">${fmtN(Math.abs(l.saldo))} ${l.dc}</td></tr>`).join('') + `<tr class="tot"><td colspan="6">Saldo final</td><td class="num">${dc(d.saldoFinal)}</td></tr>`);
-  if (d.tipo === 'balancete') return cab + `<p>${d.confere ? '<span class="pill ok">Confere: débitos = créditos</span>' : '<span class="pill bad">Não confere</span>'}</p>` + tabela('<th>Código</th><th>Conta</th><th class="num">Saldo anterior</th><th class="num">Débitos</th><th class="num">Créditos</th><th class="num">Saldo final</th>', d.linhas.map(l => `<tr class="${l.tipo === 'S' ? 'sint' : ''}"><td class="mono">${esc(l.codigo)}</td><td class="ind${Math.min(5, l.nivel - 1)}">${esc(l.nome)}</td><td class="num">${dc(l.saldoAnterior)}</td>${vl(l.debitos)}${vl(l.creditos)}<td class="num">${fmtN(l.saldoFinal)} ${l.dc}</td></tr>`).join('') + `<tr class="tot"><td colspan="3">Totais (analíticas)</td>${vl(d.totais.debitos)}${vl(d.totais.creditos)}<td class="num">D ${fmtN(d.totais.saldoDevedor)} · C ${fmtN(d.totais.saldoCredor)}</td></tr>`);
+  if (d.tipo === 'razao') return cab + `<p><b class="mono">${esc(d.conta.codigo)}</b> · ${esc(d.conta.nome)} · natureza ${nat(d.conta.natureza).toLowerCase()} · saldo anterior ${dc(d.saldoAnterior)}</p>` + tabela('<th>Data</th><th>Nº</th><th>Histórico</th><th>Contrapartida</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Saldo</th>', d.linhas.map(l => `<tr><td>${dataBR(l.data)}</td><td class="mono">${l.numero}</td><td>${esc(l.historico)}</td><td class="mono">${esc(l.contrapartidas.join(', '))}</td>${vl(l.debito)}${vl(l.credito)}<td class="num">${fmtN(Math.abs(l.saldo))} ${sufDC96(l.dc)}</td></tr>`).join('') + `<tr class="tot"><td colspan="6">Saldo final</td><td class="num">${dc(d.saldoFinal)}</td></tr>`);
+  if (d.tipo === 'balancete') return cab + `<p>${d.confere ? '<span class="pill ok">Confere: débitos = créditos</span>' : '<span class="pill bad">Não confere</span>'}</p>` + tabela('<th>Código</th><th>Conta</th><th class="num">Saldo anterior</th><th class="num">Débitos</th><th class="num">Créditos</th><th class="num">Saldo final</th>', d.linhas.map(l => `<tr class="${l.tipo === 'S' ? 'sint' : ''}"><td class="mono">${esc(l.codigo)}</td><td class="ind${Math.min(5, l.nivel - 1)}">${esc(l.nome)}</td><td class="num">${dc(l.saldoAnterior)}</td>${vl(l.debitos)}${vl(l.creditos)}<td class="num">${fmtN(l.saldoFinal)} ${sufDC96(l.dc)}</td></tr>`).join('') + `<tr class="tot"><td colspan="3">Totais (analíticas)</td>${vl(d.totais.debitos)}${vl(d.totais.creditos)}<td class="num">${CT96() ? 'Devedor' : 'D'} ${fmtN(d.totais.saldoDevedor)} · ${CT96() ? 'Credor' : 'C'} ${fmtN(d.totais.saldoCredor)}</td></tr>`);
   if (d.tipo === 'dre') { const c = d.comparativo; return cab + tabela('<th>Demonstração do Resultado do Exercício</th><th class="num">Valor</th>', d.linhas.map(l => `<tr class="${l.tipo === 'total' ? 'tot' : l.tipo === 'subtotal' ? 'sub' : ''}"><td class="ind${l.nivel}">${esc(l.rotulo)}</td>${vl(l.valor)}</tr>`).join(''))
     + (c ? `<h3>Comparativo: Modelo Atual × Nova Reforma${d.transicao ? ' (' + d.transicao.ano + ')' : ''}</h3><div class="cmp"><div><span class="hint">Lucro líquido · Modelo Atual</span><b>${fmt(c.atual.lucroLiquido)}</b><span class="hint">Receita líquida ${fmt(c.atual.receitaLiquida)}</span></div><div><span class="hint">Lucro líquido · Nova Reforma</span><b>${fmt(c.reforma.lucroLiquido)}</b><span class="hint">Receita líquida ${fmt(c.reforma.receitaLiquida)}</span></div><div><span class="hint">Diferença no lucro</span><b>${fmt(c.diferencaLucro)}</b><span class="hint">${d.transicao ? esc(d.transicao.nota) : ''}</span></div></div>` : '') + notas(d.notas); }
   if (d.tipo === 'balanco') { const bloco = (t, g) => `<tr class="sub"><td colspan="2">${t}</td>${vl(g.total)}</tr>${g.contas.map(c => `<tr><td class="mono ind1">${esc(c.codigo)}</td><td>${esc(c.nome)}</td>${vl(c.valor)}</tr>`).join('')}`;
@@ -521,6 +883,7 @@ function vRadar() {
 }
 
 /* ---------- v13.91 · documentos (relatório selecionado e laudo) ---------- */
+const CSS_DOC96 = `.dcb{display:inline-block;font-size:8pt;font-weight:700;padding:0 6px;border:1px solid #666;border-radius:10px;white-space:nowrap} td.dia96 .dcb{margin-left:6px} .g1{border-left:3px solid #059669} .g2{border-left:3px solid #DC2626} .g3{border-left:3px solid #2563EB} .g4{border-left:3px solid #EA580C} .dcb.g1,.dcb.g2,.dcb.g3,.dcb.g4{border-left-width:1px}`;
 const CSS_DOC = `.tbl{overflow:visible;border:0;max-height:none} table{border-collapse:collapse;width:100%;font-size:9.5pt} th,td{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top} th{background:#f2f2f2;font-size:8.5pt;color:#333}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} tr.sint td{font-weight:700} tr.tot td{font-weight:700;border-top:2px solid #999} tr.sub td{font-weight:600} tr.tit td{font-weight:800;text-transform:uppercase;font-size:8pt;background:#f6f6f6}
   .pill{display:inline-block;font-size:8pt;font-weight:700;padding:1px 6px;border:1px solid #bbb;border-radius:10px} .hint,.muted{color:#555;font-size:8.5pt} .mono{font-family:ui-monospace,Menlo,monospace;font-size:8.5pt}
@@ -534,7 +897,7 @@ const CSS_DOC = `.tbl{overflow:visible;border:0;max-height:none} table{border-co
   .parecer{border-left:3px solid #1B2362;padding:6px 10px;background:#f7f7fa;margin:6px 0} .ass{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:46px;break-inside:avoid} .ass div{border-top:1px solid #222;padding-top:6px;font-size:9pt;text-align:center} .disc{font-size:8pt;color:#555;margin-top:18px}`;
 function montarDoc(tit, sub, corpo, paisagem = false) {
   const D = PAI && PAI.Documento;
-  if (D && D.montar) return D.montar(tit, D.cabecalho(tit, sub) + corpo, { paisagem, margem: '12mm 10mm', css: CSS_DOC });
+  if (D && D.montar) return D.montar(tit, D.cabecalho(tit, sub) + corpo, { paisagem, margem: '12mm 10mm', css: CSS_DOC + (CT96() ? CSS_DOC96 : '') });
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(tit)}</title><style>@page{size:A4${paisagem ? ' landscape' : ''};margin:12mm 10mm} body{font-family:system-ui,Arial,sans-serif;color:#151934;font-size:10pt;margin:0;padding:16px} ${CSS_DOC}</style></head><body><h1 style="font-size:16pt;margin:0">${esc(tit)}</h1><p class="hint" style="margin:2px 0 12px">${esc(sub)}</p>${corpo}</body></html>`;
 }
 function previaDoc(tit, html, nome) {
@@ -689,6 +1052,8 @@ const acoes = {
   async 'dp-confirmar-todos'() { const l = S.dp.itens.filter(x => x.status === 'automatico' && x.ativa && x.conta); if (!confirmar('dpall', `Confirmar as ${l.length} contas mapeadas automaticamente?`)) return; const r = await api('PUT', '/depara', { itens: l.map(x => ({ chave: x.chave, conta: x.conta })) }); await aplicarDepara(r); toast(`${l.length} conta(s) confirmadas.`); },
   async 'dp-ativa'(el) { const x = S.dp.itens.find(i => i.chave === el.dataset.v); const r = await api('PUT', '/depara', { itens: [{ chave: x.chave, ativa: !x.ativa, status: x.status === 'revisado' ? undefined : x.status }] }); await aplicarDepara(r); toast(x.ativa ? 'Conta inativada: sai da lista do FCX (lançamentos antigos continuam).' : 'Conta reativada no FCX.'); },
   async 'dp-criar'() { const rotulo = $('#dp-novo').value.trim(), conta = $('#dp-novo-conta').value.trim(); const r = await api('POST', '/depara', { rotulo, conta: conta || undefined }); await carregarDepara(); await carregarBase(); render(); avisarFCX(); toast(`"${r.item.chave}" criada para o FCX → ${r.item.conta || 'sem conta'} (${ST_DP[r.item.status][1].toLowerCase()}).`); },
+  'bib-cat'(el) { S.bib.cat = el.dataset.v; render(); },
+  'bib-todos'(el) { const toks = norm96(S.bib.busca).split(/\s+/).filter(Boolean); bibCartoes().filter(c => (S.bib.cat === 'todos' || c.cat === S.bib.cat) && toks.every(t => c.palha.includes(t))).forEach(c => { if (el.dataset.v === 'abrir') S.bib.abertos.add(c.id); else S.bib.abertos.delete(c.id); }); render(); },
   'lf-mais'() { S.lf.itens.push({ conta: '', dc: S.lf.itens.length % 2 ? 'C' : 'D', valor: '', historico: '' }); render(); },
   'lf-tirar'(el) { S.lf.itens.splice(Number(el.dataset.v), 1); render(); },
   'lf-limpar'() { S.lf = novoLanc(); render(); },
@@ -792,12 +1157,13 @@ document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'pl-busca') { S.pl.busca = t.value; return render(); }
   if (t.id === 'dp-busca') { S.dp.busca = t.value; return render(); }
+  if (t.id === 'bib-busca') { S.bib.busca = t.value; return render(); }
   if (t.id === 'lf-data') S.lf.data = t.value; if (t.id === 'lf-hist') S.lf.historico = t.value; if (t.id === 'lf-doc') S.lf.docRef = t.value;
   if (FW94() && S.ef && t.dataset.ef === 'cnpj') { if (t.selectionStart === t.value.length) t.value = mascaraCnpj(t.value); S.ef.cnpj = t.value; const n = t.value.replace(/\D/g, '').length; if (n === 14) consultarCnpj(); else { efUlt = ''; efSeq++; efStatus('', ''); } }
   if (FW94() && S.ef && t.dataset.ef === 'receita.cep') t.value = cepF(t.value);
   if (t.dataset.ef != null && S.ef) { const [a, b] = t.dataset.ef.split('.'); if (b) S.ef[a][b] = t.value; else if (t.type !== 'checkbox') S.ef[a] = t.value; }
   if (t.dataset.si != null && S.ef) S.ef.socios[Number(t.dataset.si)][t.dataset.f] = t.value;
-  if (t.dataset.li != null) { const i = S.lf.itens[Number(t.dataset.li)]; i[t.dataset.f] = t.value; if (t.dataset.f === 'conta') { const x = porCodigo().get(t.value.trim()), h = t.parentElement.querySelector('.opc.hint, span.hint'); if (h) h.textContent = x ? x.nome : t.value ? 'conta não encontrada' : ''; } }
+  if (t.dataset.li != null) { const i = S.lf.itens[Number(t.dataset.li)]; i[t.dataset.f] = CT96() && t.dataset.f === 'conta' ? codDeTexto(t.value) : t.value; if (CT96() && t.dataset.f === 'conta') pintar96(t, false); else if (t.dataset.f === 'conta') { const x = porCodigo().get(t.value.trim()), h = t.parentElement.querySelector('.opc.hint, span.hint'); if (h) h.textContent = x ? x.nome : t.value ? 'conta não encontrada' : ''; } }
   if (S.aba === 'lancamentos') atualizarTotais();
 });
 document.addEventListener('focusout', e => { const t = e.target; if (FW94() && S.ef && t.dataset && t.dataset.ef === 'cnpj') { const n = String(t.value || '').replace(/\D/g, '').length; if (n === 14) consultarCnpj(); else if (n) efStatus('bad', 'CNPJ incompleto: informe os 14 dígitos.'); } });
@@ -807,6 +1173,7 @@ document.addEventListener('change', e => {
   if (t.dataset.ef === 'ativa' && S.ef) S.ef.ativa = t.checked;
   if (t.id === 'rl-de' || t.id === 'rl-ate') lerCtlRel();
   if (t.dataset.li != null && t.dataset.f === 'dc') { S.lf.itens[Number(t.dataset.li)].dc = t.value; atualizarTotais(); }
+  if (CT96() && t.dataset.li != null && t.dataset.f === 'conta') { resolver96(t); atualizarTotais(); }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'pn-nome') { e.preventDefault(); acoes['pn-sugerir']().catch(falhou); }
@@ -819,8 +1186,10 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('toggle', e => { if (e.target && e.target.id === 'empCard') S.empAberto = e.target.open; }, true);
 window.addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tipo === 'ct-aba') irAba(e.data.aba); });
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.bib && !d.dataset.auto) { if (d.open) S.bib.abertos.add(d.dataset.bib); else S.bib.abertos.delete(d.dataset.bib); } }, true);
 
 async function iniciar() {
+  if (ctV1396()) { document.documentElement.classList.add('ct96'); if (!ABAS.some(x => x[0] === 'biblioteca')) ABAS.push(['biblioteca', 'Biblioteca CPC & Regras Fiscais']); }
   try { await carregarBase(); }
   catch (e) { S.erro = e.status === 401 ? 'Sessão encerrada: entre no painel de novo.' : e.status === 403 ? 'Seu acesso não abre o Módulo Contábil (Gestão de Acessos › Contabilidade · Ler).' : e.message; return render(); }
   let a = (location.hash || '').slice(1); try { if (PAI && PAI.ModContabil && PAI.ModContabil.abaInicial) { a = PAI.ModContabil.abaInicial; PAI.ModContabil.abaInicial = null; } } catch (e) { }
