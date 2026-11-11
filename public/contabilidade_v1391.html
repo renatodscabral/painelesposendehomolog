@@ -1018,13 +1018,26 @@ function vParametros0() {
 
 /* ---------- ações ---------- */
 async function recarregarBase() { await carregarBase(); render(); }
+const ctV1399 = () => { try { return !!(PAI && PAI.Recursos && PAI.Recursos.ativo('gestao_v1399') && PAI.CargaFeedback && typeof PAI.CargaFeedback.mostrar === 'function'); } catch (e) { return false; } }; // v13.99: popup de crítica de carga (exibido pelo painel)
 async function importarFCX() {
   if (!PAI || !PAI.PainelFCX || !PAI.PainelFCX.contasFCX) return toast('Abra o Módulo Contábil pelo painel (menu Contabilidade) para importar as contas do FCX.');
   toast('Lendo as contas do FCX…');
-  const f = await PAI.PainelFCX.contasFCX();
-  const r = await api('POST', '/importar-fcx', { contas: f.contas, usadas: f.usadas });
+  let f, r;
+  try {
+    f = await PAI.PainelFCX.contasFCX();
+    r = await api('POST', '/importar-fcx', { contas: f.contas, usadas: f.usadas });
+  } catch (e) {
+    if (ctV1399()) PAI.CargaFeedback.falha('Módulo Contábil · Importar contas do FCX', null, e, { arquivos: [{ nome: 'Plano de contas do FCX (leitura direta)' }] });
+    throw e;
+  }
   await carregarBase(); await carregarDepara(); S.aba = 'depara'; render(); avisarFCX();
   toast(`${r.planoCriado ? 'Plano padrão criado (' + r.planoCriado + ' contas). ' : ''}${r.novos} conta(s) do FCX mapeadas${r.criadas.length ? ', ' + r.criadas.length + ' conta(s) nova(s) no plano' : ''}${r.complemento ? ', ' + r.complemento + ' da Reforma para o FCX' : ''} · ${r.resumo.pendente} pendente(s) de revisão.`);
+  if (ctV1399()) {
+    const lidas = (f.contas || []).length, pend = Number((r.resumo && r.resumo.pendente) || 0);
+    PAI.CargaFeedback.mostrar({ origem: 'Módulo Contábil · Importar contas do FCX', arquivos: [{ nome: 'Plano de contas do FCX (leitura direta)' }], lidas, processadas: Number(r.novos) || 0, vazioOk: true,
+      inconsistencias: pend ? [{ tipo: 'aviso', item: pend + ' conta(s) pendente(s) de revisão', motivo: 'confira o de-para na aba De-para antes de lançar' }] : [],
+      campos: [['Contas do FCX lidas', String(lidas)], ['Mapeadas agora', String(Number(r.novos) || 0)], ['Contas novas no plano', String((r.criadas || []).length)], ...(r.planoCriado ? [['Plano padrão criado', r.planoCriado + ' contas']] : []), ...(r.complemento ? [['Complemento da Reforma para o FCX', String(r.complemento)]] : [])] });
+  }
 }
 const acoes = {
   async recarregar() { S.erro = null; await iniciar(); },

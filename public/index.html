@@ -273,6 +273,40 @@ td.num,th.num{text-align:right;}
 .filecard a{color:var(--accent);font-weight:600;text-decoration:none;overflow-wrap:anywhere;}
 
 /* ---------- modal / toast ---------- */
+/* v13.99 · popup de crítica de carga e tabelas (ordenação + exportação) */
+.cf{--cf-cor:var(--ok);--cf-fundo:var(--ok-soft);}
+.cf-aviso{--cf-cor:#E0A100;--cf-fundo:#FFF3C4;} .cf-erro{--cf-cor:var(--bad);--cf-fundo:var(--bad-soft);}
+:root[data-theme="dark"] .cf-aviso{--cf-cor:#F2C14E;--cf-fundo:#3A2E0B;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cf-aviso{--cf-cor:#F2C14E;--cf-fundo:#3A2E0B;}}
+.cf-topo{display:flex;gap:16px;align-items:center;padding:14px 16px;border-radius:12px;background:var(--cf-fundo);border:1px solid var(--cf-cor);margin:0 0 14px;}
+.cf-ic{flex:none;color:var(--cf-cor);display:flex;} .cf-cab{min-width:0;}
+.cf-tit{margin:0;font-size:18px;line-height:1.25;} .cf-msg{margin:4px 0 0;font-size:13px;color:var(--ink);overflow-wrap:anywhere;} .cf-msg.cf-erro{font-weight:600;}
+.cf-res{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 18px;margin:0 0 14px;}
+.cf-it{margin:0;min-width:0;} .cf-it dt{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 2px;}
+.cf-it dd{margin:0;font-weight:600;overflow-wrap:anywhere;} .cf-it.cf-num dd{font-family:var(--font-mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;} .cf-it.cf-total dd{font-size:16px;}
+.cf-it.cf-alerta dd{color:var(--warn);} .cf-it.cf-arqs{grid-column:1 / -1;}
+.cf-arq{display:inline-block;margin:0 8px 2px 0;padding:2px 8px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);font-weight:600;font-size:12.5px;overflow-wrap:anywhere;} .cf-arq i{font-style:normal;font-weight:400;color:var(--ink-soft);}
+.cf-inc h5{margin:0 0 6px;font-size:13px;display:flex;align-items:center;gap:8px;} .cf-cont{display:inline-block;min-width:22px;padding:0 7px;border-radius:999px;background:var(--cf-cor);color:#fff;font-size:12px;text-align:center;}
+.cf-aviso .cf-cont{color:#3b2a00;}
+.cf-lista{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);}
+.cf-lista:focus-visible{outline:2px solid var(--navy-2);outline-offset:1px;}
+.cf-lista li{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-bottom:1px solid var(--line-soft);font-size:13px;}
+.cf-lista li:last-child{border-bottom:0;} .cf-txt{min-width:0;overflow-wrap:anywhere;} .cf-txt em{display:block;font-style:normal;color:var(--ink-soft);font-size:12.5px;}
+.cf-tag{flex:none;margin-top:1px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--navy-soft);color:var(--navy);white-space:nowrap;}
+.cf-t-ignorada,.cf-t-aviso{background:var(--warn-soft);color:var(--warn);} .cf-t-duplicada{background:var(--navy-soft);color:var(--navy-2);} .cf-t-invalida,.cf-t-erro{background:var(--bad-soft);color:var(--bad);}
+:root[data-theme="dark"] .cf-t-duplicada{color:#B8C4FF;}
+.cf-modal .body{max-height:calc(100vh - 220px);overflow:auto;}
+@media (max-width:720px){.cf-topo{flex-direction:column;align-items:flex-start;gap:8px;} .cf-res{grid-template-columns:1fr 1fr;}}
+/* tabelas: ordenação e exportação */
+.tp-bar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:0 0 6px;}
+.tp-bar .tp-ord{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);} .tp-bar .tp-ord select{max-width:210px;padding:4px 8px;font-size:12.5px;}
+.tp-bar .tp-dir{min-width:34px;} .tp-bar .tp-ord span{white-space:nowrap;}
+th.tp-th{cursor:pointer;user-select:none;} th.tp-th::after{content:" ⇅";opacity:.38;font-size:.92em;}
+th.tp-th[aria-sort="ascending"]::after{content:" ▲";opacity:1;color:var(--navy-2);} th.tp-th[aria-sort="descending"]::after{content:" ▼";opacity:1;color:var(--navy-2);}
+:root[data-theme="dark"] th.tp-th[aria-sort="ascending"]::after,:root[data-theme="dark"] th.tp-th[aria-sort="descending"]::after{color:#9FB0FF;}
+th.tp-th:hover{background:var(--navy-soft);} th.tp-th:focus-visible{outline:2px solid var(--navy-2);outline-offset:-2px;}
+.tp-resumo{margin:0;padding-left:18px;line-height:1.7;}
+@media print{.tp-bar{display:none !important;}}
 .overlay{position:fixed;inset:0;background:rgba(10,13,35,.55);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50;}
 .modal{background:var(--panel);border-radius:16px;width:100%;max-width:720px;box-shadow:var(--shadow-md);border:1px solid var(--line);}
 .modal.wide{max-width:1000px;}
@@ -3940,6 +3974,10 @@ const GestaoAmbientes = {
 /** v13.96 · o recurso da versão está ativo neste ambiente? (rótulos do Recebível, partidas dobradas e Biblioteca CPC & Regras Fiscais) */
 /** v13.97 · o recurso da versão está ativo neste ambiente? (Consolidado de Entradas por Crédito e Débito e Resumo por Adquirente) */
 function g97() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1397'); }
+/** v13.98 · o recurso da versão está ativo neste ambiente? (PIX previsto do dia; só vale com a estrutura da v13.97 ligada) */
+function g98() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1398') && g97(); }
+/** v13.99 · o recurso da versão está ativo neste ambiente? (popup de crítica de carga; ordenação e exportação de tabelas) */
+function g99() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1399'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -3953,7 +3991,7 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -5164,6 +5202,9 @@ const Pessoal = {
       Novos: <b>${cont('criar')}</b> · descrição atualizada: <b>${cont('atualizar')}</b> · reativados: <b>${cont('reativar')}</b><br>
       Ignorados por já existirem: ${cont('existente')} · repetidos no arquivo: ${cont('repetida')}
       ${erros.length ? `<div class="note warn" style="margin-top:10px"><b>${erros.length} linha(s) com erro (não serão importadas):</b><br>${erros.slice(0, 8).map(esc).join('<br>')}${erros.length > 8 ? '<br>…' : ''}</div>` : ''}`;
+    await CargaFeedback.mostrar({ origem: 'RH · Parametrizações (CSV)', arquivos: [{ nome: file.name, tamanho: file.size }], lidas: norm.length, processadas: gravar, ignoradas: cont('existente'), duplicadas: cont('repetida'), invalidas: erros.length,
+      inconsistencias: CargaFeedback.itens(erros, 'invalida'), campos: [['Novos', String(cont('criar'))], ['Descrição atualizada', String(cont('atualizar'))], ['Reativados', String(cont('reativar'))], ['Já existiam (ignorados)', String(cont('existente'))]],
+      titulos: CargaFeedback.TIT_LEITURA, vazioOk: true, mensagem: gravar ? 'Nada foi gravado ainda: confirme a importação na próxima tela.' : 'Nada novo para gravar.' });
     if (!gravar) return UI.modal({ titulo: 'Importar CSV', corpo: resumo + '<p>Nada novo para gravar.</p>' });
     if (!(await UI.confirmar('Importar parametrizações de RH', resumo, `Importar ${gravar}`))) return;
     const r = await RH.importar(plano, file.name);
@@ -5405,7 +5446,7 @@ const Pessoal = {
     if (a === 'pes-filtro') { this.ui[el.dataset.k] = el.value; return App.render(); }
     if (a === 'pes-verbase') { this.ui.verBase = el.checked; return App.render(); }
     if (a === 'pes-rh-filtro') { this.ui.rh.status = el.value; return App.render(); }
-    if (a === 'pes-rh-csv') { const f = el.files[0]; el.value = ''; if (f) try { await this.importarCSVRH(f); } catch (e) { UI.toast(e.message); } return; }
+    if (a === 'pes-rh-csv') { const f = el.files[0]; el.value = ''; if (f) try { await this.importarCSVRH(f); } catch (e) { UI.toast(e.message); CargaFeedback.falha('RH · Parametrizações (CSV)', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); } return; }
     if (a === 'plano-prazo') return this.salvarPrazo(el.dataset.id, el.dataset.p, el.value);
     if (a === 'plano-status') { const id = el.dataset.id, pdi = this.pdiDe(id); await Repo.salvar('pdi', id, { ...pdi, plano: pdi.plano.map(p => p.id === el.dataset.p ? { ...p, status: el.value } : p) }, { modulo: 'pdi', rotulo: Repo.get('funcionarios', id)?.nome + ' · plano' }); }
   },
@@ -5532,7 +5573,13 @@ const BaseAtiva = {
       situacao: rhTxt(r[ix.sit]) || 'Ativo', funcao: rhTxt(r[ix.fun]), lotacao: rhTxt(r[ix.lot]), loja: this.codLoja(r[ix.lot]) }));
     if (!pessoas.length) throw new Error('nenhum colaborador encontrado abaixo do cabeçalho');
     const dup = pessoas.length - new Set(pessoas.map(p => p.chapa)).size;
-    return { pessoas, dup, arquivo: file.name, dataRef: this.dataDoNome(file.name) };
+    const incons = [], vistosC = new Set(); let lidas = 0;
+    rows.slice(hi + 1).forEach((r, i) => {
+      if (!r || !r.some(c => c != null && String(c).trim() !== '')) return; lidas++;
+      if (!(rhTxt(r[ix.chapa]) && rhTxt(r[ix.nome]))) incons.push({ tipo: 'ignorada', linha: hi + i + 2, item: rhTxt(r[ix.nome]) || '(sem nome)', motivo: !rhTxt(r[ix.chapa]) ? 'linha sem Chapa' : 'linha sem Nome' });
+    });
+    pessoas.forEach(p => { if (vistosC.has(p.chapa)) incons.push({ tipo: 'duplicada', item: p.chapa + ' · ' + p.nome, motivo: 'matrícula repetida na planilha (vale a primeira linha)' }); vistosC.add(p.chapa); });
+    return { pessoas, dup, arquivo: file.name, dataRef: this.dataDoNome(file.name), incons, lidas, tam: file.size };
   },
   /** Monta o que será gravado em funcionarios (sem gravar): novos, atualizados, iguais e quem sai da base. */
   planejar(d) {
@@ -5571,7 +5618,7 @@ const BaseAtiva = {
   async abrirImportacao() {
     if (!Auth.can('rh.importar')) return UI.toast('Importar a Base Ativa exige a permissão de modificar o módulo RH.');
     const file = await rhEscolherArquivo(); if (!file) return;
-    let d; try { d = await this.ler(file); } catch (e) { return UI.toast('Falha ao ler a Base Ativa: ' + e.message); }
+    let d; try { d = await this.ler(file); } catch (e) { CargaFeedback.falha('RH · Base Ativa', file.name, e, { arquivos: [{ nome: file.name, tamanho: file.size }] }); return UI.toast('Falha ao ler a Base Ativa: ' + e.message); }
     const pl = this.planejar(d), sit = {}; d.pessoas.forEach(p => { sit[p.situacao] = (sit[p.situacao] || 0) + 1; });
     const ex = pl.saem.slice(0, 8).map(f => esc(f.nome)).join(' · ') + (pl.saem.length > 8 ? ` e mais ${pl.saem.length - 8}` : '');
     UI.modal({
@@ -5594,6 +5641,10 @@ const BaseAtiva = {
         setTimeout(() => this.aplicar(d, pl, !!f.desligar).catch(e => UI.toast('Falha na importação: ' + (e.message || e.code || e))), 30);
       } }],
     });
+    CargaFeedback.mostrar({ origem: 'RH · Base Ativa', arquivos: [{ nome: d.arquivo, tamanho: d.tam }], lidas: d.lidas, processadas: d.pessoas.length - d.dup,
+      inconsistencias: [...d.incons, ...pl.semLoja.map(t => ({ tipo: 'aviso', item: 'Lotação ' + t, motivo: 'sem loja no Módulo 2 (entra sem loja, como centro de custo)' }))],
+      campos: [['Data da base', Fmt.data(d.dataRef)], ['Novos no cadastro', String(pl.novos)], ['Atualizados', String(pl.atualizar)], ['Sem mudança', String(pl.iguais)]],
+      titulos: CargaFeedback.TIT_LEITURA, mensagem: 'A janela de importação está aberta por baixo: nada foi gravado ainda.' });
   },
   progresso(txt, pct) {
     let el = $('#rbProg'); if (!el) { el = document.createElement('div'); el.id = 'rbProg'; el.className = 'rb-prog'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
@@ -5825,7 +5876,7 @@ const FolhaImport = {
     BaseAtiva.progresso('Lendo a folha…', 15); await sleep(16); // deixa a tela mostrar o aviso antes do processamento
     let d, pl, refPad;
     try { d = await this.ler(file); refPad = d.refArq || ''; pl = this.planejar(d, refPad); }
-    catch (e) { console.warn('folha', e); BaseAtiva.progresso('Falha na leitura', 100); return UI.toast('Falha ao ler a folha: ' + (/cabeçalho|colunas|Salário Contratual/.test(e.message) ? e.message : Folha.msgAmigavel(e))); } // v13.58: sem mensagem crua do JavaScript
+    catch (e) { console.warn('folha', e); BaseAtiva.progresso('Falha na leitura', 100); CargaFeedback.falha('RH · Folha de pagamento', file.name, /cabeçalho|colunas|Salário Contratual/.test(e.message) ? e.message : Folha.msgAmigavel(e), { arquivos: [{ nome: file.name, tamanho: file.size }] }); return UI.toast('Falha ao ler a folha: ' + (/cabeçalho|colunas|Salário Contratual/.test(e.message) ? e.message : Folha.msgAmigavel(e))); } // v13.58: sem mensagem crua do JavaScript
     BaseAtiva.progresso('Folha processada', 100); const avF = Folha.aviso();
     // prévia: HTML montado UMA vez, depois de todo o processamento em memória
     const n = Fmt.num, kpi = (k, v, s) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${s}</div></div>`, tp = this._tempos || {};
@@ -5849,6 +5900,10 @@ const FolhaImport = {
         setTimeout(() => this.aplicar(d, p, !!f.desligar).catch(e => { console.warn('folha', e); UI.toast('Falha na importação da folha: ' + (/gravações feitas|tempo esgotado/.test(e.message || '') ? e.message : e.code ? msgErro(e) : Folha.msgAmigavel(e))); }), 30);
       } }],
     });
+    CargaFeedback.mostrar({ origem: 'RH · Folha de pagamento', arquivos: [{ nome: d.arquivo, tamanho: file.size }], lidas: d.st.lidas, processadas: d.regs.length, duplicadas: d.st.dupl, invalidas: d.st.semCpf + d.st.semValor,
+      total: d.regs.reduce((a, x) => a + x.valor, 0), totalRotulo: 'Salários contratuais lidos', inconsistencias: CargaFeedback.itens(d.erros, 'invalida'),
+      campos: [['Aba', d.aba], ['Meses na folha', pl.refs.map(r => this.rot(r)).join(', ') || '—'], ['Colaboradores na folha', String(pl.pessoas)], ['Linhas de outras verbas (não entram)', String(d.st.outrasVerbas)], ['Linhas de desligados', String(d.st.desligLinhas)]],
+      titulos: CargaFeedback.TIT_LEITURA, mensagem: (d.erros.length >= 50 ? 'A lista mostra as 50 primeiras linhas com erro. ' : '') + 'Nada foi gravado ainda: confirme na janela de importação, aberta por baixo.' });
   },
   /** Gravação do lote consolidado (uma vez, ao confirmar): documentos da folha → cadastros alterados → registro + 1 log. */
   async aplicar(d, pl, desligar) {
@@ -6951,6 +7006,15 @@ const Lojas = {
         ${avisos.length ? `<div class="note warn" style="margin-bottom:10px">${avisos.slice(0, 12).join('<br>')}${avisos.length > 12 ? `<br>… e mais ${avisos.length - 12}` : ''}</div>` : ''}${tab}`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: p.mudam.length ? `Aplicar em ${p.mudam.length} loja(s)` : 'Nada a aplicar', desabilitado: p.mudam.length ? '' : 'Nenhuma despesa da planilha é maior que a salva.', acao: async () => { const r = await this.aplicarOcupacao(p); UI.toast(`Ocupação importada: ${r.lojas} loja(s), ${r.campos} valor(es) atualizado(s).`); } }] });
   },
+  /** v13.99 · popup de crítica da planilha de ocupação (lojas não encontradas, linhas repetidas e valores inválidos) */
+  criticaOcupacao(dados, f) {
+    const p = this.planoOcupacao(dados), rot = x => [x.codigo, x.loja].filter(v => v != null && String(v).trim() !== '').join(' · ');
+    const inc = [...p.naoAchadas.map(x => ({ tipo: 'ignorada', linha: x.linha, item: rot(x), motivo: 'loja não encontrada no cadastro' })),
+      ...p.invalidos.map(x => ({ tipo: /repetida/.test(x.motivo) ? 'duplicada' : 'invalida', linha: x.linha, item: rot(x), motivo: x.motivo }))];
+    return CargaFeedback.mostrar({ origem: 'Gestão de Lojas · Custos de ocupação', arquivos: [{ nome: f.name, tamanho: f.size }], lidas: dados.linhas.length, processadas: p.itens.length, inconsistencias: inc,
+      campos: [['Aba', dados.aba], ['Lojas a atualizar', String(p.mudam.length)], ['Lojas sem alteração', String(p.itens.length - p.mudam.length)]],
+      titulos: CargaFeedback.TIT_LEITURA, mensagem: 'A prévia está aberta por baixo desta janela: nada foi gravado ainda.' });
+  },
   async aplicarOcupacao(p) {
     let lojas = 0, campos = 0; Sync.ocupado?.(true);
     try {
@@ -7351,7 +7415,7 @@ const Lojas = {
       case 'lj-ocup-importar': {
         if (!Contratos.podeEd()) return UI.toast('Editar custos de ocupação não está liberado para o seu acesso.');
         const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.xlsx,.xls,.csv';
-        inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { this.previaOcupacao(await this.lerOcupacao(f), f.name); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); } };
+        inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { const dados = await this.lerOcupacao(f); this.previaOcupacao(dados, f.name); this.criticaOcupacao(dados, f); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); CargaFeedback.falha('Gestão de Lojas · Custos de ocupação', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); } };
         return inp.click();
       }
       case 'lj-importar': {
@@ -7359,13 +7423,26 @@ const Lojas = {
         inp.onchange = async () => {
           try {
             const dados = await this.importar(inp.files[0]);
+            await this.criticaBase(dados, inp.files[0]);
             if (!(await UI.confirmar('Importar BASECADASTRO', `Encontradas <b>${dados.base.length}</b> lojas e <b>${Object.values(dados.adq).flat().length}</b> registros de adquirentes. Dados fiscais, adquirentes e status de contrato serão atualizados; contratos, seguros e despesas já cadastrados são mantidos.`, 'Importar'))) return;
             UI.toast('Importando…'); const r = await this.aplicarImportacao(dados); UI.toast(`Importação concluída: ${r.novas} novas, ${r.atualizadas} atualizadas.`);
-          } catch (e) { UI.toast('Falha na importação: ' + e.message); }
+          } catch (e) { UI.toast('Falha na importação: ' + e.message); const f0 = inp.files[0]; CargaFeedback.falha('Gestão de Lojas · BASECADASTRO', f0 && f0.name, e, { arquivos: f0 ? [{ nome: f0.name, tamanho: f0.size }] : [] }); }
         };
         return inp.click();
       }
     }
+  },
+  /** v13.99 · crítica da BASECADASTRO: lojas sem código, códigos repetidos e adquirentes de lojas que não estão na aba de cadastro */
+  criticaBase(dados, f) {
+    const inc = [], vistos = new Set(); let aq = 0;
+    dados.base.forEach(b => {
+      if (!b.codigo) { inc.push({ tipo: 'invalida', item: b.nome || '(sem nome)', motivo: 'linha sem número de loja reconhecível' }); return; }
+      if (vistos.has(b.codigo)) inc.push({ tipo: 'duplicada', item: b.codigo + ' · ' + b.nome, motivo: 'código de loja repetido (o último registro prevalece)' });
+      vistos.add(b.codigo);
+    });
+    Object.entries(dados.adq).forEach(([c, l]) => { aq += l.length; if (c === 'null' || !vistos.has(c)) inc.push({ tipo: 'aviso', item: 'Adquirentes da loja ' + (c === 'null' ? '(sem código)' : c), motivo: 'loja ausente da aba CADASTRO GERAL DE LOJAS (' + l.length + ' registro(s))' }); });
+    return CargaFeedback.mostrar({ origem: 'Gestão de Lojas · BASECADASTRO', arquivos: [{ nome: f.name, tamanho: f.size }], lidas: dados.base.length, processadas: dados.base.length - inc.filter(x => x.tipo === 'invalida').length, inconsistencias: inc,
+      campos: [['Lojas encontradas', String(dados.base.length)], ['Registros de adquirentes', String(aq)]], titulos: CargaFeedback.TIT_LEITURA, mensagem: 'Nada foi gravado ainda: confirme a importação na próxima tela.' });
   },
   async mudanca(a, el) {
     if (a === 'lj-filtro') { this.ui[el.dataset.k] = el.value; return App.render(); }
@@ -8949,7 +9026,8 @@ const Retaguarda = {
         for (const [alvo, nomes] of Object.entries(mapa)) idx[alvo] = cab.findIndex(c => nomes.some(n => c === n || c.startsWith(n)));
         const obrig = Object.entries(mapa).filter(([k]) => !k.startsWith('_opt')).map(([k]) => k);
         if (['loja', 'data'].every(k => !(k in idx) || idx[k] >= 0) && idx.loja >= 0) {
-          return { aba: nome, linhas: rows.slice(h + 1).filter(r => r && r.some(c => c != null && c !== '')).map(r => Object.fromEntries(Object.entries(idx).map(([k, i]) => [k, i >= 0 ? r[i] : null]))), colunas: idx, obrig };
+          const uteis = rows.slice(h + 1).map((r, i) => [r, h + 2 + i]).filter(([r]) => r && r.some(c => c != null && c !== ''));
+          return { aba: nome, linhas: uteis.map(([r]) => Object.fromEntries(Object.entries(idx).map(([k, i]) => [k, i >= 0 ? r[i] : null]))), lins: uteis.map(([, l]) => l), colunas: idx, obrig };
         }
       }
     }
@@ -9138,22 +9216,30 @@ const Retaguarda = {
     });
     if (r.colunas.web < 0) throw new Error('Não encontrei a coluna do valor recebido (WEBSYSTEM ou TOTAL).');
     // agrega por data e loja (linhas repetidas da mesma loja no mesmo dia são somadas)
-    const porData = {}, naoCad = new Set(); let n = 0, invalidas = 0;
-    for (const x of r.linhas) {
+    const porData = {}, naoCad = new Set(), incons = []; let n = 0, invalidas = 0, totalWeb = 0;
+    for (const [ix, x] of r.linhas.entries()) {
+      const lin = r.lins ? r.lins[ix] : ix + 1;
       const data = this.dataISO(x.data), web = this.num(x.web);
-      if (!data || x.loja == null || web == null) { invalidas++; continue; }
+      if (!data || x.loja == null || web == null) {
+        invalidas++; incons.push({ tipo: 'invalida', linha: lin, item: x.loja == null ? '' : String(x.loja), motivo: !data ? 'data ausente ou inválida' : x.loja == null ? 'loja ausente' : 'valor do Websystem ausente ou inválido' });
+        continue;
+      }
       const lj = this.loja(x.loja); if (!lj.lojaId) naoCad.add(lj.texto);
       const chave = lj.lojaId || 'txt:' + this.norm(lj.texto);
+      const dup = !!(porData[data] && porData[data][chave]);
       const vals = { din: this.num(x.din), cart: this.num(x.cart), pix: this.num(x.pix) };
       const temInterno = Object.values(vals).some(v => v != null);
       const alvo = (porData[data] ||= {})[chave] ||= { chave, lojaId: lj.lojaId, texto: lj.texto, web: 0, din: null, cart: null, pix: null, _interno: false };
       alvo.web = this.r2(alvo.web + web);
       if (temInterno) { alvo._interno = true; ['din', 'cart', 'pix'].forEach(k => { alvo[k] = this.r2((alvo[k] || 0) + (vals[k] || 0)); }); }
+      if (dup) incons.push({ tipo: 'duplicada', linha: lin, item: lj.texto + ' · ' + Fmt.data(data), motivo: 'loja e dia já lidos antes neste arquivo; os valores foram somados' });
+      totalWeb += web;
       n++;
     }
     const datas = Object.keys(porData).sort();
     if (!datas.length) throw new Error('Nenhuma linha válida (confira as colunas LOJA, DATA e WEBSYSTEM).');
-    return { porData, datas, n, invalidas, naoCad: [...naoCad], aba: r.aba, nomeArquivo: file.name };
+    for (const t of naoCad) incons.push({ tipo: 'aviso', item: 'Loja "' + t + '"', motivo: 'não encontrada no cadastro; entra como texto, sem vínculo com a loja' });
+    return { porData, datas, n, invalidas, naoCad: [...naoCad], aba: r.aba, nomeArquivo: file.name, incons, totalWeb: this.r2(totalWeb), lidas: r.linhas.length, tam: file.size };
   },
   async aplicarCS(imp) {
     let docs = 0;
@@ -9514,7 +9600,11 @@ const Retaguarda = {
             const tot = imp.ok.reduce((a, x) => a + x.item.valor, 0);
             box.innerHTML = `<div class="note">${imp.ok.length} lançamento(s) prontos · ${Fmt.brl(tot)} · ${imp.vinculados} caixa(s) vinculados ao cadastro${imp.ok.length - imp.vinculados ? `, ${imp.ok.length - imp.vinculados} ficarão como “não vinculado”` : ''}.</div>
               ${imp.erros.length ? `<div class="note warn" style="margin-top:8px"><b>${imp.erros.length} linha(s) ignoradas:</b><br>${imp.erros.slice(0, 8).map(esc).join('<br>')}${imp.erros.length > 8 ? '<br>…' : ''}</div>` : ''}`;
-          } catch (err) { box.innerHTML = `<div class="note warn">${esc(err.message)}</div>`; }
+            const fl = e.target.files[0];
+            CargaFeedback.mostrar({ origem: 'Faltas de Caixa · Upload em lote', arquivos: [{ nome: imp.nome, tamanho: fl && fl.size }], lidas: imp.ok.length + imp.erros.length, processadas: imp.ok.length, total: tot, totalRotulo: 'Valor total dos lançamentos',
+              campos: [['Caixas vinculados ao cadastro', String(imp.vinculados)], ['Sem vínculo (ficam "não vinculado")', String(imp.ok.length - imp.vinculados)]], inconsistencias: CargaFeedback.itens(imp.erros, 'ignorada'),
+              titulos: CargaFeedback.TIT_LEITURA, mensagem: 'Nada foi gravado ainda: use "Importar lançamentos" para concluir.' });
+          } catch (err) { box.innerHTML = `<div class="note warn">${esc(err.message)}</div>`; const fl = e.target.files[0]; CargaFeedback.falha('Faltas de Caixa · Upload em lote', fl && fl.name, err, { arquivos: fl ? [{ nome: fl.name, tamanho: fl.size }] : [] }); }
         });
       },
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Importar lançamentos', acao: async () => {
@@ -9555,11 +9645,20 @@ const Retaguarda = {
         $('#cxFile', m).addEventListener('change', async e => {
           try {
             const r = await this.lerPlanilha(e.target.files[0], { loja: ['LOJA', 'FILIAL'], nome: ['NOME', 'CAIXA', 'OPERADOR'], matricula: ['MATRICULA', 'MAT'] });
-            const porLoja = {}; let ign = 0;
-            r.linhas.forEach(x => { const lj = this.loja(x.loja); if (!lj.lojaId || !x.nome) { ign++; return; } (porLoja[lj.lojaId] ||= []).push({ nome: String(x.nome).trim().toUpperCase(), matricula: String(x.matricula ?? '').trim() }); });
+            const porLoja = {}; let ign = 0; const incons = [], vistos = new Set(); let dups = 0;
+            r.linhas.forEach((x, ix) => {
+              const lin = r.lins ? r.lins[ix] : ix + 2, lj = this.loja(x.loja);
+              if (!lj.lojaId || !x.nome) { ign++; incons.push({ tipo: 'ignorada', linha: lin, item: String(x.nome ?? x.loja ?? ''), motivo: !lj.lojaId ? 'loja não encontrada no cadastro' : 'nome do operador vazio' }); return; }
+              const k = lj.lojaId + '|' + this.norm(x.nome);
+              if (vistos.has(k) || (Repo.get('caixas', lj.lojaId)?.operadores || []).some(o => this.norm(o.nome) === this.norm(x.nome))) { dups++; incons.push({ tipo: 'duplicada', linha: lin, item: String(x.nome).trim().toUpperCase(), motivo: 'operador já cadastrado nesta loja (mantido o existente)' }); }
+              vistos.add(k);
+              (porLoja[lj.lojaId] ||= []).push({ nome: String(x.nome).trim().toUpperCase(), matricula: String(x.matricula ?? '').trim() });
+            });
             for (const [lj, ops] of Object.entries(porLoja)) { await add(lj, ops); await sleep(60); }
             refresh(); UI.toast(`Base atualizada: ${Object.values(porLoja).flat().length} operador(es)${ign ? `, ${ign} linha(s) ignoradas` : ''}.`);
-          } catch (err) { UI.toast(err.message); }
+            const fc = e.target.files[0];
+            CargaFeedback.mostrar({ origem: 'Faltas de Caixa · Base de caixas (upload rápido)', arquivos: [{ nome: fc.name, tamanho: fc.size }], lidas: r.linhas.length, processadas: r.linhas.length - ign - dups, ignoradas: ign, duplicadas: dups, inconsistencias: incons, campos: [['Aba', r.aba]] });
+          } catch (err) { UI.toast(err.message); const fc = e.target.files[0]; CargaFeedback.falha('Faltas de Caixa · Base de caixas (upload rápido)', fc && fc.name, err, { arquivos: fc ? [{ nome: fc.name, tamanho: fc.size }] : [] }); }
         });
         m.addEventListener('click', async e => {
           const b = e.target.closest('[data-cx-del]'); if (!b) return;
@@ -9619,10 +9718,13 @@ const Retaguarda = {
         const imp = await this.importarCS(f);
         const periodo = `${Fmt.data(imp.datas[0])} a ${Fmt.data(imp.datas.at(-1))}`;
         const existentes = imp.datas.filter(d => Repo.get('credsystem', d)).length;
+        await CargaFeedback.mostrar({ origem: 'Credsystem · Conciliação Websystem', arquivos: [{ nome: imp.nomeArquivo, tamanho: f.size }], lidas: imp.lidas, processadas: imp.n, invalidas: imp.invalidas,
+          total: imp.totalWeb, totalRotulo: 'Total Websystem', campos: [['Aba', imp.aba], ['Período', periodo], ['Dias', String(imp.datas.length)]], inconsistencias: imp.incons,
+          titulos: CargaFeedback.TIT_LEITURA, mensagem: 'Nada foi gravado ainda: confira a crítica e confirme a importação na próxima tela.' });
         if (!(await UI.confirmar('Importar conciliação Credsystem', `<b>${imp.n}</b> linha(s) de ${esc(imp.nomeArquivo)} (aba ${esc(imp.aba)}), período ${periodo}, ${imp.datas.length} dia(s).${existentes ? `<br>${existentes} dia(s) já existem: valores do arquivo substituem os anteriores; lançamentos digitados no painel são mantidos quando o arquivo vier sem eles.` : ''}${imp.naoCad.length ? `<br><br><b>Lojas não encontradas no cadastro:</b> ${imp.naoCad.map(esc).join(', ')}` : ''}${imp.invalidas ? `<br>${imp.invalidas} linha(s) sem data/valor ignoradas.` : ''}`, 'Importar'))) return;
         const n = await this.aplicarCS(imp);
         this.ui.cs.mes = imp.datas.at(-1).slice(0, 7); UI.toast(`Conciliação importada: ${n} dia(s).`); App.render();
-      } catch (e) { UI.toast('Falha na importação: ' + e.message); }
+      } catch (e) { UI.toast('Falha na importação: ' + e.message); CargaFeedback.falha('Credsystem · Conciliação Websystem', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); }
     }
   },
   entrada(a, el) {
@@ -13312,8 +13414,9 @@ const CredMetasImport = {
   async abrir() {
     if (!Auth.can('credsystem.editar')) return UI.toast('Importar não está liberado para o seu acesso.');
     const file = await csEscolherArquivo(); if (!file) return;
-    let v; try { v = this.validar(await this.ler(file)); } catch (e) { return UI.toast('Falha ao ler a planilha de metas: ' + e.message); }
-    if (!v.length) return UI.toast('Nenhuma linha de meta encontrada na planilha.');
+    const arqM = { nome: file.name, tamanho: file.size };
+    let v; try { v = this.validar(await this.ler(file)); } catch (e) { CargaFeedback.falha('Credsystem · Metas das lojas', file.name, e, { arquivos: [arqM] }); return UI.toast('Falha ao ler a planilha de metas: ' + e.message); }
+    if (!v.length) { CargaFeedback.falha('Credsystem · Metas das lojas', file.name, 'Nenhuma linha de meta encontrada na planilha.', { arquivos: [arqM] }); return UI.toast('Nenhuma linha de meta encontrada na planilha.'); }
     const cu = Credsystem.ui, cont = k => v.filter(x => x.st === k).length;
     const pill = { ok: '<span class="pill ok">Confere</span>', warn: '<span class="pill warn">Aviso</span>', block: '<span class="pill bad">Bloqueada</span>' };
     UI.modal({
@@ -13330,6 +13433,10 @@ const CredMetasImport = {
         const r = await this.aplicar(ok, Number(f.ano), Number(f.mes)); UI.toast(`Metas de ${CS_MESES[f.mes - 1]}/${f.ano} importadas para ${r} loja(s).`);
       } }],
     });
+    CargaFeedback.mostrar({ origem: 'Credsystem · Metas das lojas', arquivos: [arqM], lidas: v.length, processadas: cont('ok') + cont('warn'), ignoradas: cont('block'),
+      inconsistencias: v.filter(x => x.st !== 'ok').map(x => ({ tipo: x.st === 'block' ? 'ignorada' : 'aviso', linha: x.linha, item: x.l ? x.l.codigo + ' · ' + x.l.nome : x.lojaTxt, motivo: x.msg })),
+      campos: [['Conferem', String(cont('ok'))], ['Com aviso (serão importadas)', String(cont('warn'))], ['Bloqueadas (não serão importadas)', String(cont('block'))]], titulos: CargaFeedback.TIT_LEITURA,
+      mensagem: 'A janela de importação está aberta por baixo: escolha a competência e confirme.' });
   },
   f(v, suf = '') { return v == null ? '<span class="hint">—</span>' : Fmt.num(v, v % 1 ? 1 : 0) + suf; },
   async aplicar(linhas, ano, mes) {
@@ -14242,7 +14349,7 @@ const Adiantamentos = {
     let lido = null;
     const prever = async (m, file) => {
       const v = Repo.get(Viagens.COL, id), alvo = $('#adtPrev', m); alvo.innerHTML = '<p class="hint">Lendo o arquivo…</p>';
-      try { lido = await this.ler(file); } catch (e) { lido = null; alvo.innerHTML = `<div class="note warn">${esc(e.message || String(e))}</div>`; return; }
+      try { lido = await this.ler(file); } catch (e) { lido = null; alvo.innerHTML = `<div class="note warn">${esc(e.message || String(e))}</div>`; CargaFeedback.falha('Viagens · Prestação de contas (arquivo)', file.name, e, { arquivos: [{ nome: file.name, tamanho: file.size }] }); return; }
       const ind = Viagens.modo(v) === 'individual', lanc = Viagens.lancaveis(v), padrao = lanc[0] || v.funcionarioId;
       lido.itens.forEach((x, i) => { x.id = 'imp' + i; const p = ind ? this.pessoaDe(v, x.pessoa) : null; x.funcionarioId = p && lanc.includes(p.funcionarioId) ? p.funcionarioId : padrao; if (ind && x.pessoa && !p) lido.avisos.push(`Linha ${x.linha}: "${x.pessoa}" não é participante — lançada para ${Viagens.participantes(v).find(q => q.funcionarioId === padrao)?.nome || 'o titular'}.`); });
       const crit = CriticaPrestacao.analisar(v, [...(v.despesas || []), ...lido.itens]), nG = lido.itens.filter(x => crit.get(x.id).flags.some(f => f.nivel === 'glosa')).length, nA = lido.itens.filter(x => crit.get(x.id).flags.some(f => f.nivel === 'alerta')).length;
@@ -14252,6 +14359,8 @@ const Adiantamentos = {
         <div class="tbl-wrap" style="max-height:46vh"><table class="nolabel adt-prev"><thead><tr><th aria-label="Importar"></th><th>Data</th>${ind ? '<th>De</th>' : ''}<th>Despesa</th><th>Documento</th><th class="num">Valor</th></tr></thead><tbody>
         ${lido.itens.map(x => { const c = crit.get(x.id); return `<tr><td><input type="checkbox" data-adt-inc="${x.id}" checked aria-label="Importar a linha ${x.linha}"></td><td class="mono">${Fmt.data(x.data)}</td>${ind ? `<td>${esc(Viagens.participantes(v).find(p => p.funcionarioId === x.funcionarioId)?.nome || '')}</td>` : ''}<td>${esc(x.categoria)}${x.descricao ? `<div class="cell-sub">${esc(x.descricao)}</div>` : ''}${x.fornecedor ? `<div class="cell-sub">${esc(x.fornecedor)}${x.cnpj ? ' · ' + esc(x.cnpj) : ''}</div>` : ''}${CriticaPrestacao.pills(c)}</td><td class="mono">${esc(x.doc || '—')}</td><td class="num">${Fmt.brl(x.valor)}</td></tr>`; }).join('')}</tbody></table></div>
         <p class="hint" style="margin:6px 0 0">As despesas entram sem comprovante anexado (origem: ${esc(lido.arquivo)}). A crítica é só sugestão: a decisão final (aprovar, glosar ou aprovar parcialmente) é feita no Acerto de Contas Final.</p>`;
+      CargaFeedback.mostrar({ origem: 'Viagens · Prestação de contas (arquivo)', arquivos: [{ nome: lido.arquivo, tamanho: file.size }], lidas: lido.itens.length, processadas: lido.itens.length, total: tot, totalRotulo: 'Total das despesas',
+        inconsistencias: CargaFeedback.itens(lido.avisos, 'aviso'), campos: [['Com glosa sugerida', String(nG)], ['Acima do teto', String(nA)]], titulos: CargaFeedback.TIT_LEITURA, mensagem: 'Nada foi lançado ainda: marque as linhas e use "Importar despesas".' });
     };
     UI.modal({ titulo: 'Importar arquivo de prestação de contas', largo: true,
       corpo: `<p style="margin:0 0 10px">${esc(Viagens.nomes ? Viagens.nomes(v0) : v0.nome)} · ${esc(Trajeto.rota(v0))} (${Viagens.periodo(v0)}).</p>
@@ -15527,9 +15636,17 @@ const Viagens = {
     if (!this.financeiro()) return UI.toast('Só o Financeiro e o Master importam solicitações.');
     const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv,text/csv,text/plain';
     inp.addEventListener('change', async () => { const f = inp.files?.[0]; if (!f) return;
-      try { const r = this.lerCSV(CSV.decodificar(await f.arrayBuffer()), f.name); if (r.erro) return UI.modal({ titulo: 'Planilha não importada', corpo: `<p style="margin:0 0 8px">${esc(r.erro)}</p>${r.avisos?.length ? `<ul>${r.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}` }); this.novo(r); }
-      catch (e) { UI.toast('Não consegui ler a planilha: ' + (e.message || e)); } });
+      try { const r = this.lerCSV(CSV.decodificar(await f.arrayBuffer()), f.name); if (r.erro) { if (CargaFeedback.ativo()) return this.criticaCSV(r, f); return UI.modal({ titulo: 'Planilha não importada', corpo: `<p style="margin:0 0 8px">${esc(r.erro)}</p>${r.avisos?.length ? `<ul>${r.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}` }); } this.novo(r); this.criticaCSV(r, f); }
+      catch (e) { UI.toast('Não consegui ler a planilha: ' + (e.message || e)); CargaFeedback.falha('Viagens · Solicitação por planilha', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); } });
     inp.click();
+  },
+  /** v13.99 · crítica da planilha de solicitação de viagem (viajantes encontrados, linhas ignoradas e avisos; CPF sempre mascarado) */
+  criticaCSV(r, f) {
+    const tipo = a => /ignorada|não encontrado/.test(a) ? 'ignorada' : /inválida/.test(a) ? 'invalida' : 'aviso';
+    const inc = (r.avisos || []).map(a => ({ tipo: tipo(a), item: a, motivo: '' }));
+    return CargaFeedback.mostrar({ origem: 'Viagens · Solicitação por planilha', arquivos: [{ nome: f.name, tamanho: f.size }], processadas: r.erro ? 0 : (r.ids || []).length, inconsistencias: inc,
+      campos: r.erro ? [] : [['Viajantes localizados no RH', String((r.ids || []).length)]], erro: r.erro || '', titulos: CargaFeedback.TIT_LEITURA,
+      mensagem: r.erro ? '' : 'O formulário da solicitação foi aberto por baixo desta janela, já preenchido: revise e salve.' });
   },
   /** Lê a planilha e devolve o pré-preenchimento do formulário (ou { erro }). Viajantes são localizados pelo CPF no RH. */
   lerCSV(texto, arquivo = '') {
@@ -17252,6 +17369,19 @@ const PontoEquilibrio = {
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: dados.itens.length ? `Importar ${dados.itens.length} valor(es)` : 'Nada a importar', desabilitado: dados.itens.length ? '' : 'Nenhuma linha válida na planilha.',
         acao: () => { let n = 0; meses.forEach(m => { n += this.aplicarFat(porMes[m], m, 'importado'); }); UI.toast(`${n} valor(es) de faturamento realizado importados · clique em Salvar`); } }] });
   },
+  /** v13.99 · crítica da planilha de vendas (lojas não encontradas, faturamento inválido, mês fora do ano) */
+  criticaVendas(d, f) {
+    const tot = d.itens.reduce((a, x) => a + x.v, 0);
+    return CargaFeedback.mostrar({ origem: 'Planejamento Econômico · Vendas realizadas', arquivos: [{ nome: f.name, tamanho: f.size }], lidas: d.itens.length + d.erros.length, processadas: d.itens.length, invalidas: d.erros.length,
+      total: tot, totalRotulo: 'Faturamento realizado', inconsistencias: CargaFeedback.itens(d.erros, 'invalida'), campos: [['Aba', d.aba], ['Ano', String(this.ui.ano)]], titulos: CargaFeedback.TIT_LEITURA, mensagem: 'A prévia está aberta por baixo desta janela: nada foi gravado ainda.' });
+  },
+  /** v13.99 · crítica da planilha de realizado (lojas fora do cadastro, valor inválido, lojas repetidas e linhas sem código) */
+  criticaRealizado(d, f) {
+    const tot = d.itens.reduce((a, x) => a + x.v, 0), rep = d.erros.filter(e => /repetida/.test(e)).length;
+    return CargaFeedback.mostrar({ origem: 'Planejamento Econômico · Realizado ' + mm2(d.mes) + '/' + d.ano, arquivos: [{ nome: f.name, tamanho: f.size }], lidas: d.itens.length + d.erros.length + d.ignoradas, processadas: d.itens.length,
+      ignoradas: d.ignoradas, duplicadas: rep, invalidas: d.erros.length - rep, total: tot, totalRotulo: 'Vendas realizadas', inconsistencias: [...CargaFeedback.itens(d.erros.filter(e => /repetida/.test(e)), 'duplicada'), ...CargaFeedback.itens(d.erros.filter(e => !/repetida/.test(e)), 'invalida')],
+      campos: [['Aba', d.aba], ['Período (célula A1)', mm2(d.mes) + '/' + d.ano], ['Linhas sem código de loja (totais/subtítulos)', String(d.ignoradas)]], titulos: CargaFeedback.TIT_LEITURA, mensagem: 'A prévia está aberta por baixo desta janela: nada foi gravado ainda.' });
+  },
   /* ---------------- v13.64 · Importar Realizado (.xlsx) — planilha padrão de metas/vendas ---------------- */
   COL_FAT: 'lojas_faturamento', // histórico mensal do realizado por loja: lojas_faturamento/<lojaId> { meses: { 'AAAA-MM': { valor, origem, arquivo, em, por } } }
   /** A1 = período ("META MÊS 09/2026…" → 09/2026) · coluna A a partir da linha 6 = loja ("05 - CAMARAGIBE" → '05') · coluna D = vendas do ano vigente. */
@@ -17336,13 +17466,13 @@ const PontoEquilibrio = {
     if (a === 'pe-fat-meta') return this.preencherComMeta();
     if (a === 'pe-realizado') { // v13.64
       const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.xlsx,.xls,.xlsm';
-      inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { this.previaRealizado(await this.lerRealizado(f), f.name); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); } };
+      inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { const d = await this.lerRealizado(f); this.previaRealizado(d, f.name); this.criticaRealizado(d, f); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); CargaFeedback.falha('Planejamento Econômico · Realizado', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); } };
       return inp.click();
     }
     if (a === 'pe-fat-importar') {
       if (u.periodo !== 'mes') return UI.toast('Escolha “Por mês” para importar.');
       const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.xlsx,.xls,.csv';
-      inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { this.previaVendas(await this.lerVendas(f), f.name); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); } };
+      inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { const d = await this.lerVendas(f); this.previaVendas(d, f.name); this.criticaVendas(d, f); } catch (e) { UI.toast('Falha ao ler a planilha: ' + e.message); CargaFeedback.falha('Planejamento Econômico · Vendas', f.name, e, { arquivos: [{ nome: f.name, tamanho: f.size }] }); } };
       return inp.click();
     }
     if (a === 'pe-base') { if (v !== u.base) { u.base = v; App.render(); } return; }
@@ -18805,9 +18935,9 @@ const ResumoRecebivel = {
   /** Os números do dia (pura leitura). */
   async calcular(d = this.hoje()) {
     const ant = this.ontem(d), r2 = v => Math.round((Number(v) || 0) * 100) / 100;
-    const [form, futuros, saidasFcx, carga, hist] = await Promise.all([this.ler('esp2:recebivelDiario', {}), this.ler('esp2:recebiveisCredsystem', {}), this.ler('esp2:saidas', []), this.ler('esp2:cargaSaidas', null), g97() ? this.ler('esp2:salesHistory', []) : Promise.resolve([])]);
-    const pn = await window.PainelFCX.recebiveis(ant), f = (form || {})[d] || {}, cart = pn.cartao || {}, pr = pn.prestacao || {};
-    const pixR = g97() ? window.PainelFCX.pixReal1397(f.pix, window.PainelFCX.pixDoHistorico1397(hist, ant)) : null, din = Number(f.dinheiro) || 0, pix = pixR ? pixR.valor : Number(f.pix) || 0, cartao = Number(cart.liquido) || 0, pDin = Number(pr.din) || 0, pPix = Number(pr.pix) || 0, pLote = Number(pr.lote) || 0;
+    const [form, futuros, saidasFcx, carga, hist, sg98] = await Promise.all([this.ler('esp2:recebivelDiario', {}), this.ler('esp2:recebiveisCredsystem', {}), this.ler('esp2:saidas', []), this.ler('esp2:cargaSaidas', null), g97() ? this.ler('esp2:salesHistory', []) : Promise.resolve([]), g98() ? Promise.all([this.ler('esp2:monthMeta', {}), this.ler('esp2:weightsByMonth', {}), this.ler('esp2:monthParams', {}), this.ler('esp2:prestacaoModalidadePct', {})]).then(([monthMeta, weightsByMonth, monthParams, prestacaoModalidadePct]) => ({ monthMeta, weightsByMonth, monthParams, prestacaoModalidadePct })) : Promise.resolve(null)]);
+    const pn0 = await window.PainelFCX.recebiveis(ant), v98 = g98(), pn = v98 ? window.PainelFCX.cartaoSemPix1398(pn0).pn : pn0, f = (form || {})[d] || {}, cart = pn.cartao || {}, pr = pn.prestacao || {};
+    const pixR = g97() && !v98 ? window.PainelFCX.pixReal1397(f.pix, window.PainelFCX.pixDoHistorico1397(hist, ant)) : null, px98 = v98 ? window.PainelFCX.pixPrevisto1398(d, sg98) : null, din = Number(f.dinheiro) || 0, pix = px98 ? px98.vendas : pixR ? pixR.valor : Number(f.pix) || 0, cartao = Number(cart.liquido) || 0, pDin = Number(pr.din) || 0, pPix = px98 ? px98.prestacao : Number(pr.pix) || 0, pLote = Number(pr.lote) || 0;
     const credHoje = Object.values(futuros || {}).filter(x => x.vencimento === d), cred = r2(credHoje.reduce((a, x) => a + (Number(x.valor) || 0), 0));
     const adqs = Object.entries(cart.porAdquirente || {}).filter(([, v]) => Math.abs(Number(v) || 0) > 0.004).sort((a, b) => b[1] - a[1]);
     const isoLocal = t => { const x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }, cargaDia = carga && carga.em ? isoLocal(carga.em) : '';
@@ -18815,8 +18945,8 @@ const ResumoRecebivel = {
     const lista = (Array.isArray(saidasFcx) ? saidasFcx : []).filter(s => s && s.tipo !== 'previsto' && s.date && DiasUteis.proximo(String(s.date).slice(0, 10)) === d).map(s => ({ ...s, liquido: Number(s.valorLiquido != null ? s.valorLiquido : s.valor) || 0 }));
     const agrupar = (k, max) => { const m = {}; lista.forEach(s => { const c = String(s[k] || '').trim() || '(não informado)'; const g = (m[c] ||= [c, 0, 0]); g[1] += s.liquido; g[2]++; }); let a = Object.values(m).sort((x, y) => y[1] - x[1]); if (a.length > max) { const resto = a.slice(max - 1); a = a.slice(0, max - 1).concat([[`Outros (${resto.length})`, resto.reduce((t, x) => t + x[1], 0), resto.reduce((t, x) => t + x[2], 0)]]); } return a; };
     const tDin = r2(din + pDin), tPix = r2(pix + pPix), vCart = r2(cartao + cred), tCart = r2(vCart + pLote), entradas = r2(tDin + tPix + tCart), saidas = cargaOk ? r2(lista.reduce((a, s) => a + s.liquido, 0)) : null;
-    return { d, ant, em: new Date().toISOString(), informado: f.dinheiro != null || f.pix != null, din, pix, cartao, pDin, pPix, pLote, cred, credN: credHoje.length, adqs, tDin, tPix, vCart, tCart, entradas,
-      pixFonte: pixR ? pixR.fonte : null, cons97: g97() ? window.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred, credN: credHoje.length, pn, liquido: false }) : null,
+    return { d, ant, em: new Date().toISOString(), v98, informado: v98 ? f.dinheiro != null : f.dinheiro != null || f.pix != null, din, pix, cartao, pDin, pPix, pLote, cred, credN: credHoje.length, adqs, tDin, tPix, vCart, tCart, entradas,
+      pixFonte: pixR ? pixR.fonte : null, cons97: v98 ? window.PainelFCX.consolidado1398({ din, pDin, pLote, cred, credN: credHoje.length, pn: pn0, liquido: false, pixP: px98, dia: d }) : g97() ? window.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred, credN: credHoje.length, pn, liquido: false }) : null,
       saidas, saldo: saidas == null ? null : r2(entradas - saidas), prestLinhas: g96() ? window.PainelFCX.linhasPrestacao(pn, pLote, false) : null, porConta: cargaOk ? agrupar('conta', 6) : [], porForma: cargaOk ? agrupar('formaPagamento', 5) : [], nSaidas: lista.length,
       carga: carga && carga.em ? { ok: cargaOk, dia: cargaDia, arquivo: carga.arquivo || '', linhas: carga.linhas || 0 } : null, avisos: pn.avisos || [] };
   },
@@ -18834,7 +18964,7 @@ const ResumoRecebivel = {
   resumo97(r) {
     const B = v => v == null ? '—' : Fmt.brl(v), c = r.cons97, pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—', tot = k => c.resumo.reduce((a, x) => a + (x[k] || 0), 0);
     const linha = x => `<tr><td>${x.rot}</td><td class="num">${B(x.deb)}</td><td class="num">${B(x.cre)}</td><td class="num">${B(x.total)}</td><td class="num">${pct(x.total, c.total)}</td></tr>`;
-    return `<h3 class="rr-h3">Resumo por Adquirente</h3><div class="tbl-wrap"><table class="rr-tab rr-resumo"><thead><tr><th>Adquirente</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>${c.resumo.map(linha).join('')}<tr class="rr-total"><td>Total em cartões</td><td class="num">${B(tot('deb'))}</td><td class="num">${B(tot('cre'))}</td><td class="num">${B(tot('total'))}</td><td class="num">${pct(tot('total'), c.total)}</td></tr></tbody></table></div><p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). O Débito inclui as prestações recebidas no cartão de débito (arquivo do ERP), na adquirente de cada uma. A Credsystem entra só no dia do vencimento.${r.pixFonte === 'historico' ? ' PIX das vendas: histórico de vendas do FCX (nada foi digitado no Recebível Diário).' : ''}</p>`;
+    return `<h3 class="rr-h3">Resumo por Adquirente</h3><div class="tbl-wrap"><table class="rr-tab rr-resumo"><thead><tr><th>Adquirente</th><th class="num">Débito</th><th class="num">Crédito</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>${c.resumo.map(linha).join('')}<tr class="rr-total"><td>Total em cartões</td><td class="num">${B(tot('deb'))}</td><td class="num">${B(tot('cre'))}</td><td class="num">${B(tot('total'))}</td><td class="num">${pct(tot('total'), c.total)}</td></tr></tbody></table></div><p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). O Débito inclui as prestações recebidas no cartão de débito (arquivo do ERP), na adquirente de cada uma. A Credsystem entra só no dia do vencimento.${r.v98 ? ` PIX: entrada prevista do FCX para ${Fmt.data(r.d)} (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3), sem taxa; o PIX digitado e o da Conciliação dos recebimentos não são somados.` : r.pixFonte === 'historico' ? ' PIX das vendas: histórico de vendas do FCX (nada foi digitado no Recebível Diário).' : ''}</p>`;
   },
   async atualizar(forcar = false) {
     const d = this.hoje(); if (this._carregando || (!forcar && this._r && this._r.d === d && Date.now() - Date.parse(this._r.em) < this.TTL && this._v === FCX.versao)) return;
@@ -18849,11 +18979,11 @@ const ResumoRecebivel = {
     const lin = (rot, v, pr, cls = '') => `<tr class="${cls}"><td>${rot}</td><td class="num">${v == null ? '—' : B(v)}</td><td class="num">${pr == null ? '—' : B(pr)}</td><td class="num">${B((v || 0) + (pr || 0))}</td><td class="num">${pct((v || 0) + (pr || 0), r.entradas)}</td></tr>`;
     const kpi = (t, v, cls, sub) => `<div class="ini-kpi rr-kpi e-${cls}"><div class="ini-top"><span class="ini-tit">${t}</span></div><div class="ini-v">${v == null ? '—' : B(v)}</div><div class="ini-sub">${sub}</div></div>`;
     const grupo = (tit, g, total) => `<h3 class="rr-h3">${tit}</h3><div class="tbl-wrap"><table class="rr-tab"><thead><tr><th>${tit.includes('forma') ? 'Forma de pagamento' : 'Conta contábil'}</th><th class="num">Qtd.</th><th class="num">Valor</th><th class="num">%</th></tr></thead><tbody>${g.map(([k, v, n]) => `<tr><td>${esc(k)}</td><td class="num">${n}</td><td class="num">${B(v)}</td><td class="num">${pct(v, total)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nenhuma conta a pagar hoje.</td></tr>'}</tbody></table></div>`;
-    const avisos = [...r.avisos, ...(r.cons97 ? r.cons97.avisos.map(a => a.texto) : []), ...(!r.informado ? [`Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
+    const avisos = [...r.avisos, ...(r.cons97 ? r.cons97.avisos.map(a => a.texto) : []), ...(!r.informado ? [r.v98 ? `Dinheiro de ${Fmt.data(r.ant)} ainda não foi digitado no FCX › Recebível Diário (entra como R$ 0,00).` : `Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
       ...(!r.carga ? ['Saídas: nenhum arquivo de Entradas e Saídas foi importado no FCX (Gerenciar dados › Saídas).'] : !r.carga.ok ? [`Saídas: o último arquivo de Entradas e Saídas é de ${Fmt.data(r.carga.dia)} — importe o arquivo de hoje no FCX para ver as saídas e o saldo.`] : [])];
     const podeFcx = Auth.can('fcx.ver') && App.pode(MODULOS.find(m => m.id === 'fcx'));
     return `<div class="rr">
-      <div class="row between rr-cab"><span class="hint">Vendas e recebimentos de ${Fmt.data(r.ant)} · contas a pagar de ${Fmt.data(r.d)} · calculado às ${new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${r.carga?.ok ? ` · carga ${esc(r.carga.arquivo)}` : ''}</span>
+      <div class="row between rr-cab"><span class="hint">Vendas e recebimentos de ${Fmt.data(r.ant)}${r.v98 ? ` · PIX previsto de ${Fmt.data(r.d)}` : ''} · contas a pagar de ${Fmt.data(r.d)} · calculado às ${new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${r.carga?.ok ? ` · carga ${esc(r.carga.arquivo)}` : ''}</span>
         <div class="row" style="gap:8px"><button class="btn ghost sm" data-a="ini-rec-atualizar" ${this._carregando ? 'disabled' : ''}>${this._carregando ? 'Atualizando…' : 'Atualizar'}</button>${podeFcx ? '<button class="btn sec sm" data-a="ini-rec-fcx">Abrir o Recebível Diário completo (FCX)</button>' : ''}</div></div>
       ${avisos.length ? `<div class="note warn rr-avisos">${avisos.map(a => `<div>⚠ ${esc(a)}</div>`).join('')}</div>` : ''}
       <div class="ini-grid rr-kpis">${kpi('Entradas do dia', r.entradas, 'ok', 'vendas líquidas + prestações + Credsystem do dia')}${kpi('Saídas do dia', r.saidas, r.saidas ? 'bad' : 'info', r.saidas == null ? 'aguardando a carga do dia no FCX' : `${r.nSaidas} conta(s) a pagar hoje`)}${kpi('Saldo do dia', r.saldo, r.saldo == null ? 'info' : r.saldo >= 0 ? 'ok' : 'bad', 'entradas − saídas')}</div>
@@ -19391,6 +19521,510 @@ const Layout94 = {
 };
 window.Layout94 = Layout94;
 
+/* =====================================================================
+   v13.99 · TABELAS · ordenação por clique no cabeçalho e "Gerar Relatório / Exportar"
+   Atua sobre as tabelas JÁ desenhadas do #main (a cada App.render): o título da coluna vira botão (▲ crescente · ▼ decrescente),
+   a ordem escolhida sobrevive às renderizações da mesma tela, e "Gerar Relatório / Exportar" leva os dados como estão na tela
+   (filtros aplicados + ordem atual) para um PDF A4 (cabeçalho da empresa, filtros e ordenação) ou um CSV para planilha.
+   Só entram tabelas simples: um cabeçalho, uma seção de linhas e nenhum campo de edição. Tudo atrás do recurso gestao_v1399.
+   Linhas de detalhe (uma célula com colspan) acompanham a linha de cima e linhas "Total…" no fim ficam fixas.
+   ===================================================================== */
+const TabelaPro = window.TabelaPro = {
+  _est: {}, _ligado: false, _col: new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' }),
+  _VAZIO: /^(—|–|-|n\/d|nd|sem dados|nenhum|nenhuma)?$/i,
+  ativo() { return g99(); },
+  limpa(s) { return String(s == null ? '' : s).replace(/[\s ]+/g, ' ').trim(); },
+  /** texto da célula; completo = inclui as linhas de apoio (.cell-sub, .sub, .hint). Botões, ícones e rótulos ocultos ficam de fora. */
+  txt(td, completo) {
+    if (!td) return '';
+    const c = td.cloneNode(true), sels = [...td.querySelectorAll('select')];
+    c.querySelectorAll('select').forEach((n, i) => n.replaceWith(' ' + (sels[i] && sels[i].selectedOptions[0] ? sels[i].selectedOptions[0].textContent : '') + ' ')); // lista de opções não é texto da célula: vale a opção escolhida
+    c.querySelectorAll('script,style,svg,button,.btn,.iconbtn,.sr,input[type=file]' + (completo ? '' : ',.cell-sub,.sub,.hint')).forEach(n => n.remove());
+    c.querySelectorAll('br').forEach(b => b.replaceWith(' '));
+    c.querySelectorAll('div,p,li').forEach(n => { n.prepend(' '); n.append(' '); });
+    return this.limpa(c.textContent);
+  },
+  /** número no padrão do painel ("R$ 1.234,56", "-12,3%", "(45)", "1º", "1.234"); null quando não é número */
+  num(t) {
+    let s = this.limpa(t), neg = false;
+    if (/^\(.+\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+    s = s.replace(/[−–]/g, '-');
+    if (/^[-+]/.test(s)) { if (s[0] === '-') neg = !neg; s = s.slice(1).trim(); }
+    s = s.replace(/^R\$\s*/i, '').trim();
+    if (/^[-+]/.test(s)) { if (s[0] === '-') neg = !neg; s = s.slice(1).trim(); }
+    s = s.replace(/\s*(%|pp|pts?|h|x|dias?|d|º|ª|°)$/i, '');
+    let m = /^(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?$/.exec(s), v;
+    if (m) v = Number(m[1].replace(/\./g, '') + (m[2] ? '.' + m[2] : ''));
+    else if ((m = /^(\d+)\.(\d{1,2})$/.exec(s))) v = Number(s);
+    else return null;
+    return neg ? -v : v;
+  },
+  /** data/hora no padrão do painel (dd/mm/aaaa, mm/aaaa ou ISO) → texto ordenável; null quando não é data */
+  data(t) {
+    let m = /^(\d{2})\/(\d{2})\/(\d{4})(?:\D+(\d{2}):(\d{2}))?/.exec(t);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}${m[4] ? ' ' + m[4] + ':' + m[5] : ''}`;
+    if ((m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t))) return m[0];
+    if ((m = /^(\d{2})\/(\d{4})$/.exec(t))) return `${m[2]}-${m[1]}-00`;
+    return null;
+  },
+  tipoCol(vals) {
+    const v = vals.filter(x => !this._VAZIO.test(x)); if (!v.length) return 'txt';
+    const lim = Math.ceil(v.length * 0.8);
+    if (v.filter(x => this.data(x)).length >= lim) return 'data';
+    if (v.filter(x => this.num(x) != null).length >= lim) return 'num';
+    return 'txt';
+  },
+  chave(kind, t) { if (this._VAZIO.test(t)) return null; return kind === 'data' ? this.data(t) : kind === 'num' ? this.num(t) : t; },
+  /** a célula que cai na coluna i (considera colspan) */
+  cel(tr, i) { let c = 0; for (const td of tr.cells) { if (i >= c && i < c + td.colSpan) return i === c ? td : null; c += td.colSpan; } return null; },
+
+  /** a tabela entra? (simples, com título de coluna e sem campos de edição) */
+  elegivel(t) {
+    if (t.matches('.heat,.nolabel,[data-tp="nao"],#ctTabela,#algTabela,#adqTab') || t.closest('.heat,.nolabel,.prev-folha,.rd-relatorio,.rd-impressao,.modal,[data-tp="nao"],td,th') || t.querySelector('table')) return false;
+    if (t.tBodies.length !== 1 || !t.tHead || t.tHead.rows.length !== 1) return false;
+    const ths = [...t.tHead.rows[0].cells]; if (ths.length < 2 || ths.some(h => h.colSpan > 1 || h.rowSpan > 1)) return false;
+    const tr = [...t.tBodies[0].rows]; if (!tr.length) return false;
+    if (tr[0].cells.length === 1 && tr[0].cells[0].colSpan > 1) return false; // estrutura com linhas de grupo
+    if (t.tBodies[0].querySelector('input:not([type=file]):not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea')) return false; // grade de edição (uma lista suspensa por linha — ex.: situação — é só um controle da linha)
+    return true;
+  },
+  /** varre a área (o #main depois de cada renderização, ou só o trecho redesenhado) e prepara as tabelas ainda não preparadas */
+  varrer(raiz) {
+    if (!this.ativo()) return;
+    if (!raiz || raiz === document) raiz = document.getElementById('main'); if (!raiz) return;
+    this.ligar();
+    raiz.querySelectorAll('.tp-bar').forEach(b => { if (!b._t || !b._t.isConnected) b.remove(); }); // barra órfã de uma tabela que foi trocada
+    const todas = [...document.querySelectorAll('#main table')], lista = raiz.matches && raiz.matches('table') ? [raiz] : [...raiz.querySelectorAll('table')];
+    lista.forEach(t => { try { if (t._tp) this.sync(t); else if (this.elegivel(t)) this.preparar(t, todas.indexOf(t)); } catch (e) { console.warn('[tabela v13.99]', e); } });
+  },
+  /** o módulo redesenhou só as linhas da tabela (filtro, página): refaz os grupos e reaplica a ordem escolhida */
+  sync(t) {
+    const d = t._tp, corpo = t.tBodies[0]; if (!d || !corpo) return;
+    const linhas = [...corpo.rows], n = d.grupos.concat(d.fixos).reduce((s, g) => s + 1 + g.extra.length, 0);
+    if (d.corpo === corpo && linhas.length === n && d.grupos.concat(d.fixos).every(g => g.main.parentNode === corpo)) { d.bar.hidden = !d.grupos.length; return; }
+    d.corpo = corpo;
+    if (!linhas.length || (linhas.length === 1 && linhas[0].cells.length === 1 && linhas[0].cells[0].colSpan > 1)) { d.grupos = []; d.fixos = []; d.atual = null; d.bar.hidden = true; return; } // "nenhum registro": some a barra
+    const g = this.grupar(corpo); d.grupos = g.grupos; d.fixos = g.fixos; this.tipos(d); d.bar.hidden = false; this.aplicar(t);
+  },
+  /** agrupa as linhas (principal + detalhes) e separa as linhas "Total…" que ficam fixas no fim */
+  grupar(corpo) {
+    const grupos = [];
+    [...corpo.rows].forEach(tr => {
+      const detalhe = (tr.cells.length === 1 && tr.cells[0].colSpan > 1) || tr.hidden;
+      if (detalhe && grupos.length) grupos.at(-1).extra.push(tr); else grupos.push({ main: tr, extra: [], i: grupos.length });
+    });
+    const fixos = [];
+    while (grupos.length > 1 && /^total\b/i.test(this.txt(grupos.at(-1).main.cells[0]))) fixos.unshift(grupos.pop()); // "Total…" no fim fica no fim
+    return { grupos, fixos };
+  },
+  /** tipo de cada coluna (data, número ou texto) pelas primeiras 300 linhas */
+  tipos(d) { d.cols.forEach(c => { c.kind = this.tipoCol(d.grupos.slice(0, 300).map(g => this.txt(this.cel(g.main, c.i)))); }); },
+  preparar(t, idx) {
+    const ths = [...t.tHead.rows[0].cells], corpo = t.tBodies[0], { grupos, fixos } = this.grupar(corpo);
+    const cols = ths.map((th, i) => { const nome = this.txt(th, true); return { i, nome, sort: !!nome && !th.querySelector('button,input,select,a') && !th.dataset.a, exporta: !!nome, kind: 'txt' }; });
+    const abas = [...document.querySelectorAll('#main .tabs button.on,#main [role=tab][aria-selected=true]')].map(b => this.limpa(b.textContent)).join('>');
+    const chave = [typeof App !== 'undefined' ? App.rota : '', abas, t.id || idx, cols.map(c => c.nome).join('|')].join('#');
+    const bar = document.createElement('div'); bar.className = 'tp-bar no-print'; bar._t = t;
+    bar.innerHTML = `<label class="tp-ord"><span>Ordenar por</span><select aria-label="Ordenar por coluna"><option value="">Ordem original</option>${cols.filter(c => c.sort).map(c => `<option value="${c.i}">${esc(c.nome)}</option>`).join('')}</select></label>
+      <button type="button" class="btn ghost sm tp-dir" aria-label="Inverter a ordem" title="Inverter a ordem" disabled>▲</button>
+      <button type="button" class="btn sm tp-exp">Gerar Relatório / Exportar</button>`;
+    (t.closest('.tbl-wrap,.scroll-table,.tbl') || t).before(bar);
+    t._tp = { chave, cols, grupos, fixos, corpo, ths, bar }; this.tipos(t._tp);
+    ths.forEach((th, i) => { if (!cols[i].sort) return; th.classList.add('tp-th'); th.tabIndex = 0; th.dataset.tpCol = i; th.setAttribute('aria-sort', 'none'); if (!th.title) th.title = 'Ordenar por ' + cols[i].nome; });
+    if (this._est[chave]) this.aplicar(t);
+  },
+  ordenar(t, col, dir) {
+    const d = t._tp; if (!d || !d.cols[col] || !d.cols[col].sort) return;
+    const cur = this._est[d.chave];
+    this._est[d.chave] = { col, dir: dir || (cur && cur.col === col && cur.dir === 'asc' ? 'desc' : 'asc') };
+    this.aplicar(t);
+  },
+  restaurar(t) { const d = t._tp; if (!d) return; delete this._est[d.chave]; this.aplicar(t); },
+  /** reordena as linhas conforme a ordem guardada (ou volta à ordem original) e atualiza as setas */
+  aplicar(t) {
+    const d = t._tp, e = this._est[d.chave];
+    d.ths.forEach(th => { if (th.classList.contains('tp-th')) th.setAttribute('aria-sort', 'none'); });
+    let ordem;
+    if (!e) ordem = d.grupos.slice().sort((a, b) => a.i - b.i);
+    else {
+      const c = d.cols[e.col], m = e.dir === 'asc' ? 1 : -1;
+      const k = g => { g.k = g.k || {}; if (!(e.col in g.k)) g.k[e.col] = this.chave(c.kind, this.txt(this.cel(g.main, e.col))); return g.k[e.col]; };
+      ordem = d.grupos.slice().sort((a, b) => {
+        const x = k(a), y = k(b); if (x == null && y == null) return a.i - b.i; if (x == null) return 1; if (y == null) return -1; // vazios sempre no fim
+        const r = c.kind === 'txt' ? this._col.compare(x, y) : x < y ? -1 : x > y ? 1 : 0; return r ? r * m : a.i - b.i;
+      });
+      d.ths[e.col].setAttribute('aria-sort', e.dir === 'asc' ? 'ascending' : 'descending');
+    }
+    d.atual = ordem;
+    const fr = document.createDocumentFragment();
+    ordem.concat(d.fixos).forEach(g => fr.append(g.main, ...g.extra)); d.corpo.append(fr);
+    const sel = d.bar.querySelector('select'), bt = d.bar.querySelector('.tp-dir');
+    sel.value = e ? String(e.col) : ''; bt.disabled = !e; bt.textContent = e && e.dir === 'desc' ? '▼' : '▲';
+  },
+  ligar() {
+    if (this._ligado) return; this._ligado = true;
+    document.addEventListener('click', e => {
+      const th = e.target.closest && e.target.closest('th.tp-th'); if (th) { const t = th.closest('table'); if (t && t._tp) this.ordenar(t, +th.dataset.tpCol); return; }
+      const bar = e.target.closest && e.target.closest('.tp-bar'); if (!bar || !bar._t || !bar._t._tp) return;
+      if (e.target.closest('.tp-dir')) { const s = this._est[bar._t._tp.chave]; if (s) this.ordenar(bar._t, s.col, s.dir === 'asc' ? 'desc' : 'asc'); return; }
+      if (e.target.closest('.tp-exp')) this.abrirExportar(bar._t);
+    });
+    document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('th.tp-th')) { e.preventDefault(); e.target.click(); } });
+    document.addEventListener('change', e => {
+      const sel = e.target.closest && e.target.closest('.tp-bar select'); if (!sel) return; const t = sel.closest('.tp-bar')._t; if (!t || !t._tp) return;
+      if (sel.value === '') this.restaurar(t); else this.ordenar(t, +sel.value, (this._est[t._tp.chave] || {}).dir || 'asc');
+    });
+  },
+
+  /* ---------- relatório ---------- */
+  /** o que o usuário filtrou na tela (selects, buscas e marcações do #main fora das tabelas) */
+  filtros() {
+    const raiz = document.getElementById('main'), out = [];
+    if (!raiz) return out;
+    const rot = el => {
+      let l = el.id && raiz.querySelector(`label[for="${(window.CSS && CSS.escape) ? CSS.escape(el.id) : el.id}"]`);
+      if (!l) { const f = el.closest('.field'); l = f && f.querySelector('.lbl,label'); }
+      let t = l ? this.txt(l) : (el.getAttribute('aria-label') || el.getAttribute('placeholder') || '');
+      if (!l && el.closest('label')) t = this.limpa(this.txt(el.closest('label')));
+      return t.replace(/\s*[:：]\s*$/, '');
+    };
+    raiz.querySelectorAll('select,input').forEach(el => {
+      if (el.closest('table,.tp-bar,.modal,[hidden]') || ['file', 'hidden', 'button', 'submit'].includes(el.type)) return;
+      let v;
+      if (el.tagName === 'SELECT') { const o = el.selectedOptions[0]; v = o ? this.limpa(o.textContent) : ''; if (!el.value || /^\(?(tod[ao]s?|sem filtro|nenhum[a]?)\)?(\s|$)/i.test(v) || v === '—') return; }
+      else if (el.type === 'checkbox') { if (!el.checked) return; v = 'sim'; }
+      else if (el.type === 'radio') { if (!el.checked) return; v = this.limpa(el.value); }
+      else { v = this.limpa(el.value); if (!v) return; }
+      const r = rot(el), s = r ? `${r}: ${v}` : v; if (!out.includes(s)) out.push(s);
+    });
+    return out;
+  },
+  /** dados da tabela do jeito que estão na tela: cabeçalho, linhas na ordem atual, filtros e ordenação */
+  dados(t) {
+    const d = t._tp, cols = d.cols.filter(c => c.exporta);
+    const vis = (d.atual || d.grupos).concat(d.fixos).filter(g => !g.main.hidden && g.main.style.display !== 'none');
+    const linhas = vis.map(g => cols.map(c => this.txt(this.cel(g.main, c.i), true)));
+    const e = this._est[d.chave], oc = e && d.cols[e.col];
+    const modulo = this.limpa(document.querySelector('#main .page-head h1,#main h1')?.textContent || ''), abas = [...document.querySelectorAll('#main .tabs button.on')].map(b => this.txt(b));
+    const painel = this.limpa((t.closest('.panel,.card') || document).querySelector('h2')?.textContent || '');
+    const partes = [modulo, ...abas, painel].filter((x, i, a) => x && a.indexOf(x) === i);
+    return { titulo: partes.join(' · ') || 'Relatório', cab: cols.map(c => c.nome), kinds: cols.map(c => c.kind), linhas, filtros: this.filtros(),
+      ordem: oc ? `${oc.nome} ${e.dir === 'asc' ? '▲ (crescente)' : '▼ (decrescente)'}` : 'ordem original da tela', total: vis.length };
+  },
+  /** linhas do CSV: números sem "R$" e "%" (a unidade vai no título da coluna), datas como na tela */
+  csv(r) {
+    const un = r.cab.map((c, j) => { if (r.kinds[j] !== 'num') return ''; const v = r.linhas.map(l => l[j]).filter(x => !this._VAZIO.test(x)); if (!v.length) return '';
+      const q = f => v.filter(f).length >= Math.ceil(v.length * 0.8); return q(x => /^[-−–(]?\s*R\$/.test(x)) ? ' (R$)' : q(x => /%\s*\)?$/.test(x)) ? ' (%)' : ''; });
+    const cab = r.cab.map((c, j) => c + un[j]);
+    const linhas = r.linhas.map(l => l.map((v, j) => { if (r.kinds[j] !== 'num') return v; const n = this.num(v); return n == null ? v : String(n).replace('.', ','); }));
+    return [cab, ...linhas];
+  },
+  html(r) {
+    const hoje = new Date().toLocaleString('pt-BR'), n = r.cab.length;
+    const cab = r.cab.map((c, j) => `<th class="${r.kinds[j] === 'num' ? 'num' : ''}">${esc(c)}</th>`).join('');
+    const corpo = r.linhas.map(l => `<tr>${l.map((v, j) => `<td class="${r.kinds[j] === 'num' ? 'num' : ''}">${esc(v)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${n}">Nenhum registro.</td></tr>`;
+    const corpoDoc = `${Documento.cabecalho(r.titulo, `${Fmt.num(r.total)} registro(s)`)}
+      <div class="tp-info"><div><b>Filtros aplicados:</b> ${r.filtros.length ? r.filtros.map(esc).join(' · ') : 'nenhum (todos os registros da tela)'}</div><div><b>Ordenação:</b> ${esc(r.ordem)}</div></div>
+      <table class="tp-rel"><thead><tr>${cab}</tr></thead><tbody>${corpo}</tbody></table>
+      <div class="foot">Esposende · Painel de Gestão — relatório gerado em ${esc(hoje)}</div>`;
+    const css = `.tp-info{margin:0 0 10px;font-size:11px;line-height:1.5;} table.tp-rel{font-size:${n > 9 ? '9' : n > 6 ? '10' : '11'}px;} table.tp-rel th,table.tp-rel td{padding:4px 5px;} table.tp-rel tr{break-inside:avoid;} td.num,th.num{text-align:right;white-space:nowrap;} thead{display:table-header-group;}`;
+    return Documento.montar(r.titulo, corpoDoc, { paisagem: n > 6, margem: '12mm 10mm', css });
+  },
+  nome(r) { return Documento.nomeArquivo('Relatorio_' + r.titulo + '_' + Datas.hojeISO()); },
+  abrirExportar(t) {
+    const r = this.dados(t);
+    UI.modal({
+      titulo: 'Gerar Relatório / Exportar',
+      corpo: `<p style="margin:0 0 8px"><b>${esc(r.titulo)}</b></p>
+        <ul class="tp-resumo"><li><b>${Fmt.num(r.total)}</b> registro(s), exatamente como estão na tela.</li><li><b>Filtros aplicados:</b> ${r.filtros.length ? r.filtros.map(esc).join(' · ') : 'nenhum'}</li><li><b>Ordenação:</b> ${esc(r.ordem)}</li></ul>
+        <p class="hint" style="margin:8px 0 0">PDF A4: cabeçalho da empresa, filtros e ordenação, pronto para imprimir. CSV / Excel: uma coluna por título, números sem “R$” e “%” (a unidade vai no título), com separador “;” para abrir direto no Excel.</p>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' },
+        { rotulo: 'CSV / Excel', classe: 'sec', acao: async () => { const ok = await Documento.baixarArquivo(this.nome(r) + '.csv', new Blob(['﻿' + CSV.gerar(this.csv(r), ';')], { type: 'text/csv;charset=utf-8' })); if (ok !== false) { UI.toast('CSV pronto: ' + this.nome(r) + '.csv'); Audit.registrar({ modulo: 'documentos', acao: 'emitiu', entidade: 'documento', entidadeId: this.nome(r) + '.csv', rotulo: r.titulo + ' (CSV)', mudancas: [] }); } } },
+        { rotulo: 'PDF A4', acao: () => { setTimeout(() => Documento.saida(r.titulo, this.html(r), this.nome(r)), 30); } }],
+    });
+  },
+};
+
+/* =====================================================================
+   v13.99 · POPUP UNIVERSAL DE CRÍTICA DE CARGA
+   Toda importação de arquivo (ERP, adquirentes/LOTE, extratos OFX, Credsystem, FCX, RH, Lojas, Indicadores, Viagens, Adiantamentos,
+   Contábil, backup…) termina neste mesmo popup: ícone de status (verde = sucesso · amarelo = alerta/aviso parcial · vermelho = erro),
+   resumo da carga (arquivo, data/hora, linhas lidas e processadas, valor total quando houver), lista ROLÁVEL de inconsistências
+   (ignoradas, duplicadas, formato inválido) e os botões "Copiar Relatório de Carga" e "Fechar".
+   Relatório (todos os campos são opcionais): { origem, arquivo | arquivos:[nome | {nome,tamanho}], em, lidas, processadas, ignoradas, duplicadas,
+   invalidas, total, totalRotulo, totalTxt, campos:[[rótulo, valor]], inconsistencias:[texto | {tipo, linha, item, motivo}], erro, mensagem,
+   status:'ok'|'aviso'|'erro', titulos:{ok,aviso,erro}, vazioOk }. Sem `status`, ele é deduzido: erro (há `erro` ou nada foi processado),
+   aviso (há inconsistências) ou ok. mostrar() devolve uma Promise que resolve quando o popup fecha. Atrás do recurso gestao_v1399.
+   ===================================================================== */
+const CargaFeedback = window.CargaFeedback = {
+  ultimo: null, historico: [], MAX_LISTA: 5000, MAX_VISTA: 1000, _copiado: '',
+  TIT_LEITURA: { ok: 'Arquivo lido com sucesso', aviso: 'Arquivo lido com alertas', erro: 'Arquivo não pôde ser lido' },
+  ROT: { ignorada: 'Ignorada', duplicada: 'Duplicada', invalida: 'Formato inválido', aviso: 'Aviso', erro: 'Erro' },
+  TIT: { ok: 'Carga concluída com sucesso', aviso: 'Carga concluída com alertas', erro: 'Carga não concluída' },
+  ativo() { return g99(); },
+  /** "Linha 12: valor inválido" → { linha: 12, motivo } ; texto livre vira o próprio item */
+  itens(lista, tipo = 'ignorada') {
+    return (lista || []).map(x => {
+      if (x && typeof x === 'object') return { tipo, ...x };
+      const t = String(x == null ? '' : x).replace(/&(lt|gt|amp|quot|#39);/g, (_, e) => ({ lt: '<', gt: '>', amp: '&', quot: '"', '#39': "'" }[e])), m = /^(?:Linha|Registro)\s+(\d+)\s*[:\-–·]\s*(.*)$/i.exec(t);
+      return m ? { tipo, linha: Number(m[1]), item: '', motivo: m[2] } : { tipo, linha: null, item: t, motivo: '' };
+    });
+  },
+  tamanho(b) { const n = Number(b); if (!Number.isFinite(n) || n <= 0) return ''; return n < 1024 ? n + ' B' : n < 1048576 ? Fmt.num(n / 1024, 1) + ' KB' : Fmt.num(n / 1048576, 1) + ' MB'; },
+  /** completa e normaliza o relatório (contagens, status, arquivos, data/hora) */
+  normalizar(r) {
+    r = r || {};
+    const num = v => (v == null || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+    const bruto = this.itens(r.inconsistencias, 'aviso'), extra = Math.max(0, bruto.length - this.MAX_LISTA);
+    const inc = bruto.slice(0, this.MAX_LISTA).map(x => ({ tipo: this.ROT[x.tipo] ? x.tipo : 'aviso', linha: x.linha == null || x.linha === '' ? null : x.linha, item: String(x.item == null ? '' : x.item), motivo: String(x.motivo == null ? '' : x.motivo) }));
+    const conta = tp => bruto.filter(x => x.tipo === tp).length;
+    const ignoradas = num(r.ignoradas) != null ? num(r.ignoradas) : conta('ignorada'), duplicadas = num(r.duplicadas) != null ? num(r.duplicadas) : conta('duplicada'), invalidas = num(r.invalidas) != null ? num(r.invalidas) : conta('invalida');
+    const lidas = num(r.lidas), processadas = num(r.processadas);
+    let status = r.status;
+    if (!['ok', 'aviso', 'erro'].includes(status)) status = r.erro ? 'erro' : (processadas === 0 && !r.vazioOk) ? 'erro' : (bruto.length || ignoradas || duplicadas || invalidas) ? 'aviso' : 'ok';
+    const arqs = (r.arquivos || (r.arquivo ? [r.arquivo] : [])).map(a => typeof a === 'string' ? { nome: a } : { nome: String(a.nome || a.name || ''), tamanho: a.tamanho != null ? a.tamanho : a.size }).filter(a => a.nome);
+    return {
+      origem: String(r.origem || 'Importação de arquivo'), arquivos: arqs, em: r.em ? new Date(r.em) : new Date(), status, lidas, processadas, ignoradas, duplicadas, invalidas,
+      total: num(r.total), totalRotulo: r.totalRotulo || 'Valor total consolidado', totalTxt: r.totalTxt || '', campos: (r.campos || []).filter(c => c && c[1] != null && c[1] !== ''),
+      inconsistencias: inc, maisInc: extra, erro: r.erro ? String(r.erro) : '', mensagem: r.mensagem ? String(r.mensagem) : '', titulos: { ...this.TIT, ...(r.titulos || {}) },
+    };
+  },
+  /** o relatório em texto puro (é o que o botão "Copiar Relatório de Carga" leva para a área de transferência) */
+  texto(n) {
+    const L = ['RELATÓRIO DE CARGA · Painel de Gestão', 'Situação: ' + n.titulos[n.status], 'Operação: ' + n.origem];
+    L.push('Arquivo(s): ' + (n.arquivos.length ? n.arquivos.map(a => a.nome + (a.tamanho ? ' (' + this.tamanho(a.tamanho) + ')' : '')).join('; ') : '—'));
+    L.push('Data/hora: ' + n.em.toLocaleString('pt-BR'));
+    if (n.lidas != null) L.push('Linhas lidas: ' + Fmt.num(n.lidas));
+    if (n.processadas != null) L.push('Registros processados: ' + Fmt.num(n.processadas));
+    if (n.ignoradas) L.push('Ignorados: ' + Fmt.num(n.ignoradas));
+    if (n.duplicadas) L.push('Duplicados: ' + Fmt.num(n.duplicadas));
+    if (n.invalidas) L.push('Formato inválido: ' + Fmt.num(n.invalidas));
+    if (n.total != null || n.totalTxt) L.push(n.totalRotulo + ': ' + (n.totalTxt || Fmt.brl(n.total)));
+    n.campos.forEach(c => L.push(c[0] + ': ' + c[1]));
+    if (n.mensagem) L.push('Observação: ' + n.mensagem);
+    if (n.erro) L.push('Erro: ' + n.erro);
+    if (n.inconsistencias.length) {
+      L.push('', `Inconsistências (${Fmt.num(n.inconsistencias.length + n.maisInc)}):`);
+      n.inconsistencias.forEach((x, i) => L.push(`${i + 1}. [${this.ROT[x.tipo]}] ${x.linha != null ? (typeof x.linha === 'number' ? 'Linha ' + x.linha : x.linha) + (x.item || x.motivo ? ' · ' : '') : ''}${x.item}${x.item && x.motivo ? ' — ' : ''}${x.motivo}`));
+      if (n.maisInc) L.push(`… e mais ${Fmt.num(n.maisInc)} item(ns) não listados.`);
+    }
+    return L.join('\n');
+  },
+  ICONE: {
+    ok: '<svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="currentColor" opacity=".16"/><circle cx="24" cy="24" r="17" fill="currentColor"/><path d="M15.5 24.5l6 6 11-12.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    aviso: '<svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><path d="M24 4.5 45 41.5H3z" fill="currentColor" opacity=".18"/><path d="M24 9.5 41 39H7z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 18v10" stroke="#3b2a00" stroke-width="3.6" stroke-linecap="round"/><circle cx="24" cy="33.4" r="2.2" fill="#3b2a00"/></svg>',
+    erro: '<svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="currentColor" opacity=".16"/><circle cx="24" cy="24" r="17" fill="currentColor"/><path d="M17.5 17.5l13 13M30.5 17.5l-13 13" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
+  },
+  html(n) {
+    const it = (rot, v, cls = '') => `<div class="cf-it ${cls}"><dt>${esc(rot)}</dt><dd>${v}</dd></div>`;
+    const arqs = n.arquivos.length ? n.arquivos.map(a => `<span class="cf-arq">${esc(a.nome)}${a.tamanho ? ` <i>${esc(this.tamanho(a.tamanho))}</i>` : ''}</span>`).join('') : '—';
+    const resumo = [it('Operação', esc(n.origem)), it(n.arquivos.length > 1 ? 'Arquivos processados' : 'Arquivo processado', arqs, 'cf-arqs'), it('Data/hora da operação', esc(n.em.toLocaleString('pt-BR')))];
+    if (n.lidas != null) resumo.push(it('Linhas lidas', Fmt.num(n.lidas), 'cf-num'));
+    if (n.processadas != null) resumo.push(it('Registros processados', Fmt.num(n.processadas), 'cf-num'));
+    if (n.ignoradas) resumo.push(it('Ignorados', Fmt.num(n.ignoradas), 'cf-num cf-alerta'));
+    if (n.duplicadas) resumo.push(it('Duplicados', Fmt.num(n.duplicadas), 'cf-num cf-alerta'));
+    if (n.invalidas) resumo.push(it('Formato inválido', Fmt.num(n.invalidas), 'cf-num cf-alerta'));
+    if (n.total != null || n.totalTxt) resumo.push(it(n.totalRotulo, esc(n.totalTxt || Fmt.brl(n.total)), 'cf-num cf-total'));
+    n.campos.forEach(c => resumo.push(it(c[0], esc(c[1]))));
+    const tot = n.inconsistencias.length + n.maisInc, vista = n.inconsistencias.slice(0, this.MAX_VISTA);
+    const lista = tot ? `<section class="cf-inc" aria-label="Inconsistências da carga"><h5>Inconsistências encontradas <span class="cf-cont">${Fmt.num(tot)}</span></h5>
+      <ul class="cf-lista" tabindex="0" aria-label="Lista de inconsistências, com barra de rolagem">${vista.map(x => `<li data-tipo="${x.tipo}"><span class="cf-tag cf-t-${x.tipo}">${esc(this.ROT[x.tipo])}</span><span class="cf-txt">${x.linha != null ? `<b>${esc(typeof x.linha === 'number' ? 'Linha ' + x.linha : x.linha)}</b>` : ''}${x.item ? ` ${esc(x.item)}` : ''}${x.motivo ? `<em>${esc(x.motivo)}</em>` : ''}</span></li>`).join('')}</ul>
+      ${tot > vista.length ? `<p class="hint">Mostrando ${Fmt.num(vista.length)} de ${Fmt.num(tot)}; o relatório copiado traz os ${Fmt.num(n.inconsistencias.length)} primeiros${n.maisInc ? ' (limite de ' + Fmt.num(this.MAX_LISTA) + ')' : ''}.</p>` : ''}</section>` : '';
+    return `<div class="cf cf-${n.status}" data-cf-status="${n.status}" role="${n.status === 'erro' ? 'alert' : 'status'}">
+      <div class="cf-topo"><div class="cf-ic">${this.ICONE[n.status]}</div><div class="cf-cab"><h4 class="cf-tit">${esc(n.titulos[n.status])}</h4>${n.mensagem ? `<p class="cf-msg">${esc(n.mensagem)}</p>` : ''}${n.erro ? `<p class="cf-msg cf-erro">${esc(n.erro)}</p>` : ''}</div></div>
+      <dl class="cf-res">${resumo.join('')}</dl>${lista}</div>`;
+  },
+  async copiar(n) {
+    const t = this.texto(n); this._copiado = t;
+    try { await navigator.clipboard.writeText(t); UI.toast('Relatório de carga copiado.'); return true; }
+    catch {
+      try { const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0;'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); UI.toast(ok ? 'Relatório de carga copiado.' : 'Não consegui copiar: selecione e copie o texto da lista.'); return ok; }
+      catch { UI.toast('Não consegui copiar o relatório neste navegador.'); return false; }
+    }
+  },
+  /** abre o popup; devolve uma Promise que resolve quando ele é fechado (false se o recurso estiver desligado) */
+  mostrar(r) {
+    if (!this.ativo()) return Promise.resolve(false);
+    let n; try { n = this.normalizar(r); } catch (e) { console.warn('[carga v13.99]', e); return Promise.resolve(false); }
+    this.ultimo = n; this.historico.push(n); if (this.historico.length > 20) this.historico.shift();
+    return new Promise(res => {
+      UI.modal({ titulo: 'Crítica da carga · ' + n.origem, corpo: this.html(n), largo: true,
+        acoes: [{ rotulo: 'Copiar Relatório de Carga', classe: 'sec', acao: async () => { await this.copiar(n); return false; } }, { rotulo: 'Fechar', classe: n.status === 'erro' ? 'danger' : '' }],
+        aoAbrir: m => { m.classList.add('cf-modal'); const b = m.querySelector('footer .btn:last-child'); if (b) b.focus(); },
+        aoFechar: () => res(true) });
+    });
+  },
+  /** atalho: arquivo que não pôde ser lido */
+  falha(origem, arquivo, erro, extra = {}) { return this.mostrar({ origem, arquivo, status: 'erro', erro: (erro && erro.message) || String(erro || 'Falha ao ler o arquivo.'), ...extra }); },
+};
+
+/* =====================================================================
+   v13.99 · ENVOLTÓRIOS DO POPUP DE CRÍTICA DE CARGA
+   As importações que moram nas regiões protegidas (ERP, liquidação das adquirentes e LOTE em Retaguarda › Auditoria de Adquirentes;
+   extratos OFX da DFC) e as leituras da Conciliação ganham o popup por fora: cada função é envolvida (sem tocar no código original),
+   o resultado da leitura vira o relatório e o fluxo original segue igual. Com o recurso gestao_v1399 desligado, tudo passa direto.
+   ===================================================================== */
+(function () {
+  const CF = CargaFeedback, arq = f => ({ nome: f.name, tamanho: f.size });
+  const lista = a => (Array.isArray(a) || (a && typeof a.length === 'number' && typeof a !== 'string') ? [...a] : a ? [a] : []).filter(f => f && f.name).map(arq);
+  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+  const mascara = s => { const t = String(s == null ? '' : s).replace(/\s/g, ''); return t.length > 4 ? '…' + t.slice(-4) : t || '—'; };
+  CF._dentro = 0; CF._coletaAdq = null;
+
+  /* ---------- tabelas: listas que o módulo redesenha só no corpo (Lojas, filtros, buscas) passam pelo mesmo gancho das etiquetas ---------- */
+  if (typeof UI !== 'undefined' && typeof TabelaPro !== 'undefined' && !UI.__tp99) {
+    UI.__tp99 = true; const oRot = UI.rotularTabelas;
+    UI.rotularTabelas = function (raiz) { const r = oRot.apply(this, arguments); try { if (g99()) TabelaPro.varrer(raiz); } catch (e) { console.warn('[tabela v13.99]', e); } return r; };
+  }
+
+  /* ---------- Auditoria de Adquirentes: Vendas Consolidadas (ERP) · liquidação das adquirentes · LOTE ---------- */
+  if (typeof Retaguarda !== 'undefined' && typeof LeitorArquivosAdq !== 'undefined') {
+    const oLer = LeitorArquivosAdq.ler, oInt = Retaguarda.integrarArqAdq, oArq = Retaguarda.lerArquivoAdq;
+    LeitorArquivosAdq.ler = async function (tipo, file) {
+      const col = CF._coletaAdq; if (!col) return oLer.apply(this, arguments);
+      try { const f = await oLer.apply(this, arguments); col.itens.push({ file, f }); return f; }
+      catch (e) { col.itens.push({ file, erro: e }); throw e; }
+    };
+    Retaguarda.integrarArqAdq = function (tipo, novo) {
+      const notas = oInt.apply(this, arguments), col = CF._coletaAdq, it = col && col.itens.find(x => x.f === novo); if (it) it.notas = notas; return notas;
+    };
+    const relAdq = (tipo, itens) => {
+      const inc = [], campos = []; let lidas = 0, proc = 0, total = 0, invalidas = 0;
+      for (const it of itens) {
+        if (it.erro) { inc.push({ tipo: 'invalida', item: it.file.name, motivo: it.erro.message || String(it.erro) }); continue; }
+        const f = it.f, ls = f.linhas || [];
+        if (!f.meta) { inc.push({ tipo: 'invalida', item: f.nome || it.file.name, motivo: 'não foi possível processar as datas e valores do arquivo' }); continue; }
+        lidas += ls.length;
+        if (!f.meta.n) { inc.push({ tipo: 'invalida', item: f.nome, motivo: 'nenhuma linha com data e valor' }); invalidas += ls.length; continue; }
+        proc += f.meta.n;
+        const ruins = []; ls.forEach((r, i) => { if (!r._ks || !r._ks.length) ruins.push(i + 1); });
+        invalidas += ruins.length;
+        ruins.slice(0, 200).forEach(n => inc.push({ tipo: 'invalida', linha: 'Registro ' + n, item: f.nome, motivo: 'sem data ou valor válido: a linha não entra na auditoria' }));
+        if (ruins.length > 200) inc.push({ tipo: 'aviso', item: f.nome, motivo: 'mais ' + (ruins.length - 200) + ' registro(s) sem data/valor não listados' });
+        (it.notas || []).forEach(n => inc.push({ tipo: 'duplicada', item: n, motivo: 'o arquivo novo prevalece sobre o que estava em memória' }));
+        total += ls.reduce((a, r) => (r._ks && r._ks.length) ? a + num(tipo === 'erp' ? Retaguarda.num(r.valor) : Retaguarda.num(r.bruto != null ? r.bruto : r.valor != null ? r.valor : r.liquido)) : a, 0);
+        campos.push([f.nome, f.meta.n + ' linha(s)' + (tipo === 'adq' ? ' · ' + (f.adquirente || 'adquirente não identificada') + ' · ' + (f.layoutRotulo || '') : '') + (f.meta.ini ? ' · ' + Fmt.data(f.meta.ini) + ' a ' + Fmt.data(f.meta.fim) : '')]);
+      }
+      return { origem: tipo === 'erp' ? 'Auditoria de Adquirentes · Vendas Consolidadas (ERP)' : 'Auditoria de Adquirentes · Liquidação das adquirentes / LOTE', arquivos: itens.map(i => arq(i.file)), lidas, processadas: proc, invalidas,
+        total: total > 0 ? total : null, totalRotulo: tipo === 'erp' ? 'Vendas brutas lidas (ERP)' : 'Valor bruto lido', campos, inconsistencias: inc,
+        mensagem: 'Os arquivos ficam só na memória desta aba; use "Processar" para cruzar ERP × adquirentes × banco.' };
+    };
+    Retaguarda.lerArquivoAdq = async function (tipo, files) {
+      if (!g99() || CF._coletaAdq) return oArq.apply(this, arguments);
+      const col = CF._coletaAdq = { itens: [] };
+      try { await oArq.apply(this, arguments); } finally { CF._coletaAdq = null; }
+      try { return await CF.mostrar(relAdq(tipo, col.itens)); } catch (e) { console.warn('[carga v13.99]', e); }
+    };
+  }
+
+  /* ---------- DFC: extratos bancários OFX ---------- */
+  if (typeof FluxoDFC !== 'undefined' && typeof OFX !== 'undefined') {
+    const oImp = FluxoDFC.importarOFX;
+    FluxoDFC.importarOFX = async function (arquivos) {
+      if (!g99() || CF._dentro) return oImp.apply(this, arguments);
+      const fs = [...arquivos], inc = []; let lidas = 0, extratos = 0, cred = 0, deb = 0, dup = 0, invalidos = 0;
+      for (const f of fs) {
+        try {
+          const ex = OFX.ler(OFX.decodificar(await f.arrayBuffer()));
+          if (!ex.length) { invalidos++; inc.push({ tipo: 'invalida', item: f.name, motivo: 'nenhum extrato OFX encontrado no arquivo' }); continue; }
+          for (const e of ex) {
+            extratos++; lidas += e.transacoes.length;
+            e.transacoes.forEach(t => { if (t.valor >= 0) cred += t.valor; else deb += t.valor; });
+            let v = null; try { v = ContasBancarias.vincular(e.conta, this.contas()); } catch { v = null; }
+            if (!v) { inc.push({ tipo: 'aviso', item: f.name + ' · banco ' + (e.conta.bankId || '—') + ' · conta ' + mascara(e.conta.acctId), motivo: 'conta ainda não cadastrada: o cadastro será oferecido na importação' }); continue; }
+            const ja = new Set(this.transacoes().filter(t => t.contaId === v.conta.id).map(t => t.id)), d = e.transacoes.filter(t => ja.has(t.id)).length; dup += d;
+            if (d) inc.push({ tipo: 'duplicada', item: f.name + ' · ' + ContasBancarias.rotulo(v.conta), motivo: d + ' transação(ões) já importada(s): serão ignoradas' });
+          }
+        } catch (e) { invalidos++; inc.push({ tipo: 'invalida', item: f.name, motivo: (e && e.message) || 'arquivo OFX ilegível' }); }
+      }
+      await CF.mostrar({ origem: 'DFC · Extratos bancários (OFX)', arquivos: fs.map(arq), lidas, processadas: Math.max(0, lidas - dup), duplicadas: dup, invalidas: invalidos, total: extratos ? cred + deb : null, totalRotulo: 'Saldo líquido das transações',
+        campos: [['Extratos lidos', String(extratos)], ['Créditos', Fmt.brl(cred)], ['Débitos', Fmt.brl(deb)]], inconsistencias: inc, titulos: CF.TIT_LEITURA,
+        mensagem: extratos ? 'Nada foi gravado ainda: confirme a importação na próxima tela.' : '' });
+      if (!extratos) return;
+      return oImp.apply(this, arguments);
+    };
+  }
+
+  /* ---------- Conciliação: leituras de arquivos (somem ao sair da tela; nada é gravado, exceto os lançamentos importados) ---------- */
+  if (typeof ConcMP !== 'undefined') {
+    const envolver = (nome, origem, fileArg, rel) => {
+      const o = ConcMP[nome]; if (typeof o !== 'function') return;
+      ConcMP[nome] = async function () {
+        if (!g99() || CF._dentro) return o.apply(this, arguments);
+        const args = arguments, alvo = args[fileArg]; let r;
+        CF._dentro++;
+        try { r = await o.apply(this, args); }
+        catch (e) { CF._dentro--; CF.falha(origem, null, e, { arquivos: lista(alvo) }); throw e; }
+        CF._dentro--;
+        try { CF.mostrar({ origem, arquivos: lista(alvo), titulos: CF.TIT_LEITURA, ...rel(r, alvo) }); } catch (e) { console.warn('[carga v13.99]', e); }
+        return r;
+      };
+    };
+    const planilha = (r, rot) => {
+      const ls = r.linhas || [], d = r.descartes || {}, ign = d.vazia != null || d.total != null ? num(d.vazia) + num(d.total) : num(r.ignoradas), bruto = ls.reduce((a, l) => a + num(l.bruto != null ? l.bruto : l.valor), 0);
+      return { lidas: ls.length + ign + num(d.invalida), processadas: ls.length, ignoradas: ign, invalidas: num(d.invalida), total: bruto > 0 ? bruto : null, totalRotulo: rot || 'Valor bruto lido',
+        campos: [['Aba', r.aba], ['Cabeçalho na linha', r.linhaCab], ['Layout', r.layout]], mensagem: ign ? ign + ' linha(s) de título, total ou rodapé foram descartadas.' : '' };
+    };
+    envolver('lerArquivo', 'Conciliação · Arquivo de vendas', 0, r => planilha(r));
+    envolver('lerErpApuracao', 'Conciliação Getnet · ERP (Apuração dos Créditos)', 0, r => planilha(r, 'Vendas brutas lidas (ERP)'));
+    envolver('lerExtratoGetnet', 'Conciliação Getnet · Extrato detalhado', 0, r => planilha(r, 'Valor bruto lido'));
+    envolver('lerErp', 'Conciliação · ERP', 0, r => planilha(r, 'Vendas brutas lidas (ERP)'));
+    envolver('lerAdquirente', 'Conciliação · Arquivo da adquirente', 0, r => planilha(r, 'Valor bruto lido'));
+    envolver('lerOfx', 'Conciliação · Extrato bancário (OFX)', 0, r => {
+      const cr = r.cred || [], tot = cr.reduce((a, t) => a + num(t.valor), 0);
+      return { lidas: cr.length + num(r.nDeb), processadas: cr.length, ignoradas: num(r.nDeb), total: tot > 0 ? tot : null, totalRotulo: 'Créditos no extrato',
+        campos: [['Contas no(s) extrato(s)', String((r.contas || []).length)], ['Período', (r.datas && r.datas.length) ? Fmt.data(r.datas[0]) + ' a ' + Fmt.data(r.datas[r.datas.length - 1]) : '—']],
+        mensagem: num(r.nDeb) ? num(r.nDeb) + ' débito(s) do extrato não entram na conciliação de créditos.' : '' };
+    });
+    const oImpL = ConcMP.importarLanc;
+    if (typeof oImpL === 'function') {
+      ConcMP.importarLanc = async function (mod, file) {
+        if (!g99() || CF._dentro) return oImpL.apply(this, arguments);
+        let r; CF._dentro++;
+        try { r = await oImpL.apply(this, arguments); } catch (e) { CF._dentro--; CF.falha('Conciliação · Lançamentos importados', null, e, { arquivos: lista(file) }); throw e; }
+        CF._dentro--;
+        const erros = (r && r.erros) || [], n = (r && r.n) || 0;
+        CF.mostrar({ origem: 'Conciliação · Lançamentos importados', arquivos: lista(file), lidas: n + erros.length, processadas: n, invalidas: erros.length, inconsistencias: CF.itens(erros, 'invalida') });
+        return r;
+      };
+    }
+  }
+
+  /* ---------- Anexos (PDF/imagem): um popup por lote de arquivos enviados ---------- */
+  if (typeof Arquivos !== 'undefined') {
+    const fila = []; let timer = null;
+    const fechar = () => {
+      const it = fila.splice(0), oks = it.filter(x => x.ok), ko = it.filter(x => !x.ok); if (!it.length) return;
+      CF.mostrar({ origem: 'Anexo de arquivo', arquivos: it.map(x => arq(x.file)), status: !ko.length ? 'ok' : oks.length ? 'aviso' : 'erro',
+        campos: [['Arquivos anexados', String(oks.length)], ...(ko.length ? [['Não anexados', String(ko.length)]] : [])],
+        inconsistencias: ko.map(x => ({ tipo: 'invalida', item: x.file.name, motivo: x.erro })), mensagem: ko.length ? '' : 'O arquivo foi guardado e já aparece no registro.',
+        titulos: { ok: oks.length > 1 ? 'Arquivos anexados com sucesso' : 'Arquivo anexado com sucesso', aviso: 'Anexo concluído com alertas', erro: oks.length || it.length > 1 ? 'Arquivos não anexados' : 'Arquivo não anexado' } });
+    };
+    const anota = (file, ok, erro) => { if (!g99() || !file || !file.name) return; fila.push({ file, ok, erro: erro && (erro.message || String(erro)) }); clearTimeout(timer); timer = setTimeout(fechar, 450); };
+    ['enviar', 'guardarBase64'].forEach(nome => {
+      const o = Arquivos[nome]; if (typeof o !== 'function') return;
+      Arquivos[nome] = async function (file) {
+        try { const r = await o.apply(this, arguments); anota(file, true); return r; }
+        catch (e) { anota(file, false, e); throw e; }
+      };
+    });
+  }
+
+  /* ---------- varredura: toda importação/upload do painel e do que o painel embute ---------- */
+  CF.COBERTURA = [
+    ['Credsystem · Conciliação Websystem', 'rt-cs-upload'], ['Credsystem · Metas das lojas', 'CredMetasImport.abrir'],
+    ['Auditoria de Adquirentes · ERP (Vendas Consolidadas)', 'rt-adq-arq erp'], ['Auditoria de Adquirentes · Adquirentes / LOTE', 'rt-adq-arq adq'],
+    ['DFC · Extratos OFX', 'fd-bc-upload'], ['Faltas de Caixa · Upload em lote', 'ftLoteFile'], ['Faltas de Caixa · Base de caixas', 'cxFile'],
+    ['Gestão de Lojas · BASECADASTRO', 'lj-importar'], ['Gestão de Lojas · Custos de ocupação', 'lj-ocup-importar'],
+    ['RH · Base Ativa', 'BaseAtiva.abrirImportacao'], ['RH · Folha de pagamento', 'FolhaImport.abrir'], ['RH · Parametrizações (CSV)', 'pes-rh-csv'],
+    ['Planejamento Econômico · Realizado', 'lerRealizado'], ['Planejamento Econômico · Vendas', 'lerVendas'],
+    ['Viagens · Solicitação por planilha', 'importarCSV'], ['Viagens · Prestação de contas (arquivo)', 'adtArq'],
+    ['Conciliação · arquivos (ERP, adquirente, Getnet, OFX, lançamentos)', 'cmp-arq / cmp-gn-arq / cmp-cz-arq / cmp-imp'],
+    ['Backup · Restauração', 'bkp-restaurar'], ['Anexos (PDF/imagem)', 'Arquivos.enviar / Arquivos.guardarBase64'],
+    ['FCX · Vendas, Pesos, Saídas, Orçamento e Backup do FCX', 'fcx.html'], ['Módulo Contábil · Importar do FCX', 'contabilidade.html'],
+  ];
+})();
+
 const App = {
   rota: 'menu', _raf: null, navAberto: false,
   /** v13.13: um módulo pode ter regra própria de visibilidade (ex.: Liberação Remota também para gestores diretos). */
@@ -19430,6 +20064,7 @@ const App = {
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
     main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
     UI.rotularTabelas(main);
+    if (g99()) TabelaPro.varrer(main); // v13.99: cabeçalho clicável (▲/▼) e Gerar Relatório / Exportar
     if (this.rota === 'retaguarda') Retaguarda.afterRender();
     if (this.rota === 'conciliacao') ConcMP.afterRender(); // v13.69
     if (this.rota === 'equilibrio') PontoEquilibrio.afterRender().catch(e => console.warn('pe', e));
@@ -19815,8 +20450,9 @@ const Bkp = {
    * Coleções que não existiam na versão do backup (Credsystem, RH…) simplesmente não aparecem e ficam como estão.
    */
   async restaurar(file) {
-    let dados; try { dados = JSON.parse(await file.text()); } catch { return UI.toast('Arquivo inválido.'); }
-    if (dados.app !== 'painel-gestao-esposende' || !dados.colecoes) return UI.toast('Este arquivo não é um backup do Painel de Gestão.');
+    const arqB = { nome: file.name, tamanho: file.size };
+    let dados; try { dados = JSON.parse(await file.text()); } catch { CargaFeedback.falha('Backup · Restauração', file.name, 'Arquivo inválido: não é um JSON legível.', { arquivos: [arqB] }); return UI.toast('Arquivo inválido.'); }
+    if (dados.app !== 'painel-gestao-esposende' || !dados.colecoes) { CargaFeedback.falha('Backup · Restauração', file.name, 'Este arquivo não é um backup do Painel de Gestão.', { arquivos: [arqB] }); return UI.toast('Este arquivo não é um backup do Painel de Gestão.'); }
     UI.toast('Conferindo o backup…');
     const cols = Object.entries(dados.colecoes).filter(([c, v]) => this.COLECOES.includes(c) && Array.isArray(v) && v.length && ((c !== 'salarios' && c !== 'rh_folhas') || Auth.can('pessoal.salario.ver')) && (c !== 'pdi' || Auth.can('pdi.ver')) && (!['ret_ocorrencias', 'cred_pendencias'].includes(c) || Retaguarda.podeVerOc()) && (!['ec_taxas', 'conc_fechamento'].includes(c) || Auth.can('retaguarda.adq.ver')) && (c !== 'pe_simulador' || Auth.can('pe.ver')));
     const ignoradas = Object.keys(dados.colecoes).filter(c => !this.COLECOES.includes(c));
@@ -19835,10 +20471,16 @@ const Bkp = {
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Restaurar selecionadas', classe: 'danger', acao: async m => {
         const escolhidas = cols.filter(([c]) => $(`[name="col_${c}"]`, m)?.checked), modo = $('[name="modo"]:checked', m)?.value || 'faltam';
         if (!escolhidas.length) { UI.toast('Marque ao menos uma coleção.'); return false; }
-        setTimeout(() => this.gravarRestauracao(dados, escolhidas, atuais, modo), 30);
+        setTimeout(() => this.gravarRestauracao(dados, escolhidas, atuais, modo, arqB).catch(e => { if (!CargaFeedback.ativo()) throw e; UI.toast('Falha ao restaurar: ' + (e.message || e)); CargaFeedback.falha('Backup · Restauração', file.name, e, { arquivos: [arqB], mensagem: 'A restauração foi interrompida; o que já foi gravado permanece.' }); }), 30);
       } }] });
+    const totB = cols.reduce((a, [, v]) => a + v.length, 0), jaB = cols.reduce((a, [c, v]) => a + v.filter(d => atuais[c].has(d.id)).length, 0);
+    const semAcesso = Object.keys(dados.colecoes).filter(c => this.COLECOES.includes(c) && !cols.some(([k]) => k === c) && Array.isArray(dados.colecoes[c]) && dados.colecoes[c].length);
+    CargaFeedback.mostrar({ origem: 'Backup · Restauração', arquivos: [arqB], lidas: totB + semAcesso.reduce((a, c) => a + dados.colecoes[c].length, 0), processadas: totB, ignoradas: semAcesso.reduce((a, c) => a + dados.colecoes[c].length, 0) + ignoradas.length,
+      inconsistencias: [...ignoradas.map(c => ({ tipo: 'ignorada', item: 'Coleção ' + c, motivo: 'não existe nesta versão do painel' })), ...semAcesso.map(c => ({ tipo: 'ignorada', item: 'Coleção ' + c, motivo: 'sem permissão de acesso para este usuário (' + dados.colecoes[c].length + ' registro(s))' }))],
+      campos: [['Backup gerado em', Fmt.dataHora(dados.geradoEm)], ['Coleções disponíveis', String(cols.length)], ['Registros que já existem hoje', String(jaB)], ['Registros que faltam hoje', String(totB - jaB)]],
+      titulos: CargaFeedback.TIT_LEITURA, mensagem: 'Nada foi restaurado ainda: escolha as coleções na janela aberta por baixo e confirme.' });
   },
-  async gravarRestauracao(dados, escolhidas, atuais, modo) {
+  async gravarRestauracao(dados, escolhidas, atuais, modo, arqB) {
     UI.toast('Restaurando…'); let n = 0; const por = {};
     for (const [col, docs] of escolhidas) {
       por[col] = 0;
@@ -19848,6 +20490,10 @@ const Bkp = {
     }
     await Audit.registrar({ modulo: 'backup', acao: 'restaurou', entidade: 'backup', entidadeId: dados.geradoEm, rotulo: `Restauração de backup (${modo === 'faltam' ? 'só o que faltava' : 'substituindo'})`, mudancas: Object.entries(por).map(([c, k]) => ({ campo: c, de: '', para: k + ' registros' })) });
     UI.toast(`Backup restaurado: ${n} registro(s) gravado(s)${modo === 'faltam' ? ' (só os que faltavam)' : ''}.`); App.render();
+    const totR = escolhidas.reduce((a, [, docs]) => a + docs.length, 0);
+    CargaFeedback.mostrar({ origem: 'Backup · Restauração concluída', arquivos: arqB ? [arqB] : [], lidas: totR, processadas: n, ignoradas: totR - n, vazioOk: true,
+      campos: [['Modo', modo === 'faltam' ? 'só o que faltava' : 'substituindo registros de mesmo código'], ...Object.entries(por).map(([c, k]) => [c, k + ' registro(s) gravado(s)'])],
+      mensagem: totR - n ? (totR - n) + ' registro(s) já existiam e foram mantidos como estavam.' : '' });
     return por;
   },
   acao(a) { if (a === 'bkp-json') return this.json(); if (a === 'bkp-xlsx') return this.xlsx(); if (a.startsWith('bkp-amb-')) return GestaoAmbientes.acao(a); },
@@ -20127,6 +20773,68 @@ window.PainelFCX = {
     if (aprox) avisos.push({ tipo: 'prestacaoAprox', texto: 'Prestação no débito: o fechamento da Auditoria de Adquirentes e a Conciliação dos recebimentos não fecham; o valor foi repartido entre as adquirentes na proporção do fechamento.' });
     if (semAdq) avisos.push({ tipo: 'prestacaoSemAdq', texto: 'Prestação no débito sem adquirente identificada no fechamento (Auditoria de Adquirentes › Conciliação e Cruzamento › Gravar).' });
     return { linhas: L, resumo: R, totV, totP, total: r2(totV + totP), vCre, vDeb, pDeb, avisos };
+  },
+  /**
+   * v13.98 · PIX PREVISTO para o dia do relatório (D0). O PIX liquida no próprio dia (prazo 0): a entrada do relatório projeta o dia do relatório
+   * e não lê as vendas em PIX do dia anterior.
+   *   Vendas    = Vendas Previstas do dia (Peso do dia × Meta de Caixa, Parâmetros 1 e 2 do FCX) × % do PIX nos Meios de Pagamento do mês;
+   *   Prestação = Vendas Previstas do dia × % de Impacto da Prestação no Caixa (Parâmetro 3) × % do PIX na distribuição da prestação do dia.
+   * Valores brutos, como na fórmula (sem taxa do PIX). S = { monthMeta, weightsByMonth, monthParams, prestacaoModalidadePct }: o `state` do FCX
+   * ou o que o painel lê do armazenamento. Sem Meta de Caixa, sem pesos ou sem Meios de Pagamento no mês, a projeção fica em R$ 0,00 (`motivo`).
+   * Devolve { dia, ok, motivo: '' | 'meta' | 'pesos' | 'meios', metaDia, peso, pctPix, pctPrest, pctPixPrest, vendas, prestacao, total }.
+   */
+  pixPrevisto1398(dia, S) {
+    const r2 = v => Math.round((Number(v) || 0) * 100) / 100, n = v => Number(v) || 0, mk = String(dia || '').slice(0, 7), dd = Number(String(dia || '').slice(8, 10)), E = S || {};
+    const mm = (E.monthMeta || {})[mk] || {}, metaCaixa = n(mm.metaComercial) * (1 - n(mm.redutorPct)), pesos = (E.weightsByMonth || {})[mk] || {};
+    const mp = ((E.monthParams || {})[mk] || {}).methods, px = mp && mp.pix ? mp.pix : null, pr = (E.prestacaoModalidadePct || {})[dia] || {};
+    const motivo = !(metaCaixa > 0) ? 'meta' : !Object.keys(pesos).length ? 'pesos' : !px ? 'meios' : '';
+    const peso = n(pesos[dd]), metaDia = motivo ? 0 : peso * metaCaixa, pctPix = px ? n(px.participacao) : 0, pctPrest = n(pr.totalPct), pctPixPrest = n(pr.pix);
+    const vendas = motivo ? 0 : r2(metaDia * pctPix), prestacao = motivo ? 0 : r2(metaDia * pctPrest * pctPixPrest);
+    return { dia, ok: !motivo, motivo, mk, metaDia: r2(metaDia), peso, pctPix, pctPrest, pctPixPrest, vendas, prestacao, total: r2(vendas + prestacao) };
+  },
+  /**
+   * v13.98 · tira o PIX de dentro dos blocos de cartão. O fechamento da Auditoria de Adquirentes pode trazer linhas de adquirente "PIX" (por exemplo a prestação
+   * paga em PIX) e operações Pix de uma adquirente; o PIX é uma modalidade própria e só aparece na linha de PIX. Devolve uma cópia de `pn` sem essas linhas
+   * (cartao.porAdquirente, porBandeira e totais; prestacaoRotulos e prestacaoCartao) e o valor líquido retirado do cartão (pixFora).
+   */
+  cartaoSemPix1398(pn) {
+    const r2 = v => Math.round((Number(v) || 0) * 100) / 100, n = v => Number(v) || 0, out = { pn, pixFora: 0 };
+    if (!pn) return out;
+    const ehPix = a => /(^|[^A-Z0-9])PIX([^A-Z0-9]|$)/i.test(String(a == null ? '' : a)), ehPixB = b => !!b && (b.modalidade === 'pix' || /^\s*PIX\s*$/i.test(String(b.bandeira == null ? '' : b.bandeira)));
+    const cp = { ...pn }, c = pn.cartao;
+    if (c) {
+      const porAdq = {}, bands = [], rem = { bruto: 0, mdr: 0, antecip: 0, pos: 0 }; let fora = 0;
+      Object.entries(c.porAdquirente || {}).forEach(([a, v]) => { if (ehPix(a)) fora += n(v); else porAdq[a] = n(v); });
+      (c.porBandeira || []).forEach(b => {
+        const pa = ehPix(b.adquirente);
+        if (!pa && !ehPixB(b)) { bands.push(b); return; }
+        Object.keys(rem).forEach(k => { rem[k] = r2(rem[k] + n(b[k])); });
+        if (!pa) { fora += n(b.liquido); porAdq[b.adquirente] = r2(n(porAdq[b.adquirente]) - n(b.liquido)); }
+      });
+      out.pixFora = r2(fora);
+      if (out.pixFora || rem.bruto) cp.cartao = { ...c, porAdquirente: porAdq, porBandeira: bands, bruto: r2(n(c.bruto) - rem.bruto), mdr: r2(n(c.mdr) - rem.mdr), antecip: r2(n(c.antecip) - rem.antecip), pos: r2(n(c.pos) - rem.pos), liquido: r2(n(c.liquido) - out.pixFora), semBandeira: bands.some(x => x.semBandeira) };
+    }
+    if (Array.isArray(pn.prestacaoRotulos)) cp.prestacaoRotulos = pn.prestacaoRotulos.filter(x => !ehPix(x.adquirente));
+    if (pn.prestacaoCartao && Array.isArray(pn.prestacaoCartao.porBandeira)) {
+      const pc = pn.prestacaoCartao, it = pc.porBandeira.filter(x => !ehPix(x.adquirente)), sp = k => r2(it.reduce((a, x) => a + n(x[k]), 0));
+      if (it.length !== pc.porBandeira.length) cp.prestacaoCartao = { ...pc, porBandeira: it, detalhado: it.length > 0, bruto: sp('bruto'), mdr: sp('mdr'), liquido: sp('liquido'), mdrEstimado: it.some(x => x.mdrEstimado) };
+    }
+    out.pn = cp; return out;
+  },
+  /**
+   * v13.98 · Consolidado de Entradas (Vendas + Prestações) da v13.97 com duas regras novas: o PIX é a entrada PREVISTA do dia do relatório (`pixP`, de pixPrevisto1398)
+   * e nenhuma linha de PIX fica dentro dos grupos Total Cartões de Crédito e Total Cartões de Débito.
+   * Entrada: { din, pDin, pLote, cred, credN, pn (resultado de recebiveis, bruto), liquido, pixP (de pixPrevisto1398), dia }.
+   * Saída: a da v13.97 + { cartao (líquido do cartão sem PIX), pixFora, pn (sem PIX no cartão) }.
+   */
+  consolidado1398(o) {
+    const n = v => Number(v) || 0, lim = this.cartaoSemPix1398(o.pn), px = o.pixP || { vendas: 0, prestacao: 0, ok: true }, mk = String(o.dia || '').slice(0, 7);
+    const c = this.consolidado1397({ ...o, pix: n(px.vendas), pPix: n(px.prestacao), pn: lim.pn }), l = c.linhas.find(x => x.id === 'pix'), av = c.avisos.slice();
+    if (l) l.rot = 'Total em PIX (Entrada Prevista)';
+    const mes = mk ? mk.slice(5, 7) + '/' + mk.slice(0, 4) : '';
+    if (!px.ok) av.push({ tipo: 'pixSemParam', texto: 'PIX previsto de ' + Fmt.data(o.dia) + ' em R$ 0,00: ' + (px.motivo === 'meta' ? 'o FCX não tem a Meta de Caixa de ' + mes + ' (Parâmetro 1).' : px.motivo === 'pesos' ? 'o FCX não tem os pesos dos dias de ' + mes + ' (Parâmetro 2).' : 'o FCX não tem os Meios de Pagamento de ' + mes + ' (Gerenciar dados › Meios de pagamento).') });
+    if (lim.pixFora > 0.004) av.push({ tipo: 'pixFora', texto: 'Cartão: ' + Fmt.brl(lim.pixFora) + ' de PIX vinham dentro do fechamento de cartão e ficaram fora dos blocos de Crédito e Débito; o PIX do quadro é só a entrada prevista do FCX.' });
+    return { ...c, avisos: av, cartao: lim.pn && lim.pn.cartao ? n(lim.pn.cartao.liquido) : 0, pixFora: lim.pixFora, pn: lim.pn };
   },
   async recebiveis(dia) {
     const r2 = v => Math.round((Number(v) || 0) * 100) / 100, out = { dia, cartao: null, prestacao: null, avisos: [] };

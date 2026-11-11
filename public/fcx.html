@@ -1543,6 +1543,8 @@ const ROTULOS_SALDO = {
    do caixa do dia e guardada como Recebível Futuro até o vencimento; prestação "Débito"; Resumo Consolidado de Entradas
    com gráfico; gráfico de barras da previsão semanal (o mesmo da visão do FCX).
    ========================================================= */
+function fcxV1398(){ try{ const P = window.__embed ? window.parent : null; return !!(fcxV1397() && P.Recursos.ativo('gestao_v1398') && ['consolidado1398','pixPrevisto1398','cartaoSemPix1398'].every(k => typeof P.PainelFCX[k] === 'function')); }catch(e){ return false; } } // v13.98: PIX previsto do dia do relatório e cartão sem linhas de PIX
+function rdPix1398(iso){ return window.parent.PainelFCX.pixPrevisto1398(iso, state); } // PIX previsto de um dia (vendas + prestação), pelos Parâmetros 1, 2 e 3 e pelos Meios de Pagamento do mês
 function fcxV1397(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1397') && P.PainelFCX && typeof P.PainelFCX.consolidado1397 === 'function' && typeof P.PainelFCX.pixReal1397 === 'function'); }catch(e){ return false; } } // v13.97: Consolidado de Entradas por Crédito e Débito, PIX real e Resumo por Adquirente
 function rdPixHistorico1397(iso){ const r = (state.salesHistory||[]).find(x=>x && x.date===iso), v = r && r.values ? r.values.pix : null; return v == null || v === '' || !isFinite(Number(v)) ? null : Number(v); }
 function rdColClasses1397(v){ const c = state._rdCol97; return v && c ? (c.cred ? ' rd-col-cred' : '') + (c.deb ? ' rd-col-deb' : '') : ''; }
@@ -1565,6 +1567,9 @@ function rdResumo1397(c, total){
         </tbody></table></div>`;
 }
 function fcxV1396(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1396') && P.PainelFCX && typeof P.PainelFCX.linhasPrestacao === 'function'); }catch(e){ return false; } } // v13.96: rótulo da prestação no débito = adquirente + forma de recebimento (+ bandeira), sem o identificador interno do ERP
+function fcxV1399(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1399') && P.CargaFeedback && typeof P.CargaFeedback.mostrar === 'function'); }catch(e){ return false; } } // v13.99: popup de crítica de carga (exibido pelo painel)
+function fcxCarga99(rel){ if(!fcxV1399()) return; try{ window.parent.CargaFeedback.mostrar(rel); }catch(e){} }
+function fcxArq99(file){ return [{nome:file.name, tamanho:file.size}]; }
 function fcxV1387(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('rd_cartao_v1387')); }catch(e){ return false; } } // v13.87: Recebível Diário · débito × crédito, prestação no débito por bandeira, Credsystem consolidada
 function fcxV1386(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('contabil_v1386')); }catch(e){ return false; } } // v13.86: plano de contas lido do Módulo Contábil (somente leitura)
 function fcxV1385(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_periodo_v1385')); }catch(e){ return false; } } // v13.85: período por calendário + detalhamento diário em agrupadores
@@ -1862,10 +1867,10 @@ function renderRecebivelScreen(){
     <div class="grid-4 rd-campos">
       <div class="field"><label for="rdData">Data do relatório</label><input id="rdData" type="date" value="${d}" onchange="setRdData(this.value)"></div>
       <div class="field"><label for="rdDin">Vendas em Dinheiro · ${fmtDate(ant)}</label><input id="rdDin" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.dinheiro)}" oninput="rdMascara(this,'dinheiro')" onblur="rdMascaraFim(this,'dinheiro')" placeholder="R$ 0,00"></div>
-      <div class="field"><label for="rdPix">Vendas em PIX · ${fmtDate(ant)}</label><input id="rdPix" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.pix)}" oninput="rdMascara(this,'pix')" onblur="rdMascaraFim(this,'pix')" placeholder="R$ 0,00"></div>
+      ${fcxV1398() ? `<div class="field"><label for="rdPix">PIX · entrada prevista de ${fmtDate(d)}</label><input id="rdPix" class="rd-moeda" type="text" value="${BRL2(rdPix1398(d).total)}" readonly tabindex="-1" aria-readonly="true" title="Calculado pelo FCX: vendas previstas do dia × % de PIX, mais a prestação pelo Parâmetro 3"></div>` : `<div class="field"><label for="rdPix">Vendas em PIX · ${fmtDate(ant)}</label><input id="rdPix" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.pix)}" oninput="rdMascara(this,'pix')" onblur="rdMascaraFim(this,'pix')" placeholder="R$ 0,00"></div>`}
       <div class="field"><label for="rdSaldo">Saldo bancário de abertura · opcional</label><input id="rdSaldo" class="rd-moeda" type="text" inputmode="decimal" autocomplete="off" value="${rdMoedaTxt(f.saldoAbertura)}" oninput="rdMascara(this,'saldoAbertura')" onblur="rdMascaraFim(this,'saldoAbertura')" placeholder="R$ 0,00"></div>
     </div>
-    <div class="hint">Cartão: Auditoria de Adquirentes › Resumo do Fechamento de ${fmtDate(ant)} (líquido de MDR, antecipação e POS). Prestação: Retaguarda › Conciliação dos recebimentos de ${fmtDate(ant)} (Dinheiro, PIX e Débito do arquivo). Credsystem: guardada como Recebível Futuro e somada só no dia do vencimento.</div>
+    <div class="hint">Cartão: Auditoria de Adquirentes › Resumo do Fechamento de ${fmtDate(ant)} (líquido de MDR, antecipação e POS). Prestação: Retaguarda › Conciliação dos recebimentos de ${fmtDate(ant)} (Dinheiro, PIX e Débito do arquivo). Credsystem: guardada como Recebível Futuro e somada só no dia do vencimento.${fcxV1398() ? ` PIX: entrada prevista do FCX para ${fmtDate(d)} (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3), sem taxa; não usa o PIX do dia anterior.` : ''}</div>
     <div class="rd-carga ${crit.ok?'ok':'bloq'}" style="margin-top:12px;padding:10px 14px;border-radius:10px;border:1px solid ${crit.ok?'#BFE0CE':'#EAC5BF'};background:${crit.ok?'var(--green-soft)':'var(--red-soft)'};">
       <b style="color:${crit.ok?'var(--green)':'var(--red)'}">${crit.ok?'✓ Carga do dia conferida':'⚠ Crítica de carga — relatório bloqueado'}</b>
       <div style="font-size:13px;margin-top:3px;">${crit.msg}</div>
@@ -1876,14 +1881,14 @@ function renderRecebivelScreen(){
   if(!u.gerado || !crit.ok) return `<button class="backlink no-print" onclick="goto('landing')">← Início</button>${form}${!crit.ok?'':'<div class="empty">Informe as vendas do dia anterior e clique em “Gerar relatório”.</div>'}`;
 
   /* ---------- números ---------- */
-  const pn = u.painel || {}, cart = pn.cartao || { liquido:0, bruto:0, linhas:0 }, pr = pn.prestacao || { din:0, pix:0, lote:0, lojas:0 }, csy = pn.credsystem || { itens:[], bruto:0, mdr:0, liquido:0 };
-  const v97 = fcxV1397(), pixR = v97 ? window.parent.PainelFCX.pixReal1397(f.pix, rdPixHistorico1397(ant)) : null; // v13.97: PIX real das vendas
-  const din = Number(f.dinheiro)||0, pix = pixR ? pixR.valor : Number(f.pix)||0, cartao = Number(cart.liquido)||0, vendas = din+pix+cartao;
+  const pn0 = u.painel || {}, v98 = fcxV1398(), pn = v98 ? window.parent.PainelFCX.cartaoSemPix1398(pn0).pn : pn0, cart = pn.cartao || { liquido:0, bruto:0, linhas:0 }, pr = pn.prestacao || { din:0, pix:0, lote:0, lojas:0 }, csy = pn.credsystem || { itens:[], bruto:0, mdr:0, liquido:0 };
+  const v97 = fcxV1397(), pixR = v97 && !v98 ? window.parent.PainelFCX.pixReal1397(f.pix, rdPixHistorico1397(ant)) : null, px98 = v98 ? rdPix1398(d) : null; // v13.97: PIX real das vendas · v13.98: PIX previsto de hoje
+  const din = Number(f.dinheiro)||0, pix = px98 ? px98.vendas : pixR ? pixR.valor : Number(f.pix)||0, cartao = Number(cart.liquido)||0, vendas = din+pix+cartao;
   const v96 = fcxV1396(), v87 = fcxV1387(), pc = (v87 && pn.prestacaoCartao) || null, pcDet = !!(pc && pc.detalhado), pLoteBruto = Number(pr.lote)||0; // v13.87: prestação no débito pelo líquido do MDR (com abertura por bandeira)
-  const pDin = Number(pr.din)||0, pPix = Number(pr.pix)||0, pLote = pcDet ? Number(pc.liquido)||0 : pLoteBruto, prest = pDin+pPix+pLote;
+  const pDin = Number(pr.din)||0, pPix = px98 ? px98.prestacao : Number(pr.pix)||0, pLote = pcDet ? Number(pc.liquido)||0 : pLoteBruto, prest = pDin+pPix+pLote;
   const credHoje = rdCredsystemVencendo(d), credHojeV = credHoje.reduce((a,r)=>a+r.valor,0), entradas = vendas+prest+credHojeV; // v13.80: Credsystem só no vencimento
   const bands = cart.porBandeira || [], grupos = {}; bands.forEach(b=>{ (grupos[b.adquirente] ||= []).push(b); });
-  const meta = rdMetaDoDia(ant), metaVendas = meta.dinheiro+meta.pix+meta.cartao, metaEntradas = metaVendas+meta.prestacao;
+  const meta = rdMetaDoDia(ant), metaVendas = v98 ? meta.dinheiro+meta.cartao : meta.dinheiro+meta.pix+meta.cartao, metaEntradas = v98 ? metaVendas+(meta.prestacao-meta.prestPix)+px98.total : metaVendas+meta.prestacao; // v13.98: o PIX previsto é o de hoje
   const lista = rdSaidasDoDia(d), saidas = lista.reduce((a,s)=>a+s.liquido,0);
   const prevSaidas = (buildCashBook(d, d, '', '', 'conta', false)[d] || {saidasTotal:0}).saidasTotal;
   const semanas = rdSemanas(d, f.saldoAbertura);
@@ -1894,7 +1899,7 @@ function renderRecebivelScreen(){
     if(!pcDet && pLoteBruto) avisosL.push('Prestação no cartão de débito sem abertura por bandeira (cruzamento gravado antes da v13.87): regrave a Conciliação e Cruzamento na Auditoria de Adquirentes para aplicar o MDR de cada bandeira. Até lá, o valor entra bruto.');
     if((cart.porBandeira||[]).some(b=>!rdOperDe(b) && !b.semBandeira)) avisosL.push('Cartão: fechamento gravado antes da v13.87, sem separar débito e crédito. Regrave o Cruzamento para abrir por operação (por enquanto entra em Crédito).');
   }
-  const c97 = v97 ? window.parent.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred: credHojeV, credN: credHoje.length, pn, liquido: pcDet }) : null; // v13.97
+  const c97 = v98 ? window.parent.PainelFCX.consolidado1398({ din, pDin, pLote, cred: credHojeV, credN: credHoje.length, pn: pn0, liquido: pcDet, pixP: px98, dia: d }) : v97 ? window.parent.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred: credHojeV, credN: credHoje.length, pn, liquido: pcDet }) : null; // v13.97 · v13.98: PIX previsto e cartão sem PIX
   if(c97){ c97.avisos.forEach(a=>{ if(!(v87 && a.tipo === 'semModalidade')) avisosL.push(a.texto); }); if(pixR && pixR.fonte === 'historico') avisosL.push('PIX das vendas: usado o valor do histórico de vendas do FCX (nada foi digitado em Vendas em PIX).'); }
   const avisos = avisosL.length ? `<div class="rd-avisos">${avisosL.map(a=>`<div>⚠ ${a}</div>`).join('')}</div>` : '';
   const COLS5 = '<colgroup><col><col style="width:21%"><col style="width:11%"><col style="width:21%"><col style="width:20%"></colgroup>';
@@ -1915,7 +1920,7 @@ function renderRecebivelScreen(){
     <div class="rd-capa-blocos">
       <div class="rd-bloco rd-bloco-ent">
         <h3>Consolidado de Entradas (Vendas + Prestações)</h3>
-        <div class="rd-bloco-sub">Vendas de ${fmtDate(ant)} e prestações recebidas · entram em ${fmtDate(d)}</div>
+        <div class="rd-bloco-sub">Vendas de ${fmtDate(ant)} e prestações recebidas · entram em ${fmtDate(d)}${v98 ? ` · PIX: entrada prevista de ${fmtDate(d)}` : ''}</div>
         <table class="rd-tab rd-zebra rd-consolidado${rdColClasses1397(v97)}"><colgroup><col><col style="width:18%"><col style="width:16%"><col style="width:19%"><col style="width:10%"></colgroup>
         <thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
           ${v97 ? rdLinhas1397(c97, entradas) : `${linhaC('Total em Dinheiro', din, pDin, 'rd-grupo')}
@@ -1928,7 +1933,7 @@ function renderRecebivelScreen(){
         </tbody></table>
         ${v97 ? rdResumo1397(c97, entradas) : ''}
         ${v97 ? '' : '<div class="rd-graf rd-graf-ent"><canvas id="rdGrafEntradas" role="img" aria-label="Entradas por meio de pagamento × saídas do dia"></canvas></div>'}
-        <div class="rd-nota rd-linha">${v87 ? 'Cartão líquido de MDR, antecipação e POS; prestações no Cartão de Débito pelo líquido do MDR. Abertura por adquirente, operação e bandeira, Resumo de Fechamento por Adquirente e Credsystem na página do cartão.' : 'Cartão líquido de MDR, antecipação e POS; abertura por bandeira e Credsystem (Recebível Futuro) na página 3.'}</div>
+        <div class="rd-nota rd-linha">${v87 ? 'Cartão líquido de MDR, antecipação e POS; prestações no Cartão de Débito pelo líquido do MDR. Abertura por adquirente, operação e bandeira, Resumo de Fechamento por Adquirente e Credsystem na página do cartão.' : 'Cartão líquido de MDR, antecipação e POS; abertura por bandeira e Credsystem (Recebível Futuro) na página 3.'}${v98 ? ` PIX: entrada prevista do FCX de ${fmtDate(d)}, sem taxa; o PIX digitado e o da Conciliação não são somados.` : ''}</div>
       </div>
       <div class="rd-bloco rd-bloco-sai">
         <h3>Saídas do dia</h3>
@@ -2067,9 +2072,16 @@ function excelDateToISO(v){
 function readWorkbookFile(file, cb){
   const reader = new FileReader();
   reader.onload = e=>{
-    const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:true});
+    let rows;
+    try{
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:true});
+    }catch(err){
+      if(!fcxV1399()) throw err;
+      fcxCarga99({origem: window.__origem99 || 'FCX · Importação de planilha', arquivos:fcxArq99(file), status:'erro', erro:'Não consegui ler a planilha: '+((err && err.message) || err)});
+      return;
+    }
     cb(rows);
   };
   reader.readAsArrayBuffer(file);
@@ -2084,19 +2096,23 @@ const SALES_COL_MAP = {
 };
 function importSalesFile(input){
   const file = input.files[0]; if(!file) return;
+  window.__origem99 = 'FCX · Vendas históricas';
   readWorkbookFile(file, rows=>{
-    const parsed = [];
-    rows.forEach(row=>{
+    const parsed = [], inc99 = [], vistos99 = new Set();
+    rows.forEach((row,i99)=>{
       const norm = {};
       Object.keys(row).forEach(k=>{ const nk=normKey(k); if(SALES_COL_MAP[nk]) norm[SALES_COL_MAP[nk]]=row[k]; });
-      if(!norm.date) return;
-      const iso = excelDateToISO(norm.date); if(!iso) return;
+      if(!norm.date){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), motivo:'data ausente'}); return; }
+      const iso = excelDateToISO(norm.date); if(!iso){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:String(norm.date), motivo:'data inválida'}); return; }
+      if(vistos99.has(iso)) inc99.push({tipo:'duplicada', linha:'Registro '+(i99+1), item:iso.split('-').reverse().join('/'), motivo:'data repetida no arquivo: vale a última linha'});
+      vistos99.add(iso);
       const values = {};
       Object.keys(SALES_COL_MAP).forEach(k=>{ const field=SALES_COL_MAP[k]; if(field!=='date') values[field]=Number(norm[field]||0); });
       parsed.push({date:iso, values});
     });
-    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo'); return; }
+    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo'); fcxCarga99({origem:'FCX · Vendas históricas', arquivos:fcxArq99(file), lidas:rows.length, processadas:0, invalidas:inc99.length, inconsistencias:inc99, erro:'Nenhuma linha reconhecida no arquivo (colunas esperadas: Data e os meios de pagamento).'}); return; }
     const mode = state._salesImportMode || 'merge';
+    const ja99 = new Set(state.salesHistory.map(h=>h.date)), exist99 = mode==='replace' ? 0 : parsed.filter(r=>ja99.has(r.date)).length;
     if(mode==='replace') state.salesHistory = parsed;
     else{
       const byDate = {}; state.salesHistory.forEach(r=>byDate[r.date]=r);
@@ -2104,6 +2120,9 @@ function importSalesFile(input){
       state.salesHistory = Object.values(byDate);
     }
     state.salesHistory.sort((a,b)=>a.date<b.date?-1:1);
+    fcxCarga99({origem:'FCX · Vendas históricas', arquivos:fcxArq99(file), lidas:rows.length, processadas:parsed.length, invalidas:inc99.filter(x=>x.tipo==='invalida').length, duplicadas:inc99.filter(x=>x.tipo==='duplicada').length,
+      total:parsed.reduce((a,r)=>a+Object.values(r.values).reduce((b,v)=>b+(Number(v)||0),0),0), totalRotulo:'Total das vendas do arquivo', inconsistencias:inc99,
+      campos:[['Modo', mode==='replace' ? 'substituir tudo' : 'mesclar com o histórico'], ['Datas que já existiam (atualizadas)', String(exist99)]]});
     saveSalesHistory().then(render);
   });
 }
@@ -2329,12 +2348,13 @@ function setWeightsImportMode(v){ state._weightsImportMode=v; } window.setWeight
 const WEIGHT_COL_MAP = {'MES':'mes','MÊS':'mes','DIA':'dia','DIA DO MES':'dia','DIA DO MÊS':'dia','PESO':'peso','SEMANA':'semana','SEMANA DO MES':'semana','N SEMANA':'semana','NUMERO DA SEMANA':'semana'}; // v13.77: Semana (opcional)
 function importWeightsFile(input){
   const file = input.files[0]; if(!file) return;
+  window.__origem99 = 'FCX · Pesos por dia';
   readWorkbookFile(file, rows=>{
-    const parsed = [];
-    rows.forEach(row=>{
+    const parsed = [], inc99 = [], vistos99 = new Set();
+    rows.forEach((row,i99)=>{
       const norm = {};
       Object.keys(row).forEach(k=>{ const nk=normKey(k); if(WEIGHT_COL_MAP[nk]) norm[WEIGHT_COL_MAP[nk]]=row[k]; });
-      if(norm.dia==null || norm.peso==null || !norm.mes) return;
+      if(norm.dia==null || norm.peso==null || !norm.mes){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), motivo:'faltam: '+[norm.mes?'':'Mês', norm.dia==null?'Dia':'', norm.peso==null?'Peso':''].filter(Boolean).join(', ')}); return; }
       let mk = null;
       if(norm.mes instanceof Date) mk = norm.mes.getFullYear()+'-'+pad(norm.mes.getMonth()+1);
       else{
@@ -2342,10 +2362,12 @@ function importWeightsFile(input){
         const m1 = s.match(/^(\d{4})-(\d{1,2})/); if(m1) mk = m1[1]+'-'+pad(+m1[2]);
         else{ const m2 = s.match(/^(\d{1,2})\/(\d{4})/); if(m2) mk = m2[2]+'-'+pad(+m2[1]); }
       }
-      if(!mk) return;
+      if(!mk){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:String(norm.mes), motivo:'mês inválido (use AAAA-MM ou MM/AAAA)'}); return; }
+      if(vistos99.has(mk+'|'+norm.dia)) inc99.push({tipo:'duplicada', linha:'Registro '+(i99+1), item:mk.split('-').reverse().join('/')+' · dia '+norm.dia, motivo:'dia repetido no mês: vale a última linha'});
+      vistos99.add(mk+'|'+norm.dia);
       parsed.push({mk, dia:Number(norm.dia), peso:Number(norm.peso), semana: norm.semana==null ? null : parseInt(String(norm.semana).replace(/\D/g,''),10)});
     });
-    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo (colunas esperadas: Mês, Dia, Peso)'); return; }
+    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo (colunas esperadas: Mês, Dia, Peso)'); fcxCarga99({origem:'FCX · Pesos por dia', arquivos:fcxArq99(file), lidas:rows.length, processadas:0, invalidas:inc99.length, inconsistencias:inc99, erro:'Nenhuma linha reconhecida no arquivo (colunas esperadas: Mês, Dia, Peso).'}); return; }
     // detecta se os pesos vieram em pontos percentuais (ex: 3.2) em vez de fração (0.032)
     const porMes = {};
     parsed.forEach(p=>{ (porMes[p.mk]=porMes[p.mk]||[]).push(p); });
@@ -2356,6 +2378,11 @@ function importWeightsFile(input){
       porMes[mk].forEach(p=>{ state.weightsByMonth[mk][p.dia] = p.peso/div; });
       if(fcxV1377() && porMes[mk].some(p=>p.semana>=1 && p.semana<=6)){ if(!state.weeksByMonth) state.weeksByMonth={}; state.weeksByMonth[mk] = state.weeksByMonth[mk]||{}; porMes[mk].forEach(p=>{ if(p.semana>=1 && p.semana<=6) state.weeksByMonth[mk][p.dia] = p.semana; }); } // v13.77
     });
+    if(fcxV1399()){
+      const av99 = []; Object.keys(porMes).sort().forEach(mk=>{ const soma = porMes[mk].reduce((a,p)=>a+p.peso,0), pct = soma/(soma>3?100:1)*100; if(Math.abs(pct-100)>1) av99.push({tipo:'aviso', item:mk.split('-').reverse().join('/'), motivo:'os pesos somam '+pct.toFixed(1).replace('.',',')+'% (o esperado é 100%)'}); });
+      fcxCarga99({origem:'FCX · Pesos por dia', arquivos:fcxArq99(file), lidas:rows.length, processadas:parsed.length, invalidas:inc99.filter(x=>x.tipo==='invalida').length, duplicadas:inc99.filter(x=>x.tipo==='duplicada').length,
+        inconsistencias:inc99.concat(av99), campos:[['Meses carregados', String(Object.keys(porMes).length)]]});
+    }
     saveWeights().then(render);
   });
 }
@@ -2541,23 +2568,26 @@ function statusToTipo(s){
 }
 function importSaidasFile(input){
   const file = input.files[0]; if(!file) return;
+  window.__origem99 = 'FCX · Saídas';
   readWorkbookFile(file, rows=>{
-    const parsed = [], rd = fcxV1378(); // v13.78
-    rows.forEach(row=>{
+    const parsed = [], inc99 = [], novas99 = new Set(), rd = fcxV1378(); // v13.78
+    rows.forEach((row,i99)=>{
       const norm = {};
       Object.keys(row).forEach(k=>{ const nk=normKey(k); if(SAIDA_COL_MAP[nk]) norm[SAIDA_COL_MAP[nk]]=row[k]; else if(rd && SAIDA_COL_MAP_RD[nk]) norm[SAIDA_COL_MAP_RD[nk]]=row[k]; });
       if(rd && norm.valor==null && norm.valorLiquido!=null) norm.valor = norm.valorLiquido; // v13.78: arquivo só com Valor Líquido
-      if(norm.valor==null || !norm.date) return;
-      const iso = excelDateToISO(norm.date); if(!iso) return;
+      if(norm.valor==null || !norm.date){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:norm.conta ? String(norm.conta) : '', motivo:norm.date ? 'valor ausente' : 'data ausente'}); return; }
+      const iso = excelDateToISO(norm.date); if(!iso){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:String(norm.date), motivo:'data inválida'}); return; }
       const conta = (norm.conta||'(sem conta)').toString().trim();
       const centro = (norm.centro||'(sem centro de custo)').toString().trim();
-      if(!state.config.accounts.includes(conta)){ state.config.accounts.push(conta); fcx1386Nova(conta); } // v13.86: conta nova → revisão no Módulo Contábil
+      if(!state.config.accounts.includes(conta)){ state.config.accounts.push(conta); fcx1386Nova(conta); novas99.add(conta); } // v13.86: conta nova → revisão no Módulo Contábil
       if(!state.config.costCenters.includes(centro)) state.config.costCenters.push(centro);
       const extra = rd ? { ...(norm.formaPagamento!=null && String(norm.formaPagamento).trim() ? {formaPagamento:String(norm.formaPagamento).trim()} : {}), ...(norm.valorLiquido!=null && norm.valorLiquido!=='' ? {valorLiquido:Number(norm.valorLiquido)||0} : {}), ...(norm.item!=null && String(norm.item).trim() ? {item:String(norm.item).trim()} : {}) } : {}; // v13.78
       parsed.push({id:uid(), date:iso, conta, centro, tipo:statusToTipo(norm.status), valor:Number(norm.valor)||0, fornecedor:(norm.fornecedor||'').toString().trim(), obs:(norm.obs||'').toString().trim(), ...extra});
     });
-    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo'); return; }
+    if(parsed.length===0){ showToast('Nenhuma linha reconhecida no arquivo'); fcxCarga99({origem:'FCX · Saídas', arquivos:fcxArq99(file), lidas:rows.length, processadas:0, invalidas:inc99.length, inconsistencias:inc99, erro:'Nenhuma linha reconhecida no arquivo (colunas esperadas: Data, Conta, Valor).'}); return; }
     const mode = state._saidasImportMode || 'append';
+    fcxCarga99({origem:'FCX · Saídas', arquivos:fcxArq99(file), lidas:rows.length, processadas:parsed.length, invalidas:inc99.length, total:parsed.reduce((a,x)=>a+(Number(x.valor)||0),0), totalRotulo:'Total das saídas do arquivo',
+      inconsistencias:inc99.concat([...novas99].map(c=>({tipo:'aviso', item:'Conta nova: '+c, motivo:'incluída no plano e enviada para revisão no Módulo Contábil'}))), campos:[['Modo', mode==='replace' ? 'substituir todas as saídas' : 'acrescentar às existentes'], ['Contas novas', String(novas99.size)]]});
     if(mode==='replace') state.saidas = parsed; else state.saidas = state.saidas.concat(parsed);
     const grava = [saveSaidas(), saveConfig()];
     if(rd){ state.cargaSaidas = { em: new Date().toISOString(), arquivo: file.name, linhas: parsed.length, modo: mode }; grava.push(window.storage.set('esp2:cargaSaidas', JSON.stringify(state.cargaSaidas), true)); } // v13.78: crítica de carga do Recebível Diário
@@ -2738,12 +2768,13 @@ const ORC_COL_MAP = {
 function setOrcImportMode(v){ state._orcImportMode=v; } window.setOrcImportMode=setOrcImportMode;
 function importOrcamentoFile(input){
   const file = input.files[0]; if(!file) return;
+  window.__origem99 = 'FCX · Orçamento';
   readWorkbookFile(file, rows=>{
-    let count=0;
-    rows.forEach(row=>{
+    let count=0, tot99=0; const inc99 = [], vistos99 = new Set();
+    rows.forEach((row,i99)=>{
       const norm = {};
       Object.keys(row).forEach(k=>{ const nk=normKey(k); if(ORC_COL_MAP[nk]) norm[ORC_COL_MAP[nk]]=row[k]; });
-      if(norm.valor==null || !norm.conta || !norm.mes) return;
+      if(norm.valor==null || !norm.conta || !norm.mes){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:norm.conta ? String(norm.conta) : '', motivo:'faltam: '+[norm.mes?'':'Mês', norm.conta?'':'Conta Contábil', norm.valor==null?'Valor Orçado':''].filter(Boolean).join(', ')}); return; }
       let mk = null;
       if(norm.mes instanceof Date) mk = norm.mes.getFullYear()+'-'+pad(norm.mes.getMonth()+1);
       else{
@@ -2751,16 +2782,19 @@ function importOrcamentoFile(input){
         const m1 = s.match(/^(\d{4})-(\d{1,2})/); if(m1) mk = m1[1]+'-'+pad(+m1[2]);
         else{ const m2 = s.match(/^(\d{1,2})\/(\d{4})/); if(m2) mk = m2[2]+'-'+pad(+m2[1]); }
       }
-      if(!mk) return;
+      if(!mk){ inc99.push({tipo:'invalida', linha:'Registro '+(i99+1), item:String(norm.mes), motivo:'mês inválido (use AAAA-MM ou MM/AAAA)'}); return; }
       const conta = String(norm.conta).trim();
       const centro = norm.centro? String(norm.centro).trim() : '';
       if(!state.config.accounts.includes(conta)){ state.config.accounts.push(conta); fcx1386Nova(conta); } // v13.86: conta nova → revisão no Módulo Contábil
       if(centro && !state.config.costCenters.includes(centro)) state.config.costCenters.push(centro);
+      const k99 = mk+'|'+conta+'|'+centro; if(vistos99.has(k99)) inc99.push({tipo:'duplicada', linha:'Registro '+(i99+1), item:conta+' · '+mk.split('-').reverse().join('/'), motivo:'conta, centro e mês repetidos: vale a última linha'}); vistos99.add(k99);
       const entry = ensureOrcEntry(mk, conta, centro);
       entry.importado = Number(norm.valor)||0;
+      tot99 += entry.importado;
       count++;
     });
-    if(count===0){ showToast('Nenhuma linha reconhecida (colunas esperadas: Mês, Conta Contábil, Centro de Custo, Valor Orçado)'); return; }
+    if(count===0){ showToast('Nenhuma linha reconhecida (colunas esperadas: Mês, Conta Contábil, Centro de Custo, Valor Orçado)'); fcxCarga99({origem:'FCX · Orçamento', arquivos:fcxArq99(file), lidas:rows.length, processadas:0, invalidas:inc99.length, inconsistencias:inc99, erro:'Nenhuma linha reconhecida (colunas esperadas: Mês, Conta Contábil, Centro de Custo, Valor Orçado).'}); return; }
+    fcxCarga99({origem:'FCX · Orçamento', arquivos:fcxArq99(file), lidas:rows.length, processadas:count, invalidas:inc99.filter(x=>x.tipo==='invalida').length, duplicadas:inc99.filter(x=>x.tipo==='duplicada').length, total:tot99, totalRotulo:'Total orçado no arquivo', inconsistencias:inc99});
     Promise.all([saveOrcamento(), saveConfig()]).then(()=>{ showToast(count+' linhas de orçamento importadas'); render(); });
   });
 }
@@ -2872,7 +2906,7 @@ function importarBackupFile(input){
   reader.onload = e=>{
     try{
       const backup = JSON.parse(e.target.result);
-      if(!backup || typeof backup!=='object'){ showToast('Arquivo de backup inválido'); return; }
+      if(!backup || typeof backup!=='object'){ showToast('Arquivo de backup inválido'); fcxCarga99({origem:'FCX · Restauração de backup', arquivos:fcxArq99(file), status:'erro', erro:'Arquivo de backup inválido: o conteúdo não é um backup do FCX.'}); return; }
       if(backup.config) state.config = backup.config;
       if(backup.salesHistory) state.salesHistory = backup.salesHistory;
       if(backup.monthMeta) state.monthMeta = backup.monthMeta;
@@ -2884,8 +2918,15 @@ function importarBackupFile(input){
       if(backup.monthParams) state.monthParams = backup.monthParams;
       if(backup.saidas) state.saidas = backup.saidas;
       if(backup.orcamento) state.orcamento = backup.orcamento;
+      if(fcxV1399()){
+        const BL99 = [['config','Configurações'],['salesHistory','Vendas diárias'],['monthMeta','Meses com meta'],['weightsByMonth','Meses com pesos'],['weeksByMonth','Meses com semanas'],['recebivelDiario','Dias de Recebível Diário'],['recebiveisCredsystem','Recebíveis Credsystem'],['prestacaoModalidadePct','Dias com prestação por modalidade'],['monthParams','Meses com parâmetros'],['saidas','Lançamentos de saída'],['orcamento','Meses com orçamento']];
+        const nBl = v=>Array.isArray(v) ? v.length : (v && typeof v==='object') ? Object.keys(v).length : 0;
+        const campos99 = BL99.filter(([k])=>backup[k]).map(([k,r])=>[r, k==='config' ? 'restaurado' : String(nBl(backup[k]))]), tot = BL99.reduce((a,[k])=>a+(backup[k] && k!=='config' ? nBl(backup[k]) : 0),0);
+        const desc99 = Object.keys(backup).filter(k=>!BL99.some(([x])=>x===k) && !/^(geradoEm|versao|version|app|exportadoEm)$/i.test(k)).map(k=>({tipo:'ignorada', item:'Bloco "'+k+'"', motivo:'não faz parte do FCX desta versão: ignorado'}));
+        fcxCarga99({origem:'FCX · Restauração de backup', arquivos:fcxArq99(file), lidas:tot, processadas:tot, inconsistencias:desc99, campos:campos99, vazioOk:true, mensagem:'O backup substitui os blocos presentes no arquivo; blocos ausentes ficam como estão.'});
+      }
       persistAll().then(()=>{ showToast('✓ Backup restaurado com sucesso'); render(); });
-    }catch(err){ showToast('Não consegui ler esse arquivo — confirme que é um backup exportado por aqui'); }
+    }catch(err){ showToast('Não consegui ler esse arquivo — confirme que é um backup exportado por aqui'); fcxCarga99({origem:'FCX · Restauração de backup', arquivos:fcxArq99(file), status:'erro', erro:'Não consegui ler o arquivo: confirme que é um backup exportado pelo FCX.'}); }
   };
   reader.readAsText(file);
 }
