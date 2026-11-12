@@ -205,6 +205,50 @@ export function msgBackup({ ok, ponto, horas, horasMaximas, dia }) {
     whatsapp: ok ? `✅ *Backup na Nuvem confirmado*\nPonto #${ponto.id} criado em ${qd}.` : `🔴 *Backup NÃO confirmado*\n${ponto ? `Último ponto automático: ${qd} (há ${num1(horas)} h).` : 'Nenhum ponto automático guardado.'} Confira a rotina agendada.` };
 }
 
+/* ----------------------------------------------------------------- 10 · Pagamentos aprovados nas Saídas do Dia (v14.02) */
+const NOME_ARQ = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'x';
+/** Blocos do PDF A4 do "Relatório de Pagamentos Aprovados" (o mesmo conteúdo que o painel monta no navegador): cabeçalho, aprovados, retidos e assinatura. */
+export function blocosPagamentosAprovados({ lote, itens }) {
+  const aprov = itens.filter(i => i.status === 'APROVADO'), ret = itens.filter(i => i.status === 'RETIDO');
+  const linhas = l => l.map(i => [dataBR(i.vencimento), i.fornecedor || '—', i.conta || '—', i.forma || '—', { v: brl(i.valor), negrito: true }]);
+  const cols = [{ rot: 'Venc.', peso: 11 }, { rot: 'Fornecedor / favorecido', peso: 31 }, { rot: 'Conta', peso: 24 }, { rot: 'Forma de pgto.', peso: 16 }, { rot: 'Valor', alinhar: 'd', peso: 18 }];
+  const blocos = [
+    { t: 'kpis', itens: [{ rot: 'Total previsto', valor: brl(lote.totalPrevisto), tom: 'neutro' }, { rot: 'Total autorizado', valor: brl(lote.totalAutorizado), tom: 'ok' }, { rot: 'Total retido', valor: brl(lote.totalRetido), tom: lote.totalRetido ? 'warn' : 'neutro' }] },
+    { t: 'h', texto: `Pagamentos aprovados (${aprov.length})` },
+    { t: 'tabela', colunas: cols, linhas: linhas(aprov), total: aprov.length ? ['Total autorizado', '', '', '', { v: brl(lote.totalAutorizado), negrito: true }] : undefined, vazio: 'Nenhum pagamento foi aprovado neste lote.' },
+    { t: 'h', texto: `Resumo dos retidos (${ret.length})` },
+  ];
+  if (ret.length) {
+    const grupo = new Map(); for (const i of ret) { const k = i.conta || '(sem conta)', g = grupo.get(k) || { n: 0, v: 0 }; g.n++; g.v += i.valor; grupo.set(k, g); }
+    blocos.push({ t: 'p', texto: 'Estes títulos NÃO foram autorizados para pagamento neste dia e ficam retidos até nova decisão.', tom: 'warn', tam: 9 },
+      { t: 'tabela', colunas: [{ rot: 'Conta', peso: 60 }, { rot: 'Qtd.', alinhar: 'd', peso: 12 }, { rot: 'Valor retido', alinhar: 'd', peso: 28 }], linhas: [...grupo].sort((a, b) => b[1].v - a[1].v).map(([k, g]) => [k, String(g.n), brl(g.v)]), total: ['Total retido', String(ret.length), { v: brl(lote.totalRetido), negrito: true }] },
+      { t: 'tabela', colunas: cols, linhas: linhas(ret) });
+  } else blocos.push({ t: 'p', texto: 'Nenhum título foi retido: tudo o que estava previsto para o dia foi autorizado.', tom: 'ok', tam: 9 });
+  blocos.push({ t: 'espaco', h: 10 }, { t: 'h', texto: 'Assinatura digital do aprovador' },
+    { t: 'p', texto: `${lote.aprovadorNome} · CPF ${lote.aprovadorCpf}`, negrito: true, tam: 11 },
+    { t: 'p', texto: `Aprovado em ${dh(lote.criadoEm)} (horário de Brasília), pelo usuário autenticado no Painel de Gestão${lote.ambiente ? ` (ambiente ${lote.ambiente})` : ''}.`, tam: 9 },
+    { t: 'p', texto: `Selo de integridade (SHA-256): ${lote.selo.slice(0, 32)}`, tam: 8, tom: 'neutro' }, { t: 'p', texto: lote.selo.slice(32), tam: 8, tom: 'neutro' },
+    { t: 'p', texto: `Lote nº ${lote.id}. Assinatura eletrônica simples: identifica o usuário que aprovou e sela o conteúdo deste relatório; não é certificado digital ICP-Brasil.`, tam: 8, tom: 'neutro' });
+  return blocos;
+}
+export function msgSaidasAprovadas({ lote, itens, agora, copia = false }) {
+  const aprov = itens.filter(i => i.status === 'APROVADO'), ret = itens.filter(i => i.status === 'RETIDO'), dia = dataBR(lote.dia), quem = `${lote.aprovadorNome} (CPF ${lote.aprovadorCpf})`;
+  const assunto = `${copia ? '[Cópia] ' : ''}Pagamentos aprovados · ${dia} · ${brl(lote.totalAutorizado)} liberados`;
+  const topo = aprov.slice().sort((a, b) => b.valor - a.valor).slice(0, 12);
+  const corpo = aviso(lote.totalAutorizado > 0 ? 'ok' : 'warn', `<b>${esc(brl(lote.totalAutorizado))} liberados para pagamento em ${esc(dia)}.</b> ${esc(plural(lote.qtdAprovados, 'título aprovado', 'títulos aprovados'))}${lote.qtdRetidos ? ` e ${esc(plural(lote.qtdRetidos, 'título retido', 'títulos retidos'))} (${esc(brl(lote.totalRetido))})` : ''}.`)
+    + kpisHtml([{ rot: 'Total previsto', valor: brl(lote.totalPrevisto), tom: 'neutro' }, { rot: 'Total autorizado', valor: brl(lote.totalAutorizado), tom: 'ok' }, { rot: 'Total retido', valor: brl(lote.totalRetido), tom: lote.totalRetido ? 'warn' : 'neutro' }])
+    + fatos([['Aprovado por', quem], ['Data e hora', dh(lote.criadoEm)], ['Lote', `nº ${lote.id}`]])
+    + titulo2(aprov.length > topo.length ? `Maiores pagamentos aprovados (${topo.length} de ${aprov.length})` : 'Pagamentos aprovados')
+    + tabelaHtml([{ rot: 'Venc.' }, { rot: 'Fornecedor' }, { rot: 'Conta' }, { rot: 'Valor', alinhar: 'd' }], topo.map(i => [dataBR(i.vencimento), i.fornecedor || '—', i.conta || '—', { v: brl(i.valor), negrito: true }]), { vazio: 'Nenhum pagamento foi aprovado.' })
+    + paragrafo(`O relatório completo (aprovados, resumo dos retidos e a assinatura digital do aprovador), em PDF A4, está anexado.${copia ? '' : ' Libere os pagamentos aprovados e mantenha retidos os demais.'}`);
+  const base64 = pdfB64({ titulo: 'Relatório de Pagamentos Aprovados', subtitulo: `Saídas do dia ${dia} · aprovadas por ${lote.aprovadorNome}`, emitidoEm: emitido(agora), rodape: `Lote nº ${lote.id} · Uso interno`, blocos: blocosPagamentosAprovados({ lote, itens }) });
+  const wa = `✅ *Pagamentos aprovados · ${dia}*\nValor liberado: *${brl(lote.totalAutorizado)}* (${plural(lote.qtdAprovados, 'título', 'títulos')})\n` + (lote.qtdRetidos ? `Retido: ${brl(lote.totalRetido)} (${plural(lote.qtdRetidos, 'título', 'títulos')})\n` : 'Nenhum título retido.\n')
+    + `Aprovado por ${lote.aprovadorNome} em ${dh(lote.criadoEm)}.\n_O relatório em PDF foi enviado por e-mail._`;
+  return { assunto, html: layoutEmail({ titulo: 'Pagamentos aprovados nas Saídas do Dia', corpo, preheader: `${brl(lote.totalAutorizado)} liberados · ${brl(lote.totalRetido)} retidos` }),
+    texto: `${assunto}\nPrevisto: ${brl(lote.totalPrevisto)} · Autorizado: ${brl(lote.totalAutorizado)} (${lote.qtdAprovados}) · Retido: ${brl(lote.totalRetido)} (${lote.qtdRetidos})\nAprovado por ${quem} em ${dh(lote.criadoEm)}. Lote nº ${lote.id}.\nPDF do relatório anexado.`, whatsapp: wa,
+    anexos: [anexo(`Pagamentos_Aprovados_${lote.dia}_lote${lote.id}_${NOME_ARQ(lote.aprovadorNome)}.pdf`, base64)] };
+}
+
 /* ----------------------------------------------------------------- amostras (Testar Disparo) — dados fictícios */
 export function amostra(chave, { hoje, agora }) {
   const L = [{ lojaId: 'a', codigo: '101', nome: 'Loja Centro', pontos: 96, zona: 'verde', resumo: {}, deducoes: [] }, { lojaId: 'b', codigo: '102', nome: 'Loja Norte', pontos: 78, zona: 'amarela', resumo: { x: { nome: 'Falta de caixa (numerário) isolada', n: 2, pontos: -20 } }, deducoes: [{ nome: 'Falta de caixa (numerário) isolada', pontos: -10, data: hoje, detalhe: 'Falta Caixa 1 · R$ 85,00' }] }, { lojaId: 'c', codigo: '103', nome: 'Loja Sul', pontos: 52, zona: 'vermelha', resumo: { x: { nome: 'Depósitos fora do prazo', n: 1, pontos: -3 } }, deducoes: [] }];
@@ -221,6 +265,9 @@ export function amostra(chave, { hoje, agora }) {
     case 'rh_inicio_ferias': return msgFeriasInicio({ nome: 'Colaborador Exemplo', inicio: hoje, fim: hoje, dias: 5 });
     case 'falta_caixa_tolerancia': return msgFaltaCaixa({ loja: '102 · Loja Norte', data: hoje, valor: 185.4, caixa: 'Caixa 1', dinheiroDia: 1200, pct: 15.4, temBase: true, toleranciaPct: 10, valorSemBase: 100 });
     case 'backup_nuvem_status': return msgBackup({ ok: true, dia: hoje, horasMaximas: 26, horas: 8, ponto: { id: 0, data_hora: new Date(agora).toISOString(), total_registros: 1234, tamanho_bytes: 512000 } });
+    case 'saidas_aprovadas': return msgSaidasAprovadas({ agora, lote: { id: 0, dia: hoje, criadoEm: new Date(agora).toISOString(), aprovadorNome: 'Diretor Exemplo', aprovadorCpf: '***.***.***-00', totalPrevisto: 38500, totalAutorizado: 31200, totalRetido: 7300, qtdTotal: 6, qtdAprovados: 4, qtdRetidos: 2, selo: 'a'.repeat(64), ambiente: '' },
+      itens: [{ status: 'APROVADO', fornecedor: 'Fornecedor A', conta: 'Fornecedores', forma: 'Boleto', vencimento: hoje, valor: 15000 }, { status: 'APROVADO', fornecedor: 'Fornecedor B', conta: 'Fornecedores', forma: 'PIX', vencimento: hoje, valor: 9200 }, { status: 'APROVADO', fornecedor: 'Folha de pagamento', conta: 'Folha', forma: 'Transferência', vencimento: hoje, valor: 5000 }, { status: 'APROVADO', fornecedor: 'Locador', conta: 'Aluguel', forma: 'Boleto', vencimento: hoje, valor: 2000 },
+        { status: 'RETIDO', fornecedor: 'Fornecedor C', conta: 'Fornecedores', forma: 'Boleto', vencimento: hoje, valor: 4800 }, { status: 'RETIDO', fornecedor: 'Prestador D', conta: 'Serviços', forma: 'PIX', vencimento: hoje, valor: 2500 }] });
     default: return null;
   }
 }

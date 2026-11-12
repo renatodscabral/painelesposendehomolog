@@ -1469,6 +1469,25 @@ table.oc-tab td.acts .btn{margin:2px 0;}
 .rr-tab{width:100%;font-size:13px;} .rr-tab td.num,.rr-tab th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;} .rr-tab tr.rr-grupo td{font-weight:600;} .rr-tab tr.rr-sub td{color:var(--ink-soft);font-size:12.5px;} .rr-tab tr.rr-sub td:first-child{padding-left:22px;}
 .rr-tab tr.rr-total td{font-weight:700;background:var(--navy-soft);color:var(--ink);} .rr-h3{font-size:13.5px;margin:12px 0 6px;} .rr-bloco h2{margin-bottom:10px;}
 .rr-tab tr[hidden]{display:none !important;} .rr-tgl{border:0;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1;padding:2px 6px;margin:0 2px 0 -6px;border-radius:6px;} .rr-tgl:hover{background:var(--navy-soft);} .rr-tgl:focus-visible{outline:2px solid var(--navy);outline-offset:1px;} .rr-resumo td:first-child{padding-left:12px;}
+/* v14.02 · Recebíveis em accordion (celular) e aprovação das Saídas do Dia */
+.rr-blocos-sal{margin-top:16px;} .rr-blocos-sal .rr-bloco{flex:1 1 100%;}
+.rr-acc{display:flex;flex-direction:column;gap:12px;} .rr-item{display:flex;flex-direction:column;gap:8px;min-width:0;} .rr-item > .rr-bloco{width:100%;flex:none;}
+.rr-kpi-tg{width:100%;cursor:pointer;} .rr-kpi-tg .ini-top{justify-content:space-between;align-items:center;} .rr-chev{font-size:16px;color:var(--ink-soft);line-height:1;} .rr-dica{font-size:11.5px;color:var(--ink-soft);margin-top:2px;} .rr-kpi-tg[aria-expanded="true"]{border-color:var(--accent);}
+@media(max-width:768px){.rr-cab .row{width:100%;} .rr-cab .row .btn{flex:1 1 auto;} .rr-mob .rr-bloco{padding:14px;} .rr-mob .tbl-wrap{overflow-x:auto;}}
+.aprv-barra{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:0 0 10px;}
+.aprv-cx{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel-2);display:flex;flex-direction:column;gap:2px;min-width:0;} .aprv-cx span{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;} .aprv-cx b{font-size:14.5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;} .aprv-cx.aut b{color:var(--ok);} .aprv-cx.ret b{color:var(--warn);}
+.aprv-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px;}
+.aprv-lista{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.aprv-lin{border-top:1px solid var(--line);} .aprv-lin:first-child{border-top:0;} .aprv-lab{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;cursor:pointer;} div.aprv-lab{cursor:default;}
+.aprv-chk{margin-top:3px;width:20px;height:20px;flex:none;accent-color:var(--navy,#1B2362);cursor:pointer;}
+.aprv-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;} .aprv-txt b{font-size:13.5px;overflow-wrap:anywhere;} .aprv-txt small{font-size:11.5px;color:var(--ink-soft);overflow-wrap:anywhere;} .aprv-hist{font-style:italic;}
+.aprv-val{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;font-size:13.5px;}
+.aprv-lin.aut{background:var(--ok-soft);} .aprv-lin.ret .aprv-val{color:var(--ink-soft);}
+.aprv-dock{position:sticky;bottom:8px;z-index:3;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:var(--shadow-md);} .aprv-dock .aprv-barra{margin:0;} .aprv-fin{width:100%;}
+.aprv-lotes{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:6px;} .aprv-lotes li{display:flex;gap:10px;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;} .aprv-lotes small{display:block;color:var(--ink-soft);font-size:11.5px;}
+.aprv-cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 12px;} .aprv-cmp-c{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px;background:var(--panel-2);display:flex;flex-direction:column;gap:2px;} .aprv-cmp-c.ok{border-left-color:var(--ok);} .aprv-cmp-c.bad{border-left-color:var(--bad);} .aprv-cmp-c span{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;} .aprv-cmp-c b{font-size:21px;font-variant-numeric:tabular-nums;} .aprv-cmp-c.bad b{color:var(--bad);} .aprv-cmp-c small{font-size:11.5px;color:var(--ink-soft);}
+.aprv-ok{font-size:14px;margin:0 0 10px;}
+@media(max-width:768px){.aprv-barra{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;} .aprv-cx{padding:6px 8px;} .aprv-cx span{font-size:9.5px;} .aprv-cx b{font-size:12.5px;} .aprv-cmp-c b{font-size:19px;}}
 .acc-matriz tr.acc-sub td{padding-top:0;border-top:0;} .acc-sub details{margin:0 0 8px 4px;border:1px dashed var(--line);border-radius:8px;padding:4px 10px;background:var(--panel-2);color:var(--ink);} /* v13.83.1: fundo do tema (antes ficava branco no escuro) */
 .acc-sub summary{cursor:pointer;font-size:12.5px;color:var(--ink-soft);padding:3px 0;} .acc-sub-g .lbl{color:var(--ink-soft);} .acc-sub-g .check{color:var(--ink);} .acc-sub summary b{color:var(--ink);font-weight:600;}
 .acc-sub-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 18px;padding:6px 0 4px;} .acc-sub-g .lbl{grid-column:1/-1;margin:6px 0 0;}
@@ -2265,6 +2284,16 @@ MATRIZ_MODULOS.find(m => m.id === 'viagens').extras = [['viagens.solicitar', 'Po
 /* v13.93 · "Pode ver salários" (rh.ver_salarios): chave PRÓPRIA da Gestão de Acessos, independente de perfil, cargo ou de ser gestor de área/setor.
    Só quem tem a opção marcada (ou o Master) enxerga salário, líquido e custo nos cards, na listagem e no relatório da equipe. Vale sem nível no módulo. */
 MATRIZ_MODULOS.find(m => m.id === 'rh').extras = [['rh.ver_salarios', 'Pode ver salários e custos de folha', 'Libera os valores de salário (base, líquido e custo) nos cards, na listagem e no relatório da equipe. Chave própria: ser gestor de área ou de setor NÃO libera salários (v13.93)', true, 'gestao_v1393']];
+/* v14.02 · DUAS PERMISSÕES NOVAS (só existem com o recurso gestao_v1402):
+   • recebiveis_aprovar_saidas — "Autorizar Pagamentos nas Saídas do Dia": libera os checkboxes, o Selecionar Todos e o botão "Finalizar Aprovações" na Tela Inicial. Exige "Ler" na Visão / Dashboard.
+   • liberacao_gerencial — "Liberação Gerencial / Aprovação de Exclusões": eleva o Operacional a todos os módulos de negócio habilitados (Ler, Modificar e Excluir) e às decisões e exclusões da Liberação Remota
+     (excluir adiantamento pago, zerar o FCX, viagens), sem nunca abrir Banco de dados/Migrações, Backup, Ambientes, Notificações, Gestão de Acessos, Auditoria, PDI, Ponto de Equilíbrio nem salários.
+     Não inclui autorizar pagamentos: essa é a opção acima, marcada à parte (separação de funções). Linha própria na matriz, sem Ler/Modificar/Excluir (soExtras). */
+MATRIZ_MODULOS.find(m => m.id === 'visao').extras = [['recebiveis_aprovar_saidas', 'Autorizar Pagamentos nas Saídas do Dia', 'Libera, na Tela Inicial, os checkboxes dos títulos a pagar, o botão Selecionar Todos e o botão Finalizar Aprovações (grava a decisão, avisa o Financeiro e o Master e gera o relatório de pagamentos aprovados). Exige Ler nesta linha (v14.02)', false, 'gestao_v1402']];
+MATRIZ_MODULOS.push({ id: 'gerencial', curto: 'Gerencial', rotulo: 'Liberação Gerencial (v14.02)', num: 'Gestão', ler: [], modificar: [], excluir: [], soExtras: true, v1383: true, rec: 'gestao_v1402',
+  extras: [['liberacao_gerencial', 'Liberação Gerencial / Aprovação de Exclusões', 'Opera todos os módulos de negócio habilitados e aprova ou executa exclusões (adiantamento pago, zerar FCX, equipe). Nunca abre Banco de dados, Backup, Ambientes, Notificações, Acessos, Auditoria, PDI nem salários; autorizar pagamentos é opção à parte', true]] });
+/** v14.02 · o que a Liberação Gerencial NÃO leva (cada uma tem a própria chave): salários e a autorização de pagamentos. */
+const GERENCIAL_FORA = ['rh.ver_salarios', 'recebiveis_aprovar_saidas'];
 
 /**
  * v13.83 · SUB-PERMISSÕES (telas e ações de cada módulo) — Gestão de Acessos.
@@ -2342,7 +2371,7 @@ const PermNorm = (() => {
         if (kk === 'sub') { if (v && typeof v === 'object') out.sub = v; return; }
         if (['modulos', 'matriz', 'niveis', 'permissoes', 'acessos'].includes(kk) && v && typeof v === 'object' && !dentro) return aplicar(v, true);
         if (IDS.has(kk)) { out[kk] = nivelDe(v); return; }
-        if (k.includes('.') && CON.has(k)) out[k] = sim(v); });
+        if (CON.has(k)) out[k] = sim(v); }); /* v14.02: também as opções extras sem ponto (recebiveis_aprovar_saidas, liberacao_gerencial) */
     };
     aplicar(p); return out;
   }
@@ -2365,6 +2394,9 @@ function permissoesDaMatriz(m = {}, perfil = 'OPERACIONAL') {
     const s = sub[mod.id] || {}, { fora, acoes } = Acesso.recorte(mod.id, s);
     const pode = (p, acao) => !fora.has(p) && (!acao || !acoes || acoes.has(p));
     mod.ler.forEach(p => pode(p) && out.add(p)); if (n >= 2) mod.modificar.forEach(p => pode(p, 1) && out.add(p)); if (n >= 3) mod.excluir.forEach(p => pode(p, 1) && out.add(p));
+  }
+  if (out.has('liberacao_gerencial') && !loja) { /* v14.02: a Liberação Gerencial vale por cima das telas e ações marcadas — todos os módulos de negócio habilitados, com Ler, Modificar e Excluir */
+    for (const mod of MATRIZ_MODULOS) { if (!matrizOk(mod, v83)) continue; [...mod.ler, ...mod.modificar, ...mod.excluir].forEach(p => out.add(p)); (mod.extras || []).forEach(([k, , , , rec]) => { if ((!rec || Recursos.ativo(rec)) && !GERENCIAL_FORA.includes(k)) out.add(k); }); }
   }
   return [...out];
 }
@@ -2429,6 +2461,10 @@ const Auth = {
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
   chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394') + '|' + Recursos.ativo('backup_nuvem_v1395'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
   recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; try { Repo._salarios93(); } catch { } /* v13.93 */ },
+  /** v14.02 · "Liberação Gerencial / Aprovação de Exclusões": Operacional com a opção marcada (o Master tem acesso próprio e irrestrito). Nunca abre as áreas técnicas. */
+  gerencial() { return g02() && !!this.id && !this.loja && this.perfil !== 'GESTOR' && this.can('liberacao_gerencial'); },
+  /** v14.02 · alçada de decisão de NEGÓCIO (Liberação Remota, exclusões, visão da empresa toda): o Master ou quem tem a Liberação Gerencial. */
+  alcada() { return this.perfil === 'GESTOR' || this.gerencial(); },
   loja: false,
   limpar() { this.id = null; this.usuario = null; this.funcionario = null; this.nome = ''; this.simulado = null; this.perfilReal = 'OPERACIONAL'; this.loja = false; this._v83 = undefined; this.matriz = PERMISSOES; },
 };
@@ -2450,7 +2486,7 @@ const Acesso = {
   sub(modId) { const u = Auth.usuario; return (u && u.perfil !== 'MASTER' && u.permissoes?.sub?.[modId]) || null; },
   /** A aba de uma tela está liberada para quem está logado? (Master, recurso desligado ou aba sem cadastro: sim.) */
   tela(rota, aba) {
-    if (!this.ativo() || Auth.perfil === 'GESTOR' || !aba) return true;
+    if (!this.ativo() || Auth.perfil === 'GESTOR' || Auth.gerencial() || !aba) return true; // v14.02: a Liberação Gerencial abre todas as telas dos módulos
     const c = TELAS_ROTA[rota]; if (!c || !c.telas.some(([k]) => k === aba)) return true;
     const s = this.sub(c.mod); return !s?.telas || s.telas.includes(rota + ':' + aba);
   },
@@ -2464,7 +2500,7 @@ const Acesso = {
   },
   /** Depois de desenhar: some com os botões de abas (e atalhos para elas) que a pessoa não pode abrir. */
   filtrarDom(raiz, rota) {
-    const c = TELAS_ROTA[rota]; if (!c || !this.ativo() || Auth.perfil === 'GESTOR') return;
+    const c = TELAS_ROTA[rota]; if (!c || !this.ativo() || Auth.perfil === 'GESTOR' || Auth.gerencial()) return;
     raiz.querySelectorAll(`[data-a="${c.aba}"][data-v]`).forEach(b => { if (!this.tela(rota, b.dataset.v)) b.remove(); });
   },
   /** Por que um módulo não abre para quem está logado (mensagem para o usuário e para a prévia da Gestão de Acessos). */
@@ -2494,6 +2530,8 @@ const Acesso = {
       out.push({ ok, t: m.titulo, nota, ed });
     }
     if (g.has('visao.dashboard')) { const ts = telasOk('menu'); out.unshift({ ok: !ts || ts.length > 0, t: 'Tela Inicial · Visão / Dashboard', nota: ts ? ts.join(' + ') : '' }); }
+    if (g.has('recebiveis_aprovar_saidas')) out.push({ ok: true, t: 'Tela Inicial · autoriza os pagamentos das Saídas do Dia', nota: 'checkboxes e Finalizar Aprovações' });
+    if (g.has('liberacao_gerencial')) out.unshift({ ok: true, t: 'Liberação Gerencial · todos os módulos de negócio habilitados e as decisões e exclusões da Liberação Remota', nota: 'nunca Banco de dados, Backup, Ambientes, Notificações, Acessos, Auditoria, PDI nem salários; os pagamentos têm opção própria' });
     return out;
   },
   /** v13.83 · Perfil Loja (ponta): trava de gravação no Repo — só a solicitação de viagem (com a opção), as Solicitações
@@ -4045,6 +4083,8 @@ function g98() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g99() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1399'); }
 /** v14.00 · o recurso da versão está ativo neste ambiente? (Central de Notificações e publicação do Resumo do Recebível) */
 function g00() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1400'); }
+/** v14.02 · o recurso da versão está ativo neste ambiente? (Recebíveis em accordion, aprovação das Saídas do Dia e as permissões novas) */
+function g02() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1402'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4058,7 +4098,9 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1400: { versao: 'v14.00', titulo: 'Central de Notificações (Sistema & Segurança): alertas automáticos por e-mail e WhatsApp — lembrete e prazo excedido de prestação de contas, IEO semanal por Gerente Regional (PDF), solicitações acima do SLA, relatório matinal executivo, férias, falta de caixa acima da tolerância e confirmação do Backup na Nuvem — com regras por evento, Testar Disparo e auditoria de envios com Reenviar Notificação' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1402: { versao: 'v14.02', titulo: 'Tela Inicial: Recebíveis em accordion no celular (Entradas, Saídas e Saldo do Dia); fluxo de autorização das Saídas do Dia pelo Diretor (checkboxes, Selecionar Todos, Previsto × Autorizado × Retido, Finalizar Aprovações com gravação no banco, aviso ao Financeiro e ao Master e Relatório de Pagamentos Aprovados em PDF A4 e CSV); revisão estrita das permissões (travas só-Master de negócio passam a respeitar as flags) e as novas permissões Autorizar Pagamentos nas Saídas do Dia e Liberação Gerencial / Aprovação de Exclusões' },
+    backup_corr_v1401: { versao: 'v14.01', titulo: 'Backup: com os pontos de restauração na nuvem ativos (recurso backup_nuvem_v1395 e banco do Netlify) o painel não pede mais o backup diário em .json nem bloqueia nenhum perfil; o ponto do primeiro acesso segue silencioso (falha de rede só no console) e o .json fica na Contingência de Backup e dados' },
+    gestao_v1400: { versao: 'v14.00', titulo: 'Central de Notificações (Sistema & Segurança): alertas automáticos por e-mail e WhatsApp — lembrete e prazo excedido de prestação de contas, IEO semanal por Gerente Regional (PDF), solicitações acima do SLA, relatório matinal executivo, férias, falta de caixa acima da tolerância e confirmação do Backup na Nuvem — com regras por evento, Testar Disparo e auditoria de envios com Reenviar Notificação' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
   num(v) { const m = String(v || '').match(/(\d+)\.(\d+)(?:\.(\d+))?/); return m ? Number(m[1]) * 1e6 + Number(m[2]) * 1e3 + Number(m[3] || 0) : 0; }, // v13.68.1: aceita correção (vX.Y.Z)
   maior(a, b) { return this.num(a) >= this.num(b) ? a : b; },
@@ -4756,6 +4798,7 @@ const Pessoal = {
     const u = Auth.usuario || {}, f = Auth.funcionario || null, master = Auth.perfilReal === 'GESTOR' && !Auth.simulado;
     const funcs = Repo.todos('funcionarios'), lojas = Repo.todos('lojas'), ids = new Set();
     if (master && this.ui.verBase) return { tipo: 'base', rotulo: 'Base inteira', ids: null };
+    if (Auth.gerencial()) return { tipo: 'base', rotulo: 'Base inteira (Liberação Gerencial)', ids: null }; // v14.02: a Liberação Gerencial alcança toda a equipe (aprovar e executar exclusões)
     const subordinados = () => { if (!f) return; ids.add(f.id); funcs.filter(x => x.gestorId === f.id).forEach(x => ids.add(x.id)); if (g93()) this.arvoreDe(f.id).forEach(i => ids.add(i)); /* v13.93: árvore transitiva */
       // v13.10: responsável de departamento de retaguarda vê quem está lotado no departamento e nos departamentos abaixo dele
       const deps = Repo.todos('rh_departamentos'), meus = new Set(deps.filter(d => d.responsavelId === f.id).map(d => d.id)); let mais = true;
@@ -10154,7 +10197,7 @@ Object.assign(Retaguarda, {
   podeExcluirLoja() { return Auth.can('retaguarda.ocorrencias.excluir'); },
   /** v13.40 · Ocorrências Globais (dados de clientes): só Master ou Financeiro da Retaguarda COM nível de editor no painel
       (a regra do banco para ret_ocorrencias é 'admin'; sem esse nível, o banco nega a leitura). */
-  podeVerOc() { return !!Auth.id && !!Auth.podeEditarNuvem && Auth.can('retaguarda.ver') && this.finRet(); },
+  podeVerOc() { return !!Auth.id && (!!Auth.podeEditarNuvem || (g02() && !!Cloud.base?.netlify)) && Auth.can('retaguarda.ver') && this.finRet(); }, // v14.02: no Netlify o servidor entrega estes dados a quem a matriz libera (financeiro da Retaguarda), não só ao Master
   podeLancarOc() { return this.podeVerOc() && this.podeLancarLoja(); },
   podeExcluirOc() { return this.podeVerOc() && this.podeExcluirLoja(); },
 
@@ -14110,7 +14153,7 @@ const Acessos = {
     if (u.perfil === 'MASTER') return '<span class="pill navy">Acesso total</span>';
     const p = u.permissoes || {}, v83 = Acesso.ativo(), sub = (v83 && p.sub) || {};
     const rec = m => { const s = sub[m.id]; if (!s || !p[m.id]) return ''; const nt = Acesso.telas(m.id).length; return [s.telas ? ` · ${s.telas.length}/${nt} telas` : '', s.acoes ? ` · ${s.acoes.length} ações` : ''].join(''); }; // v13.83
-    return `<div class="acc-chips">${MATRIZ_MODULOS.filter(m => matrizOk(m, v83)).map(m => `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${rec(m)}${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
+    return `<div class="acc-chips">${MATRIZ_MODULOS.filter(m => matrizOk(m, v83) && (!m.soExtras || (m.extras || []).some(([k]) => p[k] === true))).map(m => m.soExtras ? `<span class="acc-chip n-excluir" title="${esc(m.rotulo)}">${esc(m.curto)} <b>✓</b></span>` : `<span class="acc-chip n-${p[m.id] || 'nenhum'}" title="${esc(m.rotulo)}: ${this.nivelTxt[p[m.id] || '']}">${esc(m.curto)} <b>${this.nivelTxt[p[m.id] || '']}</b>${rec(m)}${(m.extras || []).filter(([k]) => p[k] === true).map(([, r]) => ` · ${esc(r)}`).join('')}</span>`).join('')}</div>`;
   },
   /** v13.12 · Abre a Gestão de Acessos já na pessoa (vindo do cadastro do RH): com usuário → Permissões; sem → destaque para ativar. */
   irPara(fid) {
@@ -14190,10 +14233,10 @@ const Acessos = {
     };
     const mods = MATRIZ_MODULOS.filter(m => matrizOk(m, v83));
     return `<div class="tbl-wrap"><table class="nolabel acc-matriz"><thead><tr><th>Módulo</th><th>Ler</th><th>Modificar</th><th>Excluir</th></tr></thead><tbody>
-      ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre, rec]) => { if (rec && !Recursos.ativo(rec)) return ''; const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
+      ${mods.map(m => `<tr><td><b>${esc(m.rotulo)}</b><div class="cell-sub">${esc(m.num)}</div></td>${m.soExtras ? '<td colspan="3" class="acc-cel"><span class="hint">Opção própria, sem Ler, Modificar ou Excluir</span></td>' : ['ler', 'modificar', 'excluir'].map(n => cel(m, n)).join('')}</tr>${(m.extras || []).map(([k, rot, dica, livre, rec]) => { if (rec && !Recursos.ativo(rec)) return ''; const sem = !master && !perm[m.id] && !(livre && v83); /* v13.61 · v13.83: opção "livre" não exige nível */
         if (livre && !v83) return '';
         return `<tr class="acc-extra"><td colspan="4"><label class="check"><input type="checkbox" data-extra="${k}" data-mod-extra="${m.id}" ${master || (perm[k] === true && !sem) ? 'checked' : ''} ${master || sem ? 'disabled' : ''}> <b>${esc(rot)}</b> <span class="hint">${esc(dica)}${sem ? ' · marque ao menos “Ler” no módulo' : ''}</span></label></td></tr>`; }).join('')}${subRow(m)}`).join('')}</tbody></table></div>
-      <p class="hint" style="margin-top:6px">Modificar inclui Ler; Excluir inclui Modificar e Ler.${v83 && !master ? ' Em “Telas e ações” escolha exatamente as abas e as ações liberadas em cada módulo: o menu e o roteador do painel só abrem o que estiver marcado.' : ''}${loja ? ' <b>Perfil Loja (ponta):</b> tudo somente leitura; grava apenas as Solicitações Operacionais (Modificar = pedir) e a Nova Solicitação de Viagem (opção “Pode solicitar viagem”).' : ''} ${master ? 'Master tem acesso total, inclusive à Gestão de Acessos, Auditoria e Backup.' : 'Salários, parâmetros de RH, Auditoria, Backup e Gestão de Acessos ficam só com o Master.'}</p>`;
+      <p class="hint" style="margin-top:6px">Modificar inclui Ler; Excluir inclui Modificar e Ler.${v83 && !master ? ' Em “Telas e ações” escolha exatamente as abas e as ações liberadas em cada módulo: o menu e o roteador do painel só abrem o que estiver marcado.' : ''}${loja ? ' <b>Perfil Loja (ponta):</b> tudo somente leitura; grava apenas as Solicitações Operacionais (Modificar = pedir) e a Nova Solicitação de Viagem (opção “Pode solicitar viagem”).' : ''} ${master ? 'Master tem acesso total, inclusive à Gestão de Acessos, Auditoria e Backup.' : 'Salários, parâmetros de RH, Auditoria, Backup e Gestão de Acessos ficam só com o Master.'}${g02() && !master ? ' <b>Liberação Gerencial</b> abre todos os módulos de negócio habilitados e as decisões e exclusões da Liberação Remota, mas nunca Banco de dados, Backup, Ambientes, Notificações, Acessos, Auditoria, PDI nem salários; <b>Autorizar Pagamentos</b> é uma opção à parte.' : ''}</p>`;
   },
   /** v13.83 · prévia do acesso real (o que o roteador vai abrir), com o motivo de cada bloqueio. */
   previaHTML(perm, perfil) {
@@ -14214,6 +14257,7 @@ const Acessos = {
       if (x.telas || x.acoes) sub[mod.id] = x;
     });
     if (Object.keys(sub).length) out.sub = sub;
+    MATRIZ_MODULOS.filter(x => x.soExtras).forEach(x => delete out[x.id]); /* v14.02: linha só de opção não grava nível */
     return out;
   },
   /** Cascata: marcar um nível marca e trava os de baixo; desmarcar deixa o nível logo abaixo. */
@@ -14573,7 +14617,7 @@ const Liberacao = {
   /** Pedidos que só o Master decide. */
   SO_MASTER: ['fcx-zerar', 'viagem', 'viagem-prestacao', 'viagem-exclusao'], // v13.22: dinheiro de viagem é decisão exclusiva do Master
 
-  master() { return Auth.perfil === 'GESTOR'; }, // Master simulando OPERACIONAL segue as regras do perfil simulado
+  master() { return Auth.alcada(); }, // Master simulando OPERACIONAL segue as regras do perfil simulado · v14.02: Master ou Liberação Gerencial (decide pedidos e executa exclusões)
   eu() { return Auth.funcionario || null; },
   expirado(r) { return !!r.expiraEm && Date.now() > Date.parse(r.expiraEm); },
   statusDe(r) { return r.status === 'pendente' && this.expirado(r) ? 'expirado' : r.status; },
@@ -15213,7 +15257,7 @@ const Viagens = {
   PAGOS: ['aguardando_prestacao', 'prestacao_enviada', 'concluido'],
 
   /* ---------------- quem vê / quem faz ---------------- */
-  master() { return Auth.perfil === 'GESTOR'; },
+  master() { return Auth.alcada(); }, // v14.02: Master ou Liberação Gerencial
   verTodos() { return this.master() || Auth.can('viagens.ver'); },
   /**
    * v13.22 · Financeiro = quem lança, paga e acompanha: Master, quem tem "Viagens · Modificar" na Gestão de Acessos,
@@ -18861,7 +18905,7 @@ ${this.v74() ? `<div class="upl ${a.ofx ? 'ok' : ''}"><span class="lbl">Arquivo 
    ===================================================================== */
 const Inicio = {
   ui: { aba: 'recebivel' }, // v13.83: Visão / Dashboard — 1ª aba ao abrir o sistema
-  master() { return Auth.perfil === 'GESTOR'; },
+  master() { return Auth.alcada(); }, // v14.02: Master ou Liberação Gerencial veem a empresa toda
   /** v13.83 · quem tem "Visão / Dashboard" vê a Tela Inicial em duas abas: Resumo do Recebível do Dia (padrão) e Indicadores. */
   visao() { return Acesso.ativo() && Auth.can('visao.dashboard'); },
   /** Lojas no alcance de quem está logado: null = todas (Master ou visão sem recorte por loja). */
@@ -18972,6 +19016,7 @@ const Inicio = {
       ${ks.length ? `<div class="ini-grid">${ks.map(card).join('')}</div>` : '<div class="panel"><div class="empty">Nenhum indicador disponível para o seu acesso. Use o menu ao lado para navegar.</div></div>'}
       ${!Cloud.nuvem ? `<div class="note warn" style="margin-top:24px">Modo local: os dados estão sendo salvos apenas neste navegador. Abra o painel pelo link do claude.ai para usar a nuvem compartilhada.</div>` : ''}`;
   },
+  mudanca(a, el) { if (a.startsWith('ini-rec')) return ResumoRecebivel.mudanca(a, el); }, // v14.02
   acao(a, el) {
     if (a === 'ini-aba') { this.ui.aba = el.dataset.v; return App.render(); } // v13.83
     if (a.startsWith('ini-rec')) return ResumoRecebivel.acao(a, el);
@@ -18994,6 +19039,197 @@ window.Inicio = Inicio;
        valendo só quando a carga do arquivo é de hoje (a mesma crítica de carga do relatório).
    Lê o FCX pelo cache do painel (FCX.storage → banco do painel/IndexedDB no modo local): funciona offline-first.
    ===================================================================== */
+/* ==================== v14.02 · APROVAÇÃO DE PAGAMENTOS DAS SAÍDAS DO DIA ==================== */
+/**
+ * v14.02 · cliente de /api/aprovacoes-saidas (só no Netlify, atrás do recurso gestao_v1402). Quem tem "Autorizar Pagamentos nas Saídas do Dia" (ou é Master)
+ * marca os títulos das Saídas do Dia, acompanha a barra Total Previsto | Total Autorizado | Total Retido e toca em "Finalizar Aprovações": o servidor grava o lote
+ * (status de cada título, aprovador e data/hora), o painel avisa o Financeiro e o Master pela Central de Notificações e abre o "Relatório de Pagamentos Aprovados" (PDF A4 e CSV).
+ * Quem só enxerga o FCX vê as decisões já gravadas (somente leitura). A "Liberação Gerencial" NÃO autoriza pagamentos.
+ */
+const AprovSaidas = {
+  _est: {}, _sel: {}, _carr: {}, _erro: {}, _env: false, _tent: null,
+  hab() { return g02() && !!Cloud.base?.netlify && !!Auth.id; },
+  pode() { return this.hab() && !Auth.loja && Auth.can('recebiveis_aprovar_saidas'); },
+  podeListar() { return this.hab() && (this.pode() || Auth.can('fcx.ver')); },
+  R(v) { return Math.round((Number(v) || 0) * 100) / 100; },
+
+  /* ---------------- estado gravado no servidor ---------------- */
+  garantir(dia) { if (!this.podeListar() || this._est[dia] || this._carr[dia]) return; this.carregar(dia); },
+  async carregar(dia) {
+    if (this._carr[dia]) return; this._carr[dia] = true;
+    try {
+      const j = await Cloud.base._req('POST', '/api/aprovacoes-saidas', { acao: 'estado', dia });
+      this._est[dia] = { ok: true, decisoes: j.decisoes || {}, lotes: j.lotes || [] }; this._erro[dia] = '';
+      if (!this._sel[dia]) this._sel[dia] = Object.fromEntries(Object.entries(this._est[dia].decisoes).filter(([, d]) => d && d.status === 'APROVADO').map(([id]) => [id, true]));
+    } catch (e) {
+      this._est[dia] = { ok: false, decisoes: {}, lotes: [] };
+      this._erro[dia] = e.dados?.codigo === 'sem_esquema' ? 'As tabelas da aprovação de pagamentos ainda não existem neste banco: em Backup e dados › Banco de dados · Migrações, execute as migrações.' : (e.message || String(e));
+    }
+    this._carr[dia] = false; if (App.rota === 'menu') App.agendarRender();
+  },
+
+  /* ---------------- seleção e totais ---------------- */
+  sel(dia) { return (this._sel[dia] ||= {}); },
+  marcar(r, id, on) { const s = this.sel(r.d); if (on) s[id] = true; else delete s[id]; },
+  todos(r, on) { const s = this.sel(r.d); r.titulos.forEach(t => { if (on) s[t.id] = true; else delete s[t.id]; }); },
+  /** os títulos tratados como autorizados: a marcação de quem aprova ou, para quem só consulta, as decisões já gravadas */
+  autorizados(r) {
+    if (this.pode()) { const s = this._sel[r.d] || {}; return new Set(r.titulos.filter(t => s[t.id]).map(t => t.id)); }
+    const d = this._est[r.d]?.decisoes || {}; return new Set(r.titulos.filter(t => d[t.id]?.status === 'APROVADO').map(t => t.id));
+  },
+  totais(r) {
+    const aut = this.autorizados(r), dec = this._est[r.d]?.decisoes || {}, ap = this.pode(); let previsto = 0, autorizado = 0, retido = 0, sem = 0, nAut = 0, nRet = 0, nSem = 0;
+    r.titulos.forEach(t => {
+      previsto += t.valor;
+      if (aut.has(t.id)) { autorizado += t.valor; nAut++; } else if (ap || dec[t.id]?.status === 'RETIDO') { retido += t.valor; nRet++; } else { sem += t.valor; nSem++; }
+    });
+    return { previsto: this.R(previsto), autorizado: this.R(autorizado), retido: this.R(retido), semDecisao: this.R(sem), nAut, nRet, nSem, n: r.titulos.length };
+  },
+  rotAviso(l) { return { enviado: 'aviso enviado', enviado_com_erros: 'aviso enviado com falhas', erro: 'falha no aviso', regra_desligada: 'aviso desligado na Central' }[l.notificacao] || 'aviso pendente'; },
+
+  /* ---------------- tela: lista de títulos + barra + Finalizar ---------------- */
+  lista(r) {
+    if (!this.podeListar()) return '';
+    const B = v => Fmt.brl(v), ap = this.pode(), est = this._est[r.d], dec = est?.decisoes || {}, sel = this._sel[r.d] || {}, erro = this._erro[r.d];
+    if (!r.titulos.length) return `<p class="muted" style="margin:0 0 8px">${r.nSaidas ? 'Os títulos do dia não têm identificação no FCX: importe o arquivo de Entradas e Saídas de novo para poder autorizá-los.' : 'Nenhuma conta a pagar hoje.'}</p>`;
+    const t = this.totais(r);
+    const cx = (rot, k, v) => `<div class="aprv-cx ${k}"><span>${rot}</span><b data-aprv="${k}">${B(v)}</b></div>`;
+    const barra = `<div class="aprv-barra" role="group" aria-label="Resumo da autorização de pagamentos">${cx('Total Previsto', 'prev', t.previsto)}${cx('Total Autorizado (R$)', 'aut', t.autorizado)}${cx('Total Retido (R$)', 'ret', t.retido)}${!ap && t.nSem ? cx('Sem decisão', 'sem', t.semDecisao) : ''}</div>`;
+    const quando = d => d ? `${d.status === 'APROVADO' ? 'Aprovado' : 'Retido'} por ${esc(d.por)} em ${Fmt.dataHora(d.em)}` : 'Sem decisão registrada';
+    const lin = x => {
+      const d = dec[x.id], on = !!sel[x.id], st = ap ? (on ? 'aut' : 'ret') : d ? (d.status === 'APROVADO' ? 'aut' : 'ret') : 'sem';
+      const corpo = `<span class="aprv-txt"><b>${esc(x.fornecedor || '(sem fornecedor)')}</b><small>${[x.conta, x.forma, 'venc. ' + Fmt.data(x.vencimento)].filter(Boolean).map(esc).join(' · ')}</small>${x.descricao ? `<small>${esc(x.descricao)}</small>` : ''}<small class="aprv-hist">${quando(d)}</small></span><span class="aprv-val">${B(x.valor)}</span>`;
+      return ap ? `<li class="aprv-lin ${st}" data-id="${esc(x.id)}"><label class="aprv-lab"><input type="checkbox" class="aprv-chk" data-a="ini-rec-chk" data-id="${esc(x.id)}" ${on ? 'checked' : ''} aria-label="Autorizar o pagamento de ${esc(x.fornecedor || 'título')} no valor de ${B(x.valor)}">${corpo}</label></li>`
+        : `<li class="aprv-lin ${st}" data-id="${esc(x.id)}"><div class="aprv-lab">${corpo}</div></li>`;
+    };
+    const lotes = (est?.lotes || []).slice(0, 5);
+    const histor = lotes.length ? `<h3 class="rr-h3">Aprovações já finalizadas hoje</h3><ul class="aprv-lotes">${lotes.map(l => `<li><span><b>Lote nº ${l.id}</b> · ${Fmt.dataHora(l.criadoEm)} · ${esc(l.aprovadorNome)}<small>Autorizado ${B(l.totalAutorizado)} · Retido ${B(l.totalRetido)} · ${this.rotAviso(l)}</small></span><button type="button" class="btn ghost sm" data-a="ini-rec-rel" data-id="${l.id}">Relatório</button></li>`).join('')}</ul>` : '';
+    const aviso = erro ? `<div class="note warn" style="margin:0 0 10px">⚠ ${esc(erro)} <button type="button" class="btn ghost sm" data-a="ini-rec-atualizar">Tentar de novo</button></div>` : !est ? '<p class="hint" style="margin:0 0 8px">Carregando as aprovações já gravadas…</p>' : '';
+    const sem = r.nSaidas > r.titulos.length ? `<div class="note warn" style="margin:0 0 10px">⚠ ${r.nSaidas - r.titulos.length} título(s) sem identificação no FCX não aparecem aqui; importe de novo o arquivo de Entradas e Saídas.</div>` : '';
+    if (!ap) return `<h3 class="rr-h3" style="margin-top:0">Títulos a pagar hoje (somente consulta)</h3>${aviso}${sem}${barra}<ul class="aprv-lista" data-aprv-lista>${r.titulos.map(lin).join('')}</ul><p class="hint" style="margin:0 0 6px">Quem tem a permissão “Autorizar Pagamentos nas Saídas do Dia” marca os títulos e finaliza as aprovações. Aqui aparece a decisão mais recente de cada título.</p>${histor}`;
+    return `<h3 class="rr-h3" style="margin-top:0">Títulos a pagar hoje — autorize os pagamentos</h3>${aviso}${sem}
+      <div class="aprv-tools"><button type="button" class="btn sec sm" data-a="ini-rec-todos" data-v="1">Selecionar Todos</button><button type="button" class="btn ghost sm" data-a="ini-rec-todos" data-v="0">Limpar seleção</button><span class="hint" data-aprv-n>${t.nAut} de ${t.n} título(s) autorizado(s)</span></div>
+      <ul class="aprv-lista" data-aprv-lista>${r.titulos.map(lin).join('')}</ul>
+      <div class="aprv-dock">${barra}<button type="button" class="btn aprv-fin" data-a="ini-rec-fin" ${this._env || !est ? 'disabled' : ''}>${this._env ? 'Gravando…' : 'Finalizar Aprovações'}</button></div>
+      <p class="hint" style="margin:8px 0 0">Os títulos marcados ficam APROVADOS; os demais ficam RETIDOS. Ao finalizar, ficam gravados o seu nome, o seu CPF e a data/hora, o Financeiro e o Master são avisados e o relatório é gerado.</p>${histor}`;
+  },
+  /** atualiza a tela sem refazê-la (mantém a rolagem): números da barra, cor das linhas, contador e o comparativo do saldo */
+  pintar() {
+    const r = ResumoRecebivel._r; if (!r || !r.titulos) return;
+    const t = this.totais(r), set = (k, v) => $$(`[data-aprv="${k}"]`).forEach(e => { e.textContent = Fmt.brl(v); });
+    set('prev', t.previsto); set('aut', t.autorizado); set('ret', t.retido); set('sem', t.semDecisao);
+    $$('.aprv-lin').forEach(li => { const c = $('input.aprv-chk', li); if (c) { li.classList.toggle('aut', c.checked); li.classList.toggle('ret', !c.checked); } });
+    const n = $('[data-aprv-n]'); if (n) n.textContent = `${t.nAut} de ${t.n} título(s) autorizado(s)`;
+    const sb = $('[data-aprv-saldo]'); if (sb) sb.innerHTML = this.saldo(r);
+  },
+
+  /* ---------------- Saldo do dia: previsto x projetado pós-aprovações ---------------- */
+  saldo(r) {
+    const B = v => Fmt.brl(v);
+    if (r.saidas == null) return '<p class="muted" style="margin:0">O saldo do dia aparece quando o arquivo de Entradas e Saídas de hoje estiver importado no FCX.</p>';
+    const ap = this.pode(), t = this.podeListar() && r.titulos.length ? this.totais(r) : null, registrou = !!t && (ap || t.nAut + t.nRet > 0);
+    const proj = registrou ? this.R(r.entradas - t.autorizado) : null, dif = proj == null ? null : this.R(proj - r.saldo), cor = v => v == null ? '' : v >= 0 ? 'ok' : 'bad';
+    const nota = ap ? 'O saldo projetado muda na hora conforme você marca ou desmarca os títulos das Saídas do Dia.' : !t ? 'O saldo projetado aparece para quem acompanha as aprovações (FCX) ou autoriza pagamentos.' : registrou ? 'Considera só os pagamentos já autorizados nas aprovações gravadas (a decisão mais recente de cada título).' : 'Nenhuma aprovação foi gravada hoje: o saldo projetado aparece depois da primeira aprovação.';
+    return `<div class="aprv-cmp"><div class="aprv-cmp-c ${cor(r.saldo)}" data-cmp="prev"><span>Saldo Previsto Total</span><b>${B(r.saldo)}</b><small>entradas − todas as saídas do dia</small></div><div class="aprv-cmp-c ${cor(proj)}" data-cmp="proj"><span>Saldo Projetado Pós-Aprovações</span><b>${proj == null ? '—' : B(proj)}</b><small>entradas − pagamentos autorizados</small></div></div>
+      <div class="tbl-wrap"><table class="rr-tab rr-saldo"><tbody>
+        <tr><td>Entradas do dia</td><td class="num">${B(r.entradas)}</td></tr>
+        <tr><td>(−) Saídas previstas (todos os títulos)</td><td class="num">${B(r.saidas)}</td></tr>
+        <tr class="rr-total"><td>Saldo Previsto Total</td><td class="num">${B(r.saldo)}</td></tr>
+        <tr><td>(−) Pagamentos autorizados${ap ? ' (marcados)' : ''}</td><td class="num">${t ? B(t.autorizado) : '—'}</td></tr>
+        <tr class="rr-total"><td>Saldo Projetado Pós-Aprovações</td><td class="num">${proj == null ? '—' : B(proj)}</td></tr>
+        <tr><td>Diferença (projetado − previsto)</td><td class="num">${dif == null ? '—' : B(dif)}</td></tr>
+      </tbody></table></div><p class="hint" style="margin:6px 0 0">${nota}</p>`;
+  },
+
+  /* ---------------- Finalizar Aprovações ---------------- */
+  _chave(dia, itens) {
+    const ass = itens.map(x => x.id + ':' + x.status).join('|');
+    if (!this._tent || this._tent.dia !== dia || this._tent.ass !== ass) { let rnd = ''; try { const b = new Uint8Array(9); crypto.getRandomValues(b); rnd = [...b].map(x => x.toString(36).padStart(2, '0')).join(''); } catch { rnd = Math.random().toString(36).slice(2, 12); } this._tent = { dia, ass, chave: ('ap' + Date.now().toString(36) + rnd).replace(/[^A-Za-z0-9]/g, '').slice(0, 40) }; }
+    return this._tent.chave;
+  },
+  textoAviso(n) {
+    if (!n) return { ok: false, texto: 'O aviso não foi enviado.' };
+    if (n.motivo === 'modulo_desligado') return { ok: false, texto: 'A Central de Notificações está desligada neste ambiente: ninguém foi avisado. As aprovações estão gravadas.' };
+    if (n.motivo === 'regra_desligada') return { ok: false, texto: 'O aviso “Pagamentos aprovados” está desligado na Central de Notificações (Notificações › Regras): ninguém foi avisado. As aprovações estão gravadas.' };
+    if (n.motivo === 'sem_destinatarios') return { ok: false, texto: 'Nenhum destinatário do Financeiro ou Master tem e-mail ou WhatsApp cadastrado: ninguém foi avisado. As aprovações estão gravadas.' };
+    if (n.repetido) return { ok: n.enviado !== false, texto: 'O aviso deste lote já havia sido enviado antes.' };
+    if (n.enviado) return { ok: !n.erros, texto: `Aviso enviado ao Financeiro e ao Master: ${n.enviados} mensagem(ns) para ${n.destinatarios || '—'} destinatário(s)${n.erros ? `, com ${n.erros} falha(s) (veja Notificações › Histórico)` : ''}.` };
+    return { ok: false, texto: n.erros ? `O aviso falhou (${n.erros} erro(s)); veja Notificações › Histórico.` : 'O aviso não foi enviado.' };
+  },
+  async finalizar(r) {
+    if (this._env || !this.pode() || !r || !r.titulos?.length) return;
+    const t = this.totais(r), aut = this.autorizados(r), B = v => Fmt.brl(v);
+    const ok = await UI.confirmar('Finalizar Aprovações', `Autorizar o pagamento de <b>${t.nAut}</b> título(s), no total de <b>${B(t.autorizado)}</b>, e reter <b>${t.nRet}</b> título(s), no total de <b>${B(t.retido)}</b>, das Saídas de ${Fmt.data(r.d)}?<br><br>Ficam gravados o seu nome, o seu CPF e a data/hora; o Financeiro e o Master serão avisados e o relatório será gerado.${t.nAut ? '' : '<br><br><b>Nenhum título está marcado: todos ficarão RETIDOS.</b>'}`, 'Finalizar Aprovações');
+    if (!ok) return;
+    const itens = r.titulos.map(x => ({ id: x.id, status: aut.has(x.id) ? 'APROVADO' : 'RETIDO', valor: x.valor }));
+    this._env = true; this._repintarBotao();
+    let res;
+    try { res = await Cloud.base._req('POST', '/api/aprovacoes-saidas', { acao: 'finalizar', dia: r.d, idem: this._chave(r.d, itens), itens }); }
+    catch (e) {
+      this._env = false; this._repintarBotao();
+      if (e.status === 409) { delete this._est[r.d]; await ResumoRecebivel.atualizar(true); App.render(); return UI.toast('Os títulos do FCX mudaram desde que você abriu a tela. A lista foi atualizada: confira a seleção e finalize de novo.'); }
+      return UI.toast(e.message || String(e));
+    }
+    this._tent = null; const lote = res.lote, its = res.itens || [];
+    delete this._est[r.d]; this._sel[r.d] = Object.fromEntries(its.filter(x => x.status === 'APROVADO').map(x => [x.tituloId, true])); this._env = false;
+    let aviso; try { aviso = this.textoAviso(await Cloud.base._req('POST', '/api/notificar', { acao: 'saidas-aprovadas', loteId: lote.id })); } catch (e) { aviso = { ok: false, texto: 'As aprovações foram gravadas, mas o aviso não foi enviado: ' + (e.message || e) }; }
+    this.carregar(r.d); App.render();
+    this.relatorio(lote, its, aviso, true);
+  },
+  _repintarBotao() { const b = $('[data-a="ini-rec-fin"]'); if (b) { b.disabled = this._env; b.textContent = this._env ? 'Gravando…' : 'Finalizar Aprovações'; } },
+  async reabrir(id) {
+    try { const j = await Cloud.base._req('POST', '/api/aprovacoes-saidas', { acao: 'lote', id: Number(id) }); this.relatorio(j.lote, j.itens || [], null, false); }
+    catch (e) { UI.toast(e.message || String(e)); }
+  },
+
+  /* ---------------- relatório: janela, PDF A4 e CSV ---------------- */
+  relatorio(lote, itens, aviso, novo) {
+    const B = v => Fmt.brl(v);
+    UI.modal({ titulo: 'Relatório de Pagamentos Aprovados', largo: true, acoes: [{ rotulo: 'Fechar', classe: 'sec' }],
+      corpo: `<div class="aprv-ok"><b>${novo ? 'Aprovações finalizadas' : 'Aprovações gravadas'}</b> — Saídas de ${Fmt.data(lote.dia)} · Lote nº ${lote.id}</div>
+        <div class="aprv-barra"><div class="aprv-cx prev"><span>Total Previsto</span><b>${B(lote.totalPrevisto)}</b></div><div class="aprv-cx aut"><span>Total Autorizado (R$)</span><b>${B(lote.totalAutorizado)}</b></div><div class="aprv-cx ret"><span>Total Retido (R$)</span><b>${B(lote.totalRetido)}</b></div></div>
+        <p class="hint" style="margin:0 0 8px">${lote.qtdAprovados} aprovado(s) · ${lote.qtdRetidos} retido(s) · aprovador: <b>${esc(lote.aprovadorNome)}</b> (CPF ${esc(lote.aprovadorCpf)}) · ${Fmt.dataHora(lote.criadoEm)} · selo ${esc(String(lote.selo || '').slice(0, 12))}…</p>
+        ${aviso ? `<div class="note ${aviso.ok ? '' : 'warn'}" style="margin:0 0 10px" data-aprv-aviso>${aviso.ok ? '✔' : '⚠'} ${esc(aviso.texto)}</div>` : ''}
+        <div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" data-rel="pdf">Relatório em PDF (A4)</button><button type="button" class="btn sec" data-rel="csv">Baixar CSV</button></div>`,
+      aoAbrir: m => m.addEventListener('click', e => { const b = e.target.closest('[data-rel]'); if (!b) return; if (b.dataset.rel === 'pdf') this.pdf(lote, itens); else this.baixarCsv(lote, itens); }) });
+  },
+  nomeBase(lote) { return `Pagamentos_Aprovados_${lote.dia}_lote${lote.id}`; },
+  pdf(lote, itens) { Documento.previa('Relatório de Pagamentos Aprovados · ' + Fmt.data(lote.dia), this.htmlRelatorio(lote, itens), this.nomeBase(lote)); },
+  baixarCsv(lote, itens) {
+    const n = v => (Number(v) || 0).toFixed(2).replace('.', ','), seg = v => { const x = String(v ?? ''); return /^[=+\-@\t\r]/.test(x) ? "'" + x : x; };
+    const cab = ['Lote', 'Dia das saídas', 'Status', 'Vencimento', 'Fornecedor', 'Conta contábil', 'Centro de custo', 'Forma de pagamento', 'Descrição', 'Valor (R$)', 'Aprovador', 'CPF do aprovador (mascarado)', 'Decisão em'];
+    const linhas = itens.map(x => [lote.id, Fmt.data(lote.dia), x.status, Fmt.data(x.vencimento), seg(x.fornecedor), seg(x.conta), seg(x.centro), seg(x.forma), seg(x.descricao), n(x.valor), seg(lote.aprovadorNome), lote.aprovadorCpf, Fmt.dataHora(lote.criadoEm)]);
+    const tot = (rot, v) => ['', '', rot, '', '', '', '', '', '', n(v)];
+    const matriz = [cab, ...linhas, [], tot('TOTAL PREVISTO', lote.totalPrevisto), tot('TOTAL AUTORIZADO', lote.totalAutorizado), tot('TOTAL RETIDO', lote.totalRetido)];
+    return Documento.baixarArquivo(this.nomeBase(lote) + '.csv', new Blob(['﻿' + CSV.gerar(matriz, ';')], { type: 'text/csv' }));
+  },
+  htmlRelatorio(lote, itens) {
+    const B = v => Fmt.brl(v), tot = l => this.R(l.reduce((a, x) => a + (Number(x.valor) || 0), 0));
+    const apr = itens.filter(x => x.status === 'APROVADO'), ret = itens.filter(x => x.status === 'RETIDO');
+    const lin = x => `<tr><td>${Fmt.data(x.vencimento)}</td><td><b>${esc(x.fornecedor || '—')}</b>${x.descricao ? `<br><span class="s">${esc(x.descricao)}</span>` : ''}</td><td>${esc(x.conta || '—')}</td><td>${esc(x.forma || '—')}</td><td class="n">${B(x.valor)}</td></tr>`;
+    const cab = '<thead><tr><th>Venc.</th><th>Fornecedor</th><th>Conta contábil</th><th>Forma</th><th class="n">Valor</th></tr></thead>';
+    const porConta = Object.values(ret.reduce((m, x) => { const c = x.conta || '(não informado)'; const g = (m[c] ||= [c, 0, 0]); g[1]++; g[2] += Number(x.valor) || 0; return m; }, {})).sort((a, b) => b[2] - a[2]);
+    const selo = String(lote.selo || '');
+    const corpo = `${Documento.cabecalho('Relatório de Pagamentos Aprovados', `Saídas do dia ${Fmt.data(lote.dia)} · Lote nº ${lote.id}`)}
+      <div class="cards"><div class="c"><div class="t">Total previsto</div><div class="v">${B(lote.totalPrevisto)}</div><div class="s">${lote.qtdTotal} título(s)</div></div><div class="c aut"><div class="t">Total autorizado</div><div class="v">${B(lote.totalAutorizado)}</div><div class="s">${lote.qtdAprovados} título(s) aprovado(s)</div></div><div class="c ret"><div class="t">Total retido</div><div class="v">${B(lote.totalRetido)}</div><div class="s">${lote.qtdRetidos} título(s) retido(s)</div></div></div>
+      <h2>Pagamentos aprovados (${apr.length})</h2>
+      ${apr.length ? `<table class="det">${cab}<tbody>${apr.map(lin).join('')}<tr class="tot"><td colspan="4">Total autorizado</td><td class="n">${B(tot(apr))}</td></tr></tbody></table>` : '<p class="s">Nenhum pagamento foi aprovado neste lote.</p>'}
+      <h2>Resumo dos títulos retidos (${ret.length})</h2>
+      ${ret.length ? `<table class="det"><thead><tr><th>Conta contábil</th><th class="n">Qtd.</th><th class="n">Valor</th></tr></thead><tbody>${porConta.map(([c, q, v]) => `<tr><td>${esc(c)}</td><td class="n">${q}</td><td class="n">${B(v)}</td></tr>`).join('')}<tr class="tot"><td>Total retido</td><td class="n">${ret.length}</td><td class="n">${B(tot(ret))}</td></tr></tbody></table>
+        <p class="s" style="margin:10px 0 4px"><b>Títulos retidos</b> (ficam para uma próxima aprovação):</p><table class="det">${cab}<tbody>${ret.map(lin).join('')}</tbody></table>` : '<p class="s">Nenhum título foi retido.</p>'}
+      <div class="assin"><div class="t">Assinatura digital do aprovador</div><div class="nome">${esc(lote.aprovadorNome)}</div>
+        <div>CPF ${esc(lote.aprovadorCpf)} · aprovado em ${Fmt.dataHora(lote.criadoEm)}</div>
+        <div class="selo">Selo de integridade (SHA-256)<br>${esc(selo.slice(0, 32))}<br>${esc(selo.slice(32))}</div>
+        <div class="s">Lote nº ${lote.id}. Assinatura eletrônica simples: identifica o aprovador pela sessão autenticada no Painel e registra data, hora e o conteúdo do lote. Não é certificado digital ICP-Brasil.</div></div>
+      <div class="foot">Esposende · Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')} a partir do lote nº ${lote.id}</div>`;
+    const css = `body{font-size:12px;} .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 8px;} .c{border:1px solid #D9DCEA;border-radius:10px;padding:8px 10px;break-inside:avoid;} .c .t{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#8E93AE;font-weight:600;} .c .v{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#1B2362;margin-top:2px;} .c.aut{border-left:4px solid #1D7A4E;} .c.ret{border-left:4px solid #C08A1E;} .s{font-size:10px;color:#585E7F;}
+      table.det{font-size:11px;} table.det td{padding:4px 8px;} table.det th.n,table.det td.n{text-align:right;white-space:nowrap;font-family:'IBM Plex Mono',monospace;} table.det tr.tot td{font-weight:700;border-top:1.5px solid #1B2362;} tr{break-inside:avoid;}
+      .assin{margin-top:26px;border:1.5px solid #1B2362;border-radius:10px;padding:12px 16px;break-inside:avoid;} .assin .t{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#585E7F;font-weight:600;} .assin .nome{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:#1B2362;margin:4px 0 2px;} .assin .selo{font-family:'IBM Plex Mono',monospace;font-size:10px;margin:8px 0 6px;word-break:break-all;} h2{margin:14px 0 6px;} @media print{html,body{height:auto;}}`;
+    return Documento.montar('Relatório de Pagamentos Aprovados', corpo, { margem: '12mm 11mm', css });
+  },
+};
+window.AprovSaidas = AprovSaidas;
+
 const ResumoRecebivel = {
   _r: null, _carregando: false, _erro: '', TTL: 5 * 60e3,
   hoje() { return Datas.hojeISO(); },
@@ -19015,14 +19251,25 @@ const ResumoRecebivel = {
     return { d, ant, em: new Date().toISOString(), v98, informado: v98 ? f.dinheiro != null : f.dinheiro != null || f.pix != null, din, pix, cartao, pDin, pPix, pLote, cred, credN: credHoje.length, adqs, tDin, tPix, vCart, tCart, entradas,
       pixFonte: pixR ? pixR.fonte : null, cons97: v98 ? window.PainelFCX.consolidado1398({ din, pDin, pLote, cred, credN: credHoje.length, pn: pn0, liquido: false, pixP: px98, dia: d }) : g97() ? window.PainelFCX.consolidado1397({ din, pix, pDin, pPix, pLote, cred, credN: credHoje.length, pn, liquido: false }) : null,
       saidas, saldo: saidas == null ? null : r2(entradas - saidas), prestLinhas: g96() ? window.PainelFCX.linhasPrestacao(pn, pLote, false) : null, porConta: cargaOk ? agrupar('conta', 6) : [], porForma: cargaOk ? agrupar('formaPagamento', 5) : [], nSaidas: lista.length,
+      titulos: cargaOk ? lista.filter(s => s.id != null && String(s.id) !== '').map(s => ({ id: String(s.id), fornecedor: String(s.fornecedor || '').trim(), conta: String(s.conta || '').trim(), centro: String(s.centro || '').trim(), forma: String(s.formaPagamento || '').trim(), descricao: [s.item, s.obs].filter(Boolean).join(' · ').trim(), vencimento: String(s.date).slice(0, 10), valor: r2(s.liquido) }))
+        .sort((a, b) => a.vencimento.localeCompare(b.vencimento) || a.fornecedor.localeCompare(b.fornecedor, 'pt-BR') || a.id.localeCompare(b.id)) : [],
       carga: carga && carga.em ? { ok: cargaOk, dia: cargaDia, arquivo: carga.arquivo || '', linhas: carga.linhas || 0 } : null, avisos: pn.avisos || [] };
   },
   _col: { cred: false, deb: false },
+  /** v14.02 · accordion do celular: os blocos abaixo dos 3 cards nascem recolhidos; Crédito e Débito também (só no celular, ≤ 768 px). */
+  _sec: { ent: false, sai: false, sal: false }, _colM: { cred: true, deb: true }, _mq: null,
+  mobile() { try { return window.matchMedia('(max-width:768px)').matches; } catch { return false; } },
+  col(g) { return g02() && this.mobile() ? this._colM[g] : this._col[g]; },
+  _ouvirMq() {
+    if (this._mq || !window.matchMedia) return; this._mq = window.matchMedia('(max-width:768px)');
+    const f = () => { if (App.rota === 'menu') App.agendarRender(); };
+    if (this._mq.addEventListener) this._mq.addEventListener('change', f); else if (this._mq.addListener) this._mq.addListener(f);
+  },
   /** v13.97 · linhas do Consolidado de Entradas: Dinheiro, PIX e os grupos Crédito e Débito com o detalhamento por adquirente (recolhível). */
   linhas97(r) {
     const B = v => Fmt.brl(v), pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—', c = r.cons97;
     return c.linhas.map(x => {
-      const fechado = x.g ? this._col[x.g] : false, abre = x.tgl ? !this._col[x.tgl] : false, soma = (x.v || 0) + (x.p || 0);
+      const fechado = x.g ? this.col(x.g) : false, abre = x.tgl ? !this.col(x.tgl) : false, soma = (x.v || 0) + (x.p || 0);
       const tg = x.tgl ? `<button type="button" class="rr-tgl" data-a="ini-rec-tgl" data-g="${x.tgl}" aria-expanded="${abre}" aria-label="${abre ? 'Recolher' : 'Mostrar'} o detalhamento por adquirente" title="${abre ? 'Recolher' : 'Mostrar'} o detalhamento">${abre ? '▾' : '▸'}</button>` : '';
       return `<tr class="${x.nivel === 'sub' ? 'rr-sub' : 'rr-grupo'}"${x.g ? ` data-g="${x.g}"` : ''}${fechado ? ' hidden' : ''}><td>${tg}${x.rot}</td><td class="num">${x.v == null ? '—' : B(x.v)}</td><td class="num">${x.p == null ? '—' : B(x.p)}</td><td class="num">${B(soma)}</td><td class="num">${pct(soma, c.total)}</td></tr>`;
     }).join('');
@@ -19044,29 +19291,47 @@ const ResumoRecebivel = {
     const r = this._r, B = v => Fmt.brl(v), pct = (v, t) => t > 0 ? Fmt.pct(v / t * 100, 2) : '—';
     if (!r) return `<div class="panel"><p class="muted" style="margin:0">${this._erro ? 'Não foi possível calcular o resumo: ' + esc(this._erro) : 'Calculando o resumo do recebível do dia…'}</p></div>`;
     const lin = (rot, v, pr, cls = '') => `<tr class="${cls}"><td>${rot}</td><td class="num">${v == null ? '—' : B(v)}</td><td class="num">${pr == null ? '—' : B(pr)}</td><td class="num">${B((v || 0) + (pr || 0))}</td><td class="num">${pct((v || 0) + (pr || 0), r.entradas)}</td></tr>`;
-    const kpi = (t, v, cls, sub) => `<div class="ini-kpi rr-kpi e-${cls}"><div class="ini-top"><span class="ini-tit">${t}</span></div><div class="ini-v">${v == null ? '—' : B(v)}</div><div class="ini-sub">${sub}</div></div>`;
+    const kpi = (t, v, cls, sub, sec) => {
+      const tg = g02() && this.mobile() && !!sec, ab = tg && !!this._sec[sec];
+      const corpo = `<div class="ini-top"><span class="ini-tit">${t}</span>${tg ? `<span class="rr-chev" aria-hidden="true">${ab ? '▾' : '▸'}</span>` : ''}</div><div class="ini-v">${v == null ? '—' : B(v)}</div><div class="ini-sub">${sub}</div>${tg ? `<div class="rr-dica">${ab ? 'Toque para recolher' : 'Toque para ver os detalhes'}</div>` : ''}`;
+      return tg ? `<button type="button" class="ini-kpi rr-kpi rr-kpi-tg e-${cls}" data-a="ini-rec-sec" data-s="${sec}" aria-expanded="${ab}"${ab ? ` aria-controls="rr-b-${sec}"` : ''}>${corpo}</button>` : `<div class="ini-kpi rr-kpi e-${cls}">${corpo}</div>`;
+    };
     const grupo = (tit, g, total) => `<h3 class="rr-h3">${tit}</h3><div class="tbl-wrap"><table class="rr-tab"><thead><tr><th>${tit.includes('forma') ? 'Forma de pagamento' : 'Conta contábil'}</th><th class="num">Qtd.</th><th class="num">Valor</th><th class="num">%</th></tr></thead><tbody>${g.map(([k, v, n]) => `<tr><td>${esc(k)}</td><td class="num">${n}</td><td class="num">${B(v)}</td><td class="num">${pct(v, total)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nenhuma conta a pagar hoje.</td></tr>'}</tbody></table></div>`;
     const avisos = [...r.avisos, ...(r.cons97 ? r.cons97.avisos.map(a => a.texto) : []), ...(!r.informado ? [r.v98 ? `Dinheiro de ${Fmt.data(r.ant)} ainda não foi digitado no FCX › Recebível Diário (entra como R$ 0,00).` : `Dinheiro e PIX de ${Fmt.data(r.ant)} ainda não foram digitados no FCX › Recebível Diário (entram como R$ 0,00).`] : []),
       ...(!r.carga ? ['Saídas: nenhum arquivo de Entradas e Saídas foi importado no FCX (Gerenciar dados › Saídas).'] : !r.carga.ok ? [`Saídas: o último arquivo de Entradas e Saídas é de ${Fmt.data(r.carga.dia)} — importe o arquivo de hoje no FCX para ver as saídas e o saldo.`] : [])];
     const podeFcx = Auth.can('fcx.ver') && App.pode(MODULOS.find(m => m.id === 'fcx'));
-    return `<div class="rr">
-      <div class="row between rr-cab"><span class="hint">Vendas e recebimentos de ${Fmt.data(r.ant)}${r.v98 ? ` · PIX previsto de ${Fmt.data(r.d)}` : ''} · contas a pagar de ${Fmt.data(r.d)} · calculado às ${new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${r.carga?.ok ? ` · carga ${esc(r.carga.arquivo)}` : ''}</span>
-        <div class="row" style="gap:8px"><button class="btn ghost sm" data-a="ini-rec-atualizar" ${this._carregando ? 'disabled' : ''}>${this._carregando ? 'Atualizando…' : 'Atualizar'}</button>${podeFcx ? '<button class="btn sec sm" data-a="ini-rec-fcx">Abrir o Recebível Diário completo (FCX)</button>' : ''}</div></div>
-      ${avisos.length ? `<div class="note warn rr-avisos">${avisos.map(a => `<div>⚠ ${esc(a)}</div>`).join('')}</div>` : ''}
-      <div class="ini-grid rr-kpis">${kpi('Entradas do dia', r.entradas, 'ok', 'vendas líquidas + prestações + Credsystem do dia')}${kpi('Saídas do dia', r.saidas, r.saidas ? 'bad' : 'info', r.saidas == null ? 'aguardando a carga do dia no FCX' : `${r.nSaidas} conta(s) a pagar hoje`)}${kpi('Saldo do dia', r.saldo, r.saldo == null ? 'info' : r.saldo >= 0 ? 'ok' : 'bad', 'entradas − saídas')}</div>
-      <div class="rr-blocos">
-        <div class="panel rr-bloco"><h2>Consolidado de Entradas (Vendas + Prestações)</h2>
+    const v02 = g02(), mob = v02 && this.mobile(), AP = AprovSaidas;
+    if (v02) { this._ouvirMq(); AP.garantir(r.d); }
+    const cab = `<div class="row between rr-cab"><span class="hint">Vendas e recebimentos de ${Fmt.data(r.ant)}${r.v98 ? ` · PIX previsto de ${Fmt.data(r.d)}` : ''} · contas a pagar de ${Fmt.data(r.d)} · calculado às ${new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${r.carga?.ok ? ` · carga ${esc(r.carga.arquivo)}` : ''}</span>
+        <div class="row" style="gap:8px"><button class="btn ghost sm" data-a="ini-rec-atualizar" ${this._carregando ? 'disabled' : ''}>${this._carregando ? 'Atualizando…' : 'Atualizar'}</button>${podeFcx ? '<button class="btn sec sm" data-a="ini-rec-fcx">Abrir o Recebível Diário completo (FCX)</button>' : ''}</div></div>`;
+    const av = avisos.length ? `<div class="note warn rr-avisos">${avisos.map(a => `<div>⚠ ${esc(a)}</div>`).join('')}</div>` : '';
+    const k1 = kpi('Entradas do dia', r.entradas, 'ok', 'vendas líquidas + prestações + Credsystem do dia', 'ent'), k2 = kpi('Saídas do dia', r.saidas, r.saidas ? 'bad' : 'info', r.saidas == null ? 'aguardando a carga do dia no FCX' : `${r.nSaidas} conta(s) a pagar hoje`, 'sai'), k3 = kpi('Saldo do dia', r.saldo, r.saldo == null ? 'info' : r.saldo >= 0 ? 'ok' : 'bad', 'entradas − saídas', 'sal');
+    const resumoAberto = !mob || !this._colM.cred || !this._colM.deb;
+    const bEnt = `<div class="panel rr-bloco" id="rr-b-ent" data-s="ent"><h2>Consolidado de Entradas (Vendas + Prestações)</h2>
           <div class="tbl-wrap"><table class="rr-tab rr-cons"><thead><tr><th>Meio de pagamento</th><th class="num">Vendas</th><th class="num">Prestação</th><th class="num">Total</th><th class="num">Part.</th></tr></thead><tbody>
             ${r.cons97 ? this.linhas97(r) : `${lin('Total em Dinheiro', r.din, r.pDin, 'rr-grupo')}${lin('Total em PIX', r.pix, r.pPix, 'rr-grupo')}${lin('Total em Cartão', r.vCart, r.pLote, 'rr-grupo')}
             ${r.adqs.map(([a, v]) => lin(esc(a), v, null, 'rr-sub')).join('')}${r.cred ? lin(`CREDSYSTEM (vence hoje · ${r.credN})`, r.cred, null, 'rr-sub') : ''}${r.pLote ? (r.prestLinhas ? r.prestLinhas.map(x => lin(esc(x.rotulo), null, x.valor, 'rr-sub')).join('') : lin('Débito (LOTE) da prestação', null, r.pLote, 'rr-sub')) : ''}`}
             <tr class="rr-total"><td>Total Geral de Entradas do Dia</td><td class="num">${B(r.din + r.pix + r.vCart)}</td><td class="num">${B(r.pDin + r.pPix + r.pLote)}</td><td class="num">${B(r.entradas)}</td><td class="num">${r.entradas > 0 ? '100%' : '—'}</td></tr>
-          </tbody></table></div>${r.cons97 ? this.resumo97(r) : '<p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). A Credsystem entra só no dia do vencimento.</p>'}</div>
-        <div class="panel rr-bloco"><h2>Saídas do dia</h2>${r.saidas == null ? '<p class="muted" style="margin:0">As saídas aparecem quando o arquivo de Entradas e Saídas de hoje estiver importado no FCX.</p>' : grupo('Por conta contábil', r.porConta, r.saidas) + grupo('Por forma de pagamento', r.porForma, r.saidas)}</div>
-      </div></div>`;
+          </tbody></table></div>${r.cons97 ? (resumoAberto ? this.resumo97(r) : '<p class="hint" style="margin:6px 0 0">Toque em Crédito ou Débito (▸) para ver as adquirentes e o Resumo por Adquirente.</p>') : '<p class="hint" style="margin:6px 0 0">Cartão líquido de MDR, antecipação e POS (Auditoria de Adquirentes · Resumo do Fechamento). A Credsystem entra só no dia do vencimento.</p>'}</div>`;
+    const bSai = `<div class="panel rr-bloco" id="rr-b-sai" data-s="sai"><h2>Saídas do dia</h2>${r.saidas == null ? '<p class="muted" style="margin:0">As saídas aparecem quando o arquivo de Entradas e Saídas de hoje estiver importado no FCX.</p>' : (v02 ? AP.lista(r) : '') + grupo('Por conta contábil', r.porConta, r.saidas) + grupo('Por forma de pagamento', r.porForma, r.saidas)}</div>`;
+    const bSal = v02 ? `<div class="panel rr-bloco rr-bloco-sal" id="rr-b-sal" data-s="sal"><h2>Saldo do dia</h2><div data-aprv-saldo>${AP.saldo(r)}</div></div>` : '';
+    if (mob) {
+      const item = (sec, k, b) => `<section class="rr-item" data-item="${sec}">${k}${this._sec[sec] ? b : ''}</section>`;
+      return `<div class="rr rr-mob">${cab}${av}<div class="rr-acc">${item('ent', k1, bEnt)}${item('sai', k2, bSai)}${item('sal', k3, bSal)}</div></div>`;
+    }
+    return `<div class="rr">${cab}${av}
+      <div class="ini-grid rr-kpis">${k1}${k2}${k3}</div>
+      <div class="rr-blocos">${bEnt}${bSai}</div>${v02 ? `<div class="rr-blocos rr-blocos-sal">${bSal}</div>` : ''}</div>`;
   },
+  /** v14.02 · caixas de seleção dos títulos das Saídas do Dia (evento change). */
+  mudanca(a, el) { if (a === 'ini-rec-chk' && this._r && AprovSaidas.pode()) { AprovSaidas.marcar(this._r, el.dataset.id, !!el.checked); AprovSaidas.pintar(); } },
   acao(a, el) {
-    if (a === 'ini-rec-tgl') { const g = el && el.dataset ? el.dataset.g : ''; if (g in this._col) { this._col[g] = !this._col[g]; App.render(); } return; }
-    if (a === 'ini-rec-atualizar') { this.atualizar(true); return App.render(); }
+    if (a === 'ini-rec-tgl') { const g = el && el.dataset ? el.dataset.g : '', o = g02() && this.mobile() ? this._colM : this._col; if (g in o) { o[g] = !o[g]; App.render(); } return; }
+    if (a === 'ini-rec-sec') { const k = el && el.dataset ? el.dataset.s : ''; if (k in this._sec) { this._sec[k] = !this._sec[k]; App.render(); } return; } /* v14.02: accordion do celular */
+    if (a === 'ini-rec-todos') { if (!this._r || !AprovSaidas.pode()) return; const on = el.dataset.v === '1'; AprovSaidas.todos(this._r, on); $$('.aprv-chk').forEach(c => { c.checked = on; }); return AprovSaidas.pintar(); }
+    if (a === 'ini-rec-fin') return this._r ? AprovSaidas.finalizar(this._r) : undefined;
+    if (a === 'ini-rec-rel') return AprovSaidas.reabrir(el.dataset.id);
+    if (a === 'ini-rec-atualizar') { this.atualizar(true); if (AprovSaidas.hab()) delete AprovSaidas._est[this.hoje()]; return App.render(); }
     if (a === 'ini-rec-fcx') { FCX.ui.aba = 'fcx'; App.ir('fcx'); let n = 0; const t = setInterval(() => { const w = $('#fcxFrame')?.contentWindow; try { if (w && w.FCXAPI && w.FCXAPI.pronto() && w.eval('state').loaded) { clearInterval(t); if (typeof w.goto === 'function') w.goto('recebivel'); } } catch { } if (++n > 150) clearInterval(t); }, 200); }
   },
 };
@@ -20353,7 +20618,10 @@ const BackupNuvem = {
       if (!this.nuvem()) { this._pa = false; return; } /* recurso desligado neste ambiente: nenhuma chamada */
       Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'verificar-primeiro-acesso' })
         .then(r => { this.ui.primeiro = r; if (r?.criado) this.ui.ts = 0; if (r?.criado && App.rota === 'backup') this.carregar(); })
-        .catch(() => { this._pa = false; }); /* sem rede / sem sessão: tenta de novo na próxima inicialização */
+        .catch(e => { /* v14.01: instabilidade de rede (ou sessão encerrada): só registra no console, sem aviso e sem travar nada; uma nova tentativa em 1 minuto e outra na próxima inicialização */
+          this._pa = false; console.warn('[painel] ponto de restauração do primeiro acesso não criado agora:', String((e && e.message) || e || 'falha de rede').slice(0, 200));
+          if (!this._nova) { this._nova = true; setTimeout(() => { if (Sessao.ativa) this.primeiroAcesso(); }, 60e3); }
+        });
     };
     setTimeout(() => tentar(0), 1200);
   },
@@ -20999,16 +21267,27 @@ const BackupDiario = {
   hoje() { return Datas.hojeISO(); },
   pode() { const s = Auth.simulado; try { Auth.simulado = null; return Auth.can('backup.exportar'); } finally { Auth.simulado = s; } }, // permissão real (não a do perfil simulado)
   ligado() { return !window.__QA_SEM_TRAVA_BACKUP; }, // (só os testes automatizados antigos desligam)
+  /** v14.01 · com os pontos de restauração na nuvem funcionando (recurso backup_nuvem_v1395 ativo + banco Postgres do Netlify conectado) NÃO há modal nem bloqueio, para nenhum perfil:
+   *  a proteção é o ponto do primeiro acesso (silencioso) e o das 23:59. O .json diário passa a ser só a "Contingência" de Backup e dados.
+   *  Sem a nuvem (artefato do claude.ai, ou recurso ainda desligado no ambiente) a trava segue exatamente como na v13.64. */
+  dispensado() { try { return BackupNuvem.nuvem(); } catch { return false; } },
+  /** v14.01 · Produção/Falco leem os recursos liberados do banco (config/recursos): enquanto a lista não chegou não se abre nada (o modal não "pisca");
+   *  se a lista não vier em ~20 s, vale a regra antiga. Na Homologação o recurso é sempre ativo e a resposta é imediata. */
+  decidivel() { return !!Ambiente.homolog || Repo.prontas.has('config') || Date.now() - (this._t0 || 0) > 20e3; },
   iniciar() {
     this.parar(); if (!this.ligado()) return;
-    this._un = Cloud.adapter.watchDoc(this.DOC, d => { this._status = d; this.avaliar(); });
-    this._timer = setInterval(() => this.avaliar(), 60e3); // virada do dia com o painel aberto
+    this._t0 = Date.now();
+    this._un = Cloud.adapter.watchDoc(this.DOC, d => { this._status = d; this._visto = true; this.avaliar(); });
+    this._timer = setInterval(() => this.avaliar(), 60e3); // virada do dia com o painel aberto (e recurso liberado/desligado ao vivo)
+    let n = 0; this._espera = setInterval(() => { if (this.decidivel() || ++n > 45) { clearInterval(this._espera); this._espera = null; this.avaliar(); } }, 500); // reavalia assim que os recursos chegam
   },
-  parar() { try { this._un && this._un(); } catch { } this._un = null; clearInterval(this._timer); this._timer = null; this._status = null; this.fechar(); },
+  parar() { try { this._un && this._un(); } catch { } this._un = null; clearInterval(this._timer); this._timer = null; clearInterval(this._espera); this._espera = null; this._status = null; this._visto = false; this.fechar(); },
   feito() { const h = this.hoje(); return this._status?.data === h; },
   avaliar() {
     if (!Sessao.ativa || !this.ligado()) return this.fechar();
+    if (this.dispensado()) return this.fechar(); // v14.01: nuvem funcionando = nada de modal nem bloqueio (e se já estava aberto, fecha)
     if (this.feito()) { try { localStorage.setItem(this.chave, this.hoje()); } catch { } return this.fechar(); }
+    if (!this._visto || !this.decidivel()) return; // v14.01: espera o estado do dia e a lista de recursos chegarem antes de decidir
     this.abrir();
   },
   async registrar(total = null) {
@@ -21018,6 +21297,7 @@ const BackupDiario = {
     this.fechar();
   },
   abrir() {
+    if (this.dispensado() || !this.decidivel()) return; // v14.01: garantia extra — nunca abre com a nuvem funcionando
     const assin = this.pode() ? 'm' : 'o';
     if (this._el && this._el.dataset.tipo === assin) return;
     this.fechar();

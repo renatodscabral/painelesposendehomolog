@@ -135,6 +135,7 @@ export const VERIFICACOES = [
   { rotulo: 'Índice de documentos dos lançamentos', indices: ['contab_lanc_doc_ref_ix'] },
   { rotulo: 'Pontos de restauração na nuvem (v13.95)', tabelas: ['painel_backups_historico'], indices: ['painel_backups_hist_data_ix'] },
   { rotulo: 'Central de Notificações: regras, log de envios e resumo do recebível (v14.00)', tabelas: ['painel_notificacoes_regras', 'painel_notificacoes_log', 'painel_notificacoes_instantaneo'], indices: ['painel_notif_log_data_ix', 'painel_notif_log_ref_ix'] },
+  { rotulo: 'Aprovação de pagamentos das Saídas do Dia: lotes e decisões (v14.02)', tabelas: ['painel_saidas_lotes', 'painel_saidas_decisoes'], indices: ['painel_saidas_lotes_dia_ix', 'painel_saidas_dec_lote_ix', 'painel_saidas_dec_titulo_ix'] },
 ];
 
 export async function verificarEsquema(c) {

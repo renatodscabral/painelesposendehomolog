@@ -199,8 +199,28 @@ export default {
    ],
    "modificar": [],
    "excluir": [],
-   "extras": [],
+   "extras": [
+    [
+     "recebiveis_aprovar_saidas",
+     false,
+     "gestao_v1402"
+    ]
+   ],
    "v1383": true
+  },
+  {
+   "id": "gerencial",
+   "ler": [],
+   "modificar": [],
+   "excluir": [],
+   "extras": [
+    [
+     "liberacao_gerencial",
+     true
+    ]
+   ],
+   "v1383": true,
+   "rec": "gestao_v1402"
   }
  ],
  "telas": {

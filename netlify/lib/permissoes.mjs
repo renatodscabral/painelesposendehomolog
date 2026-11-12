@@ -47,7 +47,7 @@ export function normalizarPermissoes(p) {
       if (kk === 'sub') { if (v && typeof v === 'object') out.sub = v; continue; }
       if (['modulos', 'matriz', 'niveis', 'permissoes', 'acessos'].includes(kk) && v && typeof v === 'object' && !prefixo) { aplicar(v, k); continue; }
       if (IDS.has(kk)) { out[kk] = nivelDe(v); continue; }
-      if (k.includes('.')) { if (CONHECIDAS.has(k)) out[k] = sim(v); continue; }
+      if (CONHECIDAS.has(k)) { out[k] = sim(v); continue; } /* v14.02: também as opções sem ponto (recebiveis_aprovar_saidas, liberacao_gerencial) */
     }
   };
   aplicar(p);
@@ -66,6 +66,7 @@ function recorte(modId, s = {}) {
  * Permissões efetivas pela matriz (Set). recursoAtivo(k): recursos liberados no ambiente (Homologação: todos).
  * Master: '*'. Perfil Loja: só leitura (Solicitações até Modificar), como no painel.
  */
+export const GERENCIAL_FORA = ['rh.ver_salarios', 'recebiveis_aprovar_saidas'];
 export function permissoesEfetivas(usuario, recursoAtivo = () => true) {
   const perfil = normalizarPerfil(usuario?.perfil); if (perfil === 'MASTER') return new Set(['*']);
   if (perfil !== 'OPERACIONAL' && perfil !== 'LOJA') return new Set();
@@ -79,6 +80,15 @@ export function permissoesEfetivas(usuario, recursoAtivo = () => true) {
     const { fora, acoes } = recorte(mod.id, sub[mod.id] || {}), pode = (p, acao) => !fora.has(p) && (!acao || !acoes || acoes.has(p));
     mod.ler.forEach(p => pode(p) && out.add(p)); if (n >= 2) mod.modificar.forEach(p => pode(p, 1) && out.add(p)); if (n >= 3) mod.excluir.forEach(p => pode(p, 1) && out.add(p));
   }
+  /* v14.02 · Liberação Gerencial: eleva o Operacional (nunca a Loja) a todos os módulos de negócio habilitados, com Ler, Modificar e Excluir. Fora da elevação: salários e
+     a autorização de pagamentos (separação de funções); o PDI é só do Master (nenhuma permissão da matriz o libera). Banco de dados, Backup, Ambientes, Notificações e Acessos seguem só do Master (não estão na matriz). */
+  if (out.has('liberacao_gerencial') && !loja) {
+    for (const mod of MATRIZ.modulos) {
+      if ((mod.v1383 && !v83) || (mod.rec && !recursoAtivo(mod.rec))) continue;
+      [...mod.ler, ...mod.modificar, ...mod.excluir].forEach(p => out.add(p));
+      mod.extras.forEach(([k, , rec]) => { if ((!rec || recursoAtivo(rec)) && !GERENCIAL_FORA.includes(k)) out.add(k); });
+    }
+  }
   return out;
 }
 export const tem = (perms, p) => !!perms && (perms.has('*') || perms.has(p));
@@ -91,7 +101,7 @@ export const COLECOES_MATRIZ = {
   adq_auditorias: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']],
   adq_excecoes: [['retaguarda.adq.ver'], ['retaguarda.adq.importar', 'retaguarda.adq.taxas']],
   ec_taxas: [['retaguarda.adq.ver'], ['retaguarda.adq.taxas']],
-  conc_fechamento: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']],
+  conc_fechamento: [['retaguarda.adq.ver', 'visao.dashboard', 'fcx.ver'], ['retaguarda.adq.importar']], /* v14.02: o Resumo do Recebível (Tela Inicial) lê o fechamento; antes só o Master/Retaguarda chegavam a ele */
   contasBancarias: [['fcx.dfc.ver'], ['fcx.dfc.contas']],
   extratos: [['fcx.dfc.ver'], ['fcx.dfc.importar']],
   dfc: [['fcx.dfc.ver'], ['fcx.dfc.importar', 'fcx.dfc.regras']],
@@ -99,6 +109,11 @@ export const COLECOES_MATRIZ = {
   ieo_fechamentos: [[], ['retaguarda.ieo.fechar']],
   ieo_laudos: [[], ['retaguarda.ieo.laudo']],
   ieo_auto: [[], ['retaguarda.ieo.lancar', 'retaguarda.ieo.fechar']],
+  /* v14.02 (revisão estrita de permissões): coleções que só o Master abria passam a seguir as flags do perfil. Banco, backup, ambientes, notificações, acessos, auditoria e configuração seguem só do Master. */
+  ret_ocorrencias: [['retaguarda.faltas.status', 'retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir'], ['retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir']],
+  cred_pendencias: [['retaguarda.faltas.status', 'retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir'], ['retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir']],
+  alertas: [[], ['retaguarda.ieo.lancar', 'retaguarda.ieo.fechar']],
+  seguros_vigencia: [[], ['lojas.contratos.editar']],
   /* v13.93: salários só para quem tem a permissão isolada "Pode ver salários" (rh.ver_salarios) — leitura apenas; gravação segue só do Master */
   salarios: [['rh.ver_salarios'], []],
   rh_folhas: [['rh.ver_salarios'], []],

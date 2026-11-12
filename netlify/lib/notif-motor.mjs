@@ -21,6 +21,7 @@ import { ErroEnvio, enviarEmail, enviarWhatsApp, estadoConfig, emailValido, norm
 import * as D from './notif-dados.mjs';
 import * as M from './notif-mensagens.mjs';
 import { IEO } from './notif-ieo.mjs';
+import { lerLote, lerLoteInterno } from './saidas-aprovacoes.mjs';
 
 export const RECURSO = 'gestao_v1400';
 export const ORCAMENTO_MS = 24000;
@@ -196,12 +197,49 @@ const COLETORES = {
     const itens = D.faltasAcimaTolerancia({ faltasDocs, credsystemDocs: await D.colecaoPorIds('credsystem', dias), lojas: await c.col('lojas'), hoje: c.hoje, toleranciaPct: regra.parametros.toleranciaPct, valorSemBase: regra.parametros.valorSemBase, janelaDias: 3 });
     return itens.map(i => ({ referencia: `falta:${i.id}`, destinos, conteudo: M.msgFaltaCaixa({ ...i, toleranciaPct: regra.parametros.toleranciaPct, valorSemBase: regra.parametros.valorSemBase }) }));
   },
+  async saidas_aprovadas(c, regra) {
+    /* rede de segurança: o painel avisa na hora (acao 'saidas-aprovadas'); aqui o cron pega o lote que ficou sem aviso (navegador fechado, função ocupada) entre 10 min e 6 h depois */
+    const rows = await q(`SELECT id FROM painel_saidas_lotes WHERE notificacao IS NULL AND criado_em < now() - interval '10 minutes' AND criado_em > now() - interval '6 hours' ORDER BY id LIMIT 5`), out = [];
+    for (const r of rows) { const e = await envioDoLote(c, regra, r.id); if (e) out.push(e); }
+    return out;
+  },
   async backup_nuvem_status(c, regra) {
     const destinos = fixos(regra, 'ti'); if (!destinos.length) return [];
     const ponto = await D.ultimoBackupAutomatico(), horas = ponto ? (c.agora.ms - new Date(ponto.data_hora).getTime()) / 36e5 : null, max = Number(regra.parametros.horasMaximas) || 26, ok = !!ponto && horas <= max;
     return [{ referencia: `backup:${c.hoje}`, destinos, conteudo: M.msgBackup({ ok, ponto, horas, horasMaximas: max, dia: c.hoje }) }];
   },
 };
+
+/* ----------------------------------------------------------------- v14.02 · aviso das aprovações de pagamentos (Saídas do Dia) */
+/** Monta o envio de um lote: Financeiro + Masters ativos (+ cópia). `null` quando não há nenhum destinatário. */
+async function envioDoLote(c, regra, loteId) {
+  const { lote, itens } = await lerLote(loteId);
+  const destinos = unir(fixos(regra, 'financeiro'), regra.parametros.masters ? await D.contatosMasters() : [], fixos(regra, 'copia')); if (!destinos.length) return null;
+  const b = { lote, itens, agora: c.agora.ms };
+  return { referencia: `saidas:lote:${lote.id}`, destinos, conteudo: M.msgSaidasAprovadas(b), conteudoCopia: M.msgSaidasAprovadas({ ...b, copia: true }), meta: { loteId: lote.id } };
+}
+const estadoAviso = r => (r.enviados ? (r.erros ? 'enviado_com_erros' : 'enviado') : r.erros ? 'erro' : 'enviado');
+async function marcarLote(id, r) { await q('UPDATE painel_saidas_lotes SET notificado_em = now(), notificacao = $2 WHERE id = $1', [Number(id), estadoAviso(r)]); }
+
+/**
+ * "Finalizar Aprovações" → o painel chama /api/notificar { acao: 'saidas-aprovadas', loteId }. Avisa o Financeiro e os Masters com o valor liberado e o PDF do relatório.
+ * Nunca derruba a aprovação (que já está gravada): a resposta diz se enviou, e se não enviou, por quê. Idempotente (o mesmo lote não é avisado duas vezes).
+ */
+export async function notificarLote(loteId, { opcoes = {} } = {}) {
+  if (!(await moduloAtivo())) return { enviado: false, motivo: 'modulo_desligado' };
+  const lote = await lerLoteInterno(loteId); if (!lote) throw new ErroHttp(404, 'Lote de aprovação não encontrado.');
+  if (['enviado', 'enviado_com_erros', 'erro'].includes(lote.notificacao)) return { enviado: lote.notificacao !== 'erro', repetido: true, motivo: lote.notificacao };
+  await garantirRegras();
+  const ev = POR_CHAVE.saidas_aprovadas, regra = (await lerRegras()).find(r => r.chave === ev.chave);
+  if (!regra.ativo) { await q(`UPDATE painel_saidas_lotes SET notificacao = 'regra_desligada' WHERE id = $1 AND notificacao IS NULL`, [Number(lote.id)]); return { enviado: false, motivo: 'regra_desligada' }; }
+  return comTrava(async () => {
+    const c = criarContexto({ opcoes }), envio = await envioDoLote(c, regra, lote.id);
+    if (!envio) return { enviado: false, motivo: 'sem_destinatarios' };
+    const r = await despachar(c, ev, regra, [envio]);
+    if (r.completo) await marcarLote(lote.id, r);
+    return { enviado: r.enviados > 0, enviados: r.enviados, erros: r.erros, pulados: r.pulados, destinatarios: envio.destinos.length, completo: r.completo };
+  });
+}
 
 /* ----------------------------------------------------------------- contexto de uma rodada (com cache dos documentos lidos) */
 function criarContexto({ agora = new Date(), opcoes = {}, orcamentoMs = ORCAMENTO_MS } = {}) {
@@ -337,6 +375,7 @@ export async function rodarAgendado({ agora = new Date(), opcoes = {}, orcamento
       if (Date.now() > c.fim || c.enviosFeitos >= MAX_ENVIOS_RODADA) { eventos.push({ chave: ev.chave, adiado: true }); continue; }
       try {
         const envios = await COLETORES[ev.chave](c, regra), r = await despachar(c, ev, regra, envios);
+        if (ev.chave === 'saidas_aprovadas' && r.completo) for (const e of envios) await marcarLote(e.meta.loteId, r);
         eventos.push({ chave: ev.chave, ...r, envios: envios.length });
         if (r.completo) {
           const resumo = r.enviados || r.erros ? `${r.enviados} enviada(s)${r.erros ? `, ${r.erros} com erro` : ''}` : envios.length ? 'Tudo já enviado' : 'Nada a avisar';

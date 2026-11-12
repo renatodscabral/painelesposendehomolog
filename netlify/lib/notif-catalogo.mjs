@@ -91,6 +91,15 @@ export const EVENTOS = [
     papeis: [{ k: 'tesouraria', rot: 'Tesouraria' }],
   },
   {
+    chave: 'saidas_aprovadas', grupo: 'Tesouraria', nome: 'Pagamentos aprovados nas Saídas do Dia',
+    descricao: 'Quando o Diretor (ou quem tem a permissão) clica em "Finalizar Aprovações" na Tela Inicial, avisa o Financeiro e o Master com o valor total liberado, o total retido e o relatório "Pagamentos Aprovados" em PDF A4 anexado no e-mail (v14.02).',
+    gatilho: 'Na hora, quando as aprovações são finalizadas (o painel chama /api/notificar). A cada 5 minutos o sistema também confere se alguma aprovação das últimas 6 horas ficou sem aviso e envia.',
+    frequencia: 'IMEDIATA', canal: 'AMBOS', pdf: true,
+    campos: [],
+    automaticos: [{ k: 'masters', rot: 'Os usuários Master ativos (e-mail e telefone do cadastro do colaborador)', padrao: true }],
+    papeis: [{ k: 'financeiro', rot: 'Financeiro / Tesouraria' }, { k: 'copia', rot: 'Cópia para (opcional)' }],
+  },
+  {
     chave: 'backup_nuvem_status', grupo: 'TI / Master', nome: 'Confirmação diária do Backup na Nuvem',
     descricao: 'Todo dia de manhã confirma se o ponto de restauração automático da noite (23:59) foi criado — ou avisa que não foi.',
     gatilho: 'Todo dia no horário marcado.',

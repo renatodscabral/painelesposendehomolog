@@ -8,6 +8,8 @@
 import { q } from './db.mjs';
 import { rankingDoMes, sitDep } from './notif-ieo.mjs';
 import { FUSO } from './notif-catalogo.mjs';
+import { normalizarPerfil } from './permissoes.mjs';
+import { situacao } from './usuarios.mjs';
 
 /* ----------------------------------------------------------------- datas (sempre em Brasília) */
 const SEM = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -184,6 +186,17 @@ export function divergenciasCredsystem({ credsystemDocs, dia }) {
 export async function colecao(nome) { return (await q('SELECT doc_id, dados FROM documentos WHERE colecao = $1', [nome])).map(r => ({ id: r.doc_id, ...r.dados })); }
 export async function colecaoPorIds(nome, ids) { return (await q('SELECT doc_id, dados FROM documentos WHERE colecao = $1 AND doc_id = ANY($2::text[])', [nome, ids])).map(r => ({ id: r.doc_id, ...r.dados })); }
 export async function documento(caminho) { const [r] = await q('SELECT doc_id, dados FROM documentos WHERE caminho = $1', [caminho]); return r ? { id: r.doc_id, ...r.dados } : null; }
+/** v14.02 · Os usuários Master ativos com o contato do cadastro do colaborador vinculado (ou do próprio usuário, no Master avulso). */
+export async function contatosMasters() {
+  const us = (await colecao('usuarios')).filter(u => normalizarPerfil(u.perfil) === 'MASTER'), ids = [...new Set(us.map(u => u.funcionarioId).filter(Boolean))];
+  const fs = ids.length ? await colecaoPorIds('funcionarios', ids) : [], fm = new Map(fs.map(f => [f.id, f])), out = [];
+  for (const u of us) {
+    const f = u.funcionarioId ? fm.get(u.funcionarioId) || null : null;
+    if (situacao(u, f) !== 'ok') continue;
+    out.push(contatoDe({ id: f?.id || u.id, nome: f?.nome || u.nome, email: f?.email || u.email, telefone: f?.telefone || u.telefone }, 'master'));
+  }
+  return out;
+}
 export async function lerFuncionarios() { return colecao('funcionarios'); }
 export async function lerLojas() { return colecao('lojas'); }
 export async function lerCargos() { try { return await colecao('rh_cargos'); } catch { return []; } }
