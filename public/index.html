@@ -1076,6 +1076,20 @@ tr.acc-foco-tr td{background:var(--accent-soft);}
 .ini-v{font:600 30px/1.1 var(--font-display);color:var(--ink);font-variant-numeric:tabular-nums;}
 .ini-v small{font-size:16px;color:var(--ink-faint);font-weight:500;}
 .ini-kpi.e-bad .ini-v{color:var(--bad);}
+/* v14.09 · Extratos OFX × Contas a Pagar (FCX → Saídas) */
+.cp-linha{display:flex;gap:6px;flex-wrap:wrap;align-items:baseline;margin-top:3px;font-size:12px;color:var(--ink-soft);overflow-wrap:anywhere;max-width:340px;}
+.cp-nw{white-space:nowrap;}
+.cp-linha .cp-conta{font-weight:600;color:var(--ink);}
+.cp-linha.is-extra{opacity:.85;}
+/* v14.08 · Matriz no Cadastro de Lojas, cartão da empresa emissora e descrições das contas */
+[data-mt-oculto08]{display:none !important;}
+.mx-card{display:flex;gap:10px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.mx-card.warn{border-color:rgba(200,120,0,.55);background:rgba(255,193,7,.1);}
+.mx-card .mx-razao{font-size:15px;overflow-wrap:anywhere;} .mx-card .mx-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;overflow-wrap:anywhere;}
+.mx-card .mx-nota{flex-basis:100%;font-size:12.5px;margin:0;color:var(--ink-soft);}
+.rx-conta.is-padrao{background:rgba(46,160,67,.09);}
+.rx-opt{display:flex;gap:8px;align-items:flex-start;margin-top:10px;cursor:pointer;} .rx-opt input{margin-top:3px;}
+.mx-sec[hidden]{display:none !important;} .mx-sec h3{margin:12px 0 4px;}
 /* v14.07 · Empresas (Matriz) × Contas bancárias × Resumo Executivo */
 .rx-contas{border:1px solid var(--line);border-radius:10px;max-height:236px;overflow:auto;background:var(--surface,transparent);}
 .rx-conta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;} .rx-conta:last-child{border-bottom:0;} .rx-conta:hover{background:rgba(127,127,127,.08);}
@@ -4150,6 +4164,10 @@ function g05() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g06() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1406'); }
 /** v14.07 · Empresas (Matriz), contas padrão e escopo de contas do Resumo Executivo: recurso ativo neste ambiente? */
 function g07() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1407'); }
+/** v14.08 · Empresa Matriz no Cadastro de Lojas e Resumo Executivo emitido pela Matriz: recurso ativo neste ambiente? (depende do escopo de contas da v14.07) */
+function g08() { return g07() && typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1408'); }
+/** v14.09 · cruzamento das saídas do OFX com o Contas a Pagar do FCX (conta contábil → De-para → Categoria DFC): recurso ativo neste ambiente? (depende do cruzamento com fornecedores da v14.05) */
+function g09() { return g05() && typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1409'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4163,7 +4181,9 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1407: { versao: 'v14.07', titulo: 'DFC · Empresas com flag Matriz e situação, contas bancárias associadas como padrão da empresa, CNPJ / empresa titular e conta padrão da Matriz nas contas da DFC, e Resumo Executivo Oficial com seletor de contas (em branco = contas padrão da empresa/Matriz), apuração e documento filtrados pelas contas do escopo' },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1409: { versao: 'v14.09', titulo: 'DFC · Extratos OFX: as saídas são cruzadas com o Contas a Pagar do FCX (FCX → Saídas) por valor idêntico (±R$ 0,05) e razão social do fornecedor (nome exato ou prefixo normalizado de 12+ caracteres, para nomes truncados pelo banco) na janela de ±5 dias úteis; a Conta Contábil do título define a Categoria DFC pelo De-para FCX → DFC; prioridade: classificação manual, regra explícita, Contas a Pagar, categoria do cadastro de Fornecedores e Clientes, padrão; botão Cruzar Fornecedores, PIX e Contas a Pagar com prévia; categorias padrão da DFC com nome e grupo editáveis (ID interno e sentido travados)' },
+    gestao_v1408: { versao: 'v14.08', titulo: 'Empresa Matriz no Cadastro de Lojas (checkbox e contas bancárias padrão da Matriz, com aproveitamento da Matriz da v14.07), Resumo Executivo Oficial da DFC emitido só pela Matriz (sem empresas de adquirência), contas padrão da Matriz aplicadas na abertura e parâmetro para exibir ou ocultar as descrições internas das contas no documento A4' },
+    gestao_v1407: { versao: 'v14.07', titulo: 'DFC · Empresas com flag Matriz e situação, contas bancárias associadas como padrão da empresa, CNPJ / empresa titular e conta padrão da Matriz nas contas da DFC, e Resumo Executivo Oficial com seletor de contas (em branco = contas padrão da empresa/Matriz), apuração e documento filtrados pelas contas do escopo' },
     gestao_v1406: { versao: 'v14.06', titulo: 'DFC · Resumo Executivo Oficial (padrão bancário / institucional, CPC 03): botão no topo da aba e em DFC do mês, modal com empresa/CNPJ, período (mês, trimestre, ano ou intervalo), notas da controladoria e signatários; documento A4 com síntese e indicadores de liquidez (saldo inicial e final conciliados por conta, margem de caixa operacional, cobertura do serviço da dívida), demonstrativo detalhado realizado × previsto, notas e assinaturas; pré-visualização com Imprimir e Baixar PDF' },
     gestao_v1405: { versao: 'v14.05', titulo: 'Fornecedores e Clientes: tipo (Fornecedor, Cliente ou Ambos), chaves PIX para conciliação (CNPJ, CPF, telefone, e-mail e chave aleatória, sem repetição entre cadastros) e Categoria DFC padrão; Baixar Modelo e Importar Planilha (.xlsx/.csv) com prévia e gravação em lote; cruzamento automático dos Extratos OFX com os fornecedores (chave PIX, documento e nome) e botão Cruzar Fornecedores / Reprocessar PIX; prioridade da DFC: manual, regra, categoria padrão do fornecedor e padrão automático' },
     gestao_v1404: { versao: 'v14.04', titulo: 'DFC · Categorias personalizadas: cadastro, edição e exclusão (nome, sentido, grupo e impacto no caixa) com atalho na regra; seletores da regra, dos Extratos OFX e do De-para FCX → DFC; bloco "Atividades não operacionais" na DFC do mês e no Realizado × Previsto; exportação em PDF A4, Excel e CSV' },
@@ -6651,7 +6671,7 @@ const Lojas = {
     const seg = !segs.length ? '<span class="hint">sem apólice</span>' : `<span class="pill ${RadarSeguros.ZONAS[pior?.zona]?.cls || 'neutral'}">${pior?.zona === 'verde' ? `${segs.length} vigente${segs.length > 1 ? 's' : ''}` : esc(pior?.txt || '—')}</span>`;
     const sc = this.situacaoContrato(l.contrato);
     return `<tr class="click" data-a="lj-abrir" data-id="${l.id}">
-      <td><div class="cell-main"><span class="mono muted">${esc(l.codigo)}</span> ${esc(l.nome)}</div>${!l.ativa ? '<span class="pill neutral">inativa</span>' : ''}</td>
+      <td><div class="cell-main"><span class="mono muted">${esc(l.codigo)}</span> ${esc(l.nome)}${g08() ? this.badgeMatriz08(l) : ''}</div>${!l.ativa ? '<span class="pill neutral">inativa</span>' : ''}</td>
       <td><span class="pill ${l.bandeira === 'ESPOSENDE SPORTS' ? 'info' : 'navy'}">${l.bandeira === 'ESPOSENDE SPORTS' ? 'ES Sports' : 'Esposende'}</span> <span class="cell-sub">${esc(l.tipo)}</span></td>
       <td>${esc(l.cidade)}<span class="cell-sub"> / ${esc(l.uf)}</span></td>
       <td>${esc(l.supervisor || '—')}</td>
@@ -6666,6 +6686,7 @@ const Lojas = {
     if (g93() && this.ui.vista && this.ui.vista !== 'lista') return; /* v13.93: abas POS e KPIs não têm o painel nem a tabela da lista */
     this.montarDashboard();
     const tb = $('#ljBody'); if (!tb) return;
+    this._mz08 = g08() ? matrizAtual08() : null; // v14.08: a Matriz resolvida uma vez por renderização da lista
     const lista = this.filtradas(), todas = Repo.todos('lojas');
     const tpl = document.createElement('template');
     tpl.innerHTML = lista.map(l => this.linhaLoja(l)).join('') || `<tr><td colspan="8"><div class="empty">${todas.length ? 'Nenhuma loja com esses filtros.' : 'Nenhuma loja cadastrada. Importe a BASECADASTRO.'}</div></td></tr>`;
@@ -6735,7 +6756,7 @@ const Lojas = {
         ${this.item('CNPJ', `<span class="mono">${esc(l.cnpj)}</span> <span class="pill ${ok ? 'ok' : 'bad'}">${ok ? 'válido' : 'dígito inválido'}</span>`)}
         ${this.item('Razão social', esc(l.razaoSocial || 'ESPOSENDE CALÇADOS LTDA'))}${g94() ? this.item('Nome fantasia', esc(l.nomeFantasia)) : ''}${this.item('Inscrição estadual', esc(l.inscricaoEstadual))}
         ${g94() ? this.item('Situação cadastral', l.situacaoCadastral ? `<span class="pill ${/ativa/i.test(l.situacaoCadastral) ? 'ok' : 'warn'}">${esc(l.situacaoCadastral)}</span>` : '') + this.item('Capital social', l.capitalSocial ? Fmt.brl(l.capitalSocial) : '') + this.item('Bairro', esc(l.bairro)) : ''}
-        ${this.item('Endereço', esc(l.endereco))}${this.item('Cidade / UF', esc(l.cidade) + ' / ' + esc(l.uf))}${this.item('CEP', `<span class="mono">${esc(l.cep)}</span>`)}
+        ${g08() ? this.itemMatriz08(l) : ''}${this.item('Endereço', esc(l.endereco))}${this.item('Cidade / UF', esc(l.cidade) + ' / ' + esc(l.uf))}${this.item('CEP', `<span class="mono">${esc(l.cep)}</span>`)}
         ${this.item('Tipo de loja', esc(l.tipo))}${this.item('Praça', esc(l.classificacao))}${this.item('Supervisor regional', esc(l.supervisor))}
         ${this.item('Faturamento médio mensal', l.faturamentoMedio ? `<span class="mono">${Fmt.brl0(l.faturamentoMedio)}</span>${l.faturamentoMedioBase?.meses ? `<div class="cell-sub">média de ${l.faturamentoMedioBase.meses} mês(es) realizados (${l.faturamentoMedioBase.de.split('-').reverse().join('/')} a ${l.faturamentoMedioBase.ate.split('-').reverse().join('/')}) · Importar Realizado</div>` : ''}` : '')}${this.item('Área de vendas', l.areaM2 ? Fmt.num(l.areaM2) + ' m²' : '')}${this.item('Gerente da loja', esc(l.gerente))}
         ${this.item('Horário — seg. a sex.', esc(h.semana))}${this.item('Horário — sábado', esc(h.sabado))}${this.item('Horário — domingo/feriado', esc(h.domingo))}
@@ -6757,14 +6778,15 @@ const Lojas = {
       ${campo('Faturamento médio mensal (R$)', 'faturamentoMedio', l.faturamentoMedio, { tipo: 'number' })}${campo('Área de vendas (m²)', 'areaM2', l.areaM2, { tipo: 'number' })}
       ${campo('Horário seg. a sex.', 'horario.semana', h.semana, { attrs: 'placeholder="09:00 às 19:00"' })}${campo('Horário sábado', 'horario.sabado', h.sabado, { attrs: 'placeholder="09:00 às 17:00"' })}
       ${campo('Horário domingo/feriado', 'horario.domingo', h.domingo, { attrs: 'placeholder="Fechada / 12:00 às 18:00"' })}
-      <div class="field"><span class="lbl">Situação</span><label class="check" style="padding-top:8px"><input type="checkbox" name="ativa" ${l.ativa !== false ? 'checked' : ''}> Loja ativa</label></div>
+      <div class="field"><span class="lbl">Situação</span><label class="check" style="padding-top:8px"><input type="checkbox" name="ativa" ${l.ativa !== false ? 'checked' : ''}> Loja ativa</label></div>${g08() ? this.blocoMatriz08(l) : ''}
     </div>`;
   },
-  abrirDados(id) {
+  abrirDados(id, { aoFechar } = {}) {
     const l = id ? Repo.get('lojas', id) : { ativa: true, bandeira: 'ESPOSENDE', tipo: 'RUA', contrato: { statusDocumento: '', historico: [] }, adquirentes: [], despesas: { agua: {}, energia: {} }, seguros: [] };
     UI.modal({
-      titulo: id ? 'Editar · ' + l.nome : 'Nova loja', largo: true, corpo: this.formDados(l),
+      titulo: id ? 'Editar · ' + l.nome : 'Nova loja', largo: true, corpo: this.formDados(l), aoFechar: () => { if (aoFechar) aoFechar(); },
       aoAbrir: m => {
+        if (g08()) this.ligarMatriz08(m, l); // v14.08: Empresa Matriz e Contas Bancárias Padrão da Matriz
         if (g94()) { Cnpj94.ligarLoja(m, l); const cep = $('[name="cep"]', m); if (cep) cep.addEventListener('input', () => { cep.value = Cnpj94.cep(cep.value); }); return; } // v13.94: componente único de consulta do CNPJ
         let ultimo = CNPJ.limpar(l.cnpj);
         const consultar = async () => {
@@ -6787,9 +6809,13 @@ const Lojas = {
           if (!id && (!+codigo || CodLoja.loja(codigo))) { UI.toast('Informe um código de filial novo.'); return false; }
           if (g94() && d.cnpj && CNPJ.limpar(d.cnpj) !== CNPJ.limpar(l.cnpj) && !CNPJ.valido(d.cnpj)) { UI.toast('CNPJ inválido: confira os dígitos verificadores antes de salvar.'); return false; } // v13.94: só barra o CNPJ que a pessoa alterou
           d.cnpj = CNPJ.formatar(d.cnpj); if (l._receita) d.receita = l._receita; delete d.codigo;
-          const novo = mergeProfundo(l, d); delete novo._receita; novo.codigo = codigo;
+          let novo = mergeProfundo(l, d); delete novo._receita; novo.codigo = codigo;
+          const mx = g08() ? this.prepararMatriz08(l, novo, d, m, id || CodLoja.id(codigo)) : null; // v14.08: só UMA Matriz; desmarcar limpa as contas padrão; valida CNPJ e razão social
+          if (mx && mx.erro) { UI.toast(mx.erro); return false; }
+          if (mx) novo = mx.loja;
           await Repo.salvar('lojas', id || CodLoja.id(codigo), novo, { modulo: 'lojas', rotulo: `${codigo} · ${d.nome}` });
-          UI.toast('Loja salva'); if (!id) { this.ui.sel = CodLoja.id(codigo); this.ui.aba = 'dados'; }
+          if (mx) for (const o of mx.outras) await Repo.salvar('lojas', o.id, o, { modulo: 'lojas', rotulo: `${o.codigo} · ${o.nome} · deixou de ser a Empresa Matriz` });
+          if (mx && mx.desmarcou) UI.toast(`Loja salva. “${mx.desmarcou}” deixou de ser a Empresa Matriz.`); else UI.toast('Loja salva'); if (!id) { this.ui.sel = CodLoja.id(codigo); this.ui.aba = 'dados'; }
         }
       }],
     });
@@ -9017,12 +9043,45 @@ const DFC = {
     return out;
   },
   _lista() {
-    const ref = this._cfg()?.categorias, on = this.ativo();
-    if (!this._memo || this._memo.ref !== ref || this._memo.on !== on) { const lista = DFC_CATEGORIAS.concat(this.personalizadas()); this._memo = { ref, on, lista, mapa: new Map(lista.map(c => [c.id, c])) }; }
+    const c0 = this._cfg(), ref = c0?.categorias, aj = c0?.ajustesPadrao, on = this.ativo(), on9 = this.ativo09(), m = this._memo;
+    if (!m || m.ref !== ref || m.aj !== aj || m.on !== on || m.on9 !== on9) { const lista = this.padroes().concat(this.personalizadas()); this._memo = { ref, aj, on, on9, lista, mapa: new Map(lista.map(c => [c.id, c])) }; }
     return this._memo;
   },
-  /** padrão + personalizadas (cfg opcional = config/dfc de outra origem, ex.: testes) */
-  categorias(cfg) { return cfg === undefined ? this._lista().lista : DFC_CATEGORIAS.concat(this.personalizadas(cfg)); },
+  /** v14.09 (complemento) · ajustes de nome e grupo das categorias PADRÃO (config/dfc.ajustesPadrao), saneados: só ids padrão, nome de 3 a 60 caracteres, grupo entre os 4 escolhíveis
+      (a transferência entre contas próprias mantém o grupo) e só o que difere do original. Recurso desligado = nenhum ajuste vale (os dados gravados são preservados). */
+  ajustesPadrao(cfg) {
+    if (!this.ativo() || !this.ativo09()) return {};
+    const a = (cfg === undefined ? this._cfg() : cfg)?.ajustesPadrao;
+    if (!a || typeof a !== 'object' || Array.isArray(a)) return {};
+    const out = {};
+    for (const base of DFC_CATEGORIAS) {
+      const x = a[base.id]; if (!x || typeof x !== 'object') continue;
+      const nome = String(x.nome ?? '').replace(/\s+/g, ' ').trim(), nomeOk = nome.length >= 3 && nome.length <= 60 ? nome : base.nome;
+      const grupo = base.id !== 'transf' && this.GRUPOS_CAT.includes(x.grupo) ? x.grupo : base.grupo;
+      if (nomeOk !== base.nome || grupo !== base.grupo) out[base.id] = { nome: nomeOk, grupo };
+    }
+    return out;
+  },
+  /** as 21 categorias padrão, já com os ajustes (ajustada: true, nomeOriginal e grupoOriginal quando houver) */
+  padroes(cfg) {
+    const aj = this.ajustesPadrao(cfg);
+    return DFC_CATEGORIAS.map(c => aj[c.id] ? { ...c, nome: aj[c.id].nome, grupo: aj[c.id].grupo, ajustada: true, nomeOriginal: c.nome, grupoOriginal: c.grupo } : c);
+  },
+  /** padrão (com ajustes) + personalizadas (cfg opcional = config/dfc de outra origem, ex.: testes) */
+  categorias(cfg) { return cfg === undefined ? this._lista().lista : this.padroes(cfg).concat(this.personalizadas(cfg)); },
+  /** v14.09 (complemento) · valida o ajuste de uma categoria PADRÃO: só nome e grupo mudam (ID e sentido nunca). { ajuste, cat, igual } ou { erro }; ajuste null = igual ao original (remove o ajuste). */
+  prepararAjustePadrao(id, d, { cfg } = {}) {
+    const base = DFC_CATEGORIAS.find(c => c.id === id);
+    if (!base) return { erro: 'Esta não é uma categoria padrão do sistema.' };
+    const nome = String(d?.nome ?? '').replace(/\s+/g, ' ').trim();
+    if (nome.length < 3) return { erro: 'Informe o nome da categoria (mínimo de 3 caracteres).' };
+    if (nome.length > 60) return { erro: 'O nome da categoria pode ter no máximo 60 caracteres.' };
+    const grupo = id === 'transf' ? base.grupo : d?.grupo;
+    if (id !== 'transf' && !this.GRUPOS_CAT.includes(grupo)) return { erro: 'Escolha o grupo no demonstrativo DFC.' };
+    if (this.categorias(cfg).some(c => c.id !== id && this.norm(c.nome) === this.norm(nome))) return { erro: `Já existe uma categoria chamada “${nome}”.` };
+    const igual = nome === base.nome && grupo === base.grupo;
+    return { ajuste: igual ? null : { nome, grupo }, cat: { ...base, nome, grupo }, igual };
+  },
   cat(id, cfg) { return cfg === undefined ? this._lista().mapa.get(id) : this.categorias(cfg).find(c => c.id === id); },
   /** a categoria não soma no fluxo líquido? (transferência entre contas próprias ou impacto "neutra") */
   neutra(cat) { return !!cat && (cat.grupo === 'TRANSFERENCIA' || cat.impacto === 'neutra'); },
@@ -9075,13 +9134,18 @@ const DFC = {
   regras() { return (typeof Repo !== 'undefined' && Repo.get('config', 'dfc')?.regras) || DFC_REGRAS_PADRAO; },
   /** v14.05 · recurso gestao_v1405 ligado? (fora do painel — testes — sempre ligado) */
   ativo05() { return typeof g05 !== 'function' || g05(); },
+  /** v14.09 · recurso gestao_v1409 ligado? (fora do painel — testes — sempre ligado) */
+  ativo09() { return typeof g09 !== 'function' || g09(); },
+  /** v14.09 · categoria DFC da conta contábil do FCX pelo De-para FCX → DFC (config/dfc.mapaFCX + código da conta) */
+  _categoriaConta09(conta) { return typeof PrevistoFCX !== 'undefined' ? PrevistoFCX.categoriaDaConta(conta) : null; },
   /** cadastro (Módulo 13) vinculado à transação: o fornecedor/cliente identificado no extrato */
   _parceiro(id) { return id && typeof Repo !== 'undefined' ? Repo.get('parceiros', id) : null; },
   /** o cadastro de fornecedores e clientes não está disponível a este usuário (sem a permissão parceiros.ver) ou ainda não carregou */
   _semAcessoParceiros() { return typeof Repo !== 'undefined' && !!Repo.prontas && !Repo.prontas.has('parceiros'); },
   /**
    * Categoria de uma transação. Prioridade (v14.05):
-   *   1º classificação manual do usuário (cat) · 2º primeira regra de classificação que casar ·
+   *   v14.09: 1º manual · 2º regra · 3º Contas a Pagar do FCX (t.cp: conta contábil → De-para FCX → DFC) · 4º categoria do cadastro de fornecedores · 5º padrão.
+   *   (v14.05)  1º classificação manual do usuário (cat) · 2º primeira regra de classificação que casar ·
    *   3º Categoria DFC padrão do fornecedor/cliente vinculado (t.par) · 4º padrão automático do vinculado
    *   (Pagamento a fornecedores nas saídas; Outras entradas operacionais nas entradas) · senão, padrão pelo sinal.
    * ctx.parceiro(id) permite informar o cadastro de fora (testes).
@@ -9092,6 +9156,10 @@ const DFC = {
     for (const r of regras) {
       if (r.sentido !== '*' && r.sentido !== sentido) continue;
       if ((r.termos || []).some(x => x && h.includes(this.norm(x)))) return { categoria: r.categoria, origem: 'regra', regra: r.id };
+    }
+    if (t.cp && sentido === 'S' && this.ativo09()) { // v14.09: saída do extrato casada com um título do Contas a Pagar do FCX → categoria da conta contábil do título (De-para FCX → DFC)
+      const id = ctx && ctx.categoriaConta ? ctx.categoriaConta(t.cp.conta) : this._categoriaConta09(t.cp.conta), c = id ? this.cat(id) : null;
+      if (c && this.compativel('S', c)) return { categoria: c.id, origem: 'contas_pagar', conta: t.cp.conta, titulo: t.cp.id };
     }
     if (t.par && this.ativo05()) {
       const p = ctx && ctx.parceiro ? ctx.parceiro(t.par) : this._parceiro(t.par);
@@ -9461,6 +9529,120 @@ const PARC_IMP = {
 };
 /* PARC_IMP:FIM */
 
+/* CP_OFX:INI */
+/* =====================================================================
+   v14.09 · EXTRATOS OFX (SAÍDAS) × CONTAS A PAGAR DO FCX (FCX → Saídas) — MOTOR PURO (sem DOM, sem Repo, sem Auth)
+   Para cada saída do extrato (valor < 0, sem classificação manual) procura o título do Contas a Pagar do FCX que a originou:
+     1) valor idêntico (tolerância de R$ 0,05; vale o valor ou o valor líquido do título);
+     2) razão social / fornecedor compatível com o favorecido do histórico bancário, já sem prefixos como PIX ENVIADO, TED, DOC, PAGTO, BOLETO, DB AUTOM,
+        acentos e caracteres especiais: nome EXATO ou PREFIXO normalizado (mínimo de 12 caracteres, para os nomes truncados pelo banco);
+     3) data do título dentro de ±5 dias úteis da data do extrato.
+   Desempate (mesmo fornecedor e mesmo valor): títulos Pago/Efetivo primeiro; depois Previsto; dentro do mesmo status, o mais próximo da data do extrato.
+   Cada título casa com UMA saída (consumo): a segunda saída igual pega o próximo título livre. Dois fornecedores diferentes que casam por prefixo = ambíguo (não vincula).
+   O vínculo guarda a CONTA CONTÁBIL do título (t.cp.conta); a Categoria DFC vem do De-para FCX → DFC (PrevistoFCX.categoriaDaConta) na hora de classificar.
+   Prioridade na DFC (DFC.classificar): manual > regra explícita > Contas a Pagar > categoria do cadastro de fornecedores > padrão.
+   ===================================================================== */
+const CP_OFX = {
+  TOL_CENTAVOS: 5, MIN_PREFIXO: 12, JANELA_DIAS_UTEIS: 5,
+  /** prefixos de histórico bancário que não fazem parte do nome do favorecido (do mais longo para o mais curto; retirados em sequência do início) */
+  PREFIXOS: ['PIX TRANSFERENCIA', 'PIX ENVIADO', 'PIX ENVIO', 'PIX TRANSF', 'TED ENVIADA', 'TED ENVIADO', 'DOC ENVIADO', 'DEBITO AUTOMATICO', 'DEB AUTOMATICO', 'DB AUTOMATICO', 'DB AUTOM', 'DEB AUTOM', 'DB AUT',
+    'PAGAMENTO', 'TRANSFERENCIA', 'ENVIADO', 'ENVIADA', 'BOLETO', 'PAGTO', 'PGTO', 'TRANSF', 'PAG', 'PIX', 'TED', 'DOC'],
+  TIPOS: { pago: 'Pago', efetivo: 'Efetivo', previsto: 'Previsto' },
+  /** favorecido normalizado do histórico: sem acento, MAIÚSCULO, sem datas (dd/mm), documentos (CNPJ/CPF) e números longos, sem pontuação e sem os prefixos bancários */
+  favorecido(hist) {
+    let s = PARC_PIX.sa(String(hist ?? '')).toUpperCase();
+    s = s.replace(/(^|[^0-9])\d{1,2}\/\d{1,2}(\/\d{2,4})?(?![0-9])/g, '$1 ').replace(/\d{2,3}\.?\d{3}\.?\d{3}[\/-]?\d{0,4}-?\d{2}/g, ' ').replace(/\d{6,}/g, ' ');
+    s = s.replace(/[^A-Z0-9]+/g, ' ').replace(/ +/g, ' ').trim();
+    for (let mudou = true; mudou && s;) {
+      mudou = false;
+      for (const p of this.PREFIXOS) if (s === p || s.startsWith(p + ' ')) { s = s.slice(p.length).trim(); mudou = true; break; }
+    }
+    return s;
+  },
+  /** nome do fornecedor do FCX, no mesmo formato */
+  nomeForn(f) { return PARC_PIX.nomeNorm(f); },
+  /** 'exato' (nomes iguais), 'prefixo' (o nome do extrato, com 12+ caracteres, é o começo do nome do cadastro: truncado pelo banco) ou null */
+  compat(ofx, forn) {
+    if (!ofx || !forn) return null;
+    if (ofx === forn) return ofx.length >= 3 ? 'exato' : null;
+    return ofx.length >= this.MIN_PREFIXO && forn.length > ofx.length && forn.startsWith(ofx) ? 'prefixo' : null;
+  },
+  utc(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : null; },
+  _util(d) { const w = d.getUTCDay(); return w !== 0 && w !== 6; },
+  /** dias úteis (seg. a sex.) entre duas datas ISO; 0 = mesmo dia útil; datas muito distantes = Infinity. `util(Date UTC)` opcional (feriados). */
+  diasUteis(a, b, util) {
+    const x = this.utc(a), y = this.utc(b); if (x == null || y == null) return Infinity;
+    const ini = Math.min(x, y), fim = Math.max(x, y); if ((fim - ini) / 864e5 > 21) return Infinity;
+    const u = util || (d => this._util(d)); let n = 0;
+    for (let d = ini + 864e5; d <= fim; d += 864e5) if (u(new Date(d))) n++;
+    return n;
+  },
+  dias(a, b) { const x = this.utc(a), y = this.utc(b); return x == null || y == null ? Infinity : Math.abs(Math.round((x - y) / 864e5)); },
+  elegivel(t) { return !!t && Number(t.valor) < 0 && !t.cat; }, // classificação manual: nunca é tocada
+  /** índice das saídas do FCX ({id,date,conta,tipo,valor,valorLiquido?,fornecedor}): por valor em centavos; sem fornecedor ou sem valor ficam de fora */
+  indice(saidas) {
+    const itens = [], porCent = new Map();
+    for (const s of saidas || []) {
+      if (!s || !s.date || s.id == null) continue;
+      const nn = this.nomeForn(s.fornecedor); if (nn.length < 3 || nn === 'SEM FORNECEDOR') continue;
+      const cents = [...new Set([s.valor, s.valorLiquido].filter(v => v != null && v !== '' && Math.abs(Number(v)) > 0).map(v => Math.round(Math.abs(Number(v)) * 100)))];
+      if (!cents.length) continue;
+      const it = { s, id: String(s.id), nn, data: String(s.date).slice(0, 10), tipo: s.tipo || 'previsto', cents };
+      itens.push(it); for (const c of cents) { if (!porCent.has(c)) porCent.set(c, []); porCent.get(c).push(it); }
+    }
+    return { itens, porCent };
+  },
+  /**
+   * Procura o título do Contas a Pagar de UMA saída do extrato. `opts.usadas` = ids de título já casados (consumidos); `opts.util` = dia útil (feriados).
+   * Devolve null (sem correspondência), { ambigua: true } ou o vínculo { id, conta, forn, tipo, data, via }.
+   */
+  casarUma(t, idx, opts = {}) {
+    if (!this.elegivel(t) || !idx) return null;
+    const ofx = this.favorecido(t.hist); if (ofx.length < 3) return null;
+    const usadas = opts.usadas || new Set(), c0 = Math.round(Math.abs(Number(t.valor)) * 100), vistos = new Set(), ach = [];
+    for (let d = -this.TOL_CENTAVOS; d <= this.TOL_CENTAVOS; d++) for (const it of idx.porCent.get(c0 + d) || []) {
+      if (vistos.has(it)) continue; vistos.add(it);
+      if (usadas.has(it.id)) continue;
+      const via = this.compat(ofx, it.nn); if (!via) continue;
+      if (this.diasUteis(it.data, t.data, opts.util) > this.JANELA_DIAS_UTEIS) continue;
+      ach.push({ it, via, dc: this.dias(it.data, t.data) });
+    }
+    if (!ach.length) return null;
+    const viaMelhor = ach.some(a => a.via === 'exato') ? 'exato' : 'prefixo', g = ach.filter(a => a.via === viaMelhor);
+    if (new Set(g.map(a => a.it.nn)).size > 1) return { ambigua: true };
+    const rank = a => (a.it.tipo === 'previsto' ? 1 : 0);
+    g.sort((a, b) => rank(a) - rank(b) || a.dc - b.dc || (a.it.id < b.it.id ? -1 : a.it.id > b.it.id ? 1 : 0));
+    const m = g[0], s = m.it.s;
+    return { id: m.it.id, conta: String(s.conta || '').trim(), forn: String(s.fornecedor || '').trim(), tipo: m.it.tipo, data: m.it.data, via: m.via };
+  },
+  /** processa uma lista de transações em ordem cronológica (data, maior valor, id), consumindo os títulos; devolve um resultado por posição (null, { ambigua } ou vínculo) */
+  casarLote(lista, idx, opts = {}) {
+    const usadas = opts.usadas || new Set(), res = new Array((lista || []).length).fill(null);
+    const ord = res.map((_, i) => i).filter(i => this.elegivel(lista[i])).sort((a, b) => {
+      const x = lista[a], y = lista[b];
+      return String(x.data).localeCompare(String(y.data)) || Math.abs(Number(y.valor)) - Math.abs(Number(x.valor)) || String(x.id).localeCompare(String(y.id)) || a - b;
+    });
+    for (const i of ord) { const m = this.casarUma(lista[i], idx, { usadas, util: opts.util }); if (m && m.id) usadas.add(m.id); res[i] = m; }
+    return res;
+  },
+  /** cópia da transação com o vínculo (cp) ou sem ele; a classificação manual (cat) não é tocada */
+  aplicar(t, m) {
+    const n = { ...t };
+    if (this.elegivel(t)) { if (m && m.id) n.cp = { id: m.id, conta: m.conta, forn: m.forn, tipo: m.tipo, data: m.data, via: m.via }; else delete n.cp; }
+    return n;
+  },
+  /** ids de título já vinculados em transações gravadas (para o consumo entre importações) */
+  usadasDe(transacoes) { const u = new Set(); for (const t of transacoes || []) if (t && t.cp && t.cp.id != null) u.add(String(t.cp.id)); return u; },
+  contaRot(conta) { return String(conta || '').trim() || '(sem conta contábil)'; },
+  rotulo(cp) { return 'Contas a Pagar · Conta ' + this.contaRot(cp && cp.conta); },
+  /** texto do detalhe (dica ao passar o mouse): fornecedor do FCX, vencimento, status e como o nome foi reconhecido */
+  detalhe(cp) {
+    const d = String(cp.data || '').slice(0, 10).split('-').reverse().join('/');
+    return `Título do Contas a Pagar (FCX): ${cp.forn || '—'} · vencimento ${d || '—'} · status ${this.TIPOS[cp.tipo] || cp.tipo || '—'} · fornecedor reconhecido por ${cp.via === 'prefixo' ? 'prefixo do nome (extrato truncado)' : 'nome exato'}`;
+  },
+};
+/* CP_OFX:FIM */
+
 /* =====================================================================
    v14.06 · RESUMO EXECUTIVO OFICIAL DA DFC (padrão bancário / institucional · CPC 03) — MOTOR PURO (sem DOM, sem Repo, sem Auth)
    DFC_RESUMO.periodo   — período (mês, trimestre, acumulado do ano ou intervalo) em meses AAAA-MM
@@ -9652,7 +9834,7 @@ const DFC_RESUMO = {
     if (m.escopo) {
       const soma = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? this.r2(v.reduce((a, x) => a + x, 0)) : null; };
       const stC = { conciliado: ['Conciliado', 'ok'], divergente: ['Divergente', 'bad'], sem_inicial: ['Sem saldo inicial', 'warn'], sem_extrato: ['Sem saldo no extrato', 'warn'] };
-      const linhasC = s.porConta.map(k => `<tr><td>${esc(k.banco || '—')}${k.descricao ? `<div class="sub">${esc(k.descricao)}</div>` : ''}</td><td>${esc(k.agConta || k.rotulo)}</td>${val(k.inicial)}${val(k.movimento)}${val(k.finalCalculado)}${val(k.finalExtrato)}<td>${pill(stC[k.status])}${k.status === 'divergente' && k.diferenca != null ? ` <span class="sub">${esc(brl(k.diferenca))}</span>` : ''}</td></tr>`).join('');
+      const linhasC = s.porConta.map(k => `<tr><td>${esc(k.banco || '—')}${k.descricao && o.descricoes !== false ? `<div class="sub">${esc(k.descricao)}</div>` : ''}</td><td>${esc(k.agConta || k.rotulo)}</td>${val(k.inicial)}${val(k.movimento)}${val(k.finalCalculado)}${val(k.finalExtrato)}<td>${pill(stC[k.status])}${k.status === 'divergente' && k.diferenca != null ? ` <span class="sub">${esc(brl(k.diferenca))}</span>` : ''}</td></tr>`).join('');
       tabC07 = `<h3>Contas bancárias incluídas nesta emissão (${s.porConta.length})</h3><table class="rx-t rx-c"><thead><tr><th>Banco</th><th>Agência / conta</th><th class="n">Saldo inicial</th><th class="n">Variação líquida</th><th class="n">Saldo final (conciliado)</th><th class="n">Saldo final (extrato)</th><th>Situação</th></tr></thead><tbody>${linhasC}<tr class="s"><td colspan="2">Total das contas incluídas</td>${val(soma(s.porConta, k => k.inicial))}${val(soma(s.porConta, k => k.movimento))}${val(soma(s.porConta, k => k.finalCalculado))}${val(soma(s.porConta, k => k.finalExtrato))}<td></td></tr></tbody></table>${ind.neutras ? `<div class="rx-restr">A variação líquida por conta inclui as transferências entre contas próprias; no consolidado acima elas aparecem separadas, fora da variação líquida do período.</div>` : ''}`;
     }
     const q1 = `<div class="rx-q"><h2>Quadro 1 — Síntese Executiva e Indicadores de Liquidez</h2>
@@ -9766,7 +9948,7 @@ const DFC_MATRIZ = {
   },
   /** titular da conta: a empresa escolhida (com o CNPJ do cadastro) ou só o CNPJ informado */
   titularRotulo(k, empresas) {
-    const em = k.titularEmpresaId ? this.normalizar(empresas).find(e => e.id === k.titularEmpresaId) : null, c = em ? em.cnpj : this.dig(k.titularCnpj);
+    const em = k.titularEmpresaId ? this.normalizar(empresas).find(e => e.id === k.titularEmpresaId || (e.aliases || []).includes(k.titularEmpresaId)) : null, c = em ? em.cnpj : this.dig(k.titularCnpj);
     return [em ? (em.nome || em.razao) : '', c ? this.fmtCnpj(c) : ''].filter(Boolean).join(' · ');
   },
   /** selos do vínculo da conta com a empresa escolhida no Resumo: padrão desta empresa / padrão da Matriz / titular / inativa */
@@ -9782,7 +9964,7 @@ const DFC_MATRIZ = {
   titularesDivergentes(ids, contas, cnpjEmissor, empresas) {
     const raiz = this.dig(cnpjEmissor).slice(0, 8); if (raiz.length < 8) return [];
     const l = this.normalizar(empresas), sel = new Set((ids || []).map(String));
-    return (contas || []).filter(k => { if (!sel.has(String(k.id))) return false; const em = k.titularEmpresaId ? l.find(e => e.id === k.titularEmpresaId) : null, c = em ? em.cnpj : this.dig(k.titularCnpj); return c.length >= 8 && c.slice(0, 8) !== raiz; }).map(k => String(k.id));
+    return (contas || []).filter(k => { if (!sel.has(String(k.id))) return false; const em = k.titularEmpresaId ? l.find(e => e.id === k.titularEmpresaId || (e.aliases || []).includes(k.titularEmpresaId)) : null, c = em ? em.cnpj : this.dig(k.titularCnpj); return c.length >= 8 && c.slice(0, 8) !== raiz; }).map(k => String(k.id));
   },
   /* ---------------- escopo de contas do Resumo ---------------- */
   /**
@@ -9804,15 +9986,166 @@ const DFC_MATRIZ = {
   /** erros que impedem a emissão por causa do escopo (lista vazia = pode gerar) */
   validarEscopo(esc) { return esc && esc.ids && esc.ids.length ? [] : [(esc && esc.alerta) || 'Selecione ao menos uma conta bancária para o Resumo.']; },
   /** texto do escopo no documento: curto (subtítulo) e longo (as contas incluídas, no máximo MAX_NOMES por extenso) */
-  descreverEscopo(esc, infos, empresa) {
+  descreverEscopo(esc, infos, empresa, { descricoes = true } = {}) {
     const por = new Map((infos || []).map(i => [String(i.id), i])), l = (esc.ids || []).map(id => por.get(String(id))).filter(Boolean), n = (esc.ids || []).length, pl = n === 1 ? '' : 's';
-    const um = i => [i.banco, i.agConta].filter(Boolean).join(' · ') + (i.descricao ? ` (${i.descricao})` : '');
+    const um = i => [i.banco, i.agConta].filter(Boolean).join(' · ') + (descricoes && i.descricao ? ` (${i.descricao})` : '');
     const origem = esc.modo === 'padrao' ? (empresa && empresa.matriz ? 'contas padrão da Matriz' : 'contas padrão de ' + (esc.empresaNome || 'empresa')) : esc.todas ? 'todas as contas bancárias cadastradas' : 'contas selecionadas manualmente';
     return { curto: `Contas consideradas: ${n} conta${pl} bancária${pl} (${origem})`, longo: l.slice(0, this.MAX_NOMES).map(um).join('; ') + (l.length > this.MAX_NOMES ? `; e mais ${l.length - this.MAX_NOMES}` : '') };
   },
   /** recorta transações e extratos às contas do escopo (o DFC_RESUMO.montar faz o mesmo ao receber "escopo") */
   filtrar(d, ids) { const s = new Set((ids || []).map(String)); return { transacoes: (d.transacoes || []).filter(t => s.has(String(t.contaId))), extratos: (d.extratos || []).filter(x => s.has(String(x.contaId))) }; },
 };
+
+/**
+ * v14.08 · Empresa Matriz no Cadastro de Lojas (Gestão de Lojas).
+ *   Loja:  { id, codigo, nome, nomeFantasia?, razaoSocial?, cnpj, ativa, receita?, matriz?: boolean, contasPadraoMatriz?: [idDaConta] }   (lojas)
+ * A Matriz é a UNIDADE marcada na ficha da loja; as "Contas Bancárias Padrão da Matriz" moram só nela (contasPadraoMatriz).
+ * Retrocompatibilidade: a Matriz que a v14.07 gravou em config/empresas segue valendo (virtualmente, sem perda) até uma loja ser marcada — o vínculo é
+ * feito pelo CNPJ; ao abrir/salvar a ficha da loja de mesmo CNPJ, a Matriz e as contas padrão migram para o Cadastro de Lojas.
+ */
+Object.assign(DFC_MATRIZ, {
+  MSG08: {
+    SEM_MATRIZ: 'Nenhuma Empresa Matriz definida no Cadastro de Lojas: abra a ficha da loja da matriz (Gestão de Lojas) e marque “Esta unidade é a Empresa Matriz”.',
+    SEM_RAZAO: 'A Matriz não tem Razão Social no Cadastro de Lojas: preencha a ficha da loja (use “Consultar Receita” no CNPJ) para emitir o documento.',
+    SEM_CNPJ: 'O CNPJ da Matriz no Cadastro de Lojas está em branco ou inválido: corrija na ficha da loja para emitir o documento.',
+  },
+  uniq08(a) { return [...new Set((Array.isArray(a) ? a : []).map(x => String(x ?? '').trim()).filter(Boolean))]; },
+  ehMatriz08(l) { return !!l && l.matriz === true && l.ativa !== false; },
+  nomeLoja08(l) { return String((l && (l.nomeFantasia || l.nome)) ?? '').trim(); },
+  /** a loja que é a Matriz: marcada e ativa; com duas marcadas (dado inconsistente), vale a de menor código */
+  matrizDeLojas08(lojas) {
+    const m = (Array.isArray(lojas) ? lojas : []).filter(l => this.ehMatriz08(l) && String(l.id ?? '').trim());
+    return m.sort((a, b) => String(a.codigo || a.id).localeCompare(String(b.codigo || b.id), 'pt-BR', { numeric: true }))[0] || null;
+  },
+  /** outras lojas marcadas como Matriz além da que vale (para avisar) */
+  problemasMatriz08(lojas) {
+    const v = this.matrizDeLojas08(lojas), l = Array.isArray(lojas) ? lojas : [];
+    return { duplicadas: l.filter(x => this.ehMatriz08(x) && v && String(x.id) !== String(v.id)).map(x => String(x.id)), inativas: l.filter(x => x && x.matriz === true && x.ativa === false).map(x => String(x.id)) };
+  },
+  /** a Matriz da v14.07 (config/empresas) só vale enquanto nenhuma loja for a Matriz E a loja de mesmo CNPJ não tiver sido desmarcada de propósito */
+  legadoVale08(lojas, legado) {
+    if (!legado || this.matrizDeLojas08(lojas)) return false;
+    return !(legado.cnpj && (Array.isArray(lojas) ? lojas : []).some(l => l && l.matriz === false && this.dig(l.cnpj) === legado.cnpj));
+  },
+  /** loja de mesmo CNPJ da Matriz da v14.07 (ativa primeiro): a candidata natural a receber a Matriz */
+  lojaDoLegado08(lojas, legado) {
+    if (!legado || !legado.cnpj) return null;
+    const l = (Array.isArray(lojas) ? lojas : []).filter(x => x && String(x.id ?? '').trim() && this.dig(x.cnpj) === legado.cnpj);
+    return l.find(x => x.ativa !== false) || l[0] || null;
+  },
+  /** loja → empresa no formato do cadastro da v14.07 (nome, razao, cnpj, contasPadrao, matriz), com a origem e os apelidos de id (titulares antigos) */
+  entidadeDeLoja08(l, legado = null) {
+    if (!l || typeof l !== 'object') return null;
+    const lid = String(l.id ?? '').trim(); if (!lid) return null;
+    const rec = l.receita && typeof l.receita === 'object' ? l.receita : {}, c = this.dig(l.cnpj);
+    const herda = legado && legado.cnpj && legado.cnpj === c;
+    const contas = Array.isArray(l.contasPadraoMatriz) ? this.uniq08(l.contasPadraoMatriz) : herda ? this.uniq08(legado.contasPadrao) : [];
+    return { id: 'loja:' + lid, lojaId: lid, codigo: String(l.codigo ?? '').trim(), nome: this.nomeLoja08(l) || String(l.razaoSocial ?? '').trim(), razao: String(l.razaoSocial || rec.razaoSocial || '').trim(), cnpj: c,
+      situacao: this.situacao(l.situacaoCadastral || rec.situacao), matriz: true, contasPadrao: contas, origem: 'loja', contasHerdadas: !Array.isArray(l.contasPadraoMatriz) && contas.length > 0, aliases: herda ? [legado.id] : [] };
+  },
+  /**
+   * Quem é a Empresa Matriz do ambiente: → { origem: 'loja' | 'legado' | 'nenhuma', matriz (empresa|null), loja (a Matriz no Cadastro de Lojas|null),
+   * candidata (loja de mesmo CNPJ da Matriz da v14.07, quando ela ainda vale), legado }
+   *   lojas = Cadastro de Lojas · empresas = lista gravada em config/empresas (v14.07; as de exemplo nunca contam)
+   */
+  resolverMatriz({ lojas = [], empresas = [] } = {}) {
+    const leg = this.matriz(empresas), l = this.matrizDeLojas08(lojas);
+    if (l) return { origem: 'loja', matriz: this.entidadeDeLoja08(l, leg), loja: l, candidata: null, legado: leg };
+    if (leg && this.legadoVale08(lojas, leg)) return { origem: 'legado', matriz: { ...leg, origem: 'legado', aliases: [] }, loja: null, candidata: this.lojaDoLegado08(lojas, leg), legado: leg };
+    return { origem: 'nenhuma', matriz: null, loja: null, candidata: null, legado: leg };
+  },
+  /** empresas que o ambiente oferece como titulares de conta: a Matriz (do Cadastro de Lojas) no topo + o cadastro de empresas; sem cadastro, as de exemplo só fora do Falco */
+  entidadesTitular08({ lojas = [], empresas = [], falco = false, padrao = [] } = {}) {
+    const base = this.base(empresas, { falco, padrao }), r = this.resolverMatriz({ lojas, empresas });
+    if (r.origem !== 'loja') return base;
+    const m = r.matriz, iguais = base.filter(e => m.cnpj && e.cnpj === m.cnpj).map(e => e.id);
+    return [{ ...m, aliases: [...new Set([...m.aliases, ...iguais])] }, ...base.filter(e => !iguais.includes(e.id)).map(e => ({ ...e, matriz: false }))];
+  },
+  /* ---------- ficha da loja: o que a tela mostra e como grava ---------- */
+  /** estado inicial dos campos da ficha: { matriz, contas, herdada, sugerida, razaoSugerida, outraMatriz } */
+  prefillMatrizLoja08(loja, { lojas = [], empresas = [] } = {}) {
+    const l = loja || {}, r = this.resolverMatriz({ lojas, empresas }), leg = this.matriz(empresas), c = this.dig(l.cnpj);
+    const outra = r.loja && String(r.loja.id) !== String(l.id ?? '') ? r.loja : null;
+    if (l.matriz === true) { const e = this.entidadeDeLoja08({ ...l, id: l.id || '_' }, leg); return { matriz: true, contas: e.contasPadrao, herdada: e.contasHerdadas, sugerida: false, razaoSugerida: '', outraMatriz: null }; }
+    if (r.origem === 'legado' && leg && c && leg.cnpj === c && l.matriz !== false) {
+      const semRazao = !String(l.razaoSocial || (l.receita && l.receita.razaoSocial) || '').trim();
+      return { matriz: true, contas: this.uniq08(leg.contasPadrao), herdada: true, sugerida: true, razaoSugerida: semRazao ? leg.razao : '', outraMatriz: null };
+    }
+    return { matriz: false, contas: [], herdada: false, sugerida: false, razaoSugerida: '', outraMatriz: outra ? { id: String(outra.id), nome: this.nomeLoja08(outra) } : null };
+  },
+  /** erros que impedem gravar a ficha como Matriz (lista vazia = pode salvar); só valem quando a loja é a Matriz */
+  validarMatrizLoja08(nova) {
+    const er = []; if (!nova || nova.matriz !== true) return er;
+    if (nova.ativa === false) er.push('Uma loja inativa não pode ser a Empresa Matriz: reative a loja ou desmarque a opção.');
+    const c = this.dig(nova.cnpj); if (!c || !this.cnpjOk(c)) er.push('Informe o CNPJ válido da unidade para defini-la como Empresa Matriz: é o CNPJ oficial que sai no Resumo Executivo da DFC.');
+    if (!String(nova.razaoSocial || (nova.receita && nova.receita.razaoSocial) || '').trim()) er.push('Informe a Razão Social da unidade para defini-la como Empresa Matriz (consulte o CNPJ na Receita Federal ou digite).');
+    return er;
+  },
+  /**
+   * Consolida a gravação da ficha: marcar a Matriz desmarca as outras (só UMA Matriz por ambiente) e desmarcar limpa as contas padrão.
+   * Só grava "matriz: false" quando a loja JÁ tinha decisão sobre a Matriz — editar uma loja comum não deixa marca nenhuma (e não cancela a Matriz da v14.07).
+   * → { loja, outras: [lojas que precisam ser regravadas], desmarcou: nome da Matriz anterior | null }
+   */
+  aplicarMatrizLoja08(lojas, nova, anterior = null) {
+    const marcada = nova.matriz === true, out = { ...nova }, outras = [], ant = anterior && typeof anterior.matriz === 'boolean' ? anterior.matriz : null;
+    if (marcada) {
+      out.matriz = true; out.contasPadraoMatriz = this.uniq08(nova.contasPadraoMatriz);
+      for (const o of Array.isArray(lojas) ? lojas : []) if (o && String(o.id) !== String(nova.id) && o.matriz === true) outras.push({ ...o, matriz: false, contasPadraoMatriz: [] });
+    } else {
+      if (ant === null) delete out.matriz; else out.matriz = false;
+      if (ant === true || Array.isArray(anterior && anterior.contasPadraoMatriz)) out.contasPadraoMatriz = []; else delete out.contasPadraoMatriz;
+    }
+    return { loja: out, outras, desmarcou: outras.length ? this.nomeLoja08(outras[0]) || String(outras[0].id) : null };
+  },
+  /** leva a Matriz da v14.07 para a loja de mesmo CNPJ sem perda: marca a loja, copia as contas padrão (ou as informadas) e a razão social quando a ficha não a tem */
+  migrarLegado08(loja, legado, contas = null) {
+    const l = { ...loja }, c = Array.isArray(contas) ? this.uniq08(contas) : this.uniq08(legado && legado.contasPadrao);
+    l.matriz = true; l.contasPadraoMatriz = c;
+    if (!String(l.razaoSocial || (l.receita && l.receita.razaoSocial) || '').trim() && legado && legado.razao) l.razaoSocial = legado.razao;
+    return l;
+  },
+  /* ---------- conta bancária × Matriz ---------- */
+  /** o checkbox "Conta padrão da Empresa Matriz" da conta: onde gravar → { alvo: 'loja' | 'legado' | 'nenhum', lojaId, contas, migrar } */
+  planoPadrao08(res, contaId, ligar) {
+    const id = String(contaId ?? '').trim(), m = res && res.matriz; if (!m || !id) return { alvo: 'nenhum' };
+    if (m.contasPadrao.includes(id) === !!ligar) return { alvo: 'nenhum' };
+    const contas = ligar ? [...new Set([...m.contasPadrao, id])] : m.contasPadrao.filter(x => x !== id);
+    if (res.origem === 'loja') return { alvo: 'loja', lojaId: String(res.loja.id), contas, migrar: false };
+    if (res.candidata) return { alvo: 'loja', lojaId: String(res.candidata.id), contas, migrar: true };
+    return { alvo: 'legado', contas };
+  },
+  /** conta excluída: lojas que têm a conta entre as padrão da Matriz → regravar sem ela */
+  lojasSemConta08(lojas, contaId) {
+    const id = String(contaId ?? '');
+    return (Array.isArray(lojas) ? lojas : []).filter(l => l && Array.isArray(l.contasPadraoMatriz) && l.contasPadraoMatriz.map(String).includes(id)).map(l => ({ id: String(l.id), contasPadraoMatriz: l.contasPadraoMatriz.map(String).filter(x => x !== id) }));
+  },
+  /* ---------- Resumo Executivo: emitente = a Matriz ---------- */
+  validarEmissor08(res) {
+    const m = res && res.matriz; if (!m) return [this.MSG08.SEM_MATRIZ];
+    const er = []; if (!String(m.razao ?? '').trim()) er.push(this.MSG08.SEM_RAZAO); if (!this.cnpjOk(m.cnpj)) er.push(this.MSG08.SEM_CNPJ);
+    return er;
+  },
+  /** dados do cartão de identificação da empresa emissora (Razão Social + CNPJ oficial) e do atalho para a ficha da Matriz no Cadastro de Lojas */
+  cartaoEmissor08(res) {
+    const m = res && res.matriz, erros = this.validarEmissor08(res);
+    if (!m) return { estado: 'vazio', nome: '', razao: '', cnpj: '', codigo: '', origem: '', lojaId: '', nota: '', erros, atalho: 'Definir a Matriz no Cadastro de Lojas' };
+    return { estado: erros.length ? 'incompleto' : 'ok', nome: m.nome || m.razao, razao: m.razao, cnpj: this.fmtCnpj(m.cnpj), codigo: m.codigo || '', origem: res.origem,
+      lojaId: res.loja ? String(res.loja.id) : res.candidata ? String(res.candidata.id) : '', erros, atalho: 'Editar Matriz no Cadastro de Lojas',
+      nota: res.origem === 'legado' ? 'Matriz herdada do cadastro de empresas da v14.07: abra a ficha da loja e salve para consolidá-la no Cadastro de Lojas.' : '' };
+  },
+  /** o Resumo emite SÓ pela Matriz: mesmo escopo da v14.07, com as mensagens apontando para o Cadastro de Lojas */
+  resolverEscopo08({ matriz = null, selecionadas = [], contas = [] } = {}) {
+    const e = this.resolverEscopo({ empresa: matriz, selecionadas, contas }), nome = e.empresaNome, pl = e.n === 1 ? '' : 's';
+    if (e.modo === 'padrao') e.texto = `Nenhuma conta marcada manualmente — serão consideradas automaticamente ${e.n === 1 ? 'a' : 'as'} ${e.n} conta${pl} padrão da Empresa Matriz (${nome}), definida${pl} no Cadastro de Lojas.`;
+    if (e.modo === 'sem_padrao') { e.alerta = e.texto = matriz ? `Nenhuma conta marcada e a Matriz (${nome}) ainda não possui Contas Bancárias Padrão no Cadastro de Lojas${e.orfas.length ? ' (os vínculos existentes apontam para contas que foram removidas)' : ''}: marque ao menos uma conta ou vincule as contas na ficha da Matriz (Gestão de Lojas).` : this.MSG08.SEM_MATRIZ; }
+    return { ...e, marcadas: e.modo === 'manual' ? e.ids : [] };
+  },
+  /** abertura do modal: seletor em BRANCO e, havendo contas padrão na Matriz, elas já valem (marcadas: [] · padrao: ids) */
+  modeloAbertura08({ matriz = null, contas = [] } = {}) {
+    const e = this.resolverEscopo08({ matriz, selecionadas: [], contas }), pad = new Set(matriz && Array.isArray(matriz.contasPadrao) ? matriz.contasPadrao.map(String) : []);
+    return { marcadas: [], padrao: contas.map(k => String(k.id)).filter(id => pad.has(id)), modo: e.modo, texto: e.texto, alerta: e.alerta, n: e.n };
+  },
+});
 /* DFC_MATRIZ:FIM */
 
 /* ============================ IEO ============================ */
@@ -13455,20 +13788,21 @@ const FluxoDFC = {
       const texto = OFX.decodificar(await f.arrayBuffer());
       const tx05 = g05() ? PARC_PIX.textosOFX(texto) : null; OFX.ler(texto).forEach(e => lidos.push({ ...e, arquivo: f.name, tx05 }));
     }
+    const cp09 = g09() ? await this.prepararCP09() : null; if (cp09) cp09.usadas = CP_OFX.usadasDe(this.transacoes()); // v14.09: títulos do Contas a Pagar (FCX → Saídas) e os já casados em extratos gravados
     const plano = [];
     for (const e of lidos) {
       let v = ContasBancarias.vincular(e.conta, this.contas());
       if (!v) { const nova = await this.perguntarConta(e); if (!nova) { plano.push({ e, ignorado: true }); continue; } v = { conta: nova, criterio: 'cadastrada agora' }; }
       const existentes = new Set(this.transacoes().filter(t => t.contaId === v.conta.id).map(t => t.id));
-      const novas = this.cruzar05(e.transacoes.filter(t => !existentes.has(t.id)), e.tx05);
+      const novas = this.cruzarCP09(this.cruzar05(e.transacoes.filter(t => !existentes.has(t.id)), e.tx05), cp09);
       plano.push({ e, conta: v.conta, criterio: v.criterio, novas, duplicadas: e.transacoes.length - novas.length });
     }
     const validos = plano.filter(p => !p.ignorado);
     if (!validos.length) return UI.toast('Nada importado.');
     const texto = validos.map(p => `<div style="margin-bottom:8px"><b>${esc(ContasBancarias.rotulo(p.conta))}</b> <span class="hint">(${esc(p.criterio)})</span><br>
-      ${Fmt.data(p.e.periodo.inicio)} a ${Fmt.data(p.e.periodo.fim)} · <b>${p.novas.length}</b> transação(ões) nova(s)${this.txtForn05(p.novas)}${p.duplicadas ? ` · ${p.duplicadas} já importada(s) e ignorada(s)` : ''}${p.e.saldo ? ` · saldo ${Fmt.brl(p.e.saldo.valor)} em ${Fmt.data(p.e.saldo.data)}` : ''}</div>`).join('')
+      ${Fmt.data(p.e.periodo.inicio)} a ${Fmt.data(p.e.periodo.fim)} · <b>${p.novas.length}</b> transação(ões) nova(s)${this.txtForn05(p.novas)}${g09() ? this.txtCP09(p.novas) : ''}${p.duplicadas ? ` · ${p.duplicadas} já importada(s) e ignorada(s)` : ''}${p.e.saldo ? ` · saldo ${Fmt.brl(p.e.saldo.valor)} em ${Fmt.data(p.e.saldo.data)}` : ''}</div>`).join('')
       + (plano.length > validos.length ? `<p class="hint">${plano.length - validos.length} extrato(s) ignorado(s) por não ter conta cadastrada.</p>` : '');
-    if (!(await UI.confirmar('Importar extratos OFX', texto, 'Importar'))) return;
+    if (!(await UI.confirmar('Importar extratos OFX', texto + this.avisoCP09(cp09), 'Importar'))) return;
     const meses = new Set(); let total = 0;
     for (const p of validos) {
       const porMes = {}; p.novas.forEach(t => (porMes[t.data.slice(0, 7)] ||= []).push(t));
@@ -13481,7 +13815,7 @@ const FluxoDFC = {
     }
     await this.atualizarBaseDFC([...meses]);
     this.ui.mes = [...meses].sort().at(-1);
-    UI.toast(`${total} transação(ões) importada(s); DFC atualizada.${this.sufForn05(validos)}`);
+    UI.toast(`${total} transação(ões) importada(s); DFC atualizada.${this.sufForn05(validos)}${g09() ? this.sufCP09(validos) : ''}`);
   },
   /** Conta do OFX não cadastrada: oferece o cadastro já preenchido (retorna a conta ou null). */
   perguntarConta(e) {
@@ -13520,7 +13854,7 @@ const FluxoDFC = {
     if (dup) { UI.toast('Esta conta já está cadastrada: ' + ContasBancarias.rotulo(dup)); return null; }
     const cid = id || 'cb-' + uid(), antes = id ? Repo.get('contasBancarias', id) : {};
     await Repo.salvar('contasBancarias', cid, { ...antes, ...d }, { modulo: 'fcx', rotulo: 'Conta ' + ContasBancarias.rotulo(d) });
-    UI.toast('Conta salva'); if (pm07 != null) await this.sincronizarPadrao07(cid, pm07).catch(() => UI.toast('A conta foi salva, mas o vínculo de conta padrão da Matriz não pôde ser gravado (cadastro de empresas).'));
+    UI.toast('Conta salva'); if (pm07 != null) await this.sincronizarPadrao07(cid, pm07).catch(() => UI.toast(`A conta foi salva, mas o vínculo de conta padrão da Matriz não pôde ser gravado (${g08() ? 'Cadastro de Lojas' : 'cadastro de empresas'}).`));
     return { id: cid, ...d };
   },
   abrirConta(id) {
@@ -13541,7 +13875,7 @@ const FluxoDFC = {
      ===================================================================== */
   renderContas() {
     const contas = this.contas(), pode = Auth.can('fcx.dfc.contas');
-    return `<div class="panel"><div class="row between"><div><h2>Contas bancárias (de-para OFX)</h2><p class="sub">Cada extrato OFX é vinculado a uma destas contas pelo banco, agência e conta (ou pelo identificador OFX).</p></div>${g07() ? `<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="fd-mt-empresas">Gerenciar Empresas / Matriz</button>${pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>` : pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>
+    return `<div class="panel"><div class="row between"><div><h2>Contas bancárias (de-para OFX)</h2><p class="sub">Cada extrato OFX é vinculado a uma destas contas pelo banco, agência e conta (ou pelo identificador OFX).</p></div>${g07() ? `<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="fd-mt-empresas">${g08() ? 'Empresa Matriz (Cadastro de Lojas)' : 'Gerenciar Empresas / Matriz'}</button>${pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>` : pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>
       ${contas.length ? `<div class="tbl-wrap"><table><thead><tr><th>Conta</th><th>Banco</th><th>Agência</th><th>Conta</th><th>Tipo</th>${g07() ? '<th>Titular</th>' : ''}<th>Loja</th><th>ID no OFX</th><th>Última importação</th><th class="num">Último saldo</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>
         ${contas.map(c => `<tr><td class="cell-main">${esc(c.apelido)}${c.ativa === false ? ' <span class="pill neutral">inativa</span>' : ''}${g07() && this.ehPadraoMatriz07(c.id) ? ' <span class="mt-badge" title="Conta padrão da Empresa Matriz">Padrão da Matriz</span>' : ''}</td><td>${esc(c.banco)} · ${esc(c.bancoNome || '')}</td><td class="mono">${esc(c.agencia || '—')}</td><td class="mono">${esc(c.conta)}${c.digito ? '-' + esc(c.digito) : ''}</td>
           <td>${esc(c.tipo || '')}</td>${g07() ? `<td>${this.celulaTitular07(c)}</td>` : ''}<td>${esc(c.lojaId ? this.nomeLoja(c.lojaId) : 'Matriz')}</td><td class="mono">${esc(c.ofxAcctId || '—')}</td><td class="mono">${c.ultimaImportacao ? Fmt.dataHora(c.ultimaImportacao) : '—'}</td>
@@ -13551,7 +13885,7 @@ const FluxoDFC = {
   renderRegras() {
     const regras = DFC.regras(), pode = Auth.can('fcx.dfc.regras');
     const sent = { E: 'Entrada', S: 'Saída', '*': 'Ambos' };
-    return `<div class="panel"><div class="row between"><div><h2>Regras de classificação da DFC</h2><p class="sub">A primeira regra cujo termo aparecer no histórico da transação define a categoria. Classificações manuais sempre prevalecem.${g05() ? ' Depois das regras, vale a Categoria DFC Padrão do fornecedor ou cliente identificado no extrato; sem categoria padrão, saídas vão para “Pagamento a fornecedores” e entradas para “Outras entradas operacionais”.' : ''}</p></div>
+    return `<div class="panel"><div class="row between"><div><h2>Regras de classificação da DFC</h2><p class="sub">A primeira regra cujo termo aparecer no histórico da transação define a categoria. Classificações manuais sempre prevalecem.${g05() ? (g09() ? ' Depois das regras, vale a categoria da conta contábil do título do Contas a Pagar do FCX (De-para FCX → DFC), quando a saída do extrato casa com um título; sem título, vale' : ' Depois das regras, vale') + ' a Categoria DFC Padrão do fornecedor ou cliente identificado no extrato; sem categoria padrão, saídas vão para “' + esc(DFC.cat('pag_fornecedores')?.nome || 'Pagamento a fornecedores') + '” e entradas para “' + esc(DFC.cat('rec_outros')?.nome || 'Outras entradas operacionais') + '”.' : ''}</p></div>
         ${pode ? `<div class="row"><button class="btn ghost" data-a="fd-dfc-reaplicar">Recalcular DFC</button>${g04() ? '<button class="btn ghost" data-a="fd-cat-nova">+ Nova categoria</button>' : ''}<button class="btn sec" data-a="fd-regra-nova">+ Nova regra</button></div>` : ''}</div>
       <div class="tbl-wrap"><table><thead><tr><th>Ordem</th><th>Termos no histórico</th><th>Sentido</th><th>Categoria DFC</th><th>Grupo</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>
       ${regras.map((r, i) => { const c = DFC.cat(r.categoria) || {}; return `<tr><td class="mono">${i + 1}</td><td>${(r.termos || []).map(t => `<span class="pill neutral" style="margin:1px">${esc(t)}</span>`).join(' ')}</td><td>${sent[r.sentido] || r.sentido}</td><td>${esc(c.nome || r.categoria)}</td><td class="cell-sub">${esc((DFC_GRUPOS[c.grupo] || '').split(' (')[0])}</td>
@@ -13569,11 +13903,11 @@ const FluxoDFC = {
     const nPers = cats.filter(c => c.personalizada).length;
     const lin = c => {
       const v = DFC.vinculos(c.id, ctx), uso = v.total ? [v.regras && `${v.regras} regra${v.regras > 1 ? 's' : ''}`, v.lancamentos && `${v.lancamentos} lançamento${v.lancamentos > 1 ? 's' : ''}`, v.mapa && `${v.mapa} no De-para`, v.parceiros && `${v.parceiros} fornecedor${v.parceiros > 1 ? 'es' : ''}/cliente${v.parceiros > 1 ? 's' : ''}`].filter(Boolean).join(' · ') : '—';
-      return `<tr class="${c.personalizada ? '' : 'dfc-sistema'}"><td class="cell-main">${esc(c.nome)} ${c.personalizada ? '<span class="pill info">personalizada</span>' : '<span class="pill neutral">padrão</span>'}</td><td>${sent[c.sentido] || c.sentido}</td>
+      return `<tr class="${c.personalizada ? '' : 'dfc-sistema'}"><td class="cell-main">${esc(c.nome)} ${c.personalizada ? '<span class="pill info">personalizada</span>' : '<span class="pill neutral">padrão</span>'}${c.ajustada ? ` <span class="pill warn" title="${esc(`Original: “${c.nomeOriginal}” · ${DFC.GRUPOS_CURTO[c.grupoOriginal] || c.grupoOriginal}`)}">ajustada</span>` : ''}</td><td>${sent[c.sentido] || c.sentido}</td>
         <td>${esc(DFC.GRUPOS_CURTO[c.grupo] || c.grupo)}</td><td>${DFC.neutra(c) ? '<span class="pill neutral">Neutra / Transferência</span>' : 'Soma no fluxo líquido'}</td><td class="cell-sub">${esc(uso)}</td>
-        ${pode ? `<td class="acts">${c.personalizada ? `<button class="iconbtn" data-a="fd-cat-editar" data-id="${esc(c.id)}" aria-label="Editar categoria ${esc(c.nome)}">${ICON.editar}</button><button class="iconbtn" data-a="fd-cat-del" data-id="${esc(c.id)}" aria-label="Excluir categoria ${esc(c.nome)}">${ICON.lixo}</button>` : ''}</td>` : ''}</tr>`;
+        ${pode ? `<td class="acts">${c.personalizada ? `<button class="iconbtn" data-a="fd-cat-editar" data-id="${esc(c.id)}" aria-label="Editar categoria ${esc(c.nome)}">${ICON.editar}</button><button class="iconbtn" data-a="fd-cat-del" data-id="${esc(c.id)}" aria-label="Excluir categoria ${esc(c.nome)}">${ICON.lixo}</button>` : g09() ? `<button class="iconbtn" data-a="fd-cat-editar" data-id="${esc(c.id)}" aria-label="Editar categoria padrão ${esc(c.nome)}" title="Editar o nome exibido e o grupo no demonstrativo (o ID interno e o sentido ficam travados)">${ICON.editar}</button><button class="iconbtn" disabled aria-disabled="true" aria-label="Categoria padrão: exclusão bloqueada" title="Categoria padrão do sistema: não pode ser excluída, para o motor não perder as referências base">${ICON.lixo}</button>` : ''}</td>` : ''}</tr>`;
     };
-    return `<div class="panel dfc-cat-panel" style="margin-top:16px"><div class="row between"><div><h2>Categorias da DFC</h2><p class="sub">As categorias padrão ficam sempre disponíveis como base. Crie as suas (ex.: “Saídas não operacionais”, “Distribuição de lucros”) e use-as nas regras, nos Extratos OFX e no De-para FCX → DFC. ${nPers ? `${nPers} personalizada${nPers > 1 ? 's' : ''}.` : 'Nenhuma personalizada ainda.'}</p></div>
+    return `<div class="panel dfc-cat-panel" style="margin-top:16px"><div class="row between"><div><h2>Categorias da DFC</h2><p class="sub">As categorias padrão ficam sempre disponíveis como base${g09() ? ' e o lápis ajusta o nome exibido e o grupo no demonstrativo (o ID interno e o sentido ficam travados; excluir segue bloqueado)' : ''}. Crie as suas (ex.: “Saídas não operacionais”, “Distribuição de lucros”) e use-as nas regras, nos Extratos OFX e no De-para FCX → DFC. ${nPers ? `${nPers} personalizada${nPers > 1 ? 's' : ''}.` : 'Nenhuma personalizada ainda.'}</p></div>
         ${pode ? '<button class="btn sec" data-a="fd-cat-nova">+ Nova categoria</button>' : ''}</div>
       <div class="tbl-wrap"><table class="dfc-cat-tab"><thead><tr><th>Categoria</th><th>Sentido</th><th>Grupo no demonstrativo</th><th>Impacto no caixa</th><th>Em uso</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${cats.map(lin).join('')}</tbody></table></div></div>`;
   },
@@ -13586,6 +13920,7 @@ const FluxoDFC = {
   abrirCategoria(id, { sentido, aoSalvar } = {}) {
     if (!g04() || !Auth.can('fcx.dfc.regras')) return UI.toast('Seu perfil não tem permissão para gerenciar as categorias da DFC.');
     const atual = id ? DFC.cat(id) : null;
+    if (id && atual && !atual.personalizada && g09()) return this.abrirCategoriaPadrao09(atual, { aoSalvar }); // v14.09: padrão com nome e grupo editáveis
     if (id && (!atual || !atual.personalizada)) return UI.toast('Esta categoria é padrão do sistema e não pode ser editada.');
     const v = atual ? DFC.vinculos(atual.id, this.ctxVinculos()) : { total: 0 };
     const c = atual || { nome: '', sentido: sentido === 'E' ? 'E' : 'S', grupo: 'OPERACIONAL', impacto: 'soma' };
@@ -13673,9 +14008,9 @@ const FluxoDFC = {
         <div class="seg">${[['todas', 'Todas'], ['e', 'Entradas'], ['s', 'Saídas'], ['sem', `Sem regra (${c.semRegra})`]].map(([k, r]) => `<button class="${u.filtro === k ? 'on' : ''}" data-a="fd-bc-filtro" data-v="${k}">${r}</button>`).join('')}</div></div>
       ${lista.length ? `<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Conta</th><th>Histórico</th>${g05() ? '<th>Fornecedor / Favorecido</th>' : ''}<th class="num">Valor</th><th>Categoria DFC</th></tr></thead><tbody>
         ${lista.slice(0, u.limite).map(t => `<tr><td class="mono">${Fmt.data(t.data)}</td><td class="cell-sub">${esc(Repo.get('contasBancarias', t.contaId)?.apelido || '—')}</td><td>${esc(t.hist)}${t.doc ? `<div class="cell-sub mono">doc ${esc(t.doc)}</div>` : ''}</td>
-          ${g05() ? `<td>${this.celulaForn05(t)}</td>` : ''}<td class="num"><b style="color:var(${t.valor >= 0 ? '--ok' : '--bad'})">${Fmt.brl(t.valor)}</b></td>
+          ${g05() ? `<td>${this.celulaForn05(t)}</td>` : ''}<td class="num${g09() ? ' cp-nw' : ''}"><b style="color:var(${t.valor >= 0 ? '--ok' : '--bad'})">${Fmt.brl(t.valor)}</b></td>
           <td>${podeCls ? `<select data-a="fd-bc-cat" data-doc="${t.docId}" data-id="${esc(t.id)}" aria-label="Categoria DFC" style="min-width:210px">${optCat(t.cls.categoria)}</select>` : esc(DFC.cat(t.cls.categoria)?.nome)}
-            <div class="cell-sub">${this.origemRot05(t.cls)}</div></td></tr>`).join('')}
+            <div class="cell-sub">${this.origemRot05(t.cls)}</div>${g09() ? this.linhaCP09(t) : ''}</td></tr>`).join('')}
       </tbody></table></div>${lista.length > u.limite ? `<button class="btn sec sm" style="margin-top:10px" data-a="fd-bc-mais">Mostrar mais (${lista.length - u.limite})</button>` : ''}` : '<div class="empty">Nenhuma transação com esse filtro.</div>'}</div>`;
   },
   async classificarManual(docId, id, cat) {
@@ -13837,6 +14172,7 @@ const FluxoDFC = {
         $$('select[data-conta]', m).forEach(s => { const k = s.dataset.conta; if (s.value === PrevistoFCX.categoriaPadrao(k)) delete novo[k]; else novo[k] = s.value; });
         await Repo.salvar('config', 'dfc', { ...(Repo.get('config', 'dfc') || {}), mapaFCX: novo }, { modulo: 'fcx', rotulo: 'De-para FCX → DFC' });
         UI.toast('De-para salvo');
+        if (g09()) { await this.atualizarBaseDFC(this.mesesBanco()); UI.toast('De-para salvo; DFC recalculada com as contas contábeis do Contas a Pagar'); }
       } }],
     });
   },
@@ -13938,7 +14274,7 @@ const FluxoDFC = {
       case 'fd-bc-filtro': u.filtro = el.dataset.v; u.limite = 200; return App.render();
       case 'fd-bc-mais': u.limite += 400; return App.render();
       case 'fd-bc-conta-nova': return this.abrirConta(null);
-      case 'fd-mt-empresas': return this.abrirEmpresas07(); // v14.07
+      case 'fd-mt-empresas': return g08() ? this.abrirMatriz08() : this.abrirEmpresas07(); // v14.07 · v14.08: a Matriz mora no Cadastro de Lojas
       case 'fd-bc-conta-editar': return this.abrirConta(el.dataset.id);
       case 'fd-regra-nova': return this.abrirRegra(null);
       case 'fd-regra-editar': return this.abrirRegra(+el.dataset.i);
@@ -13949,8 +14285,8 @@ const FluxoDFC = {
       case 'fd-cat-editar': return this.abrirCategoria(el.dataset.id);
       case 'fd-cat-del': return this.excluirCategoria(el.dataset.id);
       case 'fd-exp': return this.exportar(el.dataset.t, el.dataset.f);
-      case 'fd-cruzar': return this.abrirCruzar05(); // v14.05
-      case 'fd-resumo': return this.abrirResumo06(); // v14.06
+      case 'fd-cruzar': return g09() ? this.abrirCruzar09() : this.abrirCruzar05(); // v14.05 · v14.09: também cruza com o Contas a Pagar do FCX
+      case 'fd-resumo': return g08() ? this.abrirResumo08() : this.abrirResumo06(); // v14.06 · v14.08: emitido só pela Matriz do Cadastro de Lojas
     }
   },
   async mudanca(a, el) {
@@ -13996,10 +14332,11 @@ Object.assign(FluxoDFC, {
     return `<div class="dfc-forn"><b title="${esc(p.nome)}">${esc(p.nomeFantasia || p.nome)}</b></div><div class="cell-sub"><span class="pill ${cls}" title="Como o fornecedor foi identificado">${esc(via)}</span>${p.ativo === false ? ' <span class="pill neutral">inativo</span>' : ''}</div>`;
   },
   origemRot05(c) {
-    return c.origem === 'manual' ? 'classificação manual' : c.origem === 'regra' ? 'por regra' : c.origem === 'fornecedor' ? 'categoria padrão do fornecedor'
+    return c.origem === 'contas_pagar' ? ('<span class="pill ok" title="Classificada pelo título do Contas a Pagar do FCX (conta contábil → De-para FCX → DFC)">Contas a Pagar</span> · Conta ' + esc(CP_OFX.contaRot(c.conta))) : c.origem === 'manual' ? 'classificação manual' : c.origem === 'regra' ? 'por regra' : c.origem === 'fornecedor' ? 'categoria padrão do fornecedor'
       : c.origem === 'fornecedor_padrao' ? 'padrão do fornecedor (automático)' : '<span style="color:var(--warn)">sem regra</span>';
   },
   buscaForn05(t, q) {
+    if (g09() && t.cp && this.norm([t.cp.forn, t.cp.conta].join(' ')).includes(q)) return true; // v14.09: busca também pelo fornecedor e pela conta contábil do título do Contas a Pagar
     if (!g05() || !t.par) return false;
     const p = Repo.get('parceiros', t.par); if (!p) return false;
     const dq = PARC_PIX.dig(q);
@@ -14013,8 +14350,8 @@ Object.assign(FluxoDFC, {
     if (u.forn && !['com', 'sem'].includes(u.forn) && !mapa.has(u.forn)) u.forn = ''; // o fornecedor escolhido não tem lançamento neste mês/conta
     const ops = [...mapa.entries()].sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR')).map(([id, e]) => `<option value="${esc(id)}" ${u.forn === id ? 'selected' : ''}>${esc(e.nome)} (${e.n})</option>`).join('');
     return `<div class="field"><label class="lbl" for="bcForn">Fornecedor / Favorecido</label><select id="bcForn" data-a="fd-bc" data-k="forn"><option value="">Todos</option><option value="com" ${u.forn === 'com' ? 'selected' : ''}>Com fornecedor identificado (${com})</option><option value="sem" ${u.forn === 'sem' ? 'selected' : ''}>Sem fornecedor (${todas.length - com})</option>${ops ? `<optgroup label="Fornecedores e clientes">${ops}</optgroup>` : ''}</select></div>
-      ${this.podeCruzar05() ? `<div class="field" style="flex:0 0 auto;min-width:0"><span class="lbl">&nbsp;</span><button class="btn sec" style="white-space:nowrap" data-a="fd-cruzar" title="Refaz o vínculo dos lançamentos já importados com os fornecedores e clientes cadastrados (chave PIX, documento e nome)">Cruzar Fornecedores / Reprocessar PIX</button></div>` : ''}
-      <div class="field" style="flex:1 1 220px"><span class="hint" style="padding-top:22px;display:block">${com} de ${todas.length} lançamento${todas.length === 1 ? '' : 's'} com fornecedor/cliente identificado${com ? ` (${pix} por chave PIX)` : ''}.</span></div>`;
+      ${this.podeBotao09() ? `<div class="field" style="flex:0 0 auto;min-width:0"><span class="lbl">&nbsp;</span><button class="btn sec" style="white-space:nowrap" data-a="fd-cruzar" title="${this.titCruzar09()}">${this.rotCruzar09()}</button></div>` : ''}
+      <div class="field" style="flex:1 1 220px"><span class="hint" style="padding-top:22px;display:block">${com} de ${todas.length} lançamento${todas.length === 1 ? '' : 's'} com fornecedor/cliente identificado${com ? ` (${pix} por chave PIX)` : ''}.${g09() ? this.hintCP09(todas) : ''}</span></div>`;
   },
 
   /* ---------- Cruzar Fornecedores / Reprocessar PIX (extratos já importados) ---------- */
@@ -14088,6 +14425,178 @@ Object.assign(FluxoDFC, {
   },
 });
 
+
+/* v14.09 · Extratos OFX × Contas a Pagar do FCX (FCX → Saídas): cruzamento na importação e no reprocessamento — recurso gestao_v1409 */
+Object.assign(FluxoDFC, {
+  /** pode reprocessar os extratos (cruzar com o Contas a Pagar e, se o perfil lê o cadastro, com os fornecedores)? */
+  podeCruzar09() { return g09() && Auth.can('fcx.dfc.importar'); },
+  /** o botão de reprocessamento aparece? (com o recurso desligado vale a regra da v14.05) */
+  podeBotao09() { return g09() ? this.podeCruzar09() : this.podeCruzar05(); },
+  rotCruzar09() { return g09() ? 'Cruzar Fornecedores, PIX e Contas a Pagar' : 'Cruzar Fornecedores / Reprocessar PIX'; },
+  titCruzar09() { return g09() ? 'Refaz o vínculo dos lançamentos já importados com os fornecedores e clientes cadastrados (chave PIX, documento e nome) e com as saídas do Contas a Pagar do FCX (valor e fornecedor); a conta contábil do título define a categoria pelo De-para FCX → DFC' : 'Refaz o vínculo dos lançamentos já importados com os fornecedores e clientes cadastrados (chave PIX, documento e nome)'; },
+  /** espera o motor do FCX (iframe) ficar pronto: as saídas do Contas a Pagar vêm dele */
+  async esperarApi09(ms = 15000) { if (FCX.api()) return FCX.api(); FCX.montar(); for (let t = 0; t < ms / 100 && !FCX.api(); t++) await sleep(100); return FCX.api(); },
+  /** índice dos títulos do Contas a Pagar (FCX → Saídas); null = o FCX não está disponível agora (o cruzamento é pulado e nada é desfeito) */
+  async prepararCP09() {
+    let api = null, saidas = null; if (!FCX.api()) UI.toast('Lendo o Contas a Pagar do FCX…');
+    try { api = await this.esperarApi09(); saidas = api ? api.saidas() : null; } catch { saidas = null; }
+    return Array.isArray(saidas) ? { idx: CP_OFX.indice(saidas), n: saidas.length, usadas: new Set() } : null;
+  },
+  /** saídas novas do OFX → com o título do Contas a Pagar identificado (t.cp: conta contábil do título). Sem o FCX, volta a lista como veio. */
+  cruzarCP09(lista, cp) {
+    if (!g09() || !cp) return lista;
+    const res = CP_OFX.casarLote(lista, cp.idx, { usadas: cp.usadas });
+    return lista.map((t, i) => CP_OFX.aplicar(t, res[i]));
+  },
+  txtCP09(novas) { const n = (novas || []).filter(t => t.cp).length; return n ? ` · <b>${n}</b> saída${n > 1 ? 's' : ''} com título do Contas a Pagar identificado` : ''; },
+  sufCP09(validos) { const n = (validos || []).reduce((a, p) => a + (p.novas || []).filter(t => t.cp).length, 0); return n ? ` ${n} saída${n > 1 ? 's' : ''} cruzada${n > 1 ? 's' : ''} com o Contas a Pagar (conta contábil → De-para → Categoria DFC).` : ''; },
+  avisoCP09(cp) { return g09() && !cp ? '<p class="hint">O Contas a Pagar do FCX não está disponível agora: as saídas serão importadas sem o cruzamento com os títulos. Depois, use “Cruzar Fornecedores, PIX e Contas a Pagar”.</p>' : ''; },
+  hintCP09(todas) {
+    const n = todas.filter(t => t.cp).length, v = todas.filter(t => t.cls && t.cls.origem === 'contas_pagar').length;
+    return n ? ` ${v} classificada${v === 1 ? '' : 's'} pelo Contas a Pagar do FCX (${n} casada${n === 1 ? '' : 's'} com um título).` : '';
+  },
+  /** linhas sob a categoria: o título do Contas a Pagar (fornecedor, status) ou, se a regra/classificação manual prevalece, o vínculo que ficou em segundo plano */
+  linhaCP09(t) {
+    if (!t.cp) return '';
+    const tit = esc(CP_OFX.detalhe(t.cp)), st = CP_OFX.TIPOS[t.cp.tipo] || t.cp.tipo || '';
+    if (t.cls && t.cls.origem === 'contas_pagar') return `<div class="cp-linha" title="${tit}"><span>${esc(t.cp.forn || '')}</span>${st ? `<span class="pill ${t.cp.tipo === 'previsto' ? 'neutral' : 'info'}">${esc(st)}</span>` : ''}</div>`;
+    const quem = t.cls && t.cls.origem === 'manual' ? 'a classificação manual prevalece' : t.cls && t.cls.origem === 'regra' ? 'a regra de classificação prevalece' : 'outra classificação prevalece';
+    return `<div class="cp-linha is-extra" title="${tit}">vinculado ao ${esc(CP_OFX.rotulo(t.cp))} (${quem})</div>`;
+  },
+
+  /* ---------- Cruzar Fornecedores, PIX e Contas a Pagar (extratos já importados) ---------- */
+  /** Calcula, SEM gravar, o que mudaria nos extratos do mês (ou de todos): vínculos com fornecedores (v14.05) e com o Contas a Pagar (v14.09) e lançamentos que mudam de categoria */
+  planoCruzar09(mes, cp) {
+    const regras = DFC.regras(), todos = Repo.todos('extratos'), docs = todos.filter(d => !mes || d.mes === mes);
+    const podeForn = this.podeCruzar05() && Repo.prontas.has('parceiros') && Repo.todos('parceiros').length > 0;
+    const idx = podeForn ? PARC_PIX.indice(Repo.todos('parceiros')) : null;
+    const pl = { docs: [], total: 0, comVinculo: 0, novos: 0, trocados: 0, removidos: 0, mantidos: 0, semForn: 0, ambiguas: 0, mudaCategoria: 0, amostras: [], meses: new Set(), nAlt: 0, podeForn,
+      cpOk: !!cp, cpTitulos: cp ? cp.n : 0, cpTotal: 0, cpNovos: 0, cpTrocados: 0, cpRemovidos: 0, cpAtualizados: 0, cpAmbiguas: 0, cpViaCP: 0, cpRegra: 0, cpManual: 0 };
+    // 1) fornecedores e clientes (v14.05): sem acesso ao cadastro, o vínculo gravado é mantido
+    const itens = [];
+    for (const d of docs) for (const t of (d.transacoes || [])) { const r = podeForn ? this.cruzarUma05(t, idx) : { t: { ...t }, ambigua: false }; itens.push({ d, t, n: r.t, ambigua: r.ambigua }); }
+    // 2) Contas a Pagar do FCX (v14.09): títulos já casados fora do escopo (e por lançamentos manuais) continuam consumidos
+    if (cp) {
+      const usadas = CP_OFX.usadasDe(todos.filter(d => !docs.includes(d)).flatMap(d => d.transacoes || []));
+      for (const it of itens) if (it.t.cat && it.t.cp) usadas.add(String(it.t.cp.id));
+      const res = CP_OFX.casarLote(itens.map(x => x.n), cp.idx, { usadas });
+      itens.forEach((it, i) => { it.n = CP_OFX.aplicar(it.n, res[i]); if (res[i] && res[i].ambigua) pl.cpAmbiguas++; });
+    }
+    const porDoc = new Map();
+    for (const it of itens) {
+      const { d, t, n } = it, antes = t.par || '', depois = n.par || ''; pl.total++;
+      if (it.ambigua) pl.ambiguas++;
+      if (depois) pl.comVinculo++; else pl.semForn++;
+      let alterou = false;
+      if (!antes && depois) { pl.novos++; alterou = true; } else if (antes && !depois) { pl.removidos++; alterou = true; } else if (antes && depois && antes !== depois) { pl.trocados++; alterou = true; }
+      else if (depois && (t.via !== n.via || t.vch !== n.vch)) alterou = true; else if (depois) pl.mantidos++;
+      if (!alterou && JSON.stringify([t.pcat, t.chv]) !== JSON.stringify([n.pcat, n.chv])) alterou = true; // só atualiza a categoria gravada / chaves extras
+      const cA = t.cp ? String(t.cp.id) : '', cD = n.cp ? String(n.cp.id) : ''; let alterouCP = false;
+      if (n.cp) pl.cpTotal++;
+      if (!cA && cD) { pl.cpNovos++; alterouCP = true; } else if (cA && !cD) { pl.cpRemovidos++; alterouCP = true; } else if (cA && cD && cA !== cD) { pl.cpTrocados++; alterouCP = true; }
+      else if (cA && cD && JSON.stringify(t.cp) !== JSON.stringify(n.cp)) { pl.cpAtualizados++; alterouCP = true; }
+      const c1 = DFC.classificar(n, regras);
+      if (n.cp) { if (c1.origem === 'contas_pagar') pl.cpViaCP++; else if (c1.origem === 'manual') pl.cpManual++; else pl.cpRegra++; }
+      let e = porDoc.get(d.id); if (!e) porDoc.set(d.id, e = { doc: d, novas: [], mudou: false });
+      if (!alterou && !alterouCP) { e.novas.push(t); continue; }
+      e.novas.push(n); e.mudou = true; pl.nAlt++; pl.meses.add(d.mes);
+      const c0 = DFC.classificar(t, regras), mudaCat = c0.categoria !== c1.categoria;
+      if (mudaCat) pl.mudaCategoria++;
+      if (pl.amostras.length < 8 && (antes !== depois || mudaCat || cA !== cD)) pl.amostras.push({ data: t.data, hist: t.hist, valor: t.valor, de: antes ? (Repo.get('parceiros', antes) || {}).nome || 'cadastro excluído' : '', para: depois ? (Repo.get('parceiros', depois) || {}).nome || '' : '', via: depois ? PARC_PIX.rotuloVia({ via: n.via, chave: n.vch }) : '',
+        c0: (DFC.cat(c0.categoria) || {}).nome || c0.categoria, c1: (DFC.cat(c1.categoria) || {}).nome || c1.categoria, mudaCat, cpA: t.cp || null, cpD: n.cp || null, origem: c1.origem });
+    }
+    pl.docs = [...porDoc.values()].filter(x => x.mudou).map(x => ({ doc: x.doc, novas: x.novas }));
+    return pl;
+  },
+  htmlCruzar09(pl) {
+    const card = (n, t, cor) => `<div class="par-imp-card"><b${cor ? ` style="color:var(${cor})"` : ''}>${n}</b><span>${t}</span></div>`;
+    const cpMuda = pl.cpTrocados + pl.cpRemovidos + pl.cpAtualizados, amb = pl.ambiguas + pl.cpAmbiguas;
+    const aviso = !pl.cpOk ? '<div class="note warn" style="margin-bottom:10px">O Contas a Pagar do FCX não está disponível agora (o FCX ainda não carregou): o cruzamento com as saídas foi pulado e os vínculos já gravados com o Contas a Pagar foram mantidos.</div>'
+      : !pl.cpTitulos ? '<div class="note warn" style="margin-bottom:10px">O Contas a Pagar do FCX (FCX → Saídas) não tem nenhum título cadastrado: não há o que cruzar.</div>' : '';
+    const sem = !pl.podeForn ? '<p class="hint" style="margin:0 0 8px">O cruzamento com o cadastro de Fornecedores e Clientes não está disponível ao seu perfil (ou não há cadastros): os vínculos com fornecedores já gravados foram mantidos.</p>' : '';
+    return `${aviso}<div class="par-imp-cards">${card(pl.total, 'lançamentos lidos')}${pl.podeForn ? card(pl.comVinculo, 'com fornecedor/cliente identificado', '--ok') + card(pl.novos, 'vínculos novos com fornecedores', pl.novos ? '--ok' : '') + card(pl.trocados + pl.removidos, 'vínculos com fornecedores trocados ou desfeitos', pl.trocados + pl.removidos ? '--warn' : '') : ''}${card(pl.cpTotal, 'saídas casadas com títulos do Contas a Pagar', pl.cpTotal ? '--ok' : '')}${card(pl.cpNovos, 'vínculos novos com o Contas a Pagar', pl.cpNovos ? '--ok' : '')}${card(cpMuda, 'vínculos com o Contas a Pagar trocados, atualizados ou desfeitos', cpMuda ? '--warn' : '')}${card(pl.cpViaCP, 'classificadas via Contas a Pagar / Conta Contábil', pl.cpViaCP ? '--ok' : '')}${card(pl.cpRegra + pl.cpManual, 'casadas, mas a regra ou a classificação manual prevalece', pl.cpRegra + pl.cpManual ? '--info' : '')}${card(pl.mudaCategoria, 'mudam de categoria na DFC', pl.mudaCategoria ? '--info' : '')}${card(amb, 'ambíguos: mais de um cadastro ou fornecedor (não vincula)', amb ? '--warn' : '')}</div>
+      ${sem}<p class="hint" style="margin:0 0 8px">${pl.docs.length ? `${pl.nAlt} lançamento${pl.nAlt === 1 ? '' : 's'} a atualizar em ${pl.docs.length} arquivo${pl.docs.length > 1 ? 's' : ''} de extrato (${[...pl.meses].sort().map(m => this.mesLabel(m)).join(', ')}).` : 'Os vínculos já estão em dia: nada a atualizar neste escopo.'} Classificações manuais nunca são alteradas.</p>
+      ${pl.amostras.length ? `<div class="tbl-wrap par-imp-tab"><table><thead><tr><th>Data</th><th>Histórico</th><th>Fornecedor · Contas a Pagar</th><th>Categoria na DFC</th></tr></thead><tbody>${pl.amostras.map(a => `<tr><td class="mono">${Fmt.data(a.data)}</td><td>${esc(a.hist)}<div class="cell-sub mono">${Fmt.brl(a.valor)}</div></td><td>${a.de && !a.para ? `${esc(a.de)} → <span class="muted">sem fornecedor</span>` : a.de && a.para && a.de !== a.para ? `${esc(a.de)} → <b>${esc(a.para)}</b>` : a.para ? `<b>${esc(a.para)}</b>` : ''}${a.via ? `<div class="cell-sub">${esc(a.via)}</div>` : ''}${a.cpD ? `<div class="cp-linha"><span class="pill ok">Contas a Pagar</span><span class="cp-conta">${esc(CP_OFX.contaRot(a.cpD.conta))}</span></div><div class="cell-sub">${esc(a.cpD.forn || '')}${a.cpD.tipo ? ' · ' + esc(CP_OFX.TIPOS[a.cpD.tipo] || a.cpD.tipo) : ''}</div>` : a.cpA ? `<div class="cp-linha"><span class="muted">Contas a Pagar → sem título</span></div>` : ''}</td><td>${a.mudaCat ? `${esc(a.c0)} → <b>${esc(a.c1)}</b>` : esc(a.c1)}${a.origem === 'contas_pagar' ? '<div class="cell-sub">via Contas a Pagar</div>' : ''}</td></tr>`).join('')}</tbody></table></div><p class="hint">Exemplos (até 8).</p>` : ''}`;
+  },
+  async abrirCruzar09() {
+    if (!this.podeCruzar09()) return UI.toast('Seu perfil não pode reprocessar extratos: é preciso poder importar extratos da DFC.');
+    const leForn = this.podeCruzar05();
+    if (!Repo.prontas.has('extratos') || (leForn && !Repo.prontas.has('parceiros'))) return UI.toast('Aguarde: os cadastros e os extratos ainda estão carregando.');
+    let cp = await this.prepararCP09();
+    const mes = this.ui.mes; let escopo = 'mes';
+    const plano = () => this.planoCruzar09(escopo === 'mes' ? mes : null, cp);
+    UI.modal({
+      titulo: 'Cruzar Fornecedores, PIX e Contas a Pagar', largo: true,
+      corpo: `<div class="note" style="margin-bottom:12px">Refaz o vínculo dos lançamentos <b>já importados</b>: <b>1)</b> com os fornecedores e clientes cadastrados (chave PIX, CNPJ/CPF em TED, DOC, boleto ou PIX, e nome ou fantasia idênticos); e <b>2)</b> nas <b>saídas</b>, com o <b>Contas a Pagar do FCX</b> (FCX → Saídas): valor idêntico (até R$ 0,05 de diferença) e fornecedor compatível com o favorecido do extrato (nome exato ou prefixo de 12 caracteres ou mais, para nomes truncados pelo banco), em até ±5 dias úteis. A <b>conta contábil</b> do título define a categoria pelo De-para FCX → DFC. Prioridade: classificação manual, regra explícita, Contas a Pagar, categoria do fornecedor, padrão. Nada é gravado antes da confirmação.</div>
+        <div class="field" style="max-width:360px;margin-bottom:12px"><label class="lbl" for="crzEsc">Extratos a reprocessar</label><select id="crzEsc"><option value="mes">Só ${esc(this.mesLabel(mes))}</option><option value="todos">Todos os meses importados</option></select></div>
+        <div data-crz-corpo></div>`,
+      aoAbrir: m => {
+        const desenhar = () => { $('[data-crz-corpo]', m).innerHTML = this.htmlCruzar09(plano()); };
+        desenhar(); $('#crzEsc', m).addEventListener('change', e => { escopo = e.target.value; desenhar(); });
+      },
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Aplicar vínculos', acao: async () => {
+        if (!this.podeCruzar09()) { UI.toast('Seu perfil não pode reprocessar extratos.'); return; }
+        cp = (await this.prepararCP09()) || cp;
+        const pl = plano(); if (!pl.docs.length) { UI.toast('Nada a atualizar: os vínculos já estão em dia.'); return false; }
+        const falhas = []; let feito = 0; Parceiros.progresso05(`Atualizando extratos: 0 de ${pl.docs.length}`, 0);
+        for (const x of pl.docs) {
+          try { const { id, ...resto } = x.doc; await Repo.salvar('extratos', id, { ...resto, transacoes: x.novas }, { modulo: 'fcx', rotulo: `Extrato ${x.doc.mes} · cruzamento com fornecedores e Contas a Pagar`, semAudit: true }); }
+          catch (e) { falhas.push(`${x.doc.mes}: ${(e && e.message) || e}`); }
+          feito++; Parceiros.progresso05(`Atualizando extratos: ${feito} de ${pl.docs.length}`, feito / pl.docs.length * 100); await sleep(60);
+        }
+        try { await this.atualizarBaseDFC([...pl.meses]); } catch (e) { falhas.push('base da DFC: ' + ((e && e.message) || e)); }
+        await Audit.registrar({ modulo: 'fcx', acao: 'reprocessou', entidade: 'extratos', entidadeId: 'cruzamento-fornecedores-contas-pagar', rotulo: 'Cruzar Fornecedores, PIX e Contas a Pagar',
+          detalhe: `${pl.novos} vínculo(s) novo(s) com fornecedores, ${pl.trocados} trocado(s), ${pl.removidos} desfeito(s); Contas a Pagar: ${pl.cpNovos} novo(s), ${pl.cpTrocados + pl.cpRemovidos + pl.cpAtualizados} trocado(s)/atualizado(s)/desfeito(s), ${pl.cpViaCP} classificado(s) via Conta Contábil; ${pl.mudaCategoria} lançamento(s) mudaram de categoria na DFC (${escopo === 'mes' ? this.mesLabel(mes) : 'todos os meses'})${falhas.length ? `, ${falhas.length} falha(s)` : ''}`,
+          mudancas: [{ campo: 'vinculosNovos', de: '', para: String(pl.novos) }, { campo: 'vinculosTrocados', de: '', para: String(pl.trocados) }, { campo: 'vinculosDesfeitos', de: '', para: String(pl.removidos) }, { campo: 'contasPagarNovos', de: '', para: String(pl.cpNovos) }, { campo: 'classificadosViaContasPagar', de: '', para: String(pl.cpViaCP) }, { campo: 'mudaramDeCategoria', de: '', para: String(pl.mudaCategoria) }] });
+        Parceiros.progresso05(falhas.length ? 'Reprocessamento concluído com falhas' : 'Extratos atualizados', 100);
+        if (falhas.length) UI.alerta('Reprocessamento concluído com falhas', `<ul style="margin:0 0 0 18px">${falhas.slice(0, 10).map(f => `<li>${esc(f)}</li>`).join('')}</ul><p class="hint" style="margin-top:10px">Rode de novo: o que já foi gravado não duplica.</p>`);
+        else UI.toast(`Extratos atualizados: ${pl.nAlt} lançamento(s) (${pl.cpViaCP} classificado(s) via Contas a Pagar) e DFC recalculada.`);
+        App.render();
+      } }],
+    });
+  },
+});
+
+/* ---------- v14.09 (complemento) · categorias padrão da DFC com nome e grupo editáveis ---------- */
+Object.assign(FluxoDFC, {
+  /** grava (ou remove, ajuste = null) o ajuste de uma categoria padrão em config/dfc.ajustesPadrao e, se o grupo mudou, regrava a base mensal da DFC */
+  async salvarAjustePadrao09(id, ajuste, detalhe, recalcular = false) {
+    const cfg = Repo.get('config', 'dfc') || {}, aj = { ...(cfg.ajustesPadrao || {}) }, novo = { ...cfg };
+    if (ajuste) aj[id] = { nome: ajuste.nome, grupo: ajuste.grupo }; else delete aj[id];
+    if (Object.keys(aj).length) novo.ajustesPadrao = aj; else delete novo.ajustesPadrao;
+    await Repo.salvar('config', 'dfc', novo, { modulo: 'fcx', rotulo: 'Categorias DFC', detalhe });
+    if (recalcular) await this.atualizarBaseDFC(this.mesesBanco());
+  },
+  /** Modal da categoria PADRÃO: Nome exibido e Grupo no Demonstrativo editáveis; ID interno e Sentido travados (a transferência entre contas próprias também trava o grupo) */
+  abrirCategoriaPadrao09(atual, { aoSalvar } = {}) {
+    if (!g09() || !Auth.can('fcx.dfc.regras')) return UI.toast('Seu perfil não tem permissão para gerenciar as categorias da DFC.');
+    const orig = DFC_CATEGORIAS.find(x => x.id === atual.id); if (!orig) return UI.toast('Esta categoria é padrão do sistema e não pode ser editada.');
+    const v = DFC.vinculos(atual.id, this.ctxVinculos()), ehTransf = atual.id === 'transf', sent = [['E', 'Entrada'], ['S', 'Saída'], ['*', 'Ambos (Entrada e Saída)']];
+    const rotG = g => DFC.GRUPOS_CURTO[g] || g;
+    UI.modal({
+      titulo: 'Editar categoria padrão da DFC',
+      corpo: `<div class="note" style="margin-bottom:12px">Categoria <b>padrão do sistema</b>: só o <b>nome exibido</b> e o <b>grupo no demonstrativo</b> podem ser ajustados. O <b>ID interno</b> e o <b>sentido</b> ficam travados para os cálculos, as regras e o De-para FCX → DFC não perderem a referência. A exclusão também é bloqueada.</div>
+        <div class="form-grid">${campo('Nome exibido', 'nome', atual.nome, { full: true, dica: `Vale nos seletores de regras, nos Extratos OFX, na DFC do mês, no Realizado × Previsto, nas exportações e no Resumo Executivo (PDF A4). Nome original: “${orig.nome}”.` })}
+        ${campo('ID interno (travado)', 'id_interno', atual.id, { attrs: 'disabled readonly' })}
+        ${campo('Sentido (travado)', 'sentido_travado', atual.sentido, { opcoes: sent, attrs: 'disabled' })}
+        ${campo('Grupo no Demonstrativo DFC', 'grupo', atual.grupo, { full: true, opcoes: ehTransf ? [['TRANSFERENCIA', rotG('TRANSFERENCIA')]] : DFC.GRUPOS_CAT.map(g => [g, rotG(g)]), attrs: ehTransf ? 'disabled' : '', dica: ehTransf ? 'Travado: a transferência entre contas próprias fica sempre fora do fluxo líquido de caixa.' : `Grupo original: ${rotG(orig.grupo)}. Mudar o grupo regrava a base mensal da DFC. Saídas no grupo Financiamento entram no serviço da dívida (DSCR) do Resumo Executivo.` })}</div>
+        ${v.total ? `<p class="hint" style="margin:10px 0 0">Em uso: ${v.regras} regra(s), ${v.lancamentos} lançamento(s) reclassificado(s) e ${v.mapa} conta(s) do De-para${v.parceiros ? `, além de ${v.parceiros} fornecedor(es)/cliente(s) com esta categoria padrão` : ''}. As referências continuam valendo: elas usam o ID interno.</p>` : ''}`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' },
+        ...(atual.ajustada ? [{ rotulo: 'Restaurar original', classe: 'sec', acao: async () => {
+          await this.salvarAjustePadrao09(atual.id, null, `Categoria padrão restaurada · “${atual.nome}” → “${orig.nome}” · ${rotG(atual.grupo)} → ${rotG(orig.grupo)}`, atual.grupo !== orig.grupo);
+          UI.toast('Nome e grupo originais restaurados'); if (aoSalvar) aoSalvar(DFC.cat(atual.id));
+        } }] : []),
+        { rotulo: 'Salvar', acao: async m => {
+          const d = UI.lerForm(m), r = DFC.prepararAjustePadrao(atual.id, { nome: d.nome, grupo: ehTransf ? atual.grupo : d.grupo });
+          if (r.erro) { UI.toast(r.erro); return false; }
+          if (r.cat.nome === atual.nome && r.cat.grupo === atual.grupo) { UI.toast('Nada foi alterado.'); return; }
+          await this.salvarAjustePadrao09(atual.id, r.ajuste, `Categoria padrão ajustada · “${atual.nome}” → “${r.cat.nome}” · ${rotG(atual.grupo)} → ${rotG(r.cat.grupo)}`, r.cat.grupo !== atual.grupo);
+          UI.toast('Categoria padrão atualizada'); if (aoSalvar) aoSalvar(r.cat);
+        } }],
+    });
+  },
+});
+
 /* v14.06 · DFC · Resumo Executivo Oficial (padrão bancário / institucional, CPC 03) — recurso gestao_v1406 */
 Object.assign(FluxoDFC, {
   K06: 'esp-painel:dfc-resumo',
@@ -14110,11 +14619,11 @@ Object.assign(FluxoDFC, {
   /** quem não tem "Pode ver salários" recebe a folha de pagamento agregada nas saídas operacionais */
   semSalarios06() { return !Auth.can('rh.ver_salarios'); },
   /** entrada do motor: lançamentos, saldos dos extratos, previsto do FCX e saldo inicial informado, para o período escolhido */
-  dadosResumo06(per, escopo) {
+  dadosResumo06(per, escopo, { descricoes = true } = {}) {
     const meses = per.meses, ant = DFC_RESUMO.mesAnterior(per.de);
     const transacoes = this.transacoes().filter(t => t.data && meses.includes(t.data.slice(0, 7)));
     const extratos = Repo.todos('extratos').filter(d => d.mes === ant || meses.includes(d.mes)).map(d => ({ contaId: d.contaId, mes: d.mes, saldo: d.saldo || null }));
-    const contas = this.contas().map(k => ({ id: k.id, rotulo: ContasBancarias.rotulo(k), ...(g07() ? DFC_MATRIZ.infoConta(k) : {}) }));
+    const contas = this.contas().map(k => { const i = g07() ? DFC_MATRIZ.infoConta(k) : null; return { id: k.id, rotulo: i && descricoes === false ? `${i.banco} · ${i.agConta}` : ContasBancarias.rotulo(k), ...(i || {}) }; }); // v14.08: descrições ocultas também nos avisos
     const man = Repo.get('config', 'fcx_saldos')?.saldosIniciais?.[per.de];
     let previstoPorMes = null;
     if (FCX.api()) {
@@ -14193,9 +14702,15 @@ Object.assign(FluxoDFC, {
 /* v14.07 · DFC · Empresas (Matriz), contas bancárias padrão e escopo de contas do Resumo Executivo — recurso gestao_v1407 */
 Object.assign(FluxoDFC, {
   /** editar o cadastro de empresas: a mesma permissão do editor de empresas do Conciliador (no servidor, o documento config/empresas segue só do Master) */
-  podeEmpresas07() { return g07() && Auth.can('retaguarda.adq.taxas'); },
+  podeEmpresas07() { return g07() && (g08() ? Auth.can('lojas.editar') : Auth.can('retaguarda.adq.taxas')); }, // v14.08: a Matriz e os vínculos moram no Cadastro de Lojas
   /** empresas do ambiente (config/empresas) com a Matriz no topo; sem cadastro, as de exemplo só fora do Falco (white-label) */
-  empresas07() { return DFC_MATRIZ.ordenar(DFC_MATRIZ.base(Repo.get('config', 'empresas')?.lista, { falco: typeof Ambiente !== 'undefined' && !!Ambiente.rc, padrao: typeof CONC_MP !== 'undefined' ? CONC_MP.EMPRESAS_PADRAO : [] })); },
+  empresas07() {
+    const falco = typeof Ambiente !== 'undefined' && !!Ambiente.rc, padrao = typeof CONC_MP !== 'undefined' ? CONC_MP.EMPRESAS_PADRAO : [], salvas = Repo.get('config', 'empresas')?.lista;
+    if (g08()) return DFC_MATRIZ.ordenar(DFC_MATRIZ.entidadesTitular08({ lojas: Repo.todos('lojas'), empresas: salvas || [], falco, padrao })); // v14.08: a Matriz do Cadastro de Lojas no topo (+ empresas do cadastro de adquirência só como titulares de conta)
+    return DFC_MATRIZ.ordenar(DFC_MATRIZ.base(salvas, { falco, padrao }));
+  },
+  /** v14.08: o cadastro de empresas (config/empresas) como está gravado, sem a Matriz do Cadastro de Lojas (é o que o editor de empresas regrava) */
+  empresasCad08() { return DFC_MATRIZ.ordenar(DFC_MATRIZ.base(Repo.get('config', 'empresas')?.lista, { falco: typeof Ambiente !== 'undefined' && !!Ambiente.rc, padrao: typeof CONC_MP !== 'undefined' ? CONC_MP.EMPRESAS_PADRAO : [] })); },
   ehPadraoMatriz07(id) { const m = DFC_MATRIZ.matriz(this.empresas07()); return !!m && m.contasPadrao.includes(String(id)); },
   celulaTitular07(c) { const t = DFC_MATRIZ.titularRotulo(c, this.empresas07()); return t ? esc(t) : '<span class="hint">—</span>'; },
   pills07(vz) { return vz.map(x => `<span class="pill ${x.tipo === 'ok' ? 'ok' : x.tipo === 'info' ? 'info' : 'neutral'}">${esc(x.txt)}</span>`).join(' '); },
@@ -14207,21 +14722,21 @@ Object.assign(FluxoDFC, {
   /* ---------- Resumo Executivo: seletor de contas, fallback e escopo ---------- */
   fieldsetContas07(emps, sel) {
     const contas = this.contas(), e0 = emps.find(e => e.id === sel) || null;
-    const linha = k => { const i = DFC_MATRIZ.infoConta(k); return `<label class="rx-conta" data-conta="${esc(k.id)}"><input type="checkbox" name="contas" value="${esc(k.id)}" data-lista="1"><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')}</div></div><div class="vz">${this.pills07(DFC_MATRIZ.vinculos(k, e0, emps))}</div></label>`; };
+    const linha = k => { const i = DFC_MATRIZ.infoConta(k); return `<label class="rx-conta${g08() && e0 && (e0.contasPadrao || []).map(String).includes(String(k.id)) ? ' is-padrao' : ''}" data-conta="${esc(k.id)}"><input type="checkbox" name="contas" value="${esc(k.id)}" data-lista="1"><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')}</div></div><div class="vz">${this.pills07(DFC_MATRIZ.vinculos(k, e0, emps))}</div></label>`; };
     return `<fieldset><legend>Contas bancárias consideradas no resumo</legend>
-      <p class="hint" style="margin:0 0 8px">Marque as contas que entram no demonstrativo. <b>Em branco</b>, valem automaticamente as contas padrão vinculadas à empresa emissora (cadastro de empresas / Matriz).</p>
-      <div class="rx-acoes"><button type="button" class="btn ghost sm" data-rx-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-rx-limpar>Limpar seleção</button>${this.podeEmpresas07() ? '<button type="button" class="btn ghost sm" data-rx-gerir>Gerenciar Empresas / Matriz</button>' : ''}<span class="n" data-rx-n></span></div>
+      <p class="hint" style="margin:0 0 8px">Marque as contas que entram no demonstrativo. ${g08() ? '<b>Em branco</b>, valem automaticamente as contas padrão da <b>Empresa Matriz</b> definidas no Cadastro de Lojas (já aplicadas ao abrir). Marque contas específicas só se quiser outro conjunto.' : '<b>Em branco</b>, valem automaticamente as contas padrão vinculadas à empresa emissora (cadastro de empresas / Matriz).'}</p>
+      <div class="rx-acoes"><button type="button" class="btn ghost sm" data-rx-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-rx-limpar>Limpar seleção</button>${this.podeEmpresas07() && !g08() ? '<button type="button" class="btn ghost sm" data-rx-gerir>Gerenciar Empresas / Matriz</button>' : ''}<span class="n" data-rx-n></span></div>
       ${contas.length ? `<div class="rx-contas" data-rx-contas role="group" aria-label="Contas bancárias consideradas no resumo">${contas.map(linha).join('')}</div>` : '<div class="empty">Nenhuma conta bancária cadastrada na DFC.</div>'}
-      <div class="rx-esc" data-rx-esc role="status" aria-live="polite"></div></fieldset>`;
+      ${g08() ? this.optDescricoes08() : ''}<div class="rx-esc" data-rx-esc role="status" aria-live="polite"></div></fieldset>`;
   },
   /** liga o seletor: ações rápidas, vínculos por empresa e a mensagem do escopo (marcado manualmente × contas padrão × alerta) */
   ligarContas07(m) {
     const $f = n => $(`[name="${n}"]`, m), caixa = $('[data-rx-contas]', m), info = $('[data-rx-esc]', m), cont = $('[data-rx-n]', m);
     const marcadas = () => $$('input[name="contas"]:checked', m).map(i => i.value);
     const atualizar = () => {
-      const emps = this.empresas06(), e0 = emps.find(e => e.id === $f('empresaId').value) || null, contas = this.contas(), sel = marcadas();
-      const sc = DFC_MATRIZ.resolverEscopo({ empresa: e0, selecionadas: sel, contas });
-      $$('[data-conta]', m).forEach(l => { const k = contas.find(x => String(x.id) === l.dataset.conta); const vz = $('.vz', l); if (k && vz) vz.innerHTML = this.pills07(DFC_MATRIZ.vinculos(k, e0, emps)); });
+      const emps = this.empresas06(), e0 = g08() ? matrizAtual08().matriz : (emps.find(e => e.id === $f('empresaId').value) || null), contas = this.contas(), sel = marcadas();
+      const sc = g08() ? DFC_MATRIZ.resolverEscopo08({ matriz: e0, selecionadas: sel, contas }) : DFC_MATRIZ.resolverEscopo({ empresa: e0, selecionadas: sel, contas });
+      $$('[data-conta]', m).forEach(l => { const k = contas.find(x => String(x.id) === l.dataset.conta); const vz = $('.vz', l); if (k && vz) vz.innerHTML = this.pills07(DFC_MATRIZ.vinculos(k, e0, emps)); if (g08()) l.classList.toggle('is-padrao', !!e0 && !sel.length && (e0.contasPadrao || []).map(String).includes(l.dataset.conta)); });
       if (cont) cont.textContent = sel.length ? `${sel.length} marcada${sel.length === 1 ? '' : 's'}` : 'nenhuma marcada';
       const div = sc.modo === 'manual' ? DFC_MATRIZ.titularesDivergentes(sc.ids, contas, $f('cnpj').value, emps) : [];
       const rot = id => { const k = contas.find(x => String(x.id) === id); return k ? ContasBancarias.rotulo(k) : id; };
@@ -14245,11 +14760,12 @@ Object.assign(FluxoDFC, {
   },
   /** contas do escopo a partir do formulário (d = UI.lerForm do modal): marcadas à mão ou, em branco, as contas padrão da empresa escolhida */
   escopo07(d) {
+    if (g08()) return DFC_MATRIZ.resolverEscopo08({ matriz: matrizAtual08().matriz, selecionadas: d.contas || [], contas: this.contas() }); // v14.08: a empresa emissora é sempre a Matriz
     const e0 = this.empresas06().find(e => e.id === d.empresaId) || null;
     return DFC_MATRIZ.resolverEscopo({ empresa: e0, selecionadas: d.contas || [], contas: this.contas() });
   },
   textoEscopo07(sc, d) {
-    const e0 = this.empresas06().find(e => e.id === d.empresaId) || null, ds = DFC_MATRIZ.descreverEscopo(sc, this.contas().map(k => DFC_MATRIZ.infoConta(k)), e0);
+    const e0 = g08() ? matrizAtual08().matriz : (this.empresas06().find(e => e.id === d.empresaId) || null), ds = DFC_MATRIZ.descreverEscopo(sc, this.contas().map(k => DFC_MATRIZ.infoConta(k)), e0, g08() ? { descricoes: !!d.exibirDescricoes } : undefined);
     return { escopoCurto: ds.curto, escopoLongo: ds.longo };
   },
 
@@ -14272,7 +14788,7 @@ Object.assign(FluxoDFC, {
   /** empresa: Razão Social, CNPJ (busca na Receita), Situação, Empresa Matriz e Contas Bancárias Associadas (padrão desta empresa) */
   abrirEmpresa07(id) {
     if (!this.podeEmpresas07()) return UI.toast('Seu perfil não pode editar o cadastro de empresas.');
-    const lista = this.empresas07(), orig = id ? lista.find(x => x.id === id) : null, contas = this.contas();
+    const lista = g08() ? this.empresasCad08() : this.empresas07(), orig = id ? lista.find(x => x.id === id) : null, contas = this.contas();
     const e = orig || { id: '', nome: '', razao: '', cnpj: '', situacao: '', matriz: false, contasPadrao: [] }, outraMatriz = lista.find(x => x.matriz && x.id !== e.id);
     const emps = lista, linha = k => { const i = DFC_MATRIZ.infoConta(k), t = DFC_MATRIZ.titularRotulo(k, emps), outras = emps.filter(x => x.id !== e.id && x.contasPadrao.includes(String(k.id))).map(x => x.nome || x.razao);
       return `<label class="rx-conta"><input type="checkbox" name="contasPadrao" value="${esc(k.id)}" data-lista="1" ${e.contasPadrao.includes(String(k.id)) ? 'checked' : ''}><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')} · Titular: ${t ? esc(t) : 'não informado'}</div></div><div class="vz">${k.ativa === false ? '<span class="pill neutral">Inativa</span>' : ''}${outras.length ? `<span class="pill info" title="Também é padrão de outra empresa">Também em ${esc(outras.join(', '))}</span>` : ''}</div></label>`; };
@@ -14285,13 +14801,13 @@ Object.assign(FluxoDFC, {
         m.addEventListener('change', ev => { if (ev.target.matches?.('input[name="contasPadrao"]')) conta(); }); conta();
       },
       corpo: `<div class="form-grid">${campo('Nome (como aparece no painel)', 'nome', e.nome)}${campo('Razão social', 'razao', e.razao)}${g94() ? Cnpj94.campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '') : campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '', { attrs: 'inputmode="numeric" placeholder="00.000.000/0000-00"' })}${campo('Situação', 'situacao', e.situacao || '', { opcoes: [['', 'Não informada'], ...DFC_MATRIZ.SITUACOES.map(s => [s, s])], dica: 'Preenchida pela consulta do CNPJ na Receita Federal; pode ser ajustada.' })}
-        <div class="field full"><label class="check"><input type="checkbox" name="matriz" ${e.matriz ? 'checked' : ''}> <span><b>Empresa Matriz</b> — a Matriz principal do grupo (só pode haver uma)${outraMatriz ? `. Hoje a Matriz é “${esc(outraMatriz.nome || outraMatriz.razao)}”: marcar esta empresa a desmarca` : ''}.</span></label></div></div>
-        <h3 style="margin:16px 0 4px">Contas Bancárias Associadas (Padrão desta Empresa)</h3>
+        <div class="field full" ${g08() ? 'data-mt-oculto08' : ''}><label class="check"><input type="checkbox" name="matriz" ${e.matriz ? 'checked' : ''}> <span><b>Empresa Matriz</b> — a Matriz principal do grupo (só pode haver uma)${outraMatriz ? `. Hoje a Matriz é “${esc(outraMatriz.nome || outraMatriz.razao)}”: marcar esta empresa a desmarca` : ''}.</span></label></div></div>
+        <div ${g08() ? 'data-mt-oculto08' : ''}><h3 style="margin:16px 0 4px">Contas Bancárias Associadas (Padrão desta Empresa)</h3>
         <p class="hint" style="margin:0 0 8px">Marque todas as contas às quais esta empresa tem acesso. No Resumo Executivo da DFC, quando nenhuma conta for marcada à mão, valem estas contas.</p>
-        ${contas.length ? `<div class="rx-acoes"><button type="button" class="btn ghost sm" data-mt-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-mt-limpar>Limpar seleção</button><span class="n" data-mt-n></span></div><div class="mt-contas">${contas.map(linha).join('')}</div>` : '<div class="empty">Nenhuma conta bancária cadastrada na DFC (FCX › DFC › Contas bancárias).</div>'}`,
+        ${contas.length ? `<div class="rx-acoes"><button type="button" class="btn ghost sm" data-mt-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-mt-limpar>Limpar seleção</button><span class="n" data-mt-n></span></div><div class="mt-contas">${contas.map(linha).join('')}</div>` : '<div class="empty">Nenhuma conta bancária cadastrada na DFC (FCX › DFC › Contas bancárias).</div>'}</div>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar', acao: async m => {
         const d = UI.lerForm(m), cnpj = String(d.cnpj || '').replace(/\D/g, '');
-        const nova = { ...(orig || {}), id: orig ? orig.id : '', nome: String(d.nome || '').trim(), razao: String(d.razao || '').trim(), cnpj, situacao: d.situacao || '', matriz: !!d.matriz, contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [] };
+        const nova = { ...(orig || {}), id: orig ? orig.id : '', nome: String(d.nome || '').trim(), razao: String(d.razao || '').trim(), cnpj, situacao: d.situacao || '', ...(g08() ? {} : { matriz: !!d.matriz, contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [] }) }; // v14.08: Matriz e contas padrão moram no Cadastro de Lojas (os dados da v14.07 seguem preservados)
         if (!orig) { nova.id = (typeof ConcMP !== 'undefined' ? ConcMP.slug(nova.nome) : '') || 'emp-' + uid(); if (lista.some(x => x.id === nova.id)) nova.id += '-' + uid().slice(-4); }
         const er = DFC_MATRIZ.validar(nova, lista, orig ? orig.id : ''); if (er.length) { UI.toast(er[0]); return false; }
         const r = DFC_MATRIZ.salvarEmpresa(lista, nova);
@@ -14305,13 +14821,13 @@ Object.assign(FluxoDFC, {
   /* ---------- Conta bancária: CNPJ / Empresa titular e Conta padrão da Empresa Matriz ---------- */
   camposConta07(c) {
     const emps = this.empresas07(), m = DFC_MATRIZ.matriz(emps), pode = this.podeEmpresas07(), dig = DFC_MATRIZ.dig(c.titularCnpj);
-    const sel = c.titularEmpresaId && emps.some(e => e.id === c.titularEmpresaId) ? c.titularEmpresaId : dig ? '__outro' : '';
+    const ent = c.titularEmpresaId ? emps.find(e => e.id === c.titularEmpresaId || (e.aliases || []).includes(c.titularEmpresaId)) : null, sel = ent ? ent.id : dig ? '__outro' : '';
     const op = [['', 'Não informado'], ...emps.map(e => [e.id, `${e.matriz ? '[Matriz] ' : ''}${e.nome || e.razao}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ''}`]), ['__outro', 'Outro CNPJ (informar ao lado)']];
     const padrao = !!m && !!c.id && m.contasPadrao.includes(String(c.id));
     if (!this._ct07) { this._ct07 = true; document.addEventListener('change', ev => { const s = ev.target.closest?.('[name="titularEmpresaId"]'); if (s) this.ajustaTitular07(s.closest('.modal')); }); }
     return `${campo('CNPJ / Empresa titular (opcional)', 'titularEmpresaId', sel, { opcoes: op, dica: 'Quem é dono da conta. Escolha uma empresa do cadastro ou “Outro CNPJ”.' })}
       <div class="field"><label class="lbl" for="f_titularCnpj">CNPJ do titular</label><input id="f_titularCnpj" type="text" name="titularCnpj" value="${esc(sel === '__outro' ? CNPJ.formatar(dig) : (emps.find(e => e.id === sel)?.cnpj ? CNPJ.formatar(emps.find(e => e.id === sel).cnpj) : ''))}" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" autocomplete="off" ${sel === '__outro' ? '' : 'readonly'}></div>
-      <div class="field full"><label class="check"><input type="checkbox" name="padraoMatriz" ${padrao ? 'checked' : ''} ${m && pode ? '' : 'disabled'}> <span><b>Conta padrão da Empresa Matriz</b>${m ? ` — usada automaticamente no Resumo Executivo da DFC quando nenhuma conta for marcada (Matriz: ${esc(m.nome || m.razao)}).${pode ? '' : ' Só quem edita o cadastro de empresas altera este vínculo.'}` : ' — marque a Empresa Matriz em “Gerenciar Empresas / Matriz” para usar esta opção.'}</span></label></div>`;
+      <div class="field full"><label class="check"><input type="checkbox" name="padraoMatriz" ${padrao ? 'checked' : ''} ${m && pode ? '' : 'disabled'}> <span><b>Conta padrão da Empresa Matriz</b>${m ? ` — usada automaticamente no Resumo Executivo da DFC quando nenhuma conta for marcada (Matriz: ${esc(m.nome || m.razao)}).${pode ? '' : (g08() ? ' Só quem edita o Cadastro de Lojas altera este vínculo.' : ' Só quem edita o cadastro de empresas altera este vínculo.')}` : (g08() ? ' — defina a Empresa Matriz no Cadastro de Lojas (Gestão de Lojas) para usar esta opção.' : ' — marque a Empresa Matriz em “Gerenciar Empresas / Matriz” para usar esta opção.')}</span></label></div>`;
   },
   /** trocar a empresa titular preenche o CNPJ (somente leitura); "Outro CNPJ" libera a digitação; "Não informado" limpa */
   ajustaTitular07(modal) {
@@ -14328,14 +14844,199 @@ Object.assign(FluxoDFC, {
   },
   /** o checkbox "Conta padrão da Empresa Matriz" grava a associação na Matriz (config/empresas); sem permissão ou sem Matriz, não faz nada */
   async sincronizarPadrao07(cid, ligar) {
+    if (g08()) return this.sincronizarPadrao08(cid, ligar);
     if (!this.podeEmpresas07()) return;
     const lista = this.empresas07(), m = DFC_MATRIZ.matriz(lista); if (!m || m.contasPadrao.includes(String(cid)) === !!ligar) return;
     await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.alternarContaPadrao(lista, m.id, cid, !!ligar) }, { modulo: 'conciliacao', rotulo: `Empresa · ${m.nome || m.razao} · conta padrão` });
   },
   async limparPadroes07(cid) {
+    if (g08()) return this.limparPadroes08(cid);
     if (!this.podeEmpresas07()) return;
     const lista = this.empresas07(); if (!lista.some(e => e.contasPadrao.includes(String(cid)))) return;
     await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.removerContaDosPadroes(lista, cid) }, { modulo: 'conciliacao', rotulo: 'Empresas · conta removida dos padrões' });
+  },
+});
+
+/* v14.08 · quem é a Empresa Matriz do ambiente (Cadastro de Lojas; a Matriz da v14.07 em config/empresas continua valendo até uma loja ser marcada) */
+function matrizAtual08() { return DFC_MATRIZ.resolverMatriz({ lojas: Repo.todos('lojas'), empresas: (Repo.get('config', 'empresas') || {}).lista || [] }); }
+/** o CNPJ informado é o da Matriz? (selo "Matriz" na lista de empresas do Conciliador) */
+function ehMatrizCnpj08(c) { const m = matrizAtual08().matriz, d = DFC_MATRIZ.dig(c); return !!m && !!m.cnpj && d === m.cnpj; }
+
+
+/* v14.08 · Lojas · Empresa Matriz e Contas Bancárias Padrão da Matriz na ficha da loja */
+Object.assign(Lojas, {
+  badgeMatriz08(l) {
+    const r = this._mz08 || matrizAtual08();
+    if (r.loja && String(r.loja.id) === String(l.id)) return ' <span class="mt-badge" title="Empresa Matriz do ambiente (emite o Resumo Executivo Oficial da DFC)">Matriz</span>';
+    if (r.origem === 'legado' && r.candidata && String(r.candidata.id) === String(l.id)) return ' <span class="mt-badge" title="Matriz herdada do cadastro de empresas (v14.07): abra a ficha e salve para consolidar">Matriz</span>';
+    return '';
+  },
+  itemMatriz08(l) {
+    const r = matrizAtual08(), ehLoja = !!r.loja && String(r.loja.id) === String(l.id), ehCand = r.origem === 'legado' && !!r.candidata && String(r.candidata.id) === String(l.id);
+    if (!ehLoja && !ehCand) return '';
+    const n = r.matriz.contasPadrao.length;
+    return this.item('Empresa Matriz', `<span class="mt-badge">Matriz</span> ${n} conta${n === 1 ? '' : 's'} bancária${n === 1 ? '' : 's'} padrão${ehCand ? ' <span class="hint">(herdada do cadastro de empresas da v14.07: edite e salve a ficha para consolidar)</span>' : ''}`);
+  },
+  /** checkbox "Esta unidade é a Empresa Matriz" e, marcada, a seção "Contas Bancárias Padrão da Matriz" (todas as contas cadastradas na DFC) */
+  blocoMatriz08(l) {
+    const ctx = { lojas: Repo.todos('lojas'), empresas: (Repo.get('config', 'empresas') || {}).lista || [] }, pf = DFC_MATRIZ.prefillMatrizLoja08(l, ctx);
+    const podeContas = Auth.can('fcx.dfc.ver') && Repo.prontas.has('contasBancarias'), contas = podeContas ? FluxoDFC.contas() : [], marc = new Set(pf.contas.map(String));
+    const linha = k => { const i = DFC_MATRIZ.infoConta(k); return `<label class="rx-conta"><input type="checkbox" name="contasPadraoMatriz" value="${esc(k.id)}" data-lista="1" ${marc.has(String(k.id)) ? 'checked' : ''}><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')}</div></div><div class="vz">${k.ativa === false ? '<span class="pill neutral">Inativa</span>' : ''}</div></label>`; };
+    const n = pf.contas.length;
+    const lista = !podeContas ? `<div class="note">${n} conta${n === 1 ? '' : 's'} bancária${n === 1 ? '' : 's'} padrão vinculada${n === 1 ? '' : 's'}. O seu perfil não acessa as contas bancárias da DFC, então o vínculo não pode ser alterado aqui (nada se perde ao salvar a ficha).</div>`
+      : contas.length ? `<div class="rx-acoes"><button type="button" class="btn ghost sm" data-mx-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-mx-limpar>Limpar seleção</button><span class="n" data-mx-n></span></div><div class="mt-contas">${contas.map(linha).join('')}</div>`
+        : '<div class="empty">Nenhuma conta bancária cadastrada na DFC (FCX › DFC › Contas bancárias).</div>';
+    return `<div class="field full mx-matriz" data-mx-matriz data-mx-contas="${podeContas ? 1 : 0}">
+      <label class="check"><input type="checkbox" name="matriz" ${pf.matriz ? 'checked' : ''}> <span><b>Esta unidade é a Empresa Matriz</b> — é a empresa emissora do Resumo Executivo Oficial da DFC (só pode haver uma Matriz por ambiente)${pf.outraMatriz ? `. Hoje a Matriz é “${esc(pf.outraMatriz.nome)}”: marcar esta unidade a desmarca` : ''}.</span></label>
+      ${pf.sugerida ? '<div class="note" style="margin-top:8px">Esta unidade tem o mesmo CNPJ da Matriz configurada na v14.07 (cadastro de empresas): a Matriz e as contas bancárias padrão foram aproveitadas. Revise e salve para consolidar no Cadastro de Lojas.</div>' : ''}
+      <div class="mx-sec" data-mx-sec ${pf.matriz ? '' : 'hidden'}><h3>Contas Bancárias Padrão da Matriz</h3><p class="hint" style="margin:0 0 8px">Marque todas as contas bancárias (cadastradas na DFC) às quais a Matriz tem acesso. No Resumo Executivo da DFC, com o seletor de contas em branco, valem estas contas.</p>${lista}</div></div>`;
+  },
+  ligarMatriz08(m, l) {
+    const cb = $('[name="matriz"]', m), sec = $('[data-mx-sec]', m), n = $('[data-mx-n]', m); if (!cb || !sec) return;
+    const conta = () => { const q = $$('input[name="contasPadraoMatriz"]:checked', m).length; if (n) n.textContent = q ? `${q} conta${q === 1 ? '' : 's'} padrão` : 'nenhuma conta padrão'; };
+    cb.addEventListener('change', () => { sec.hidden = !cb.checked; });
+    const todas = on => { $$('input[name="contasPadraoMatriz"]', m).forEach(i => { i.checked = on; }); conta(); };
+    $('[data-mx-todas]', m)?.addEventListener('click', () => todas(true)); $('[data-mx-limpar]', m)?.addEventListener('click', () => todas(false));
+    m.addEventListener('change', ev => { if (ev.target.matches?.('input[name="contasPadraoMatriz"]')) conta(); }); conta();
+    const pf = DFC_MATRIZ.prefillMatrizLoja08(l, { lojas: Repo.todos('lojas'), empresas: (Repo.get('config', 'empresas') || {}).lista || [] });
+    if (pf.razaoSugerida) { const r = $('[name="razaoSocial"]', m); if (r && !r.value.trim()) { r.value = pf.razaoSugerida; r.closest('.field')?.classList.add('ia-preenchido'); } }
+  },
+  /** valida e consolida a gravação da ficha: → { loja, outras, desmarcou } ou { erro } */
+  prepararMatriz08(l, novo, d, m, idFinal) {
+    const box = $('[data-mx-matriz]', m); if (!box) return { loja: novo, outras: [], desmarcou: null };
+    const pf = DFC_MATRIZ.prefillMatrizLoja08(l, { lojas: Repo.todos('lojas'), empresas: (Repo.get('config', 'empresas') || {}).lista || [] });
+    novo.matriz = d.matriz === true;
+    novo.contasPadraoMatriz = box.dataset.mxContas === '1' ? (Array.isArray(d.contasPadraoMatriz) ? d.contasPadraoMatriz : []) : pf.contas; // sem acesso às contas da DFC: o vínculo existente é mantido
+    const er = DFC_MATRIZ.validarMatrizLoja08(novo); if (er.length) return { erro: er[0] };
+    const r = DFC_MATRIZ.aplicarMatrizLoja08(Repo.todos('lojas'), { ...novo, id: idFinal }, pf.matriz ? { ...l, matriz: true } : (l && l.id ? l : null)); // a ficha abriu marcada (inclusive a sugerida da v14.07): desmarcar é uma decisão registrada (matriz:false)
+    if (!('id' in novo)) delete r.loja.id;
+    return r;
+  },
+});
+
+/* v14.08 · DFC · Resumo Executivo emitido pela Empresa Matriz do Cadastro de Lojas */
+Object.assign(FluxoDFC, {
+  /** cartão de identificação da empresa emissora: Razão Social e CNPJ oficial da Matriz + atalho para a ficha dela no Cadastro de Lojas */
+  cartaoEmissor08(mz) {
+    const c = DFC_MATRIZ.cartaoEmissor08(mz), pode = Auth.can('lojas.editar');
+    if (c.estado === 'vazio') return `<div class="mx-card warn" role="alert"><div><b>Nenhuma Empresa Matriz definida</b><div class="mx-sub">${esc(c.erros[0])}</div></div>${pode ? '<button type="button" class="btn sec sm" data-mx-editar="">Definir a Matriz no Cadastro de Lojas</button>' : '<p class="mx-nota">Peça a quem edita o Cadastro de Lojas para marcar a unidade da Matriz.</p>'}</div>`;
+    return `<div class="mx-card ${c.estado === 'ok' ? '' : 'warn'}"><div><div class="t">Empresa Matriz · emitente do documento</div><div class="mx-razao"><b>${esc(c.razao || '—')}</b></div><div class="mx-sub">CNPJ ${esc(c.cnpj || '—')}${c.codigo ? ` · unidade ${esc(c.codigo)}` : ''}${c.nome && c.nome !== c.razao ? ` · ${esc(c.nome)}` : ''}</div></div>${pode ? `<button type="button" class="btn ghost sm" data-mx-editar="${esc(c.lojaId)}">${esc(c.atalho)}</button>` : ''}${c.nota ? `<p class="mx-nota">${esc(c.nota)}</p>` : ''}${c.erros.map(x => `<p class="mx-nota" style="color:var(--bad)">${esc(x)}</p>`).join('')}</div>`;
+  },
+  /** parâmetro do documento: as descrições internas das contas no Quadro 1 do A4 (desmarcado por padrão) */
+  optDescricoes08() {
+    return `<label class="rx-opt"><input type="checkbox" name="exibirDescricoes"> <span><b>Exibir descrições internas das contas no documento A4</b><span class="hint" style="display:block">Desmarcado (padrão): o Quadro 1 mostra só o código e o nome do banco e a agência / conta. Marcado: a descrição da conta aparece logo abaixo do nome do banco. Nesta lista as descrições continuam visíveis para a conferência interna.</span></span></label>`;
+  },
+  ligarEmissor08(m) {
+    m.addEventListener('click', ev => {
+      const b = ev.target.closest('[data-mx-editar]'); if (!b) return;
+      const depois = () => this.atualizarEmissor08(m);
+      if (b.dataset.mxEditar) return Lojas.abrirDados(b.dataset.mxEditar, { aoFechar: depois });
+      this.escolherLojaMatriz08(depois);
+    });
+  },
+  /** depois de editar a ficha da Matriz: refaz o cartão, os campos do emitente e as mensagens do escopo (a escolha das contas é mantida) */
+  atualizarEmissor08(m) {
+    if (!m || !document.body.contains(m)) return;
+    const mz = matrizAtual08(), em = mz.matriz, $f = n => $(`[name="${n}"]`, m), box = $('[data-rx-emissor]', m);
+    $f('empresaId').value = em ? em.id : ''; $f('razao').value = em ? em.razao : ''; $f('cnpj').value = em && em.cnpj ? CNPJ.formatar(em.cnpj) : '';
+    if (box) box.innerHTML = this.cartaoEmissor08(mz);
+    if (m._atualizarContas07) m._atualizarContas07();
+  },
+  /** sem Matriz definida: escolhe a unidade e abre a ficha dela para marcar "Esta unidade é a Empresa Matriz" */
+  escolherLojaMatriz08(aoFechar) {
+    if (!Auth.can('lojas.editar')) return UI.toast('Seu perfil não pode editar o Cadastro de Lojas.');
+    const lojas = Repo.todos('lojas').filter(l => l.ativa !== false).sort((a, b) => String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true }));
+    if (!lojas.length) return UI.toast('Nenhuma loja ativa no Cadastro de Lojas.');
+    UI.modal({ titulo: 'Definir a Empresa Matriz', corpo: `<p class="hint" style="margin-top:0">Escolha a unidade que é a Empresa Matriz. Na ficha dela, marque “Esta unidade é a Empresa Matriz” e as Contas Bancárias Padrão da Matriz.</p>${campo('Unidade', 'lojaId', lojas[0].id, { opcoes: lojas.map(l => [l.id, `${l.codigo} · ${l.nome}${l.cnpj ? ' · ' + l.cnpj : ''}`]) })}`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Abrir ficha da loja', acao: m => { const id = $('[name="lojaId"]', m)?.value; if (!id) { UI.toast('Escolha a unidade.'); return false; } setTimeout(() => Lojas.abrirDados(id, { aoFechar }), 0); } }] });
+  },
+  /** atalho da aba Contas: abre a ficha da Matriz (ou a escolha da unidade, se ainda não há Matriz) */
+  abrirMatriz08() {
+    if (!Auth.can('lojas.editar')) return UI.toast('Seu perfil não pode editar o Cadastro de Lojas.');
+    const c = DFC_MATRIZ.cartaoEmissor08(matrizAtual08()), depois = () => App.render();
+    if (c.lojaId) return Lojas.abrirDados(c.lojaId, { aoFechar: depois });
+    this.escolherLojaMatriz08(depois);
+  },
+  /** o checkbox "Conta padrão da Empresa Matriz" da conta grava no Cadastro de Lojas (ou migra a Matriz da v14.07 para a loja de mesmo CNPJ, sem perda) */
+  async sincronizarPadrao08(cid, ligar) {
+    if (!this.podeEmpresas07()) return;
+    const r = matrizAtual08(), pl = DFC_MATRIZ.planoPadrao08(r, cid, ligar);
+    if (pl.alvo === 'loja') {
+      const l = Repo.get('lojas', pl.lojaId); if (!l) return;
+      const novo = pl.migrar ? DFC_MATRIZ.migrarLegado08(l, r.legado, pl.contas) : { ...l, contasPadraoMatriz: pl.contas };
+      await Repo.salvar('lojas', pl.lojaId, novo, { modulo: 'lojas', rotulo: `${l.codigo} · ${l.nome} · conta padrão da Matriz` });
+    } else if (pl.alvo === 'legado' && Auth.can('retaguarda.adq.taxas')) { // Matriz só na v14.07 e nenhuma loja de mesmo CNPJ: o vínculo segue em config/empresas
+      const lista = (Repo.get('config', 'empresas') || {}).lista || [], m = DFC_MATRIZ.matriz(lista); if (!m) return;
+      await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.alternarContaPadrao(lista, m.id, cid, !!ligar) }, { modulo: 'conciliacao', rotulo: `Empresa · ${m.nome || m.razao} · conta padrão` });
+    }
+  },
+  /** conta excluída: sai das contas padrão da Matriz (Cadastro de Lojas) e, se a Matriz ainda estiver na v14.07, do cadastro de empresas */
+  async limparPadroes08(cid) {
+    if (this.podeEmpresas07()) for (const p of DFC_MATRIZ.lojasSemConta08(Repo.todos('lojas'), cid)) { const l = Repo.get('lojas', p.id); if (l) await Repo.salvar('lojas', p.id, { ...l, contasPadraoMatriz: p.contasPadraoMatriz }, { modulo: 'lojas', rotulo: `${l.codigo} · ${l.nome} · conta removida das padrão da Matriz` }); }
+    const lista = (Repo.get('config', 'empresas') || {}).lista;
+    if (Array.isArray(lista) && Auth.can('retaguarda.adq.taxas') && DFC_MATRIZ.normalizar(lista).some(e => e.contasPadrao.includes(String(cid)))) await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.removerContaDosPadroes(lista, cid) }, { modulo: 'conciliacao', rotulo: 'Empresas · conta removida dos padrões' });
+  },
+  /** v14.08: modal do Resumo Executivo DFC — emitente = Empresa Matriz do Cadastro de Lojas (sem seletor de empresas de adquirência), seletor de contas em branco com as contas padrão da Matriz aplicadas e o parâmetro das descrições */
+  abrirResumo08() {
+    if (!this.podeResumo06()) return UI.toast('Seu perfil não tem permissão para emitir o Resumo Executivo da DFC.');
+    if (!Repo.prontas.has('extratos')) return UI.toast('Aguarde: os extratos ainda estão carregando.');
+    const u = this.ui, lem = this.lembrar06(true) || {}, emps = this.empresas06(), meses = this.meses(), ref = u.mes || this.mesAtual();
+    const mz = matrizAtual08(), em = mz.matriz, sel = em ? em.id : '', razao0 = em ? em.razao : '', cnpj0 = em && em.cnpj ? CNPJ.formatar(em.cnpj) : '';
+    const nContas = this.contas().length, fcxOk = !!FCX.api();
+    const optMes = (v) => meses.map(m => `<option value="${m}" ${m === v ? 'selected' : ''}>${this.mesLabel(m)}${m === this.mesAtual() ? ' (atual)' : ''}${this.mesesBanco().includes(m) ? '' : ' · sem OFX'}</option>`).join('');
+    const s1 = lem.s1 || {}, s2 = lem.s2 || {};
+    UI.modal({
+      titulo: 'Resumo Executivo DFC · Padrão Banco / Institucional', largo: true,
+      corpo: `<p class="hint" style="margin-top:0">Documento A4 em retrato (CPC 03, método direto) com síntese e indicadores de liquidez, demonstrativo detalhado (realizado dos extratos OFX × previsto do FCX), notas da controladoria e assinaturas. ${g07() ? 'A empresa emissora é a Empresa Matriz do Cadastro de Lojas. Considera apenas as contas bancárias escolhidas abaixo; em branco, as contas padrão da Matriz.' : `Considera todas as contas bancárias com extrato no período (${nContas} cadastrada${nContas === 1 ? '' : 's'}).`}${fcxOk ? '' : ' <b>As premissas do FCX ainda estão sendo lidas</b>: se gerar agora, o Quadro 2 sai só com o realizado.'}${this.semSalarios06() ? ' Seu perfil não vê salários: a folha de pagamento sai reunida com outras saídas operacionais.' : ''}</p>
+        <div class="rx-form" data-rx>
+          <fieldset><legend>Empresa emissora</legend>
+            <input type="hidden" name="empresaId" value="${esc(sel)}"><input type="hidden" name="razao" value="${esc(razao0)}"><input type="hidden" name="cnpj" value="${esc(cnpj0)}">
+            <div data-rx-emissor>${this.cartaoEmissor08(mz)}</div>
+          </fieldset>
+          ${g07() ? this.fieldsetContas07(emps, sel) : ''}<fieldset><legend>Período</legend><div class="sub2">
+            <div class="field"><label class="lbl" for="rxTipo">Tipo de período</label><select id="rxTipo" name="tipo"><option value="mes">Mês de referência</option><option value="trimestre">Trimestre (3 meses até o mês de referência)</option><option value="ano">Acumulado do ano (janeiro até o mês de referência)</option><option value="personalizado">Intervalo personalizado</option></select></div>
+            <div class="field"><label class="lbl" for="rxMes" data-rx-rot-mes>Mês de referência</label><select id="rxMes" name="mes">${optMes(ref)}</select></div>
+            <div class="field" data-rx-de hidden><label class="lbl" for="rxDe">Mês inicial</label><select id="rxDe" name="de">${optMes(DFC_RESUMO.somaMes(ref, -2))}</select></div>
+          </div></fieldset>
+          <fieldset><legend>Notas explicativas / parecer da controladoria (opcional)</legend>
+            <div class="field full"><label class="lbl" for="rxNotas">Justifique sazonalidades, investimentos ou movimentações extraordinárias para o banco</label><textarea id="rxNotas" name="notas" maxlength="${DFC_RESUMO.MAX_NOTAS}" placeholder="Ex.: a receita de maio reflete o Dia das Mães; a saída de investimento refere-se à reforma da loja…"></textarea><div class="rx-cont" data-rx-cont>0 / ${DFC_RESUMO.MAX_NOTAS}</div></div>
+          </fieldset>
+          <fieldset><legend>Signatários</legend><div class="sub2">
+            ${campo('Nome · Diretoria / Gestão Financeira', 's1nome', s1.nome || '', { attrs: 'maxlength="80" autocomplete="off"' })}
+            ${campo('Cargo', 's1cargo', s1.cargo || 'Gestor Financeiro / Diretoria', { attrs: 'maxlength="80"' })}
+            ${campo('Nome · Contador responsável', 's2nome', s2.nome || '', { attrs: 'maxlength="80" autocomplete="off"' })}
+            ${campo('Cargo', 's2cargo', s2.cargo || 'Contador Responsável', { attrs: 'maxlength="80"' })}
+            ${campo('Registro no CRC do contador', 's2crc', s2.registro || '', { full: true, attrs: 'maxlength="40" placeholder="Ex.: CRC-PE 000000/O-0"', dica: 'Aparece sob o nome do contador, na linha de assinatura.' })}
+          </div></fieldset>
+          <div class="full" data-rx-erros role="alert" aria-live="polite"></div>
+        </div>`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Gerar pré-visualização A4', fechar: false, acao: m => { this.gerarResumo08(m); return false; } }],
+      aoAbrir: m => {
+        const $f = n => $(`[name="${n}"]`, m), tipo = $f('tipo'), rot = $('[data-rx-rot-mes]', m), de = $('[data-rx-de]', m), cont = $('[data-rx-cont]', m);
+        const ajusta = () => { de.hidden = tipo.value !== 'personalizado'; rot.textContent = tipo.value === 'mes' ? 'Mês de referência' : tipo.value === 'personalizado' ? 'Mês final' : 'Até o mês'; };
+        tipo.addEventListener('change', ajusta); ajusta();
+        this.ligarEmissor08(m); this.ligarContas07(m);
+        const conta = () => { cont.textContent = `${$f('notas').value.length} / ${DFC_RESUMO.MAX_NOTAS}`; };
+        $f('notas').addEventListener('input', conta); conta();
+      },
+    });
+  },
+  /** v14.08: emite o documento com a Empresa Matriz do Cadastro de Lojas como emitente e as descrições das contas conforme o parâmetro */
+  gerarResumo08(m) {
+    if (!this.podeResumo06()) return UI.toast('Seu perfil não tem permissão para emitir o Resumo Executivo da DFC.');
+    const d = UI.lerForm(m), box = $('[data-rx-erros]', m), per = DFC_RESUMO.periodo(d.tipo, d.mes, d.de);
+    const mz = matrizAtual08(), em = mz.matriz, erEmissor = DFC_MATRIZ.validarEmissor08(mz); d.empresaId = em ? em.id : ''; d.razao = em ? em.razao : ''; d.cnpj = em && em.cnpj ? CNPJ.formatar(em.cnpj) : '';
+    const sigs = [{ nome: d.s1nome, cargo: d.s1cargo }, { nome: d.s2nome, cargo: d.s2cargo, registro: d.s2crc || '' }];
+    const cfg = { razao: d.razao, cnpj: d.cnpj, periodo: per, notas: d.notas, signatarios: sigs }, sc07 = g07() ? this.escopo07(d) : null, er = [...new Set([...erEmissor, ...DFC_RESUMO.validar(cfg).filter(x => !erEmissor.length || !/Razão Social|CNPJ/i.test(x)), ...(sc07 ? DFC_MATRIZ.validarEscopo(sc07) : [])])];
+    if (box) box.innerHTML = er.length ? `<div class="note warn"><b>Falta ajustar:</b><ul style="margin:4px 0 0 18px">${er.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+    if (er.length) return UI.toast(er[0]);
+    if (!Repo.prontas.has('extratos')) return UI.toast('Aguarde: os extratos ainda estão carregando.');
+    const mod = DFC_RESUMO.montar(this.dadosResumo06(per, sc07, { descricoes: !!d.exibirDescricoes })), marca = this.marcaDoc(), agora = new Date().toLocaleString('pt-BR');
+    const corpo = DFC_RESUMO.html(mod, { razao: String(d.razao).trim(), cnpj: d.cnpj, logo: LOGO_NAVY, marca, emitidoEm: agora, notas: d.notas, signatarios: sigs, descricoes: !!d.exibirDescricoes, ...(sc07 ? this.textoEscopo07(sc07, d) : {}) });
+    this.lembrar06(false, { empresaId: d.empresaId, razao: String(d.razao).trim(), cnpj: d.cnpj, s1: { nome: d.s1nome, cargo: d.s1cargo }, s2: { nome: d.s2nome, cargo: d.s2cargo, registro: d.s2crc || '' } });
+    try { Audit.registrar({ modulo: 'fcx', acao: 'emitiu', entidade: 'documento', entidadeId: 'dfc-resumo-' + per.de + (per.de === per.ate ? '' : '_' + per.ate), rotulo: `Resumo Executivo DFC · ${per.rotulo}`, detalhe: `${String(d.razao).trim()} · CNPJ ${CNPJ.formatar(d.cnpj)}${mod.mascarado ? ' · folha agregada (perfil sem acesso a salários)' : ''}${sc07 ? ' · ' + this.textoEscopo07(sc07, d).escopoCurto + ' [' + sc07.ids.join(', ') + ']' : ''} · descrições internas das contas ${d.exibirDescricoes ? 'exibidas' : 'ocultas'} no A4`, mudancas: [] }); } catch { /* auditoria nunca trava a emissão */ }
+    const titulo = 'Resumo Executivo DFC · ' + per.rotulo;
+    Documento.previa(titulo, Documento.montar(titulo, corpo, { css: DFC_RESUMO.css(), margem: '12mm 12mm' }), `Resumo_Executivo_DFC_${marca}_${per.de === per.ate ? per.ate : per.de + '_a_' + per.ate}`);
   },
 });
 
@@ -19209,7 +19910,7 @@ const ConcMP = {
     const pct = v => v == null || v === '' ? '<span class="hint">—</span>' : Fmt.num(Number(v), 2);
     const adqsEmp = e => [...new Set([...ecs.filter(x => x.empresaId === e.id).map(x => x.adquirente), ...Repo.todos(CONC_MP.COL_EC).filter(t => t.nivel === 'empresa' && t.empresaId === e.id).map(t => t.adquirente)])];
     const empresasHtml = `<div class="panel"><div class="row between"><div><h2>Empresas (Razão Social / CNPJ)</h2><p class="sub" style="margin:0">Cada EC é vinculado a uma empresa do grupo${v70 ? ' — automaticamente pelo CNPJ (mesma raiz da matriz e das filiais) quando o cadastro do EC não indica a empresa' : ''}.${salvo ? '' : ' <b>Sugestão inicial</b> (ainda não gravada): Resilienza e Mar Aberto.'}</p></div>${pode ? '<button class="btn sec sm" data-a="cmp-emp-nova">+ Empresa</button>' : ''}</div>
-      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${v70 ? '<th>Taxas por adquirente</th>' : ''}${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const ads = adqsEmp(e); return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && e.matriz ? ' <span class="mt-badge">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs">${(() => { const n = ecs.filter(x => x.empresaId === e.id).length; return this.v701() ? `<button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button>` : n; })()}</td>
+      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${v70 ? '<th>Taxas por adquirente</th>' : ''}${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const ads = adqsEmp(e); return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && (g08() ? ehMatrizCnpj08(e.cnpj) : e.matriz) ? ' <span class="mt-badge" title="Empresa Matriz (Cadastro de Lojas)">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs">${(() => { const n = ecs.filter(x => x.empresaId === e.id).length; return this.v701() ? `<button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button>` : n; })()}</td>
         ${v70 ? `<td>${ads.length ? ads.map(ad => `<span class="pill ${this.taxasEmpresa(e.id, ad) ? 'ok' : 'warn'}" title="${this.taxasEmpresa(e.id, ad) ? 'taxas cadastradas' : 'sem taxas'}">${esc(ad)}</span>`).join(' ') : '<span class="hint">—</span>'}</td>` : ''}
         ${pode ? `<td class="acts">${v70 ? `<button class="btn ghost sm" data-a="cmp-emp-taxas" data-id="${esc(e.id)}">Editar Taxas das Adquirentes</button>` : ''}<button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
     const avisos = [semEmp ? `${semEmp} EC(s) sem empresa vinculada${v70 ? ' (CNPJ do EC/TEF e da loja não conferem com nenhuma empresa)' : ''}` : '', semTx ? `${semTx} EC(s) sem taxas contratadas` : '', dups ? `${dups} EC(s) repetido(s) na rede — o EC é a chave da leitura das vendas e precisa ser único` : ''].filter(Boolean);
@@ -19893,7 +20594,7 @@ const ConcMP = {
     const ecs = this.ecs(), pode = this.podeTaxas(), emp = this.empresas(), salvo = !!Repo.get('config', 'empresas')?.lista?.length, semEmp = ecs.filter(e => !e.empresaId).length;
     return `<div class="panel cmp-emp72"><div class="row between"><div><h2>Empresas (Razão Social / CNPJ)</h2><p class="sub" style="margin:0">Usadas na coluna Empresa / CNPJ das regras e no EC das lojas (vínculo automático pelo CNPJ quando o EC não indica a empresa). Clique no número de ECs para a varredura.${salvo ? '' : ' <b>Sugestão inicial</b> (ainda não gravada): Resilienza e Mar Aberto.'}</p></div><div class="row">${pode ? '<button class="btn ghost sm" data-a="cmp-vincular">Vincular ECs pelo CNPJ</button><button class="btn sec sm" data-a="cmp-emp-nova">+ Empresa</button>' : ''}</div></div>
       ${semEmp ? `<div class="note warn" style="margin:10px 0 0">${semEmp} EC(s) sem empresa vinculada (CNPJ do EC/TEF e da loja não conferem com nenhuma empresa).</div>` : ''}
-      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const n = ecs.filter(x => x.empresaId === e.id).length; return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && e.matriz ? ' <span class="mt-badge">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs"><button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button></td>${pode ? `<td class="acts"><button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
+      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const n = ecs.filter(x => x.empresaId === e.id).length; return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && (g08() ? ehMatrizCnpj08(e.cnpj) : e.matriz) ? ' <span class="mt-badge" title="Empresa Matriz (Cadastro de Lojas)">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs"><button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button></td>${pode ? `<td class="acts"><button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
   },
   renderRegras() {
     if (!['adq_taxas', 'lojas'].every(c => Repo.prontas.has(c))) return '<div class="panel"><p class="muted" style="margin:0">Carregando…</p></div>';
@@ -21228,7 +21929,7 @@ Object.assign(Parceiros, {
         <div data-pix-lista>${linhas}</div>
         <button type="button" class="btn ghost sm" data-pix-add>+ Adicionar chave PIX</button></div>
       <div class="field full"><label class="lbl" for="f_categoriaDfc">Categoria DFC Padrão (opcional)</label><select id="f_categoriaDfc" name="categoriaDfc">${this.optCat05(p.categoriaDfc || '')}</select>
-        <span class="hint" style="margin-top:4px">Linha da DFC onde as movimentações deste parceiro caem por padrão. A classificação manual e as regras de classificação da DFC têm prioridade; sem categoria padrão, saídas vão para “Pagamento a fornecedores” e entradas para “Outras entradas operacionais”.</span></div>`;
+        <span class="hint" style="margin-top:4px">Linha da DFC onde as movimentações deste parceiro caem por padrão. A classificação manual e as regras de classificação da DFC têm prioridade; sem categoria padrão, saídas vão para “${esc(DFC.cat('pag_fornecedores')?.nome || 'Pagamento a fornecedores')}” e entradas para “${esc(DFC.cat('rec_outros')?.nome || 'Outras entradas operacionais')}”.</span></div>`;
   },
   ligarPix05(m, p, id) {
     const box = $('[data-pix-lista]', m), txt = $('[data-pix-impl-txt]', m), outros = this.todos().filter(x => x.id !== id);
@@ -21406,7 +22107,7 @@ Object.assign(Parceiros, {
       mudancas: [{ campo: 'novos', de: '', para: String(r.novos) }, { campo: 'atualizados', de: '', para: String(r.atualizar) }, { campo: 'chavesPixVinculadas', de: '', para: String(r.chavesNovas) }, { campo: 'linhasRecusadas', de: '', para: String(r.invalidos) }, { campo: 'chavesDuplicadas', de: '', para: String(r.chavesEmConflito) }] });
     this.progresso05(falhas.length ? 'Importação concluída com falhas' : 'Cadastros gravados', 100);
     if (falhas.length) UI.alerta('Importação concluída com falhas', `<p>${ok} de ${total} cadastro(s) gravado(s). Não gravou:</p><ul style="margin:8px 0 0 18px">${falhas.slice(0, 12).map(f => `<li>${esc(f.nome)}: ${esc(f.erro)}</li>`).join('')}</ul><p class="hint" style="margin-top:10px">Importe a planilha de novo para concluir: o que já foi gravado não duplica.</p>`);
-    else UI.toast(`Importação concluída: ${r.novos} novo(s), ${r.atualizar} atualizado(s), ${r.chavesNovas} chave(s) PIX. Para aplicar aos extratos já importados, use “Cruzar Fornecedores / Reprocessar PIX” na DFC.`);
+    else UI.toast(`Importação concluída: ${r.novos} novo(s), ${r.atualizar} atualizado(s), ${r.chavesNovas} chave(s) PIX. Para aplicar aos extratos já importados, use “${g09() ? 'Cruzar Fornecedores, PIX e Contas a Pagar' : 'Cruzar Fornecedores / Reprocessar PIX'}” na DFC.`);
     App.render();
   },
 });
