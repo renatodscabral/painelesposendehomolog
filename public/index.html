@@ -1076,6 +1076,20 @@ tr.acc-foco-tr td{background:var(--accent-soft);}
 .ini-v{font:600 30px/1.1 var(--font-display);color:var(--ink);font-variant-numeric:tabular-nums;}
 .ini-v small{font-size:16px;color:var(--ink-faint);font-weight:500;}
 .ini-kpi.e-bad .ini-v{color:var(--bad);}
+/* v14.03 · Balanced Scorecard */
+.bsc-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 12px;}
+.bsc-geral,.bsc-mini{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;border-left:4px solid var(--line);}
+.bsc-geral .t,.bsc-mini .t{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+.bsc-geral .v{font-family:var(--font-display,inherit);font-size:22px;font-weight:700;margin:2px 0;} .bsc-mini .v{margin:6px 0 4px;} .bsc-geral .d,.bsc-mini .d{font-size:11.5px;color:var(--ink-soft);}
+.bsc-geral.bsc-verde,.bsc-mini.bsc-verde{border-left-color:var(--ok);} .bsc-geral.bsc-amarelo,.bsc-mini.bsc-amarelo{border-left-color:var(--warn);} .bsc-geral.bsc-vermelho,.bsc-mini.bsc-vermelho{border-left-color:var(--bad);}
+.bsc-geral.bsc-verde .v{color:var(--ok);} .bsc-geral.bsc-amarelo .v{color:var(--warn);} .bsc-geral.bsc-vermelho .v{color:var(--bad);}
+.bsc-tab td.num,.bsc-tab th.num{text-align:right;white-space:nowrap;} .bsc-tab td{vertical-align:top;} .bsc-regra{font-style:italic;opacity:.85;} .bsc-motivo{max-width:60ch;}
+.bsc-sub td{background:var(--panel-2);} .bsc-sub .cell-main{font-weight:500;padding-left:12px;}
+.bsc-var-ok{color:var(--ok);} .bsc-var-warn{color:var(--warn);} .bsc-var-bad{color:var(--bad);}
+.bsc-b{font-size:11.5px;} .bsc-persp{margin-top:16px;}
+.bsc-laudo{margin-bottom:16px;border-top:3px solid var(--navy);} .bsc-abertura{font-size:14px;line-height:1.6;margin:10px 0;}
+.bsc-h3{font-size:13px;margin:12px 0 4px;} .bsc-h3.ok{color:var(--ok);} .bsc-h3.warn{color:var(--warn);} .bsc-h3.bad{color:var(--bad);} .bsc-laudo ul{margin:4px 0;padding-left:18px;} .bsc-laudo li{margin:4px 0;}
+.bsc-filtros{margin-bottom:12px;}
 .ini-txt{font-size:13.5px;color:var(--ink);}
 .ini-sub{font-size:12px;color:var(--ink-faint);margin-top:2px;}
 .ini-load{color:var(--ink-faint);}
@@ -2251,7 +2265,7 @@ const PERMISSOES = {
     'retaguarda.ocorrencias.lancar', 'retaguarda.ocorrencias.excluir',       // v13.39: Conta Cofre, Depósitos e Ocorrências Globais (Retaguarda de Loja)
     'visao.dashboard', 'viagens.solicitar',                                  // v13.83: Visão / Dashboard (Tela Inicial) · Pode solicitar viagem
     'pe.ver', 'pe.editar',                                                   // v13.50: Módulo 9 · Ponto de Equilíbrio (só Master/GESTOR; banco: editores)
-    'solicitacoes.ver', 'solicitacoes.lancar', 'solicitacoes.atender', 'solicitacoes.excluir', 'solicitacoes.todas', // v13.60: Módulo 10 · Solicitações Operacionais (v13.61: + todas as lojas)
+    'solicitacoes.ver', 'solicitacoes.lancar', 'solicitacoes.atender', 'solicitacoes.excluir', 'solicitacoes.todas', 'bsc_visualizar', /* v14.03 */ // v13.60: Módulo 10 · Solicitações Operacionais (v13.61: + todas as lojas)
   ],
 };
 
@@ -2292,6 +2306,10 @@ MATRIZ_MODULOS.find(m => m.id === 'rh').extras = [['rh.ver_salarios', 'Pode ver 
 MATRIZ_MODULOS.find(m => m.id === 'visao').extras = [['recebiveis_aprovar_saidas', 'Autorizar Pagamentos nas Saídas do Dia', 'Libera, na Tela Inicial, os checkboxes dos títulos a pagar, o botão Selecionar Todos e o botão Finalizar Aprovações (grava a decisão, avisa o Financeiro e o Master e gera o relatório de pagamentos aprovados). Exige Ler nesta linha (v14.02)', false, 'gestao_v1402']];
 MATRIZ_MODULOS.push({ id: 'gerencial', curto: 'Gerencial', rotulo: 'Liberação Gerencial (v14.02)', num: 'Gestão', ler: [], modificar: [], excluir: [], soExtras: true, v1383: true, rec: 'gestao_v1402',
   extras: [['liberacao_gerencial', 'Liberação Gerencial / Aprovação de Exclusões', 'Opera todos os módulos de negócio habilitados e aprova ou executa exclusões (adiantamento pago, zerar FCX, equipe). Nunca abre Banco de dados, Backup, Ambientes, Notificações, Acessos, Auditoria, PDI nem salários; autorizar pagamentos é opção à parte', true]] });
+/* v14.03 · linha "BSC": a flag bsc_visualizar (Ler) abre o Balanced Scorecard. Só existe com o recurso gestao_v1403. O Master e a Liberação Gerencial (todos os módulos de negócio) a recebem sozinhos;
+   outros perfis (financeiro, diretoria, supervisão) ganham marcando "Ler" aqui. Cada indicador, porém, continua exigindo a permissão do módulo de onde vem o dado (FCX, Retaguarda, Contratos…): sem ela, aparece "Sem acesso".
+   Perfil Loja com a flag enxerga apenas o farol da própria filial (sem liquidez/consolidado da rede). */
+MATRIZ_MODULOS.push({ id: 'bsc', curto: 'BSC', rotulo: 'Balanced Scorecard (BSC) & Farol Estratégico (v14.03)', num: 'Gestão', ler: ['bsc_visualizar'], modificar: [], excluir: [], v1383: true, rec: 'gestao_v1403' });
 /** v14.02 · o que a Liberação Gerencial NÃO leva (cada uma tem a própria chave): salários e a autorização de pagamentos. */
 const GERENCIAL_FORA = ['rh.ver_salarios', 'recebiveis_aprovar_saidas'];
 
@@ -2459,7 +2477,7 @@ const Auth = {
     this.recalcular();
   },
   /** v13.83 · matriz do usuário (com as sub-permissões e o perfil Loja) — refeita se o recurso da versão mudar de estado. */
-  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394') + '|' + Recursos.ativo('backup_nuvem_v1395'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
+  chaveRec() { return Acesso.ativo() + '|' + Recursos.ativo('contabil_v1386') + '|' + Recursos.ativo('gestao_v1393') + '|' + Recursos.ativo('gestao_v1394') + '|' + Recursos.ativo('backup_nuvem_v1395') + '|' + Recursos.ativo('gestao_v1403'); }, /* v13.86: recalcula também quando o Módulo Contábil é liberado */
   recalcular() { const u = this.usuario; if (!u) return; this._v83 = this.chaveRec(); this.matriz = { ...this.matriz, OPERACIONAL: PermNorm.perfil(u.perfil) === 'MASTER' ? PERMISSOES.OPERACIONAL : permissoesDaMatriz(u.permissoes || {}, u.perfil) }; try { Repo._salarios93(); } catch { } /* v13.93 */ },
   /** v14.02 · "Liberação Gerencial / Aprovação de Exclusões": Operacional com a opção marcada (o Master tem acesso próprio e irrestrito). Nunca abre as áreas técnicas. */
   gerencial() { return g02() && !!this.id && !this.loja && this.perfil !== 'GESTOR' && this.can('liberacao_gerencial'); },
@@ -3483,6 +3501,7 @@ document.addEventListener('input', e => { const i = e.target; if (i.matches?.('i
 
 /* ============================== 7. UI ============================== */
 const ICON = {
+  bsc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><circle cx="17" cy="17" r="3.5"/><path d="m15.6 17 1 1 1.9-2"/></svg>',
   livro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5Z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/><path d="M9 10.5h6"/><path d="M12 13.5v-.01"/></svg>', // v13.86
   pacote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 7.5 8.5-4 8.5 4v9l-8.5 4-8.5-4Z"/><path d="m3.5 7.5 8.5 4 8.5-4"/><path d="M12 11.5v9"/><path d="m7.8 5.5 8.5 4"/></svg>', // v13.60 · Solicitações Operacionais
   equilibrio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M7 20h10"/><path d="M5 7h14"/><path d="m5 7-3 6a3 3 0 0 0 6 0Z"/><path d="m19 7-3 6a3 3 0 0 0 6 0Z"/></svg>', // v13.50
@@ -4085,6 +4104,10 @@ function g99() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g00() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1400'); }
 /** v14.02 · o recurso da versão está ativo neste ambiente? (Recebíveis em accordion, aprovação das Saídas do Dia e as permissões novas) */
 function g02() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1402'); }
+/** v14.02.1 · o recurso da correção dos Indicadores & KPIs Operacionais (colunas CTO / Custo da folha / Custo operacional) está ativo neste ambiente? */
+function g021() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v14021'); }
+/** v14.03 · o recurso do Balanced Scorecard (BSC) & Farol Estratégico está ativo neste ambiente? */
+function g03() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1403'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4098,7 +4121,9 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1402: { versao: 'v14.02', titulo: 'Tela Inicial: Recebíveis em accordion no celular (Entradas, Saídas e Saldo do Dia); fluxo de autorização das Saídas do Dia pelo Diretor (checkboxes, Selecionar Todos, Previsto × Autorizado × Retido, Finalizar Aprovações com gravação no banco, aviso ao Financeiro e ao Master e Relatório de Pagamentos Aprovados em PDF A4 e CSV); revisão estrita das permissões (travas só-Master de negócio passam a respeitar as flags) e as novas permissões Autorizar Pagamentos nas Saídas do Dia e Liberação Gerencial / Aprovação de Exclusões' },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1403: { versao: 'v14.03', titulo: 'Balanced Scorecard (BSC) & Farol Estratégico: 13 indicadores em 4 perspectivas (Financeira, Cliente & Vendas, Processos Internos e Pessoas) com meta, realizado, variância e farol; liquidez e cobertura de caixa do FCX; filtros de escopo (rede, regional, loja), segmento e mês; Laudo Estratégico, PDF A4, CSV e Excel; mini-card na Tela Inicial; permissão própria "BSC" na Gestão de Acessos' },
+    gestao_v14021: { versao: 'v14.02.1', titulo: 'Gestão de Lojas › Indicadores & KPIs Operacionais: a caixa "Incluir folha de pagamento (salário + encargos)" recalcula na hora os cards e a tabela; novas colunas CTO (ocupação), Custo da folha, Custo operacional/mês (CTO + folha) e Custo por m²; subtítulo "CTO + folha de pagamento"; Excel, PDF e Gerar Relatório / Exportar na mesma ordem; linha REDE fixa ao ordenar' },
+    gestao_v1402: { versao: 'v14.02', titulo: 'Tela Inicial: Recebíveis em accordion no celular (Entradas, Saídas e Saldo do Dia); fluxo de autorização das Saídas do Dia pelo Diretor (checkboxes, Selecionar Todos, Previsto × Autorizado × Retido, Finalizar Aprovações com gravação no banco, aviso ao Financeiro e ao Master e Relatório de Pagamentos Aprovados em PDF A4 e CSV); revisão estrita das permissões (travas só-Master de negócio passam a respeitar as flags) e as novas permissões Autorizar Pagamentos nas Saídas do Dia e Liberação Gerencial / Aprovação de Exclusões' },
     backup_corr_v1401: { versao: 'v14.01', titulo: 'Backup: com os pontos de restauração na nuvem ativos (recurso backup_nuvem_v1395 e banco do Netlify) o painel não pede mais o backup diário em .json nem bloqueia nenhum perfil; o ponto do primeiro acesso segue silencioso (falha de rede só no console) e o .json fica na Contingência de Backup e dados' },
     gestao_v1400: { versao: 'v14.00', titulo: 'Central de Notificações (Sistema & Segurança): alertas automáticos por e-mail e WhatsApp — lembrete e prazo excedido de prestação de contas, IEO semanal por Gerente Regional (PDF), solicitações acima do SLA, relatório matinal executivo, férias, falta de caixa acima da tolerância e confirmação do Backup na Nuvem — com regras por evento, Testar Disparo e auditoria de envios com Reenviar Notificação' }, gestao_v1399: { versao: 'v13.99', titulo: 'Popup de crítica em toda importação de arquivo (resumo, inconsistências e cópia do relatório) e, nas tabelas, ordenação por clique no cabeçalho com Gerar Relatório / Exportar (PDF A4 e CSV)' }, gestao_v1398: { versao: 'v13.98', titulo: 'Consolidado de Entradas: o PIX passa a ser a entrada prevista do próprio dia do relatório (vendas previstas do dia × % de PIX; prestação pelo Parâmetro 3) e as linhas Pix - Crédito e Pix - Débito saem dos blocos de cartão' }, gestao_v1397: { versao: 'v13.97', titulo: 'Consolidado de Entradas reestruturado: PIX real (digitado ou histórico de vendas do FCX), Total Cartões de Crédito (Credsystem, Getnet e Safra), Total Cartões de Débito (vendas e prestação juntas por adquirente) e o quadro Resumo por Adquirente' }, gestao_v1396: { versao: 'v13.96', titulo: 'Recebível: a prestação no cartão de débito sai com a adquirente, a forma de recebimento e a bandeira (sem a palavra LOTE); Módulo Contábil: partidas dobradas com código e nome da conta na mesma coluna, Débito/Crédito em selo e cores por grupo contábil, e a aba Biblioteca CPC & Regras Fiscais' }, backup_nuvem_v1395: { versao: 'v13.95', titulo: 'Pontos de Restauração na Nuvem: ponto automático no primeiro acesso do dia e às 23:59, ponto manual, histórico dos 30 últimos e restauração pelo Master (digitando RESTAURAR, com backup preventivo); o arquivo .json vira contingência' }, gestao_v1394: { versao: 'v13.94', titulo: 'Layout 100% da largura (notebook, Full HD e ultra-wide) com tabelas e formulários adaptativos, consulta automática de CNPJ na Receita Federal (BrasilAPI com reserva MinhaReceita), CPF com máscara e dígitos verificadores e o cadastro de Fornecedores e Clientes e, para o Master, o botão “Executar Migrações do Banco” (Backup e dados)' }, gestao_v1393: { versao: 'v13.93', titulo: 'RH, Viagens, Retaguarda e Lojas: permissão isolada de salários, férias em períodos com abono e 13º, folga por período, hierarquia transitiva, depósitos parciais, Máquinas POS Consolidado, KPIs por m² e alerta de prestação vencida' }, contabil_v1392: { versao: 'v13.92', titulo: 'Módulo Contábil: carga de dados de teste exclusiva da Falco (plano da planilha, 60 + 10 lançamentos), Radar e disponibilidades com planos de contas próprios e DRE sem dupla contagem de IBS/CBS' }, contabil_v1391: { versao: 'v13.91', titulo: 'Módulo Contábil executivo: multiempresas (CNPJ, QSA e contador/CRC), disponibilidades em tempo real, relatórios em abas com KPIs (Diário, Caixa, Razão, Balancete, DRE CPC 26 e CPC 51, Balanço, DRA, DMPL, DFC), Radar de Saúde, Motor de Crítica e Laudo Técnico em PDF' }, marca_falco_v1390: { versao: 'v13.90', titulo: 'Marca Falco Controladoria e Gestão (antiga RC Consultoria): logomarca, paleta azul-marinho e dourado, 3 temas exclusivos e Tela Inicial sem o Recebível do Dia — vale no site da Falco desde a publicação' }, adiant_v1388: { versao: 'v13.88', titulo: 'Adiantamentos: importação da prestação de contas (CSV/Excel/JSON), crítica de itens indevidos, Acerto de Contas Final e encerramento com lançamentos contábeis' }, rel_v1389: { versao: 'v13.89', titulo: 'Relatórios: Solicitações por período, Resumo Operacional de Viagens, impressão da equipe (folgas agendadas e férias) e pré-visualização A4 padronizada em todos os documentos' } },
   BASE: 'v13.64', // última versão publicada sem recursos em homologação (o que a Produção roda sem nenhuma liberação)
@@ -7418,55 +7443,112 @@ const Lojas = {
   },
   /**
    * v13.93 · Indicadores por m² (área de vendas cadastrada na loja). Faturamento = média mensal do cadastro (atualizada pelo realizado importado).
-   * Custo operacional = ocupação + água/energia (Módulo 3, só para quem acessa Contratos) + aluguel de POS (+ folha com encargos, se marcada e permitida).
+   * Custo operacional = CTO (ocupação + água/energia, Módulo 3, só para quem acessa Contratos, + aluguel de POS) (+ folha com encargos patronais, se marcada e permitida) — v14.02.1: CTO e folha em colunas próprias.
    * Resultado = faturamento médio − custo operacional (não deduz CMV nem impostos). Rede = razão das somas (não média das razões), só com as lojas que têm todos os dados.
    */
   dadosKpi93({ tipo = '', regional = '', folha = false } = {}) {
     const r2 = n => Math.round((Number(n) || 0) * 100) / 100, hoje = Datas.hoje(), ano = hoje.getFullYear(), mes = hoje.getMonth() + 1;
-    const verCustos = Contratos.pode(), verFolha = !!folha && Auth.can('pessoal.salario.ver') && Repo.prontas.has('salarios') && Repo.prontas.has('funcionarios');
+    /* v14.02.1 · a folha é dado de RH (permissão própria "Pode ver salários") e só entra no custo de quem também enxerga os custos de ocupação (Módulo 3);
+       a Liberação Gerencial (v14.02) nunca leva salários: segue sem a folha, por desenho (LGPD). Sem os dados do RH carregados, devolve folhaPendente (a tela avisa em vez de calcular com zero). */
+    const verCustos = Contratos.pode(), pedeFolha = !!folha && verCustos && Auth.can('pessoal.salario.ver');
+    const folhaPronta = Repo.prontas.has('salarios') && Repo.prontas.has('funcionarios'), verFolha = pedeFolha && folhaPronta, v21 = g021();
     const posPorLoja = new Map(this.dadosPOS93().grupos.map(g => [g.lojaId, g.custo]));
     const lojas = Repo.todos('lojas').filter(l => l.ativa !== false && (!tipo || l.tipo === tipo) && (!regional || l.supervisor === regional));
+    const info = { ref: `${mm2(mes)}/${ano}`, fonte: verFolha && FolhaLoja.realMes(ano, mes) ? 'folha importada' : 'cadastro do RH', pessoas: 0, semSalario: 0, salarios: 0, encargos: 0, total: 0, lojas: 0 };
     const linhas = lojas.map(l => {
       const area = Number(l.areaM2) > 0 ? Number(l.areaM2) : 0, fat = Number(l.faturamentoMedio) > 0 ? Number(l.faturamentoMedio) : 0, pos = posPorLoja.get(l.id) || 0;
       const k = verCustos ? this.custos(l) : null, ocup = k ? k.total : null;
-      let fol = null; if (verFolha) { try { fol = FolhaLoja.mes(l, ano, mes).total; } catch { fol = null; } }
-      const custo = verCustos && ocup != null ? r2(ocup + pos + (fol || 0)) : null, res = custo != null && fat ? r2(fat - custo) : null;
-      return { lojaId: l.id, codigo: l.codigo, loja: l.nome, tipo: l.tipo, area, fat, ocup, pos, folha: fol, custo, resultado: res,
+      /* v14.02.1 · folha da filial = colaboradores ativos do RH lotados nela (o código da lotação e o da loja são comparados pelo número oficial de 2 dígitos:
+         "05" = "5" = "05 - CAMARAGIBE" = "05 · CAMARAGIBE" = "loja-005", em CodLoja.oficial) × (salário vigente + encargos patronais = custo real da empresa). */
+      let fi = null; if (verFolha) { try { fi = FolhaLoja.mes(l, ano, mes); } catch { fi = null; } }
+      const fol = verFolha ? r2(fi ? fi.total : 0) : null;
+      if (fi) { info.pessoas += fi.pessoas; info.semSalario += fi.semSalario; info.salarios += fi.salarios; info.encargos += fi.encargos; info.total += fi.total; if (fi.pessoas) info.lojas++; }
+      const cto = ocup != null ? r2(ocup + pos) : null; // CTO (ocupação) = aluguel, condomínio, fundo de promoção, IPTU e taxas + água e energia + aluguel de POS
+      const custo = cto != null ? r2(cto + (fol || 0)) : null, res = custo != null && fat ? r2(fat - custo) : null; // custo operacional/mês = CTO + folha (se marcada)
+      return { lojaId: l.id, codigo: l.codigo, loja: l.nome, tipo: l.tipo, area, fat, ocup, pos, cto, folha: fol, folhaPessoas: fi ? fi.pessoas : 0, folhaSemSalario: fi ? fi.semSalario : 0, custo, resultado: res,
         vendaM2: area && fat ? r2(fat / area) : null, custoM2: area && custo != null ? r2(custo / area) : null, resultadoM2: area && res != null ? r2(res / area) : null, margem: res != null && fat ? res / fat * 100 : null,
         semArea: !area, semFat: !fat, semCusto: verCustos && ocup == null };
     }).sort((a, b) => (b.vendaM2 ?? -1) - (a.vendaM2 ?? -1) || String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true }));
-    const soma = (xs, f) => xs.reduce((a, x) => a + f(x), 0), cv = linhas.filter(x => x.vendaM2 != null), cc = linhas.filter(x => x.custoM2 != null), cr = linhas.filter(x => x.resultadoM2 != null);
+    const soma = (xs, f) => xs.reduce((a, x) => a + f(x), 0), cv = linhas.filter(x => x.vendaM2 != null), cc = linhas.filter(x => x.custoM2 != null), cr = linhas.filter(x => x.resultadoM2 != null), cm = linhas.filter(x => x.custo != null);
     const rede = { vendaM2: cv.length ? r2(soma(cv, x => x.fat) / soma(cv, x => x.area)) : null, custoM2: cc.length ? r2(soma(cc, x => x.custo) / soma(cc, x => x.area)) : null,
       resultadoM2: cr.length ? r2(soma(cr, x => x.resultado) / soma(cr, x => x.area)) : null, margem: cr.length ? soma(cr, x => x.resultado) / soma(cr, x => x.fat) * 100 : null,
-      lojas: linhas.length, comArea: linhas.filter(x => !x.semArea).length, semArea: linhas.filter(x => x.semArea).length, comTudo: cr.length, areaTotal: soma(cv, x => x.area) };
-    return { linhas, rede, verCustos, verFolha };
+      lojas: linhas.length, comArea: linhas.filter(x => !x.semArea).length, semArea: linhas.filter(x => x.semArea).length, comTudo: cr.length, areaTotal: soma(cv, x => x.area),
+      /* v14.02.1 · totais mensais da linha REDE (soma das lojas listadas com custo): CTO + folha = custo operacional/mês */
+      ctoTotal: cm.length ? r2(soma(cm, x => x.cto)) : null, folhaTotal: cm.length && verFolha ? r2(soma(cm, x => x.folha || 0)) : null, custoTotal: cm.length ? r2(soma(cm, x => x.custo)) : null };
+    ['salarios', 'encargos', 'total'].forEach(c => { info[c] = r2(info[c]); });
+    return { linhas, rede, verCustos, verFolha, pedeFolha, folhaPendente: pedeFolha && !folhaPronta, folhaInfo: info, v21 };
+  },
+  /** v14.02.1 · UMA definição das colunas dos indicadores: a tela, a impressão/PDF e o Excel nascem dela (e a barra "Ordenar por / Gerar Relatório / Exportar" lê a tela), então a ordem e o estado da folha são sempre os mesmos.
+   *  Ordem: LOJA | TIPO | M² | FATURAMENTO MÉDIO/MÊS | VENDA POR M² | CTO (OCUPAÇÃO) | CUSTO DA FOLHA (só com a folha marcada) | CUSTO OPERACIONAL/MÊS | CUSTO POR M² | RESULTADO/MÊS | RESULTADO POR M² | MARGEM. */
+  colunasKpi93(d) {
+    const c = [{ id: 'loja', rot: 'Loja' }, { id: 'tipo', rot: 'Tipo' }, { id: 'area', rot: 'm²', rotX: 'm²', num: 1 }, { id: 'fat', rot: 'Faturamento médio/mês', rotX: 'Faturamento médio/mês (R$)', num: 1 }, { id: 'vendaM2', rot: 'Venda por m²', rotX: 'Venda por m² (R$)', num: 1 }];
+    if (!d.verCustos) return c;
+    if (d.v21) { c.push({ id: 'cto', rot: 'CTO (ocupação)', rotX: 'CTO (ocupação) (R$)', num: 1 }); if (d.verFolha) c.push({ id: 'folha', rot: 'Custo da folha', rotX: 'Custo da folha (R$)', num: 1 }); }
+    c.push({ id: 'custo', rot: 'Custo operacional/mês', rotX: 'Custo operacional/mês (R$)', num: 1 }, { id: 'custoM2', rot: 'Custo por m²', rotX: 'Custo por m² (R$)', num: 1 },
+      { id: 'resultado', rot: 'Resultado/mês', rotX: 'Resultado/mês (R$)', num: 1 }, { id: 'resultadoM2', rot: 'Resultado por m²', rotX: 'Resultado por m² (R$)', num: 1 }, { id: 'margem', rot: 'Margem', rotX: 'Margem (%)', num: 1 });
+    return c;
   },
   htmlTabelaKpi93(d, impressao = false) {
-    const mx = Math.max(0, ...d.linhas.map(x => x.vendaM2 || 0)), n = v => v == null ? '<span class="hint">—</span>' : Fmt.brl(v), cor = v => v == null ? '' : `style="color:var(${v < 0 ? '--bad' : '--ok'})"`;
+    const mx = Math.max(0, ...d.linhas.map(x => x.vendaM2 || 0)), n = v => v == null ? '<span class="hint">—</span>' : Fmt.brl(v), cor = v => v == null ? '' : `style="color:var(${v < 0 ? '--bad' : '--ok'})"`, cols = this.colunasKpi93(d);
     const sem = x => x.semArea ? '<span class="pill warn" title="Cadastre a área de vendas (m²) na loja">sem m²</span>' : Fmt.num(x.area, x.area % 1 ? 1 : 0);
-    const cab = `<tr><th>Loja</th><th>Tipo</th><th class="num">m²</th><th class="num">Faturamento médio/mês</th><th class="num">Venda por m²</th>${d.verCustos ? '<th class="num">Custo operacional/mês</th><th class="num">Custo por m²</th><th class="num">Resultado/mês</th><th class="num">Resultado por m²</th><th class="num">Margem</th>' : ''}</tr>`;
-    const lin = d.linhas.map(x => `<tr><td class="cell-main"><span class="mono muted">${esc(x.codigo)}</span> ${esc(x.loja)}</td><td class="cell-sub">${esc(x.tipo || '—')}</td><td class="num">${sem(x)}</td><td class="num">${x.fat ? Fmt.brl(x.fat) : '<span class="hint">—</span>'}</td>
-      <td class="num">${n(x.vendaM2)}${!impressao && x.vendaM2 && mx ? `<div class="lj-bar" aria-hidden="true"><i style="width:${Math.round(x.vendaM2 / mx * 100)}%"></i></div>` : ''}</td>
-      ${d.verCustos ? `<td class="num">${x.custo != null ? Fmt.brl(x.custo) : `<span class="hint">${x.semCusto ? 'sem custos' : '—'}</span>`}</td><td class="num">${n(x.custoM2)}</td><td class="num" ${cor(x.resultado)}>${n(x.resultado)}</td><td class="num" ${cor(x.resultadoM2)}>${n(x.resultadoM2)}</td><td class="num" ${cor(x.margem)}>${x.margem != null ? Fmt.pct(x.margem, 1) : '<span class="hint">—</span>'}</td>` : ''}</tr>`).join('');
-    const r = d.rede;
-    const tot = `<tr class="tot"><td colspan="2">REDE (${r.comArea} de ${r.lojas} lojas com m²)</td><td class="num">${Fmt.num(r.areaTotal, 0)}</td><td></td><td class="num">${n(r.vendaM2)}</td>${d.verCustos ? `<td></td><td class="num">${n(r.custoM2)}</td><td></td><td class="num" ${cor(r.resultadoM2)}>${n(r.resultadoM2)}</td><td class="num" ${cor(r.margem)}>${r.margem != null ? Fmt.pct(r.margem, 1) : '—'}</td>` : ''}</tr>`;
+    const dica = x => `${x.folhaPessoas} colaborador(es) ativo(s) lotado(s) na filial${x.folhaSemSalario ? ` · ${x.folhaSemSalario} sem salário cadastrado` : ''}`;
+    const cab = `<tr>${cols.map(c => `<th${c.num ? ' class="num"' : ''}>${c.rot}</th>`).join('')}</tr>`;
+    const cel = (x, c) => {
+      switch (c.id) {
+        case 'loja': return `<td class="cell-main"><span class="mono muted">${esc(x.codigo)}</span> ${esc(x.loja)}</td>`;
+        case 'tipo': return `<td class="cell-sub">${esc(x.tipo || '—')}</td>`;
+        case 'area': return `<td class="num">${sem(x)}</td>`;
+        case 'fat': return `<td class="num">${x.fat ? Fmt.brl(x.fat) : '<span class="hint">—</span>'}</td>`;
+        case 'vendaM2': return `<td class="num">${n(x.vendaM2)}${!impressao && x.vendaM2 && mx ? `<div class="lj-bar" aria-hidden="true"><i style="width:${Math.round(x.vendaM2 / mx * 100)}%"></i></div>` : ''}</td>`;
+        case 'cto': return `<td class="num">${x.cto != null ? Fmt.brl(x.cto) : `<span class="hint">${x.semCusto ? 'sem custos' : '—'}</span>`}</td>`;
+        case 'folha': return `<td class="num" title="${esc(dica(x))}">${x.folha != null ? Fmt.brl(x.folha) : '<span class="hint">—</span>'}</td>`;
+        case 'custo': return `<td class="num">${x.custo != null ? Fmt.brl(x.custo) : `<span class="hint">${x.semCusto ? 'sem custos' : '—'}</span>`}</td>`;
+        case 'custoM2': return `<td class="num">${n(x.custoM2)}</td>`;
+        case 'resultado': return `<td class="num" ${cor(x.resultado)}>${n(x.resultado)}</td>`;
+        case 'resultadoM2': return `<td class="num" ${cor(x.resultadoM2)}>${n(x.resultadoM2)}</td>`;
+        case 'margem': return `<td class="num" ${cor(x.margem)}>${x.margem != null ? Fmt.pct(x.margem, 1) : '<span class="hint">—</span>'}</td>`;
+      }
+      return '<td></td>';
+    };
+    const lin = d.linhas.map(x => `<tr>${cols.map(c => cel(x, c)).join('')}</tr>`).join('');
+    const r = d.rede, soma = 'soma mensal das lojas listadas';
+    const celR = c => {
+      switch (c.id) {
+        case 'loja': return `<td colspan="2">REDE (${r.comArea} de ${r.lojas} lojas com m²)</td>`;
+        case 'tipo': return '';
+        case 'area': return `<td class="num">${Fmt.num(r.areaTotal, 0)}</td>`;
+        case 'vendaM2': return `<td class="num">${n(r.vendaM2)}</td>`;
+        case 'cto': return `<td class="num" title="${soma}">${n(r.ctoTotal)}</td>`;
+        case 'folha': return `<td class="num" title="${soma}">${n(r.folhaTotal)}</td>`;
+        case 'custo': return `<td class="num" title="${soma}">${d.v21 ? n(r.custoTotal) : ''}</td>`;
+        case 'custoM2': return `<td class="num">${n(r.custoM2)}</td>`;
+        case 'resultadoM2': return `<td class="num" ${cor(r.resultadoM2)}>${n(r.resultadoM2)}</td>`;
+        case 'margem': return `<td class="num" ${cor(r.margem)}>${r.margem != null ? Fmt.pct(r.margem, 1) : '—'}</td>`;
+      }
+      return '<td></td>'; // faturamento e resultado/mês da rede ficam em branco (só as razões por m²)
+    };
+    const tot = `<tr class="tot" data-tp-fixa="1">${cols.map(celR).join('')}</tr>`; // v14.02.1: a linha REDE fica sempre no fim ao ordenar pelos cabeçalhos
     return `<table class="lj-kpi"><thead>${cab}</thead><tbody>${lin}${tot}</tbody></table>`;
   },
   renderKpi93() {
     const u = this.ui, todas = Repo.todos('lojas'), sup = [...new Set(todas.map(l => l.supervisor).filter(Boolean))].sort(), podeFolha = Auth.can('pessoal.salario.ver');
-    const d = this.dadosKpi93({ tipo: u.v93Tipo || '', regional: u.v93Reg || '', folha: podeFolha && u.v93Folha === true }), r = d.rede;
+    const d = this.dadosKpi93({ tipo: u.v93Tipo || '', regional: u.v93Reg || '', folha: podeFolha && u.v93Folha === true }), r = d.rede, fi = d.folhaInfo;
     const kpi = (k, v, dd, c = '') => `<div class="kpi"><div class="k">${k}</div><div class="v mono" ${c ? `style="color:var(${c})"` : ''}>${v}</div><div class="d">${dd}</div></div>`;
     const m2 = v => v == null ? '—' : Fmt.brl(v), sel = (k, rot, ops, vl) => `<div class="field"><label class="lbl" for="lj_${k}">${rot}</label><select id="lj_${k}" data-a="lj-filtro" data-k="${k}"><option value="">Todos</option>${ops.map(o => `<option ${o === vl ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`;
+    const subCusto = d.verFolha ? (d.v21 ? 'CTO + folha de pagamento' : 'ocupação + utilidades + aluguel de POS + folha') : (d.v21 ? 'CTO · ocupação + utilidades + aluguel de POS' : 'ocupação + utilidades + aluguel de POS');
+    const semContratos = podeFolha && !d.verCustos; // a folha só entra no custo de quem também vê a ocupação (Módulo 3)
+    const avisoFolha = d.folhaPendente ? '<p class="hint" style="margin:0 0 10px" role="status">Carregando os dados de funcionários e salários do RH… a folha entra no cálculo assim que chegarem.</p>'
+      : d.verFolha ? `<p class="hint" style="margin:0 0 10px" role="status" data-folha-info="1"><b>Folha incluída</b> · ${fi.ref} (${esc(fi.fonte)}): ${fi.pessoas} colaborador(es) ativo(s) lotado(s) em ${fi.lojas} filial(is) · salários ${Fmt.brl(fi.salarios)} + encargos patronais ${Fmt.brl(fi.encargos)} = ${Fmt.brl(fi.total)}${fi.semSalario ? ` · ${fi.semSalario} sem salário cadastrado` : ''}.</p>` : '';
     return `<div class="grid g4" style="margin-bottom:16px">
         ${kpi('Venda por m²', m2(r.vendaM2), `por mês · faturamento médio ÷ m² · ${r.comArea} de ${r.lojas} lojas com m²`)}
-        ${d.verCustos ? kpi('Custo operacional por m²', m2(r.custoM2), `ocupação + utilidades + aluguel de POS${d.verFolha ? ' + folha' : ''}`) : kpi('Custo operacional por m²', '—', 'custos de ocupação são restritos ao Módulo 3 (Contratos)')}
+        ${d.verCustos ? kpi('Custo operacional por m²', m2(r.custoM2), subCusto) : kpi('Custo operacional por m²', '—', 'custos de ocupação são restritos ao Módulo 3 (Contratos)')}
         ${d.verCustos ? kpi('Resultado por m²', m2(r.resultadoM2), r.margem != null ? `margem de ${Fmt.pct(r.margem, 1)} sobre a venda · ${r.comTudo} loja(s) com todos os dados` : 'faltam dados de custo ou faturamento', r.resultadoM2 != null ? (r.resultadoM2 < 0 ? '--bad' : '--ok') : '') : kpi('Resultado por m²', '—', 'restrito a quem acessa o Módulo 3')}
         ${kpi('Lojas sem m² cadastrado', String(r.semArea), r.semArea ? 'preencha “Área de vendas (m²)” em Gestão de Lojas › Dados' : 'todas com área cadastrada', r.semArea ? '--warn' : '--ok')}</div>
       <div class="panel"><div class="toolbar">${sel('v93Tipo', 'Tipo', TIPOS_LOJA, u.v93Tipo)}${sel('v93Reg', 'Regional (supervisor)', sup, u.v93Reg)}
-          ${podeFolha ? `<label class="check" style="align-self:flex-end"><input type="checkbox" data-a="lj-v93-folha" ${u.v93Folha === true ? 'checked' : ''}> Incluir folha de pagamento (salário + encargos)</label>` : ''}
+          ${podeFolha ? `<label class="check" style="align-self:flex-end"${semContratos ? ' title="A folha entra no custo de quem também acessa os custos de ocupação (Módulo 3 · Contratos)"' : ''}><input type="checkbox" data-a="lj-v93-folha" ${u.v93Folha === true ? 'checked' : ''}${semContratos ? ' disabled' : ''}> Incluir folha de pagamento (salário + encargos)</label>` : ''}
           <div class="row" style="align-self:flex-end;gap:8px"><button class="btn sec sm" data-a="lj-v93-xlsx" data-v="kpis">Exportar Excel</button><button class="btn sec sm" data-a="lj-v93-pdf" data-v="kpis">${ICON.pdf} Imprimir / PDF</button></div></div>
-        ${d.linhas.length ? `<div class="tbl-wrap">${this.htmlTabelaKpi93(d)}</div>` : '<div class="empty">Nenhuma loja ativa com esses filtros.</div>'}</div>
-      <details class="cmp-leitura"><summary><b>Como os indicadores são calculados</b></summary><p class="hint" style="margin:8px 0 0"><b>Venda por m²</b> = faturamento médio mensal da loja ÷ área de vendas (m²). <b>Custo operacional</b> = custos de ocupação (aluguel, condomínio, fundo de promoção, IPTU e taxas) + água e energia + aluguel das máquinas POS${podeFolha ? ' (+ folha com encargos, quando marcada)' : ''}. <b>Resultado</b> = faturamento médio − custo operacional (não deduz CMV nem impostos). <b>Margem</b> = resultado ÷ faturamento. Os números da rede dividem a soma dos valores pela soma das áreas (não é média das médias) e só consideram lojas com todos os dados do indicador.</p></details>`;
+        ${avisoFolha}${d.linhas.length ? `<div class="tbl-wrap">${this.htmlTabelaKpi93(d)}</div>` : '<div class="empty">Nenhuma loja ativa com esses filtros.</div>'}</div>
+      <details class="cmp-leitura"><summary><b>Como os indicadores são calculados</b></summary><p class="hint" style="margin:8px 0 0"><b>Venda por m²</b> = faturamento médio mensal da loja ÷ área de vendas (m²). <b>CTO (ocupação)</b> = custos de ocupação (aluguel, condomínio, fundo de promoção, IPTU e taxas) + água e energia + aluguel das máquinas POS.${podeFolha ? ' <b>Custo da folha</b> (com a caixa marcada) = salário vigente + encargos patronais (custo real para a empresa) dos colaboradores ativos lotados na filial; o código da lotação é comparado pelo número da loja (05 = 5 = 05 - CAMARAGIBE).' : ''} <b>Custo operacional/mês</b> = CTO${podeFolha ? ' + custo da folha (quando marcada; desmarcada, é igual ao CTO)' : ''}; <b>Custo por m²</b> = custo operacional/mês ÷ m². <b>Resultado</b> = faturamento médio − custo operacional (não deduz CMV nem impostos). <b>Margem</b> = resultado ÷ faturamento. Os números por m² da rede dividem a soma dos valores pela soma das áreas (não é média das médias) e só consideram lojas com todos os dados do indicador; CTO, folha e custo operacional da linha REDE são a soma mensal das lojas listadas.</p></details>`;
   },
   async exportarV93(qual) {
     const XLSX = await Libs.xlsx(), wb = XLSX.utils.book_new(), hoje = Datas.hojeISO();
@@ -7479,10 +7561,15 @@ const Lojas = {
       return Documento.baixarArquivo(`maquinas_pos_consolidado_${hoje}.xlsx`, new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]));
     }
     const d = this.dadosKpi93({ tipo: this.ui.v93Tipo || '', regional: this.ui.v93Reg || '', folha: Auth.can('pessoal.salario.ver') && this.ui.v93Folha === true });
-    const rows = [['Código', 'Loja', 'Tipo', 'm²', 'Faturamento médio/mês (R$)', 'Venda por m² (R$)', ...(d.verCustos ? ['Custo operacional/mês (R$)', 'Custo por m² (R$)', 'Resultado/mês (R$)', 'Resultado por m² (R$)', 'Margem (%)'] : [])]];
-    d.linhas.forEach(x => rows.push([x.codigo, x.loja, x.tipo, x.area || '', x.fat || '', x.vendaM2 ?? '', ...(d.verCustos ? [x.custo ?? '', x.custoM2 ?? '', x.resultado ?? '', x.resultadoM2 ?? '', x.margem != null ? Math.round(x.margem * 10) / 10 : ''] : [])]));
-    rows.push(['', 'REDE', '', d.rede.areaTotal, '', d.rede.vendaM2 ?? '', ...(d.verCustos ? ['', d.rede.custoM2 ?? '', '', d.rede.resultadoM2 ?? '', d.rede.margem != null ? Math.round(d.rede.margem * 10) / 10 : ''] : [])]);
+    const cols = this.colunasKpi93(d).filter(c => c.id !== 'loja' && c.id !== 'tipo'), pm = v => v != null ? Math.round(v * 10) / 10 : '';
+    const val = (x, id) => { switch (id) { case 'area': return x.area || ''; case 'fat': return x.fat || ''; case 'margem': return pm(x.margem); default: return x[id] ?? ''; } };
+    const valR = id => { const r = d.rede; switch (id) { case 'area': return r.areaTotal; case 'vendaM2': return r.vendaM2 ?? ''; case 'cto': return r.ctoTotal ?? ''; case 'folha': return r.folhaTotal ?? ''; case 'custo': return d.v21 ? (r.custoTotal ?? '') : ''; case 'custoM2': return r.custoM2 ?? ''; case 'resultadoM2': return r.resultadoM2 ?? ''; case 'margem': return pm(r.margem); default: return ''; } };
+    const rows = [['Código', 'Loja', 'Tipo', ...cols.map(c => c.rotX)]]; // v14.02.1: ordem única (colunasKpi93) e a folha só aparece com a caixa marcada
+    d.linhas.forEach(x => rows.push([x.codigo, x.loja, x.tipo, ...cols.map(c => val(x, c.id))]));
+    rows.push(['', 'REDE', '', ...cols.map(c => valR(c.id))]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'KPIs por m²');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Parâmetro', 'Valor'], ['Tipo', this.ui.v93Tipo || 'Todos'], ['Regional (supervisor)', this.ui.v93Reg || 'Todos'], ['Folha de pagamento (salário + encargos)', d.verFolha ? 'Incluída' : 'Não incluída'],
+      ...(d.verFolha ? [['Folha: referência', `${d.folhaInfo.ref} (${d.folhaInfo.fonte})`], ['Folha: colaboradores ativos', d.folhaInfo.pessoas], ['Folha: salários (R$)', d.folhaInfo.salarios], ['Folha: encargos patronais (R$)', d.folhaInfo.encargos]] : []), ['Gerado em', new Date().toLocaleString('pt-BR')]]), 'Parâmetros');
     return Documento.baixarArquivo(`indicadores_operacionais_m2_${hoje}.xlsx`, new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]));
   },
   imprimirV93(qual) {
@@ -7491,7 +7578,7 @@ const Lojas = {
       const corpo = `${Documento.cabecalho('Máquinas POS Consolidado', `${d.total.qtd} POS · ${d.total.lojas} filial(is) · custo mensal ${Fmt.brl(d.total.custo)}`)}${this.htmlTabelaPOS93(d)}<div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>`;
       return Documento.previa('Máquinas POS Consolidado', Documento.montar('Máquinas POS Consolidado', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Maquinas_POS_Consolidado_${Datas.hojeISO()}`); }
     const d = this.dadosKpi93({ tipo: this.ui.v93Tipo || '', regional: this.ui.v93Reg || '', folha: Auth.can('pessoal.salario.ver') && this.ui.v93Folha === true });
-    const corpo = `${Documento.cabecalho('Indicadores & KPIs Operacionais por m²', `${d.rede.lojas} loja(s) · venda por m² da rede ${d.rede.vendaM2 != null ? Fmt.brl(d.rede.vendaM2) : '—'}`)}${this.htmlTabelaKpi93(d, true)}<div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')} · resultado = faturamento médio − custo operacional (sem CMV e impostos)</div>`;
+    const corpo = `${Documento.cabecalho('Indicadores & KPIs Operacionais por m²', `${d.rede.lojas} loja(s) · venda por m² da rede ${d.rede.vendaM2 != null ? Fmt.brl(d.rede.vendaM2) : '—'}${d.verFolha ? ' · custo = CTO + folha de pagamento' : ''}`)}${this.htmlTabelaKpi93(d, true)}<div class="foot">Painel de Gestão — relatório gerado em ${new Date().toLocaleString('pt-BR')} · folha de pagamento ${d.verFolha ? 'incluída (' + d.folhaInfo.ref + ')' : 'não incluída'} · resultado = faturamento médio − custo operacional (sem CMV e impostos)</div>`;
     return Documento.previa('Indicadores operacionais por m²', Documento.montar('Indicadores & KPIs Operacionais', corpo, { paisagem: true, margem: '12mm 10mm', css }), `Indicadores_Operacionais_m2_${Datas.hojeISO()}`);
   },
 
@@ -7559,6 +7646,7 @@ const Lojas = {
     if (a === 'doc-upload') return this.uploadDoc(el);
     if (a === 'lj-calc') { this.ui.calc[el.dataset.k] = el.value; return App.render(); }
     if (a === 'lj-hist') { this.ui.histDias = el.value; return App.render(); } // v13.60
+    if (a === 'lj-v93-folha') { this.ui.v93Folha = !!el.checked; return App.render(); } // v14.02.1: o clique em INPUT é ignorado pelo despachante global; a caixa chega por "change" e recalcula cards e tabela na hora
   },
   entrada(a, el) {
     if (a === 'lj-busca') { this.ui.busca = el.value; App.render(); }
@@ -18988,6 +19076,7 @@ const Inicio = {
       const res = ok ? Campanhas.resumoMes(a, m).filter(x => x.temMeta && (!lj || lj.has(x.l.id))) : [], ap = res.filter(x => x.s).length;
       out.push({ id: 'credsystem', icon: 'cartao', titulo: 'Credsystem', valor: ok ? ap : null, de: res.length, estado: !res.length ? 'info' : ap < res.length ? 'warn' : 'ok', texto: `de ${res.length} ${res.length === 1 ? 'loja apurada' : 'lojas apuradas'} em ${mesRot}`, sub: res.length ? `${res.filter(x => x.s?.elegivel).length} elegível(is) na Campanha 1` : 'nenhuma loja com meta no mês', ir: ['credsystem', 'campanhas'] });
     }
+    const bsc = BSC.cartaoHome(); if (bsc) out.push(bsc); // v14.03 · mini-card do Farol BSC
     return out;
   },
   resumoSituacao(ps) { const c = s => ps.filter(f => (f.status || 'Ativo') === s).length, a = c('Afastado'), fe = c('Férias'); return [a ? `${a} afastado(s)` : '', fe ? `${fe} em férias agora` : ''].filter(Boolean).join(' · ') || 'todos em atividade'; },
@@ -19659,6 +19748,575 @@ const Parceiros = {
 };
 window.Parceiros = Parceiros;
 
+/* =====================================================================
+   v14.03 · BALANCED SCORECARD (BSC) & FAROL ESTRATÉGICO — MOTOR PURO
+   Sem DOM, sem Repo, sem Auth: recebe filtros, o contexto do usuário e uma "fonte" (funções que devolvem dados simples) e devolve os
+   indicadores das 4 perspectivas com Meta/Previsto, Realizado, Variância (%) e o Farol. É esta camada que os testes automáticos exercitam.
+   Regras do Farol (percentual da meta):
+     • geral ........ Verde ≥ 85% · Amarelo 70% a 84,9% · Vermelho < 70% (para custo/perda, "menor é melhor", o atingimento é meta ÷ realizado)
+     • IEO .......... Verde ≥ 85 pontos · Amarelo 60 a 84,9 · Vermelho < 60 (base 100)
+     • Liquidez ..... Índice de Cobertura = (Saldo + Entradas) ÷ Saídas · Verde ≥ 1,15 · Amarelo 1,00 a 1,14 · Vermelho < 1,00
+     • sem base ..... "Sem dados no período" (cinza) — nunca quebra os demais indicadores
+   O que cada indicador exige de permissão está em DEF[].requer (a mesma matriz da v14.02); o perfil Loja só enxerga a própria filial.
+   ===================================================================== */
+/* BSC_MOTOR:INI */
+const BSC_MOTOR = {
+  P: { VERDE: 85, AMARELO: 70, IEO_VERDE: 85, IEO_VERMELHO: 60, LIQ_VERDE: 1.15, LIQ_AMARELO: 1.0,
+    META_VAZAMENTO_PCT: 0.5, META_CONCILIACAO: 100, META_RADAR: 100, META_PRONTIDAO: 70, META_NOTA: 4, META_IEO: 100 },
+  PERSPECTIVAS: [
+    { id: 'fin', titulo: 'Perspectiva Financeira', curto: 'Financeira', sub: 'Liquidez, margem, ocupação e vazamento financeiro' },
+    { id: 'cli', titulo: 'Perspectiva do Cliente & Vendas', curto: 'Cliente & Vendas', sub: 'Meta de vendas, Credsystem e ticket médio' },
+    { id: 'proc', titulo: 'Perspectiva dos Processos Internos', curto: 'Processos Internos', sub: 'IEO, conciliação de caixas e contratos' },
+    { id: 'pes', titulo: 'Perspectiva de Aprendizado & Crescimento (Pessoas)', curto: 'Aprendizado & Crescimento', sub: 'PDI, prontidão para promoção e produtividade da folha' },
+  ],
+  STATUS: {
+    verde: { rot: 'Verde', cls: 'ok', ico: '●' }, amarelo: { rot: 'Amarelo', cls: 'warn', ico: '●' }, vermelho: { rot: 'Vermelho', cls: 'bad', ico: '●' },
+    semdados: { rot: 'Sem dados no período', cls: 'neutral', ico: '○' }, restrito: { rot: 'Sem acesso', cls: 'neutral', ico: '⊘' }, consolidado: { rot: 'Indicador consolidado', cls: 'neutral', ico: '◐' },
+  },
+  /* ---------- utilitários ---------- */
+  r1: v => Math.round((Number(v) + Number.EPSILON) * 10) / 10,
+  r2: v => Math.round((Number(v) + Number.EPSILON) * 100) / 100,
+  norm: s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(),
+  num: v => (v === '' || v == null || isNaN(Number(v))) ? null : Number(v),
+  soma: (xs, f) => xs.reduce((a, x) => a + (Number(f ? f(x) : x) || 0), 0),
+  mesValido: m => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(m || '')),
+  rotMes(m) { if (!this.mesValido(m)) return '—'; const [y, mm] = m.split('-'); return ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+mm - 1] + '/' + y; },
+  fimDoMes(m) { const [y, mm] = m.split('-').map(Number); return m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0'); },
+  /** Formatação (pt-BR) usada no laudo, no CSV e na tela. */
+  fmt(unid, v) {
+    if (v === Infinity) return '∞';
+    if (v == null || (typeof v === 'number' && !isFinite(v))) return '—';
+    const n = (x, d) => Number(x).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+    switch (unid) {
+      case 'brl': return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      case 'pct': return n(v, 1) + '%';
+      case 'int': return n(v, 0);
+      case 'indice': return n(this.trunc2(v), 2);
+      case 'pontos': return n(v, 1);
+      case 'nota': return n(v, 2);
+      case 'x': return 'R$ ' + n(v, 2);
+      default: return n(v, 2);
+    }
+  },
+  fmtVar: v => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(Math.round(v * 10) / 10).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%',
+
+  /* ---------- regras do Farol ---------- */
+  farolGeral(ating) {
+    if (ating == null || !isFinite(ating)) return 'semdados';
+    const a = this.r1(ating);
+    return a >= this.P.VERDE ? 'verde' : a >= this.P.AMARELO ? 'amarelo' : 'vermelho';
+  },
+  farolIEO(pontos) {
+    if (pontos == null || !isFinite(pontos)) return 'semdados';
+    const a = this.r1(pontos);
+    return a >= this.P.IEO_VERDE ? 'verde' : a >= this.P.IEO_VERMELHO ? 'amarelo' : 'vermelho';
+  },
+  /** O índice é truncado em 2 casas (nunca superestima a cobertura): 1,149 aparece "1,14" e é Amarelo; 0,999 aparece "0,99" e é Vermelho (déficit). */
+  trunc2: v => Math.floor(Number(v) * 100 + 1e-9) / 100,
+  farolLiquidez(indice) {
+    if (indice == null) return 'semdados';
+    if (!isFinite(indice)) return 'verde'; // sem saídas previstas: folga total
+    const a = this.trunc2(indice);
+    return a >= this.P.LIQ_VERDE ? 'verde' : a >= this.P.LIQ_AMARELO ? 'amarelo' : 'vermelho';
+  },
+  /** Liquidez & Cobertura de Caixa (FCX): Saldo Líquido Projetado = Saldo + Entradas − Saídas · Índice = (Saldo + Entradas) ÷ Saídas. */
+  liquidez(d) {
+    if (!d) return null;
+    const saldo = Number(d.saldo) || 0, ent = Number(d.entradas) || 0, sai = Number(d.saidas) || 0;
+    if (!ent && !sai) return null;
+    const base = this.r2(saldo + ent), liquido = this.r2(base - sai);
+    const indice = sai > 0 ? base / sai : (base > 0 ? Infinity : null);
+    return { saldo: this.r2(saldo), entradas: this.r2(ent), saidas: this.r2(sai), base, saldoLiquido: liquido, indice, deficit: liquido < 0 ? this.r2(-liquido) : 0, status: this.farolLiquidez(indice) };
+  },
+  /** Atingimento (% da meta): "maior é melhor" = realizado ÷ meta; "menor é melhor" (custo, perda) = meta ÷ realizado (realizado ≤ meta → 100%). */
+  atingimento(real, meta, sentido = 'maior') {
+    if (real == null || meta == null || !isFinite(real) || !isFinite(meta)) return null;
+    if (sentido === 'menor') { if (real <= meta) return 100; return real > 0 ? meta / real * 100 : 100; }
+    return meta > 0 ? real / meta * 100 : null;
+  },
+  variancia(real, meta) { return real == null || meta == null || !isFinite(real) || !isFinite(meta) || !meta ? null : (real - meta) / Math.abs(meta) * 100; },
+
+  /* ---------- escopo (Rede / Regional / Loja) e segmento ---------- */
+  segmentoDe(loja) { return /sports/i.test(String(loja?.bandeira || '')) ? 'essports' : 'esposende'; },
+  /**
+   * Lojas do recorte. ctx.lojas = lojas ATIVAS no alcance de quem está logado (o painel já aplica Master / regional / loja).
+   * Perfil Loja (ctx.ehLoja): só a(s) própria(s) filial(is) — o escopo é forçado a "loja" e nunca vira consolidado da rede.
+   */
+  escopo(f, ctx) {
+    const todas = ctx.lojas || [], temSports = todas.some(l => this.segmentoDe(l) === 'essports');
+    let tipo = ['rede', 'regional', 'loja'].includes(f.escopo) ? f.escopo : 'rede', rotulo = 'Rede consolidada';
+    let lista = todas;
+    if (ctx.ehLoja) { tipo = 'loja'; if (!todas.some(l => l.id === f.lojaId)) f = { ...f, lojaId: todas[0]?.id || '' }; }
+    if (tipo === 'regional') { const k = this.norm(f.regional); lista = todas.filter(l => this.norm(l.supervisor) === k); rotulo = 'Regional · ' + (f.regional || '—'); }
+    else if (tipo === 'loja') { lista = todas.filter(l => l.id === f.lojaId); const l = lista[0]; rotulo = l ? `Loja ${l.codigo || ''} · ${l.nome || ''}`.replace(/\s+/g, ' ').trim() : 'Loja não identificada'; }
+    else if (ctx.alcanceParcial) rotulo = 'Rede consolidada · suas lojas';
+    let seg = ['todas', 'esposende', 'essports'].includes(f.seg) ? f.seg : 'todas';
+    if (!temSports) seg = 'todas';
+    if (seg !== 'todas') lista = lista.filter(l => this.segmentoDe(l) === seg);
+    const ids = new Set(lista.map(l => l.id));
+    const consolidadoCompleto = tipo === 'rede' && seg === 'todas' && !ctx.alcanceParcial && !ctx.ehLoja;
+    return { tipo, seg, temSports, lojas: lista, ids, rotulo, consolidadoCompleto, rotSeg: ctx.rotSeg || (s => s === 'essports' ? 'ES Sports' : s === 'esposende' ? 'Esposende Tradicional' : 'Todas'), lojaId: f.lojaId || '' };
+  },
+  mediaPonderada(itens, valor, peso) {
+    const ok = itens.filter(x => valor(x) != null && (Number(peso(x)) || 0) > 0), p = this.soma(ok, peso);
+    return p > 0 ? ok.reduce((a, x) => a + valor(x) * peso(x), 0) / p : null;
+  },
+
+  /* ---------- definição dos 13 indicadores ---------- */
+  /* calc(ctx) devolve { meta, real, unid, sentido?, detalhe:[texto], sub?:[linhas], nota?, status? (regra própria) } ou { vazio: true, motivo } */
+  DEF: [
+    { id: 'liquidez', persp: 'fin', titulo: 'Índice de Liquidez & Cobertura de Caixa (FCX)', requer: ['fcx.ver'], soRede: true, unid: 'indice', regra: 'Verde ≥ 1,15 · Amarelo 1,00–1,14 · Vermelho < 1,00', acaoRuim: 'Reprogramar pagamentos do FCX, antecipar recebíveis ou acionar capital de giro antes do déficit projetado.',
+      calc(c) {
+        if (!c.esc.consolidadoCompleto) return { consolidado: true, motivo: 'Indicador consolidado da Tesouraria: o FCX não é segmentado por filial, regional ou segmento. Selecione "Rede consolidada" e "Todas" para ver a liquidez.' };
+        const d = c.fonte.liquidez(c.mes); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Sem entradas nem saídas previstas no FCX para o mês.' };
+        const L = c.M.liquidez(d); if (!L) return { vazio: true, motivo: 'Sem entradas nem saídas previstas no FCX para o mês.' };
+        const det = [`Saldo disponível ${c.M.fmt('brl', L.saldo)}${d.saldoOrigem ? ' (' + d.saldoOrigem + ')' : ''} + entradas previstas ${c.M.fmt('brl', L.entradas)} − saídas previstas ${c.M.fmt('brl', L.saidas)}`,
+          `Saldo Líquido Projetado: ${c.M.fmt('brl', L.saldoLiquido)}`];
+        if (d.saldoInformado === false) det.push('Saldo inicial do mês não informado: considerado R$ 0,00 (informe no FCX › DFC ou importe o OFX).');
+        if (d.vencidas > 0.004) det.push(`Há ${c.M.fmt('brl', d.vencidas)} de saídas vencidas e não pagas (não somadas acima).`);
+        if (d.hoje) det.push(`Recebível do dia: entradas ${c.M.fmt('brl', d.hoje.entradas)}${d.hoje.saidas != null ? ' · saídas ' + c.M.fmt('brl', d.hoje.saidas) : ''}.`);
+        return { meta: c.M.P.LIQ_VERDE, real: L.indice, unid: 'indice', detalhe: det, status: L.status, extra: L };
+      } },
+    { id: 'margem_pe', persp: 'fin', titulo: 'Margem de Contribuição e Ponto de Equilíbrio', requer: ['pe.ver'], unid: 'brl', regra: 'Realizado (faturamento) ÷ Meta do Ponto de Equilíbrio (com lucro-alvo)', acaoRuim: 'Rever mix de margem, despesas fixas e rateio da sede nas lojas abaixo do equilíbrio.',
+      calc(c) {
+        const d = c.fonte.pe(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Faturamento realizado do mês ainda não informado/importado (Ponto de Equilíbrio).' };
+        const alvo = d.meta != null ? d.meta : d.pe; if (alvo == null) return { vazio: true, motivo: 'Margem de contribuição insuficiente para calcular o ponto de equilíbrio.' };
+        const folga = d.pe ? d.receita / d.pe - 1 : null;
+        const det = [`Margem de contribuição ${c.M.fmt('brl', d.mcValor)} (${c.M.fmt('pct', d.mcPct)}) · custos fixos ${c.M.fmt('brl', d.fixos)}`,
+          `Ponto de Equilíbrio ${d.pe != null ? c.M.fmt('brl', d.pe) : '—'}${folga != null ? ` · folga ${c.M.fmtVar(folga * 100)}` : ''}${d.meta != null ? ' · meta com lucro-alvo ' + c.M.fmt('brl', d.meta) : ''}`];
+        if (d.lojasTotal > d.lojas) det.push(`${d.lojas} de ${d.lojasTotal} loja(s) com faturamento realizado.`);
+        return { meta: alvo, real: d.receita, unid: 'brl', detalhe: det };
+      } },
+    { id: 'ocupacao', persp: 'fin', titulo: 'Custo de Ocupação Eficiente (aluguel fixo × % sobre vendas)', requer: ['lojas.contratos.ver'], unid: 'brl', sentido: 'menor', regra: 'Meta = aluguel fixo contratual · Realizado = o maior entre o fixo e o % sobre vendas (menor é melhor)', acaoRuim: 'Renegociar o percentual sobre vendas nos contratos em que o variável supera o mínimo.',
+      calc(c) {
+        const d = c.fonte.ocupacao(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Sem contratos de locação ativos no recorte.' };
+        const pF = d.vendas > 0 ? d.final / d.vendas * 100 : null, pM = d.vendas > 0 ? d.minimo / d.vendas * 100 : null;
+        const det = [`Ocupação projetada ${pF != null ? c.M.fmt('pct', pF) : '—'} das vendas (fixo puro: ${pM != null ? c.M.fmt('pct', pM) : '—'}) · ${d.acima} de ${d.contratos} contrato(s) com variável acima do mínimo`];
+        if (!(d.vendas > 0)) det.push('Sem meta de vendas no FCX: o % sobre vendas não pôde ser projetado (vale o aluguel mínimo).');
+        return { meta: d.minimo, real: d.final, unid: 'brl', sentido: 'menor', detalhe: det };
+      } },
+    { id: 'vazamento', persp: 'fin', titulo: 'Índice de Perda por Vazamento Financeiro (MDR / antecipação)', requer: ['retaguarda.adq.ver'], unid: 'pct', sentido: 'menor', regra: 'Divergência de MDR/antecipação ÷ volume bruto · meta ≤ 0,5% (menor é melhor)', acaoRuim: 'Tratar as exceções da Auditoria de Adquirentes e cobrar a restituição das taxas cobradas acima do contrato.',
+      calc(c) {
+        const d = c.fonte.vazamento(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Auditoria de Adquirentes não processada para o mês.' };
+        if (!(d.bruto > 0)) return { vazio: true, motivo: 'Volume bruto da auditoria zerado no mês.' };
+        const pct = (Number(d.divergencia) || 0) / d.bruto * 100;
+        const det = [`Divergências de MDR/antecipação ${c.M.fmt('brl', d.divergencia)} sobre ${c.M.fmt('brl', d.bruto)} de volume bruto${d.estimado ? ' (volume rateado pela participação nas vendas)' : ''}`];
+        return { meta: c.M.P.META_VAZAMENTO_PCT, real: pct, unid: 'pct', sentido: 'menor', detalhe: det };
+      } },
+    { id: 'meta_vendas', persp: 'cli', titulo: 'Atingimento de Meta (global e por segmento)', requer: ['pe.ver'], unid: 'brl', regra: 'Faturamento realizado ÷ meta comercial do mês (FCX, rateada pela participação de cada loja)', acaoRuim: 'Atacar as lojas e o segmento abaixo da meta: ação comercial, escala e estoque.',
+      calc(c) {
+        const d = c.fonte.vendas(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Faturamento realizado do mês ainda não informado/importado.' };
+        if (!(d.meta > 0)) return { vazio: true, motivo: 'Meta comercial do mês não cadastrada no FCX.' };
+        if (!(d.realizado > 0)) return { vazio: true, motivo: 'Faturamento realizado do mês ainda não informado/importado.' };
+        const det = [`${d.lojasComDado} de ${d.lojasTotal} loja(s) com faturamento realizado no mês`];
+        const sub = [];
+        if (c.esc.seg === 'todas' && c.esc.temSports) ['esposende', 'essports'].forEach(s => {
+          const x = d.porSegmento?.[s]; if (!x || !(x.meta > 0) || !(x.real > 0)) return;
+          const a = c.M.atingimento(x.real, x.meta); sub.push({ rot: c.esc.rotSeg(s), meta: x.meta, real: x.real, unid: 'brl', variancia: c.M.variancia(x.real, x.meta), atingimento: a, status: c.M.farolGeral(a) });
+        });
+        return { meta: d.meta, real: d.realizado, unid: 'brl', detalhe: det, sub };
+      } },
+    { id: 'ativacao', persp: 'cli', titulo: 'Taxa de Ativação e Penetração Credsystem', requer: ['credsystem.ver'], unid: 'pct', regra: '% de cartões emitidos que foram ativados ÷ meta de % de ativação (Cadastro de Metas)', acaoRuim: 'Reforçar a ativação no balcão (script, incentivo da Campanha 1) nas lojas abaixo da meta.',
+      calc(c) {
+        const d = c.fonte.credsystem(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Resultado de emissão/ativação do mês não importado (Credsystem › Importações).' };
+        if (!(d.emissao > 0) || d.ativacao == null) return { vazio: true, motivo: 'Ativações do mês não importadas (Credsystem › Importações).' };
+        if (d.metaAtivacaoPct == null) return { vazio: true, motivo: 'Meta de % de ativação não cadastrada (Credsystem › Cadastro de Metas).' };
+        const real = d.ativacao / d.emissao * 100, pen = d.metaEmissao > 0 ? d.emissao / d.metaEmissao * 100 : null;
+        const det = [`${c.M.fmt('int', d.ativacao)} cartões ativados de ${c.M.fmt('int', d.emissao)} emitidos`];
+        if (pen != null) det.push(`Penetração: emissão de ${c.M.fmt('pct', pen)} da meta de ${c.M.fmt('int', d.metaEmissao)} cartões`);
+        return { meta: d.metaAtivacaoPct, real, unid: 'pct', detalhe: det };
+      } },
+    { id: 'ticket_mix', persp: 'cli', titulo: 'Ticket Médio e Mix de Produtos (ERP)', requer: [], unid: 'brl', regra: 'Ticket = faturamento ÷ nº de vendas · meta de ticket do cadastro', acaoRuim: 'Trabalhar venda adicional e mix nas lojas com ticket abaixo da meta.',
+      calc(c) {
+        const d = c.fonte.ticketMix ? c.fonte.ticketMix(c.mes, c.esc.ids) : null;
+        if (!d || d.vazio || !(d.vendas > 0) || !(d.faturamento > 0)) return { vazio: true, motivo: d?.motivo || 'O painel ainda não recebe vendas por cupom nem mix de produtos do ERP: indicador aguardando a carga.' };
+        const ticket = d.faturamento / d.vendas, det = [`${c.M.fmt('brl', d.faturamento)} em ${c.M.fmt('int', d.vendas)} venda(s)`];
+        if (d.mix?.length) det.push('Mix: ' + d.mix.slice(0, 4).map(m => `${m.rot} ${c.M.fmt('pct', m.pct)}`).join(' · '));
+        if (d.metaTicket == null) return { vazio: true, motivo: 'Meta de ticket médio não cadastrada.', parcial: { real: ticket } };
+        return { meta: d.metaTicket, real: ticket, unid: 'brl', detalhe: det };
+      } },
+    { id: 'ieo', persp: 'proc', titulo: 'Placar Médio do IEO (Índice de Eficiência Operacional)', requer: ['retaguarda.ieo.ver'], unid: 'pontos', regra: 'Verde ≥ 85 · Amarelo 60–84 · Vermelho < 60 (base 100)', acaoRuim: 'Acionar a supervisão das lojas em Zona Vermelha e tratar as deduções que mais pesam.',
+      calc(c) {
+        const d = c.fonte.ieo(c.mes, c.esc.ids); if (!d || d.vazio || !d.itens?.length) return { vazio: true, motivo: d?.motivo || 'Sem lançamentos de IEO (faltas, conciliação ou ocorrências) no mês.' };
+        const real = d.itens.reduce((a, x) => a + (Number(x.pontos) || 0), 0) / d.itens.length, z = k => d.itens.filter(x => x.zona === k).length;
+        return { meta: c.M.P.META_IEO, real, unid: 'pontos', detalhe: [`${d.itens.length} loja(s): ${z('verde')} verde(s) · ${z('amarela')} amarela(s) · ${z('vermelha')} vermelha(s)${d.fechado ? ' · mês fechado' : ''}`], status: c.M.farolIEO(real) };
+      } },
+    { id: 'conciliacao', persp: 'proc', titulo: 'Aderência à Conciliação de Caixas (Credsystem × Websystem)', requer: ['retaguarda.ver'], unid: 'pct', regra: '% de divergências resolvidas ou justificadas ÷ divergências do mês', acaoRuim: 'Justificar ou lançar como falta as divergências em aberto antes do fechamento do mês.',
+      calc(c) {
+        const d = c.fonte.conciliacao(c.mes, c.esc.ids); if (!d || d.vazio || !(d.lancadas > 0)) return { vazio: true, motivo: d?.motivo || 'Conciliação Credsystem × Websystem não lançada no mês.' };
+        const real = d.divergencias > 0 ? d.tratadas / d.divergencias * 100 : 100;
+        const det = [d.divergencias > 0 ? `${d.tratadas} de ${d.divergencias} divergência(s) resolvida(s) ou justificada(s) · ${d.divergencias - d.tratadas} em aberto (${c.M.fmt('brl', d.valorAberto || 0)})` : `Nenhuma divergência em ${d.lancadas} lançamento(s) conferido(s).`];
+        return { meta: c.M.P.META_CONCILIACAO, real, unid: 'pct', detalhe: det };
+      } },
+    { id: 'radar', persp: 'proc', titulo: 'Radar Renovatório de Contratos (Zona Verde, > 12 meses)', requer: ['lojas.contratos.ver'], unid: 'pct', regra: '% dos contratos de locação com mais de 12 meses para o vencimento', acaoRuim: 'Abrir a negociação/ação renovatória dos contratos nas zonas amarela e vermelha.',
+      calc(c) {
+        const d = c.fonte.radar(c.esc.ids); if (!d || d.vazio || !(d.total > 0)) return { vazio: true, motivo: d?.motivo || 'Sem contratos de locação com vencimento cadastrado no recorte.' };
+        return { meta: c.M.P.META_RADAR, real: d.verde / d.total * 100, unid: 'pct', detalhe: [`${d.verde} na Zona Verde · ${d.amarela} na janela renovatória (12 a 6 meses) · ${d.vermelha} na Zona Vermelha (< 6 meses) · posição de hoje, não depende do mês`] };
+      } },
+    { id: 'pdi_nota', persp: 'pes', titulo: 'Nota Média das Competências do PDI', requer: ['pdi.ver'], unid: 'nota', regra: 'Média das competências avaliadas ÷ nível-meta (padrão 4 · Avançado)', acaoRuim: 'Priorizar as trilhas das competências com maior distância da meta nos PDIs.',
+      calc(c) {
+        const d = c.fonte.pdi(c.mes, c.esc.ids); if (!d || d.vazio || !(d.avaliados > 0) || d.nota == null) return { vazio: true, motivo: d?.motivo || 'Nenhum colaborador com PDI avaliado até o fim do mês.' };
+        return { meta: d.meta != null ? d.meta : c.M.P.META_NOTA, real: d.nota, unid: 'nota', detalhe: [`${d.avaliados} colaborador(es) com avaliação vigente no mês (última avaliação de cada um)`] };
+      } },
+    { id: 'pdi_prontidao', persp: 'pes', titulo: 'Taxa de Prontidão para Promoção (PDI)', requer: ['pdi.ver'], unid: 'pct', regra: '% dos candidatos (objetivo "Promoção") com nota média ≥ nível-meta do cargo-alvo', acaoRuim: 'Montar o plano de ação dos candidatos que ainda não atingem o nível-meta.',
+      calc(c) {
+        const d = c.fonte.pdi(c.mes, c.esc.ids); if (!d || d.vazio) return { vazio: true, motivo: d?.motivo || 'Nenhum colaborador com PDI avaliado até o fim do mês.' };
+        if (!(d.candidatos > 0)) return { vazio: true, motivo: 'Nenhum colaborador em PDI com objetivo "Promoção" no período.' };
+        return { meta: c.M.P.META_PRONTIDAO, real: d.aptos / d.candidatos * 100, unid: 'pct', detalhe: [`${d.aptos} de ${d.candidatos} candidato(s) à promoção estão aptos ao cargo-alvo`] };
+      } },
+    { id: 'produtividade', persp: 'pes', titulo: 'Produtividade Individual da Folha (Vendas ÷ Custo real da folha)', requer: ['pe.ver'], salario: true, unid: 'x', regra: 'R$ de venda por R$ 1,00 de folha · meta = meta comercial ÷ folha (valores de folha só com "Pode ver salários")', acaoRuim: 'Rever escala, quadro e metas por operador nas lojas de baixa produtividade.',
+      calc(c) {
+        const v = c.fonte.vendas(c.mes, c.esc.ids), f = c.fonte.folha(c.mes, c.esc.ids);
+        if (!f || f.vazio || !(f.folha > 0)) return c.ctx.verSalarios ? { vazio: true, motivo: f?.motivo || 'Folha do mês não importada/cadastrada.' } : { restritoSalario: true, motivo: 'Exige a permissão "Pode ver salários" (a folha não é entregue a este usuário).' };
+        if (!v || v.vazio || !(v.realizado > 0)) return { vazio: true, motivo: v?.motivo || 'Faturamento realizado do mês ainda não informado/importado.' };
+        const real = v.realizado / f.folha, meta = v.meta > 0 ? v.meta / f.folha : null;
+        if (meta == null) return { vazio: true, motivo: 'Meta comercial do mês não cadastrada no FCX (necessária para a meta de produtividade).' };
+        /* LGPD: sem "Pode ver salários" nada que permita recuperar a folha (nem o R$ de venda por R$ 1,00 de folha, que × vendas revelaria o custo): só o atingimento da meta e o farol */
+        const det = c.ctx.verSalarios ? [`Cada R$ 1,00 de folha gerou ${c.M.fmt('x', real)} de venda (meta ${c.M.fmt('x', meta)})${f.fonte === 'cadastro' ? ' · folha estimada pelo cadastro (folha real do mês não importada)' : ''}`,
+          `Folha ${c.M.fmt('brl', f.folha)} (${f.pessoas || 0} colaborador(es)) · vendas ${c.M.fmt('brl', v.realizado)}`]
+          : ['Valores de folha e a relação vendas ÷ folha ocultos (sem a permissão "Pode ver salários"): o farol usa só o atingimento da meta.'];
+        return { meta, real, unid: 'x', detalhe: det, oculto: !c.ctx.verSalarios };
+      } },
+  ],
+  /* ---------- montagem do scorecard ---------- */
+  /**
+   * montar(filtros, ctx, fonte) → { mes, escopo, indicadores[], porPerspectiva, resumo, filtros }
+   *   filtros: { escopo:'rede'|'regional'|'loja', regional, lojaId, seg:'todas'|'esposende'|'essports', mes:'AAAA-MM' }
+   *   ctx:     { lojas[{id,codigo,nome,bandeira,supervisor}], pode(perm), verSalarios, ehLoja, alcanceParcial, rotSeg(seg) }
+   *   fonte:   { liquidez, pe, ocupacao, vazamento, vendas, credsystem, ticketMix, ieo, conciliacao, radar, pdi, folha } — cada uma devolve dados simples, null ou { vazio, motivo }
+   */
+  montar(filtros, ctx, fonte) {
+    const M = this, mes = M.mesValido(filtros.mes) ? filtros.mes : '';
+    const esc = M.escopo(filtros, ctx), out = [];
+    for (const def of M.DEF) {
+      const base = { id: def.id, persp: def.persp, titulo: def.titulo, unid: def.unid, sentido: def.sentido || 'maior', regra: def.regra, acaoRuim: def.acaoRuim, meta: null, real: null, variancia: null, atingimento: null, detalhe: [], sub: [], motivo: '', status: 'semdados' };
+      if (!mes) { out.push({ ...base, motivo: 'Selecione o mês de referência.' }); continue; }
+      if (ctx.ehLoja && def.soRede) { out.push({ ...base, status: 'restrito', motivo: 'A liquidez e o consolidado financeiro da rede não são exibidos ao perfil Loja: você enxerga apenas o farol da sua filial.' }); continue; }
+      const falta = (def.requer || []).filter(p => !ctx.pode(p));
+      if (falta.length) { out.push({ ...base, status: 'restrito', motivo: `Sem permissão para esta base (${falta.join(', ')}). Peça a liberação na Gestão de Acessos.` }); continue; }
+      if (!esc.lojas.length && !def.soRede) { out.push({ ...base, motivo: 'Nenhuma loja no recorte selecionado.' }); continue; }
+      let r; try { r = def.calc({ M, mes, esc, ctx, fonte }); } catch (e) { r = { vazio: true, motivo: 'Não foi possível calcular com a base atual (' + (e?.message || e) + ').' }; }
+      if (!r) r = { vazio: true, motivo: 'Sem base lançada no mês.' };
+      if (r.consolidado) { out.push({ ...base, status: 'consolidado', motivo: r.motivo }); continue; }
+      if (r.restritoSalario) { out.push({ ...base, status: 'restrito', motivo: r.motivo }); continue; }
+      if (r.vazio) { out.push({ ...base, status: 'semdados', motivo: r.motivo || 'Sem dados no período.' }); continue; }
+      const sentido = r.sentido || def.sentido || 'maior', ating = M.atingimento(r.real, r.meta, sentido);
+      const status = r.status || M.farolGeral(ating);
+      out.push({ ...base, unid: r.unid || def.unid, sentido, meta: r.oculto ? null : r.meta, real: r.oculto ? null : r.real, variancia: M.variancia(r.real, r.meta), atingimento: ating, status, detalhe: r.detalhe || [], sub: r.sub || [], extra: r.extra || null, oculto: !!r.oculto, nota: r.nota || '', motivo: '' });
+    }
+    const conta = lista => ({ total: lista.length, verde: lista.filter(x => x.status === 'verde').length, amarelo: lista.filter(x => x.status === 'amarelo').length, vermelho: lista.filter(x => x.status === 'vermelho').length,
+      semdados: lista.filter(x => x.status === 'semdados').length, restrito: lista.filter(x => x.status === 'restrito').length, consolidado: lista.filter(x => x.status === 'consolidado').length });
+    const pior = k => k.vermelho ? 'vermelho' : k.amarelo ? 'amarelo' : k.verde ? 'verde' : 'semdados';
+    const porPerspectiva = {}; M.PERSPECTIVAS.forEach(p => { const lista = out.filter(x => x.persp === p.id), k = conta(lista); porPerspectiva[p.id] = { ...p, indicadores: lista, ...k, status: pior(k) }; });
+    const resumo = conta(out); resumo.status = pior(resumo);
+    return { mes, rotMes: M.rotMes(mes), filtros: { escopo: esc.tipo, regional: filtros.regional || '', lojaId: esc.lojaId, seg: esc.seg, mes }, escopo: { tipo: esc.tipo, seg: esc.seg, rotulo: esc.rotulo, segRotulo: esc.rotSeg(esc.seg), nLojas: esc.lojas.length, consolidadoCompleto: esc.consolidadoCompleto }, indicadores: out, porPerspectiva, resumo };
+  },
+
+  /* ---------- Laudo Executivo (parecer estruturado) ---------- */
+  laudo(res) {
+    const M = this, I = res.indicadores, por = s => I.filter(x => x.status === s), nome = x => x.titulo.replace(/ \(.*\)$/, '');
+    const linha = x => `${nome(x)}: ${x.oculto ? 'valores de folha ocultos (sem a permissão "Pode ver salários")' : `realizado ${M.fmt(x.unid, x.real)} × meta ${M.fmt(x.unid, x.meta)}`} (${M.fmtVar(x.variancia)}${x.atingimento != null && x.id !== 'liquidez' && x.id !== 'ieo' ? ' · atingimento ' + M.fmt('pct', x.atingimento) : ''})`;
+    const k = res.resumo, avaliados = k.verde + k.amarelo + k.vermelho;
+    const geral = k.vermelho ? 'CRÍTICO' : k.amarelo ? 'EM ATENÇÃO' : k.verde ? 'SAUDÁVEL' : 'SEM BASE SUFICIENTE';
+    const abertura = `Parecer do período ${res.rotMes} · ${res.escopo.rotulo}${res.escopo.seg !== 'todas' ? ' · ' + res.escopo.segRotulo : ''}. Dos ${I.length} indicadores do Balanced Scorecard, ${avaliados} têm base lançada: ${k.verde} em zona verde, ${k.amarelo} em amarela e ${k.vermelho} em vermelha${k.semdados ? `; ${k.semdados} sem dados no período` : ''}${k.restrito ? `; ${k.restrito} fora do seu acesso` : ''}${k.consolidado ? `; ${k.consolidado} consolidado(s) da Tesouraria` : ''}. Leitura geral: ${geral}.`;
+    const alertas = [], liq = I.find(x => x.id === 'liquidez');
+    if (liq && liq.extra) {
+      const L = liq.extra;
+      if (liq.status === 'vermelho') alertas.push(`ALERTA DE LIQUIDEZ: o FCX projeta déficit de ${M.fmt('brl', L.deficit)} no mês. O Índice de Cobertura é ${M.fmt('indice', L.indice)} (< 1,00): saldo ${M.fmt('brl', L.saldo)} + entradas ${M.fmt('brl', L.entradas)} não cobrem as saídas de ${M.fmt('brl', L.saidas)}.`);
+      else if (liq.status === 'amarelo') alertas.push(`ATENÇÃO À LIQUIDEZ: cobertura de caixa de ${M.fmt('indice', L.indice)}, abaixo da folga de 15% (1,15). O Saldo Líquido Projetado é de ${M.fmt('brl', L.saldoLiquido)}; qualquer atraso de recebíveis consome a folga.`);
+      else alertas.push(`Liquidez confortável: cobertura de ${L.indice === Infinity ? 'sem saídas previstas' : M.fmt('indice', L.indice)} e Saldo Líquido Projetado de ${M.fmt('brl', L.saldoLiquido)}.`);
+    } else if (liq && liq.status === 'consolidado') alertas.push('Liquidez não avaliada neste recorte: é um indicador consolidado da Tesouraria (selecione Rede consolidada e Todas os segmentos).');
+    else if (liq && liq.status === 'semdados') alertas.push('Liquidez sem base no período: ' + liq.motivo);
+    const fortes = por('verde').map(x => ({ id: x.id, titulo: nome(x), texto: linha(x) }));
+    const gargalos = por('vermelho').map(x => ({ id: x.id, titulo: nome(x), texto: linha(x), acao: x.acaoRuim }));
+    const atencao = por('amarelo').map(x => ({ id: x.id, titulo: nome(x), texto: linha(x), acao: x.acaoRuim }));
+    const lacunas = [...por('semdados'), ...por('restrito')].map(x => ({ id: x.id, titulo: nome(x), texto: x.status === 'restrito' ? 'sem acesso' : 'sem dados no período' }));
+    const encaminhamentos = [...gargalos, ...atencao.slice(0, 3)].map(x => `${x.titulo}: ${x.acao}`);
+    if (!encaminhamentos.length && fortes.length) encaminhamentos.push('Manter a rotina atual e acompanhar a variação mensal dos indicadores.');
+    const paragrafos = [abertura, ...alertas];
+    if (fortes.length) paragrafos.push('Pontos fortes (zona verde): ' + fortes.map(f => f.titulo).join('; ') + '.');
+    if (gargalos.length) paragrafos.push('Principais gargalos críticos (zona vermelha): ' + gargalos.map(f => f.titulo).join('; ') + '.');
+    return { titulo: 'Laudo Estratégico BSC', periodo: res.rotMes, escopo: res.escopo.rotulo, segmento: res.escopo.segRotulo, geral, abertura, alertas, fortes, gargalos, atencao, lacunas, encaminhamentos, paragrafos };
+  },
+
+  /* ---------- exportação ---------- */
+  CSV_CAB: ['Perspectiva', 'Indicador', 'Escopo', 'Segmento', 'Mês de referência', 'Meta / Previsto', 'Realizado', 'Variância (%)', 'Atingimento (%)', 'Status', 'Observação'],
+  /** Linhas para CSV/Excel (texto formatado em pt-BR); sub-linhas por segmento entram logo abaixo do indicador. */
+  linhasExport(res) {
+    const M = this, rows = [], pTit = id => M.PERSPECTIVAS.find(p => p.id === id)?.curto || id;
+    for (const x of res.indicadores) {
+      const st = M.STATUS[x.status]?.rot || x.status, obs = x.status === 'semdados' || x.status === 'restrito' || x.status === 'consolidado' ? x.motivo : x.detalhe.join(' | ');
+      rows.push([pTit(x.persp), x.titulo, res.escopo.rotulo, res.escopo.segRotulo, res.rotMes, x.meta == null ? '' : M.fmt(x.unid, x.meta), x.real == null ? '' : M.fmt(x.unid, x.real), x.variancia == null ? '' : M.fmtVar(x.variancia), x.atingimento == null || x.id === 'liquidez' || x.id === 'ieo' ? '' : M.fmt('pct', x.atingimento), st, obs]);
+      (x.sub || []).forEach(s => rows.push([pTit(x.persp), '   ↳ ' + s.rot, res.escopo.rotulo, s.rot, res.rotMes, M.fmt(s.unid, s.meta), M.fmt(s.unid, s.real), M.fmtVar(s.variancia), M.fmt('pct', s.atingimento), M.STATUS[s.status].rot, '']));
+    }
+    return rows;
+  },
+  /** Pílula do Home: pior estado e contagens. */
+  cartaoHome(res) {
+    const k = res.resumo, estado = k.vermelho ? 'bad' : k.amarelo ? 'warn' : k.verde ? 'ok' : 'info';
+    return { valor: k.vermelho, estado, texto: k.vermelho === 1 ? `indicador em zona vermelha no BSC de ${res.rotMes}` : `indicadores em zona vermelha no BSC de ${res.rotMes}`,
+      sub: `${k.verde} verde(s) · ${k.amarelo} amarelo(s) · ${k.semdados + k.restrito + k.consolidado} sem leitura`, resumo: k };
+  },
+};
+/* BSC_MOTOR:FIM */
+
+/* =====================================================================
+   v14.03 · BALANCED SCORECARD (BSC) & FAROL ESTRATÉGICO — dados reais do painel + tela
+   Recurso gestao_v1403 (Homologação sempre; Produção/Falco só depois de "Liberar Versão") · permissão bsc_visualizar (Gestão de Acessos › linha "BSC").
+   O motor (BSC_MOTOR) é puro e testado à parte; aqui ficam os adaptadores que leem os módulos que já existem — nenhum deles é alterado:
+     Liquidez .... FCX (PrevistoFCX.doMes: entradas e saídas previstas do mês) + Cruzamento.saldoInicial (saldo informado ou do extrato OFX) [+ Recebível do dia, se calculado]
+     Margem/PE ... Ponto de Equilíbrio (calcMes, sobre os dados GRAVADOS do ano — o rascunho aberto na tela do PE não é tocado)
+     Ocupação .... Motor de Aluguel (fixo × % sobre vendas)        Vazamento ... Auditoria de Adquirentes (divergência de MDR/antecipação)
+     Vendas ...... meta comercial do FCX × participação da loja ÷ faturamento realizado (PE / Importar Realizado)      Credsystem ... resultados importados + Cadastro de Metas
+     IEO ......... Retaguarda.rankingIEO    Conciliação ... Retaguarda.linhasCS + Faltas de Caixa    Radar ... RadarRenovatoria    PDI ... coleção pdi (só Master)    Folha ... FolhaLoja
+   O recorte (Rede / Regional / Loja / Segmento) usa o alcance de quem está logado (Inicio.lojasDoAlcance); o perfil Loja só enxerga a própria filial.
+   ===================================================================== */
+const BSC = {
+  ui: { escopo: 'rede', regional: '', lojaId: '', seg: 'todas', mes: '', laudo: false },
+  _memo: null,
+  mesAtual() { return Datas.hojeISO().slice(0, 7); },
+  podeVer() { return g03() && Auth.can('bsc_visualizar'); },
+  marca() { return Ambiente.rc ? 'Falco' : 'Esposende'; },
+  rotSeg(s) { return s === 'essports' ? (Ambiente.rc ? 'Sports' : 'ES Sports') : s === 'esposende' ? (Ambiente.rc ? 'Tradicional' : 'Esposende Tradicional') : 'Todas'; },
+  stat() { return Repo.prontas.has('lojas') ? '13 indicadores em 4 perspectivas' : '…'; },
+  /** Lojas ativas no alcance de quem está logado (Master/Gerencial: todas · regional/loja: as suas). */
+  contexto() {
+    const todas = Repo.todos('lojas').filter(l => l.ativa), ehLoja = Acesso.loja(); let lj = Inicio.lojasDoAlcance();
+    if (ehLoja && !lj) lj = new Set(Auth.funcionario?.lotacao ? [Auth.funcionario.lotacao] : []); // perfil Loja nunca cai no consolidado da rede
+    const nos = (lj ? todas.filter(l => lj.has(l.id)) : todas).sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)));
+    return { lojas: nos.map(l => ({ id: l.id, codigo: CodLoja.oficial(l.codigo || l.id) || l.codigo || '', nome: l.nome || '', bandeira: l.bandeira || '', supervisor: l.supervisor || '' })),
+      pode: p => Auth.can(p), verSalarios: Auth.can('rh.ver_salarios'), ehLoja, alcanceParcial: !!lj && lj.size < todas.length, rotSeg: s => this.rotSeg(s), _todas: todas.length };
+  },
+  completo(ids, ctx) { return ids.size >= ctx._todas; },
+  /** Faturamento realizado da loja no mês: o informado no Ponto de Equilíbrio ou o importado (Importar Realizado). Nulo = ainda não lançado. */
+  fatLoja(l, ano, mm) {
+    const f = Repo.get('pe_simulador', String(ano))?.fat?.[l.id]; let v = f ? (f[mm] ?? f[String(+mm)] ?? f[`${ano}-${mm}`]) : null;
+    if (v != null && v !== '' && Number(v) > 0) return Number(v);
+    const h = Repo.get('lojas_faturamento', l.id)?.meses?.[`${ano}-${mm}`]; return h && Number(h.valor) > 0 ? Number(h.valor) : null;
+  },
+  /** A "fonte" que o motor consome: cada função devolve dados simples, null ou { vazio, motivo }. */
+  fonte(ctx) {
+    const M = BSC_MOTOR, memo = {}, lojaObj = id => Repo.get('lojas', id), idsArr = ids => [...ids].map(lojaObj).filter(Boolean);
+    const split = mes => { const [a, m] = mes.split('-'); return [Number(a), m]; };
+    const F = {
+      liquidez: mes => {
+        let prev = null; try { prev = typeof PrevistoFCX !== 'undefined' ? PrevistoFCX.doMes(mes) : null; } catch { prev = null; }
+        if (!prev) return { vazio: true, motivo: 'O motor do FCX ainda está carregando: aguarde alguns segundos (ou abra o módulo FCX uma vez) e atualize.' };
+        const dias = Object.values(prev.porDia || {}), entradas = M.soma(dias, d => d.entradas), saidas = M.soma(dias, d => d.saidas);
+        let sd = { valor: 0, origem: 'não informado (considerado zero)' }; try { sd = Cruzamento.saldoInicial(mes); } catch { /* saldo ausente */ }
+        const r = ResumoRecebivel?._r, hoje = mes === this.mesAtual() && r && r.d === Datas.hojeISO() ? { entradas: r.entradas, saidas: r.saidas } : null;
+        return { saldo: sd.valor, saldoOrigem: sd.origem, saldoInformado: !/^não informado/.test(sd.origem), entradas, saidas, vencidas: (prev.vencidos?.mes?.valor || 0) + (prev.vencidos?.anterior?.valor || 0), hoje };
+      },
+      pe: (mes, ids) => {
+        const [ano, mm] = split(mes), PE = PontoEquilibrio, u = PE.ui, sv = { ano: u.ano, rasc: u.rascunho, rascAno: u.rascAno, rascVer: u.rascVer, sujo: u.sujo, rev: PE._rev };
+        let cm; try { u.ano = ano; u.rascunho = null; u.rascAno = null; cm = PE.calcMes(Number(mm)); } finally { u.ano = sv.ano; u.rascunho = sv.rasc; u.rascAno = sv.rascAno; u.rascVer = sv.rascVer; u.sujo = sv.sujo; PE._rev = sv.rev; }
+        const L = cm.linhas.filter(x => ids.has(x.id)), comR = L.filter(x => x.fonteR === 'informado' && x.R > 0);
+        if (!comR.length) return { vazio: true, motivo: 'Faturamento realizado do mês ainda não informado/importado (Ponto de Equilíbrio › Importar Realizado).' };
+        const receita = M.soma(comR, x => x.R), mcV = M.soma(comR, x => x.mcV), fixos = M.soma(comR, x => x.cp + x.rOp + x.rMk + x.rNop), mc = receita ? mcV / receita : cm.mc;
+        return { receita, mcValor: mcV, mcPct: mc * 100, fixos, pe: mc > 0 ? fixos / mc : null, meta: mc - cm.L > 0 ? fixos / (mc - cm.L) : null, lojas: comR.length, lojasTotal: L.length };
+      },
+      ocupacao: (mes, ids) => {
+        const r = MotorAluguel.calcular(mes); if (!r) return { vazio: true, motivo: 'O motor do FCX ainda está carregando: aguarde alguns segundos e atualize.' };
+        const L = r.linhas.filter(l => l.loja && ids.has(l.loja.id)); if (!L.length) return { vazio: true, motivo: 'Sem contratos de locação ativos no recorte.' };
+        return { minimo: M.soma(L, l => l.minimo), final: M.soma(L, l => l.final), vendas: M.soma(L, l => l.vendas.valor), acima: L.filter(l => l.acima).length, contratos: L.length };
+      },
+      vazamento: (mes, ids) => {
+        const a = Repo.get('adq_auditorias', mes); if (!a?.kpis) return { vazio: true, motivo: 'Auditoria de Adquirentes não processada para o mês.' };
+        if (this.completo(ids, ctx)) return { divergencia: Math.abs(Number(a.kpis.divergencia) || 0), bruto: Number(a.kpis.bruto) || 0 };
+        const exc = Retaguarda.excecoes(mes).filter(e => e.t === 'taxa' && ids.has(e.loja)), part = MotorAluguel.participacoes().mapa;
+        return { divergencia: M.soma(exc, e => Math.abs(e.dif)), bruto: (Number(a.kpis.bruto) || 0) * M.soma([...ids], id => part[id]) / 100, estimado: true };
+      },
+      vendas: (mes, ids) => {
+        const k = mes + '|' + [...ids].sort().join(','); if (memo[k]) return memo[k];
+        const [ano, mm] = split(mes), api = FCX.api(), metaG = api ? Number(api.vendasPrevistas(mes)) || 0 : 0, part = MotorAluguel.participacoes().mapa;
+        const acc = { realizado: 0, meta: 0, lojasComDado: 0, lojasTotal: ids.size, porSegmento: { esposende: { real: 0, meta: 0 }, essports: { real: 0, meta: 0 } } };
+        for (const l of idsArr(ids)) {
+          const real = this.fatLoja(l, ano, mm); if (real == null) continue;
+          const meta = metaG > 0 ? metaG * (part[l.id] || 0) / 100 : 0, s = acc.porSegmento[M.segmentoDe(l)];
+          acc.realizado += real; acc.meta += meta; acc.lojasComDado++; s.real += real; s.meta += meta;
+        }
+        return (memo[k] = acc.lojasComDado ? acc : { vazio: true, motivo: 'Faturamento realizado do mês ainda não informado/importado (Ponto de Equilíbrio › Importar Realizado).' });
+      },
+      credsystem: (mes, ids) => {
+        const [ano, mm] = split(mes); let emissao = 0, ativacao = 0, comAtiv = 0, metaEm = 0; const metasPct = [];
+        for (const l of idsArr(ids)) {
+          const res = ResultadoOp.doMes(ano, Number(mm), l.id), ap = Repo.get(Campanhas.COL_AP, Campanhas.apId(ano, Number(mm), l.id));
+          const em = res?.emissao != null ? Number(res.emissao) : ap?.realizado?.emissao != null ? Number(ap.realizado.emissao) : null;
+          if (em != null) emissao += em;
+          if (res?.ativacao != null) { ativacao += Number(res.ativacao) || 0; comAtiv++; metasPct.push([Number(Credsystem.doc(ano, l.id)?.extras?.[mm]?.ativacaoPct ?? Credsystem.doc(ano, l.id)?.meses?.[mm]?.ativacaoPct), res.emissao != null ? Number(res.emissao) : em || 0]); }
+          metaEm += Number(Credsystem.doc(ano, l.id)?.meses?.[mm]?.emissao) || 0;
+        }
+        if (!comAtiv) return { vazio: true, motivo: 'Resultado de ativação do mês não importado (Credsystem › Importações › Resultado Operacional).' };
+        return { emissao, ativacao, metaEmissao: metaEm, metaAtivacaoPct: M.mediaPonderada(metasPct.filter(x => isFinite(x[0])), x => x[0], x => x[1]) };
+      },
+      ticketMix: () => ({ vazio: true, motivo: 'O painel ainda não recebe vendas por cupom nem mix de produtos do ERP: indicador aguardando a carga de dados.' }),
+      ieo: (mes, ids) => {
+        const fech = Repo.get('ieo_fechamentos', mes), temBase = !!fech?.ranking || Retaguarda.linhasCS().some(l => l.data?.startsWith(mes)) || Retaguarda.itensFaltas().some(i => i.data?.startsWith(mes)) || Repo.todos('ieo_ocorrencias').some(d => d.mes === mes);
+        if (!temBase) return { vazio: true, motivo: 'Sem lançamentos de IEO (conciliação, faltas ou ocorrências) no mês.' };
+        const { ranking, fechado } = Retaguarda.rankingIEO(mes);
+        return { itens: ranking.filter(r => ids.has(r.lojaId)).map(r => ({ lojaId: r.lojaId, pontos: r.pontos, zona: r.zona })), fechado: !!fechado };
+      },
+      conciliacao: (mes, ids) => {
+        const linhas = Retaguarda.linhasCS().filter(l => l.data?.startsWith(mes) && l.lojaId && ids.has(l.lojaId)), lanc = linhas.filter(l => l.st !== 'pend'), divs = lanc.filter(l => l.st === 'div');
+        const dec = new Set(Retaguarda.itensFaltas().filter(i => i.origem === 'conciliação Credsystem' && (i.status || 'Em análise') !== 'Em análise').map(i => i.lojaId + '|' + i.data));
+        const ok = l => !!String(l.obs || '').trim() || dec.has(l.lojaId + '|' + l.data), abertas = divs.filter(l => !ok(l));
+        return { lancadas: lanc.length, divergencias: divs.length, tratadas: divs.length - abertas.length, valorAberto: M.soma(abertas, l => Math.abs(l.dif)) };
+      },
+      radar: ids => {
+        if (!Contratos.pronto()) return { vazio: true, motivo: 'Contratos ainda carregando.' };
+        const todos = this.completo(ids, ctx), daLoja = c => todos || ids.has(c.loja_ref) || (c.lojas_ids || []).some(x => ids.has(x));
+        const p = RadarRenovatoria.painel(ContratosLocacao.paraRadar().filter(daLoja));
+        return { verde: p.cont.verde, amarela: p.cont.amarela, vermelha: p.cont.vermelha, total: p.itens.length };
+      },
+      pdi: (mes, ids) => {
+        if (!Repo.prontas.has('pdi') || !Repo.prontas.has('funcionarios')) return { vazio: true, motivo: 'PDI ainda carregando.' };
+        const fim = M.fimDoMes(mes), todos = this.completo(ids, ctx), notas = [], metas = []; let cand = 0, aptos = 0;
+        for (const f of Repo.todos('funcionarios')) {
+          if ((f.status || 'Ativo') === 'Desligado' || (!todos && !ids.has(f.lotacao))) continue;
+          const p = Repo.get('pdi', f.id); if (!p) continue;
+          const av = (p.avaliacoes || []).filter(a => a.data && a.data <= fim).sort((a, b) => a.data.localeCompare(b.data)).at(-1); if (!av) continue;
+          const media = Pessoal.media(av.notas); if (media == null) continue;
+          const ms = COMPETENCIAS.filter(c => av.notas?.[c.id] > 0).map(c => p.metas?.[c.id] || META_PADRAO), meta = ms.reduce((a, x) => a + x, 0) / ms.length;
+          notas.push(media); metas.push(meta);
+          if (av.objetivo === 'promocao') { cand++; if (media >= meta) aptos++; }
+        }
+        return notas.length ? { avaliados: notas.length, nota: M.soma(notas) / notas.length, meta: M.soma(metas) / metas.length, candidatos: cand, aptos } : { vazio: true, motivo: 'Nenhum colaborador com PDI avaliado até o fim do mês.' };
+      },
+      folha: (mes, ids) => {
+        if (!Repo.prontas.has('funcionarios')) return { vazio: true, motivo: 'Cadastro de colaboradores ainda carregando.' };
+        const [ano, mm] = split(mes), real = FolhaLoja.realMes(ano, Number(mm)), mapa = real || FolhaLoja.mapaMes(ano, Number(mm)); let folha = 0, pessoas = 0;
+        for (const l of idsArr(ids)) { const r = mapa.get(FolhaLoja.chaveLoja(l)); if (r) { folha += r.total || 0; pessoas += r.pessoas || 0; } }
+        return { folha, pessoas, fonte: real ? 'folha' : 'cadastro' };
+      },
+    };
+    return F;
+  },
+  /** Filtros → scorecard (memorizado pelas versões dos dados e por 30 s: o FCX muda fora do banco do painel). */
+  calcular(f = this.ui) {
+    const ctx = this.contexto(), cols = ['lojas', 'funcionarios', 'pe_simulador', 'lojas_faturamento', 'adq_auditorias', 'adq_excecoes', 'credsystem', 'faltas', 'ieo_fechamentos', 'ieo_ocorrencias', 'credsystem_metas', 'credsystem_resultados', 'credsystem_apuracoes', 'contratos_locacao', 'pdi', 'salarios', 'rh_folhas', 'config', 'extratos'];
+    const chave = JSON.stringify([f.escopo, f.regional, f.lojaId, f.seg, f.mes, Auth.id, ctx.lojas.length, Ambiente.rc ? 'rc' : '', Auth.perfil, !!ctx.verSalarios]) +'|' + cols.map(c => Repo.versao(c)).join('.') + '|' + (typeof FCX !== 'undefined' ? FCX.versao + ':' + (FCX.api() ? 1 : 0) : '') + '|' + Math.floor(Date.now() / 30000);
+    if (this._memo?.k === chave) return this._memo.r;
+    const r = BSC_MOTOR.montar(f, ctx, this.fonte(ctx)); r._ctx = ctx; this._memo = { k: chave, r }; return r;
+  },
+  /** Mini-card da Tela Inicial (Home): farol do mês corrente no recorte padrão do usuário. */
+  cartaoHome() {
+    if (!this.podeVer() || !Repo.prontas.has('lojas')) return null;
+    try {
+      const r = this.calcular({ escopo: Acesso.loja() ? 'loja' : 'rede', regional: '', lojaId: '', seg: 'todas', mes: this.mesAtual() }), c = BSC_MOTOR.cartaoHome(r);
+      return { id: 'bsc', icon: 'bsc', titulo: 'Farol BSC', valor: c.valor, estado: c.estado, texto: c.texto, sub: c.sub, ir: ['bsc'] };
+    } catch (e) { console.warn('BSC home', e); return null; }
+  },
+
+  /* ---------------- tela ---------------- */
+  meses() { const a = this.mesAtual(), out = []; for (let i = -1; i < 14; i++) { const d = Datas.de(a + '-01'); d.setMonth(d.getMonth() - i); out.push(Datas.iso(d).slice(0, 7)); } return out; },
+  badge(st, motivo = '') { const s = BSC_MOTOR.STATUS[st] || BSC_MOTOR.STATUS.semdados; return `<span class="pill ${s.cls} bsc-b bsc-${st}" ${motivo ? `title="${esc(motivo)}"` : ''}><span aria-hidden="true">${s.ico}</span> ${esc(s.rot)}</span>`; },
+  linhaHTML(x, sub = false) {
+    const M = BSC_MOTOR, vazio = ['semdados', 'restrito', 'consolidado'].includes(x.status), cel = v => x.oculto ? '<span class="muted" title="Sem a permissão Pode ver salários">oculto</span>' : vazio || v == null ? '<span class="muted">—</span>' : esc(M.fmt(x.unid, v));
+    const info = vazio ? `<div class="cell-sub bsc-motivo">${esc(x.motivo)}</div>` : (x.detalhe || []).map(d => `<div class="cell-sub">${esc(d)}</div>`).join('');
+    const corVar = x.status === 'verde' ? 'ok' : x.status === 'amarelo' ? 'warn' : x.status === 'vermelho' ? 'bad' : '';
+    return `<tr class="${sub ? 'bsc-sub' : ''}" data-ind="${esc(x.id || '')}" data-status="${x.status}"><td><div class="cell-main">${sub ? '↳ ' : ''}${esc(sub ? x.rot : x.titulo)}</div>${sub ? '' : `${info}<div class="cell-sub bsc-regra">${esc(x.regra || '')}</div>`}</td>
+      <td class="num" data-v="meta">${cel(x.meta)}</td><td class="num" data-v="real"><b>${cel(x.real)}</b></td>
+      <td class="num ${corVar ? 'bsc-var-' + corVar : ''}" data-v="var">${vazio || x.variancia == null ? '<span class="muted">—</span>' : esc(M.fmtVar(x.variancia))}</td>
+      <td data-v="farol">${this.badge(x.status, vazio ? x.motivo : x.regra)}</td></tr>`;
+  },
+  perspectivaHTML(p) {
+    const conta = [['verde', p.verde], ['amarelo', p.amarelo], ['vermelho', p.vermelho]].filter(([, n]) => n).map(([s, n]) => `<span class="pill ${BSC_MOTOR.STATUS[s].cls}">${n} ${BSC_MOTOR.STATUS[s].rot.toLowerCase()}</span>`).join(' ');
+    const sem = p.semdados + p.restrito + p.consolidado ? `<span class="pill neutral">${p.semdados + p.restrito + p.consolidado} sem leitura</span>` : '';
+    return `<section class="panel bsc-persp" data-persp="${p.id}" aria-label="${esc(p.titulo)}"><div class="row between" style="align-items:flex-start;margin-bottom:8px"><div><h2>${esc(p.titulo)}</h2><p class="sub" style="margin:2px 0 0">${esc(p.sub)}</p></div><div class="row" style="gap:6px">${conta} ${sem}</div></div>
+      <div class="tbl-wrap"><table class="bsc-tab" data-rt94="off"><thead><tr><th>Indicador</th><th class="num">Meta / Previsto</th><th class="num">Realizado</th><th class="num">Variância (%)</th><th>Farol</th></tr></thead>
+      <tbody>${p.indicadores.map(x => this.linhaHTML(x) + (x.sub || []).map(s => this.linhaHTML({ ...s, id: x.id + '-' + s.rot }, true)).join('')).join('')}</tbody></table></div></section>`;
+  },
+  filtrosHTML(r) {
+    const u = this.ui, ctx = r._ctx, M = BSC_MOTOR, esc0 = M.escopo(r.filtros, ctx), regs = [...new Set(ctx.lojas.map(l => l.supervisor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const op = (v, t, sel) => `<option value="${esc(v)}" ${sel ? 'selected' : ''}>${esc(t)}</option>`;
+    const tipo = r.filtros.escopo, dis = ctx.ehLoja ? 'disabled' : '';
+    return `<div class="toolbar bsc-filtros" role="group" aria-label="Filtros do BSC">
+      <div class="field"><label class="lbl" for="bscEsc">Escopo</label><select id="bscEsc" data-a="bsc-f" data-k="escopo" ${dis}>${op('rede', ctx.alcanceParcial ? 'Rede consolidada (suas lojas)' : 'Rede consolidada', tipo === 'rede')}${op('regional', 'Regional (Supervisor)', tipo === 'regional')}${op('loja', 'Loja individual', tipo === 'loja')}</select></div>
+      ${tipo === 'regional' ? `<div class="field"><label class="lbl" for="bscReg">Regional</label><select id="bscReg" data-a="bsc-f" data-k="regional">${op('', 'Selecione…', !u.regional)}${regs.map(s => op(s, s, s === u.regional)).join('')}</select></div>` : ''}
+      ${tipo === 'loja' ? `<div class="field grow"><label class="lbl" for="bscLoja">Loja</label><select id="bscLoja" data-a="bsc-f" data-k="lojaId" ${ctx.ehLoja && ctx.lojas.length <= 1 ? 'disabled' : ''}>${ctx.ehLoja ? '' : op('', 'Selecione a loja…', !r.filtros.lojaId)}${ctx.lojas.map(l => op(l.id, `${l.codigo} · ${l.nome}`, l.id === r.filtros.lojaId)).join('')}</select></div>` : ''}
+      ${esc0.temSports && !ctx.ehLoja ? `<div class="field"><label class="lbl" for="bscSeg">Segmento</label><select id="bscSeg" data-a="bsc-f" data-k="seg">${op('todas', 'Todas', u.seg === 'todas')}${op('esposende', this.rotSeg('esposende'), u.seg === 'esposende')}${op('essports', this.rotSeg('essports'), u.seg === 'essports')}</select></div>` : ''}
+      <div class="field"><label class="lbl" for="bscMes">Período · mês de referência</label><select id="bscMes" data-a="bsc-f" data-k="mes">${this.meses().map(m => op(m, M.rotMes(m), m === r.mes)).join('')}</select></div></div>`;
+  },
+  resumoHTML(r) {
+    const k = r.resumo, M = BSC_MOTOR, ger = { vermelho: 'Crítico', amarelo: 'Em atenção', verde: 'Saudável', semdados: 'Sem base' }[k.status];
+    return `<div class="bsc-resumo" role="status"><div class="bsc-geral bsc-${k.status}"><div class="t">Farol geral · ${esc(r.rotMes)}</div><div class="v">${ger}</div><div class="d">${esc(r.escopo.rotulo)}${r.escopo.seg !== 'todas' ? ' · ' + esc(r.escopo.segRotulo) : ''} · ${r.escopo.nLojas} loja(s)</div></div>
+      ${Object.values(r.porPerspectiva).map(p => `<div class="bsc-mini bsc-${p.status}"><div class="t">${esc(p.curto)}</div><div class="v">${this.badge(p.status === 'semdados' ? 'semdados' : p.status)}</div><div class="d">${p.verde} verde · ${p.amarelo} amarelo · ${p.vermelho} vermelho · ${p.total - p.verde - p.amarelo - p.vermelho} sem leitura</div></div>`).join('')}</div>
+      <p class="hint" style="margin:0 0 12px">Regras do Farol: Verde ≥ 85% da meta · Amarelo 70% a 84% · Vermelho < 70% · IEO: verde ≥ 85, vermelho < 60 · Liquidez (FCX): verde ≥ 1,15, amarelo 1,00–1,14, vermelho < 1,00 (déficit projetado). Custo e perda: menor é melhor. Indicador sem base no mês aparece como “Sem dados no período” e não afeta os demais.</p>`;
+  },
+  laudoHTML(r) {
+    const L = BSC_MOTOR.laudo(r), li = (xs, f) => xs.length ? `<ul>${xs.map(f).join('')}</ul>` : '<p class="muted">Nenhum indicador nesta faixa no período.</p>';
+    return `<section class="panel bsc-laudo" id="bscLaudo" aria-label="Laudo Estratégico BSC"><div class="row between"><div><h2>Laudo Estratégico BSC</h2><p class="sub" style="margin:2px 0 0">Parecer executivo gerado automaticamente a partir dos indicadores acima · ${esc(L.periodo)} · ${esc(L.escopo)}</p></div>
+      <div class="row">${this.badge(L.geral === 'CRÍTICO' ? 'vermelho' : L.geral === 'EM ATENÇÃO' ? 'amarelo' : L.geral === 'SAUDÁVEL' ? 'verde' : 'semdados')}<button class="btn ghost sm" data-a="bsc-laudo-fechar">Recolher</button></div></div>
+      <p class="bsc-abertura">${esc(L.abertura)}</p>
+      ${L.alertas.map(a => `<div class="note ${/ALERTA/.test(a) ? 'bad' : /ATENÇÃO/.test(a) ? 'warn' : ''}" role="${/ALERTA/.test(a) ? 'alert' : 'note'}" style="margin:8px 0">${esc(a)}</div>`).join('')}
+      <div class="grid g2" style="margin-top:12px"><div><h3 class="bsc-h3 ok">Pontos fortes (zona verde)</h3>${li(L.fortes, f => `<li>${esc(f.texto)}</li>`)}</div>
+      <div><h3 class="bsc-h3 bad">Gargalos críticos (zona vermelha)</h3>${li(L.gargalos, f => `<li>${esc(f.texto)}<div class="cell-sub">Encaminhamento: ${esc(f.acao)}</div></li>`)}</div></div>
+      ${L.atencao.length ? `<h3 class="bsc-h3 warn">Pontos de atenção (zona amarela)</h3>${li(L.atencao, f => `<li>${esc(f.texto)}</li>`)}` : ''}
+      ${L.lacunas.length ? `<h3 class="bsc-h3">Sem leitura no período</h3><p class="hint">${L.lacunas.map(f => esc(f.titulo) + ' (' + f.texto + ')').join(' · ')}</p>` : ''}
+      ${L.encaminhamentos.length ? `<h3 class="bsc-h3">Encaminhamentos sugeridos</h3>${li(L.encaminhamentos.map(t => ({ t })), f => `<li>${esc(f.t)}</li>`)}` : ''}</section>`;
+  },
+  render() {
+    if (!this.podeVer()) return `<div class="panel"><div class="empty">Seu acesso não inclui o Balanced Scorecard (permissão “BSC” na Gestão de Acessos).</div></div>`;
+    const u = this.ui; u.mes ||= this.mesAtual();
+    if (!Repo.prontas.has('lojas')) return `<div class="panel"><p class="muted">Carregando o cadastro de lojas…</p></div>`;
+    const r = this.calcular(u), pdf = ICON.pdf || '';
+    const head = `<div class="page-head"><div><div class="eyebrow-mod">Gestão · Financeiro</div><h1>Balanced Scorecard (BSC) & Farol Estratégico</h1><p>Quatro perspectivas estratégicas calculadas ao vivo com os dados do painel: meta, realizado, variância e farol de cada indicador.</p></div>
+      <div class="row" style="gap:8px"><button class="btn" data-a="bsc-laudo">Gerar Laudo Estratégico BSC</button><button class="btn sec" data-a="bsc-pdf">${pdf} Imprimir / Exportar PDF A4</button><button class="btn sec" data-a="bsc-csv">Exportar CSV</button><button class="btn sec" data-a="bsc-xlsx">Exportar Excel</button><button class="btn ghost" data-a="bsc-atualizar" title="Recalcula com os dados atuais">Atualizar</button></div></div>`;
+    return head + this.filtrosHTML(r) + this.resumoHTML(r) + (u.laudo ? this.laudoHTML(r) : '') + `<div class="stack">${Object.values(r.porPerspectiva).map(p => this.perspectivaHTML(p)).join('')}</div>`;
+  },
+  mudanca(a, el) {
+    if (a !== 'bsc-f') return; const u = this.ui, k = el.dataset.k;
+    if (!['escopo', 'regional', 'lojaId', 'seg', 'mes'].includes(k)) return;
+    u[k] = el.value; if (k === 'escopo') { u.regional = ''; u.lojaId = ''; }
+    App.render();
+  },
+  async acao(a) {
+    const u = this.ui;
+    if (a === 'bsc-laudo') { u.laudo = true; App.render(); setTimeout(() => document.getElementById('bscLaudo')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); return; }
+    if (a === 'bsc-laudo-fechar') { u.laudo = false; return App.render(); }
+    if (a === 'bsc-atualizar') { this._memo = null; try { PrevistoFCX._memo.clear(); } catch { /* sem memo */ } return App.render(); }
+    if (!this.podeVer()) return;
+    const r = this.calcular(u);
+    if (a === 'bsc-pdf') return this.pdf(r);
+    if (a === 'bsc-csv') return this.csv(r);
+    if (a === 'bsc-xlsx') return this.xlsx(r);
+  },
+  nomeArquivo(r, ext) { return `BSC_${this.marca()}_${r.mes}${r.escopo.tipo === 'loja' ? '_' + Documento.nomeArquivo(r.escopo.rotulo).slice(0, 24) : ''}${ext ? '.' + ext : ''}`; },
+  audit(r, o) { try { Audit.registrar({ modulo: 'bsc', acao: 'emitiu', entidade: 'documento', entidadeId: 'bsc-' + r.mes, rotulo: `BSC · ${o} · ${r.rotMes}`, detalhe: `${r.escopo.rotulo} · ${r.escopo.segRotulo}`, mudancas: [] }); } catch { /* auditoria nunca trava a emissão */ } },
+  csv(r) {
+    const rows = [BSC_MOTOR.CSV_CAB, ...BSC_MOTOR.linhasExport(r)];
+    Documento.baixarArquivo(this.nomeArquivo(r, 'csv'), new Blob(['﻿' + CSV.gerar(rows, ';')], { type: 'text/csv' })); this.audit(r, 'CSV'); UI.toast('BSC exportado em CSV');
+  },
+  async xlsx(r) {
+    const XLSX = await Libs.xlsx(), rows = [BSC_MOTOR.CSV_CAB, ...BSC_MOTOR.linhasExport(r)], ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{ wch: 22 }, { wch: 56 }, { wch: 28 }, { wch: 18 }, { wch: 12 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 22 }, { wch: 90 }];
+    const L = BSC_MOTOR.laudo(r), lz = XLSX.utils.aoa_to_sheet([['Laudo Estratégico BSC'], [L.periodo + ' · ' + L.escopo], [''], ...L.paragrafos.map(p => [p]), [''], ['Encaminhamentos'], ...L.encaminhamentos.map(e => [e])]); lz['!cols'] = [{ wch: 140 }];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Indicadores'); XLSX.utils.book_append_sheet(wb, lz, 'Laudo');
+    const ok = await Documento.baixarArquivo(this.nomeArquivo(r, 'xlsx'), new Blob([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    if (ok !== false) { this.audit(r, 'Excel'); UI.toast('BSC exportado em Excel'); }
+  },
+  /** PDF A4 executivo: cabeçalho da empresa, filtros aplicados, as 4 perspectivas e o laudo. */
+  pdf(r) {
+    const M = BSC_MOTOR, L = M.laudo(r), cor = { verde: '#1D7A4E', amarelo: '#966108', vermelho: '#B63A2F', semdados: '#585E7F', restrito: '#585E7F', consolidado: '#585E7F' };
+    const bd = st => `<span class="bsc-pb" style="color:${cor[st]};border-color:${cor[st]}">${M.STATUS[st].ico} ${esc(M.STATUS[st].rot)}</span>`;
+    const linha = (x, sub) => { const vazio = ['semdados', 'restrito', 'consolidado'].includes(x.status), v = k => x.oculto ? 'oculto' : vazio || x[k] == null ? '—' : esc(M.fmt(x.unid, x[k]));
+      return `<tr><td>${sub ? '&nbsp;&nbsp;↳ ' + esc(x.rot) : '<b>' + esc(x.titulo) + '</b>'}${sub ? '' : `<div class="sub">${esc(vazio ? x.motivo : (x.detalhe || [])[0] || '')}</div>`}</td><td class="n">${v('meta')}</td><td class="n"><b>${v('real')}</b></td><td class="n">${vazio || x.variancia == null ? '—' : esc(M.fmtVar(x.variancia))}</td><td>${bd(x.status)}</td></tr>`; };
+    const bloco = p => `<h2>${esc(p.titulo)}</h2><table class="bsc-t"><thead><tr><th>Indicador</th><th class="n">Meta / Previsto</th><th class="n">Realizado</th><th class="n">Variância</th><th>Farol</th></tr></thead><tbody>${p.indicadores.map(x => linha(x) + (x.sub || []).map(s => linha({ ...s }, true)).join('')).join('')}</tbody></table>`;
+    const li = xs => xs.length ? `<ul>${xs.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="sub">Nenhum indicador nesta faixa.</p>';
+    const corpo = `${Documento.cabecalho('Balanced Scorecard (BSC) · Farol Estratégico', `${r.rotMes} · ${r.escopo.rotulo}`)}
+      <div class="grid"><div><div class="t">Escopo</div><div class="d">${esc(r.escopo.rotulo)}</div></div><div><div class="t">Segmento</div><div class="d">${esc(r.escopo.segRotulo)}</div></div><div><div class="t">Mês de referência</div><div class="d">${esc(r.rotMes)}</div></div></div>
+      <div class="box ${r.resumo.status === 'vermelho' ? '' : 'ok'}" style="margin-top:12px"><b>Farol geral: ${esc(L.geral)}</b> — ${r.resumo.verde} verde(s), ${r.resumo.amarelo} amarelo(s), ${r.resumo.vermelho} vermelho(s), ${r.resumo.semdados + r.resumo.restrito + r.resumo.consolidado} sem leitura.</div>
+      ${Object.values(r.porPerspectiva).map(bloco).join('')}
+      <h2>Laudo Estratégico</h2><p>${esc(L.abertura)}</p>${L.alertas.map(a => `<div class="box ${/ALERTA/.test(a) ? '' : 'foco'}">${esc(a)}</div>`).join('')}
+      <h3>Pontos fortes (zona verde)</h3>${li(L.fortes.map(f => f.texto))}<h3>Gargalos críticos (zona vermelha)</h3>${li(L.gargalos.map(f => f.texto + ' — Encaminhamento: ' + f.acao))}
+      ${L.atencao.length ? `<h3>Pontos de atenção (zona amarela)</h3>${li(L.atencao.map(f => f.texto))}` : ''}${L.encaminhamentos.length ? `<h3>Encaminhamentos sugeridos</h3>${li(L.encaminhamentos)}` : ''}
+      <div class="foot">Painel de Gestão ${this.marca()} — Balanced Scorecard gerado em ${new Date().toLocaleString('pt-BR')} · regras: Verde ≥ 85% da meta, Amarelo 70–84%, Vermelho < 70%; IEO verde ≥ 85 / vermelho < 60; Liquidez verde ≥ 1,15, vermelho < 1,00.</div>`;
+    const css = `h2{font-size:13px;margin:16px 0 6px;} table.bsc-t{font-size:10.5px;} table.bsc-t td,table.bsc-t th{padding:5px 6px;} table.bsc-t tr{break-inside:avoid;} td.n,th.n{text-align:right;white-space:nowrap;} .sub{font-size:9px;color:#585E7F;font-weight:400;} .bsc-pb{display:inline-block;border:1px solid;border-radius:20px;padding:1px 7px;font-size:9.5px;font-weight:600;white-space:nowrap;} h3{margin:12px 0 4px;} li{margin:2px 0;}`;
+    Documento.previa('Balanced Scorecard (BSC)', Documento.montar('Balanced Scorecard (BSC)', corpo, { css, margem: '14mm 12mm' }), this.nomeArquivo(r)); this.audit(r, 'PDF A4');
+  },
+};
+window.BSC = BSC;
+
 const MODULOS = [
   { id: 'pessoal', num: 'Módulo 1', titulo: 'Gestão de Pessoal', icon: 'pessoas', perm: 'pessoal.ver',
     desc: 'Equipe, jornada, banco de horas, férias e o PDI com matriz de competências e parecer para o colaborador.',
@@ -19705,6 +20363,9 @@ const MODULOS = [
   { id: 'conciliacao', num: 'Módulo 11', titulo: 'Conciliação de Meios de Pagamento', curto: 'Conciliação MP', icon: 'cartao', perm: 'retaguarda.adq.ver', ver: () => ConcMP.pode(), // v13.69
     desc: 'Crédito de terceiros por EC (ERP × adquirente, taxas por empresa), depósitos, Pix, Esposende Card e o resumo do custo financeiro do fechamento.',
     stat: () => { if (!Repo.prontas.has(CONC_MP.COL_F)) return '…'; const r = ConcMP.resumo(); return r.tot.bruto ? `custo ${Fmt.pct(r.tot.pct, 2)} no mês` : 'sem fechamento no mês'; } },
+  { id: 'bsc', num: 'Gestão', titulo: 'Balanced Scorecard (BSC)', curto: 'BSC', icon: 'bsc', perm: 'bsc_visualizar', ver: () => g03() && Auth.can('bsc_visualizar'), // v14.03
+    desc: 'Farol estratégico em 4 perspectivas (Financeira, Cliente & Vendas, Processos Internos e Pessoas): meta, realizado, variância e semáforo de 13 indicadores, com liquidez do FCX, laudo executivo, PDF A4 e Excel.',
+    stat: () => BSC.stat() },
   { id: 'rh', num: 'Módulo 7', titulo: 'RH', curto: 'RH', icon: 'pessoas', perm: 'rh.ver',
     desc: 'Entrada de pessoas no sistema (Base Ativa e cadastro manual), organograma, parâmetros da folha, cargos e centros de custo.',
     stat: () => { if (!Repo.prontas.has('rh_importacoes')) return '…'; const u = BaseAtiva.ultima(); return u ? `Base Ativa de ${Fmt.data(u.dataRef)}` : 'Base Ativa não importada'; } },
@@ -19725,7 +20386,7 @@ const ADMIN = [
  */
 const NAV_GRUPOS = [
   { titulo: 'Pessoas & Operação', ids: ['menu', 'pessoal', 'rh', 'lojas', 'contratos', 'solicitacoes'] },
-  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'parceiros', 'equilibrio', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
+  { titulo: 'Financeiro & Caixa', ids: ['fcx', 'contabil', 'parceiros', 'equilibrio', 'bsc', 'retaguarda', 'conciliacao', 'credsystem', 'viagens'] },
   { titulo: 'Sistema & Segurança', ids: ['liberacao', 'acessos', 'auditoria', 'backup', 'notificacoes'] },
 ];
 const NAV_SUB = {
@@ -19948,7 +20609,7 @@ const TabelaPro = window.TabelaPro = {
       if (detalhe && grupos.length) grupos.at(-1).extra.push(tr); else grupos.push({ main: tr, extra: [], i: grupos.length });
     });
     const fixos = [];
-    while (grupos.length > 1 && /^total\b/i.test(this.txt(grupos.at(-1).main.cells[0]))) fixos.unshift(grupos.pop()); // "Total…" no fim fica no fim
+    while (grupos.length > 1 && (/^total\b/i.test(this.txt(grupos.at(-1).main.cells[0])) || grupos.at(-1).main.hasAttribute('data-tp-fixa'))) fixos.unshift(grupos.pop()); // "Total…" (ou linha marcada com data-tp-fixa, v14.02.1) no fim fica no fim
     return { grupos, fixos };
   },
   /** tipo de cada coluna (data, número ou texto) pelas primeiras 300 linhas */
@@ -20394,7 +21055,7 @@ const App = {
     const main = $('#main');
     const ativo = document.activeElement, idAtivo = ativo && ativo.id, sel = ativo && 'selectionStart' in ativo ? [ativo.selectionStart, ativo.selectionEnd] : null;
     const crumbs = this.rota === 'menu' ? '' : `<div class="crumbs"><button data-a="nav" data-r="menu">Painel de Gestão</button><span>/</span><span>${esc(([...MODULOS, ...ADMIN].find(m => m.id === this.rota) || {}).titulo || '')}</span></div>`;
-    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), parceiros: () => Parceiros.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render(), notificacoes: () => CentralNotif.render() }[this.rota];
+    const tela = { menu: () => this.menu(), pessoal: () => Pessoal.render(), lojas: () => Lojas.render(), contratos: () => Contratos.render(), acessos: () => Acessos.render(), fcx: () => FCX.render(), contabil: () => ModContabil.render(), parceiros: () => Parceiros.render(), retaguarda: () => Retaguarda.render(), conciliacao: () => ConcMP.render(), equilibrio: () => PontoEquilibrio.render(), bsc: () => BSC.render(), solicitacoes: () => Solicitacoes.render(), credsystem: () => Credsystem.render(), rh: () => ModRH.render(), liberacao: () => Liberacao.render(), viagens: () => Viagens.render(), auditoria: () => Aud.render(), backup: () => Bkp.render(), notificacoes: () => CentralNotif.render() }[this.rota];
     Acesso.ajustarAba(this.rota); // v13.83: aba não liberada → primeira liberada
     let html; try { html = tela ? tela() : this.menu(); } catch (e) { console.error('render', this.rota, e); html = this.telaErro(e); } // v13.58: erro de dado vira aviso, não tela quebrada
     main.innerHTML = crumbs + html; Acesso.filtrarDom(main, this.rota); // v13.83
@@ -21196,6 +21857,7 @@ const Bkp = {
 /* --------------------------- Eventos globais --------------------------- */
 const ROTEADOR = [
   [/^sol-/, () => Solicitacoes], // v13.60
+  [/^bsc-/, () => BSC], // v14.03 · Balanced Scorecard
   [/^par-/, () => Parceiros], // v13.94
   [/^mig-/, () => MigracoesBanco], // v13.94 · botão "Executar Migrações do Banco"
   [/^cmp-/, () => ConcMP], // v13.69

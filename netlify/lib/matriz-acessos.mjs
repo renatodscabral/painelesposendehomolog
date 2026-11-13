@@ -221,6 +221,17 @@ export default {
    ],
    "v1383": true,
    "rec": "gestao_v1402"
+  },
+  {
+   "id": "bsc",
+   "ler": [
+    "bsc_visualizar"
+   ],
+   "modificar": [],
+   "excluir": [],
+   "extras": [],
+   "v1383": true,
+   "rec": "gestao_v1403"
   }
  ],
  "telas": {
