@@ -120,16 +120,23 @@ export const COLECOES_MATRIZ = {
   /* v13.94: Fornecedores e Clientes (Módulo 13) — contêm CPF de pessoa física: leitura só com a permissão; Loja nunca acessa */
   parceiros: [['parceiros.ver', 'parceiros.editar', 'parceiros.excluir'], ['parceiros.editar', 'parceiros.excluir']],
 };
+/* v14.04 · DOCUMENTOS avulsos de coleções reservadas ao Master que a matriz libera (caminho sem o prefixo do ambiente → [leitura, gravação]).
+   config/dfc guarda as regras de classificação, o De-para FCX → DFC e as categorias personalizadas da DFC: quem tem "Regras de classificação" (fcx.dfc.regras) grava este documento
+   e só ele — o resto da coleção config (parâmetros do sistema, IEO, saldos…) segue só do Master. Excluir o documento continua só com o Master. */
+export const DOCS_MATRIZ = {
+  'config/dfc': [['fcx.dfc.ver'], ['fcx.dfc.regras']],
+};
 const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
-/** A matriz libera esta leitura ('r') ou gravação ('w')? (só para as coleções da lista acima; Loja nunca grava por aqui) */
+/** A matriz libera esta leitura ('r') ou gravação ('w')? (só para as coleções e documentos da lista acima; Loja nunca grava por aqui) */
 export function acessoPorMatriz(sess, caminho, op) {
   if (!sess || sess.trocaPendente || !sess.perms) return false;
-  const r = COLECOES_MATRIZ[semAmb(caminho).split('/')[0]]; if (!r) return false;
+  const r = DOCS_MATRIZ[semAmb(caminho)] || COLECOES_MATRIZ[semAmb(caminho).split('/')[0]]; if (!r) return false;
   if ((op === 'w' || semAmb(caminho).startsWith('parceiros')) && sess.perfil === 'LOJA') return false;
   return (op === 'r' ? r[0] : r[1]).some(p => tem(sess.perms, p));
 }
 /** v13.94: excluir exige a permissão própria de exclusão nas coleções liberadas pela matriz (editar não basta). Master sempre pode. */
 export function exclusaoPermitida(sess, caminho) {
+  if (DOCS_MATRIZ[semAmb(caminho)]) return !!sess && sess.nivel >= 3 && !sess.trocaPendente; /* v14.04: o documento liberado pela matriz só é excluído pelo Master */
   if (semAmb(caminho).split('/')[0] !== 'parceiros') return true;
   return !!sess && sess.nivel >= 3 || tem(sess?.perms, 'parceiros.excluir');
 }
