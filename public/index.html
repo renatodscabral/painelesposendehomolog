@@ -1076,6 +1076,16 @@ tr.acc-foco-tr td{background:var(--accent-soft);}
 .ini-v{font:600 30px/1.1 var(--font-display);color:var(--ink);font-variant-numeric:tabular-nums;}
 .ini-v small{font-size:16px;color:var(--ink-faint);font-weight:500;}
 .ini-kpi.e-bad .ini-v{color:var(--bad);}
+/* v14.07 · Empresas (Matriz) × Contas bancárias × Resumo Executivo */
+.rx-contas{border:1px solid var(--line);border-radius:10px;max-height:236px;overflow:auto;background:var(--surface,transparent);}
+.rx-conta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;} .rx-conta:last-child{border-bottom:0;} .rx-conta:hover{background:rgba(127,127,127,.08);}
+.rx-conta input{margin:0;} .rx-conta .t{font-weight:600;overflow-wrap:anywhere;} .rx-conta .d{font-size:12px;color:var(--ink-soft);overflow-wrap:anywhere;} .rx-conta .vz{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+.rx-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px;} .rx-acoes .n{margin-left:auto;font-size:12px;color:var(--ink-soft);}
+.rx-esc{margin-top:8px;} .rx-esc .note{margin:0;}
+.mt-badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 8px;border-radius:20px;background:rgba(213,175,102,.2);color:#8A5A00;border:1px solid rgba(213,175,102,.6);vertical-align:middle;white-space:nowrap;}
+:root[data-theme="dark"] .mt-badge{color:#f0d8a8;} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]):not([data-theme="diurno"]) .mt-badge{color:#f0d8a8;}}
+.mt-lista .acts{white-space:nowrap;} .mt-contas{border:1px solid var(--line);border-radius:10px;max-height:260px;overflow:auto;}
+@media (max-width:640px){.rx-conta{grid-template-columns:auto minmax(0,1fr);} .rx-conta .vz{grid-column:2;justify-content:flex-start;}}
 /* v14.06 · Resumo Executivo da DFC (padrão bancário) */
 .rx-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;} .rx-form .full{grid-column:1 / -1;} .rx-form fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0;grid-column:1 / -1;}
 .rx-form legend{font-size:12px;font-weight:600;color:var(--ink-soft);padding:0 6px;} .rx-form textarea{width:100%;min-height:120px;resize:vertical;font:inherit;}
@@ -4138,6 +4148,8 @@ function g04() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g05() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1405'); }
 /** v14.06 · o Resumo Executivo Oficial da DFC (padrão bancário / institucional) está ativo neste ambiente? */
 function g06() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1406'); }
+/** v14.07 · Empresas (Matriz), contas padrão e escopo de contas do Resumo Executivo: recurso ativo neste ambiente? */
+function g07() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1407'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4151,7 +4163,8 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1406: { versao: 'v14.06', titulo: 'DFC · Resumo Executivo Oficial (padrão bancário / institucional, CPC 03): botão no topo da aba e em DFC do mês, modal com empresa/CNPJ, período (mês, trimestre, ano ou intervalo), notas da controladoria e signatários; documento A4 com síntese e indicadores de liquidez (saldo inicial e final conciliados por conta, margem de caixa operacional, cobertura do serviço da dívida), demonstrativo detalhado realizado × previsto, notas e assinaturas; pré-visualização com Imprimir e Baixar PDF' },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1407: { versao: 'v14.07', titulo: 'DFC · Empresas com flag Matriz e situação, contas bancárias associadas como padrão da empresa, CNPJ / empresa titular e conta padrão da Matriz nas contas da DFC, e Resumo Executivo Oficial com seletor de contas (em branco = contas padrão da empresa/Matriz), apuração e documento filtrados pelas contas do escopo' },
+    gestao_v1406: { versao: 'v14.06', titulo: 'DFC · Resumo Executivo Oficial (padrão bancário / institucional, CPC 03): botão no topo da aba e em DFC do mês, modal com empresa/CNPJ, período (mês, trimestre, ano ou intervalo), notas da controladoria e signatários; documento A4 com síntese e indicadores de liquidez (saldo inicial e final conciliados por conta, margem de caixa operacional, cobertura do serviço da dívida), demonstrativo detalhado realizado × previsto, notas e assinaturas; pré-visualização com Imprimir e Baixar PDF' },
     gestao_v1405: { versao: 'v14.05', titulo: 'Fornecedores e Clientes: tipo (Fornecedor, Cliente ou Ambos), chaves PIX para conciliação (CNPJ, CPF, telefone, e-mail e chave aleatória, sem repetição entre cadastros) e Categoria DFC padrão; Baixar Modelo e Importar Planilha (.xlsx/.csv) com prévia e gravação em lote; cruzamento automático dos Extratos OFX com os fornecedores (chave PIX, documento e nome) e botão Cruzar Fornecedores / Reprocessar PIX; prioridade da DFC: manual, regra, categoria padrão do fornecedor e padrão automático' },
     gestao_v1404: { versao: 'v14.04', titulo: 'DFC · Categorias personalizadas: cadastro, edição e exclusão (nome, sentido, grupo e impacto no caixa) com atalho na regra; seletores da regra, dos Extratos OFX e do De-para FCX → DFC; bloco "Atividades não operacionais" na DFC do mês e no Realizado × Previsto; exportação em PDF A4, Excel e CSV' },
     gestao_v1403: { versao: 'v14.03', titulo: 'Balanced Scorecard (BSC) & Farol Estratégico: 13 indicadores em 4 perspectivas (Financeira, Cliente & Vendas, Processos Internos e Pessoas) com meta, realizado, variância e farol; liquidez e cobertura de caixa do FCX; filtros de escopo (rede, regional, loja), segmento e mês; Laudo Estratégico, PDF A4, CSV e Excel; mini-card na Tela Inicial; permissão própria "BSC" na Gestão de Acessos' },
@@ -9519,7 +9532,8 @@ const DFC_RESUMO = {
    */
   montar(e) {
     const r2 = n => this.r2(n), per = e.periodo, meses = per.meses, regras = e.regras || DFC.regras();
-    const tr = (e.transacoes || []).filter(t => t && typeof t.data === 'string' && meses.includes(t.data.slice(0, 7)) && Number.isFinite(Number(t.valor))).map(t => ({ ...t, valor: Number(t.valor) }));
+    const esc07 = Array.isArray(e.escopo) ? new Set(e.escopo.map(String)) : null; // v14.07: contas do escopo (ausente = todas, como na v14.06)
+    const tr = (e.transacoes || []).filter(t => t && typeof t.data === 'string' && meses.includes(t.data.slice(0, 7)) && Number.isFinite(Number(t.valor)) && (!esc07 || esc07.has(String(t.contaId)))).map(t => ({ ...t, valor: Number(t.valor) }));
     const c = DFC.consolidar(tr, regras), dm = DFC.demonstrativo(c);
     const movTotal = r2(tr.reduce((a, t) => a + t.valor, 0)), neutras = r2(movTotal - c.liquido); // neutras/transferências: mexem no saldo do banco, não no fluxo
     // serviço da dívida: amortizações (atividades de financiamento, saídas) + juros identificados em "Tarifas e juros bancários"
@@ -9534,18 +9548,19 @@ const DFC_RESUMO = {
     amort = r2(amort); juros = r2(juros);
     const g = c.porGrupo, op = g.OPERACIONAL, antesJuros = r2(op.liquido + juros), servico = r2(amort + juros), icsd = servico > 0 ? antesJuros / servico : null;
     // saldos por conta: inicial = saldo (LEDGERBAL) do extrato do mês anterior ao 1º mês; final = saldo do extrato do último mês
-    const ant = this.mesAnterior(per.de), exs = (e.extratos || []).filter(x => x && x.saldo && Number.isFinite(Number(x.saldo.valor)));
+    const ant = this.mesAnterior(per.de), exs = (e.extratos || []).filter(x => x && x.saldo && Number.isFinite(Number(x.saldo.valor)) && (!esc07 || esc07.has(String(x.contaId))));
     const saldoDe = (id, mes) => { const x = exs.find(z => z.contaId === id && z.mes === mes); return x ? { valor: r2(x.saldo.valor), data: x.saldo.data || null } : null; };
     const mov = {}; tr.forEach(t => { mov[t.contaId] = (mov[t.contaId] || 0) + t.valor; });
-    const ids = new Set([...tr.map(t => t.contaId), ...(e.extratos || []).filter(x => x && (x.mes === ant || meses.includes(x.mes))).map(x => x.contaId)]);
+    const ids = esc07 ? new Set(esc07) : new Set([...tr.map(t => t.contaId), ...(e.extratos || []).filter(x => x && (x.mes === ant || meses.includes(x.mes))).map(x => x.contaId)]);
     const cad = e.contas || [], ordem = [...cad.map(k => k.id).filter(id => ids.has(id)), ...[...ids].filter(id => !cad.some(k => k.id === id))];
     const porConta = ordem.map(id => {
       const ini = saldoDe(id, ant), fim = saldoDe(id, per.ate), mv = r2(mov[id] || 0), calc = ini ? r2(ini.valor + mv) : null, dif = calc != null && fim ? r2(calc - fim.valor) : null;
-      return { id, rotulo: (cad.find(k => k.id === id) || {}).rotulo || String(id), inicial: ini ? ini.valor : null, dataInicial: ini ? ini.data : null, movimento: mv, finalCalculado: calc, finalExtrato: fim ? fim.valor : null, dataFinal: fim ? fim.data : null, diferenca: dif,
+      const kc = cad.find(k => k.id === id) || {}; return { id, rotulo: kc.rotulo || String(id), banco: kc.banco || '', agConta: kc.agConta || '', descricao: kc.descricao || '', inicial: ini ? ini.valor : null, dataInicial: ini ? ini.data : null, movimento: mv, finalCalculado: calc, finalExtrato: fim ? fim.valor : null, dataFinal: fim ? fim.data : null, diferenca: dif,
         status: dif != null ? (Math.abs(dif) <= this.TOL ? 'conciliado' : 'divergente') : fim ? 'sem_inicial' : 'sem_extrato' };
     });
     const comIni = porConta.filter(x => x.inicial != null), semIni = porConta.filter(x => x.inicial == null), comFim = porConta.filter(x => x.finalExtrato != null), semFim = porConta.filter(x => x.finalExtrato == null);
-    const man = e.saldoManualInicial != null && e.saldoManualInicial !== '' && Number.isFinite(Number(e.saldoManualInicial)) ? r2(e.saldoManualInicial) : null;
+    const manInf = e.saldoManualInicial != null && e.saldoManualInicial !== '' && Number.isFinite(Number(e.saldoManualInicial)) ? r2(e.saldoManualInicial) : null;
+    const manIgnorado = !!esc07 && !e.escopoCompleto && manInf != null, man = manIgnorado ? null : manInf; // v14.07: o saldo inicial manual vale para o consolidado; com só parte das contas, o saldo vem dos extratos
     const inicial = man != null ? { valor: man, origem: 'manual', data: null, parcial: false, semSaldo: [] }
       : comIni.length ? { valor: r2(comIni.reduce((a, x) => a + x.inicial, 0)), origem: 'extratos', data: comIni.map(x => x.dataInicial).filter(Boolean).sort().at(-1) || null, parcial: semIni.length > 0, semSaldo: semIni.map(x => x.rotulo) }
       : { valor: 0, origem: 'ausente', data: null, parcial: false, semSaldo: [] };
@@ -9575,8 +9590,9 @@ const DFC_RESUMO = {
     else if (inicial.parcial) avisos.push(`Saldo inicial sem o saldo do extrato anterior de: ${inicial.semSaldo.join(', ')}.`);
     if (status === 'parcial' && extrato != null && !completo) avisos.push(`Conciliação parcial: sem saldo final no extrato de: ${semFim.map(x => x.rotulo).join(', ')}.`);
     if (!temPrev) avisos.push('Premissas do FCX indisponíveis na emissão: o Quadro 2 sai só com o realizado.');
+    if (manIgnorado) avisos.push('O saldo inicial informado manualmente na DFC vale para todas as contas e foi desconsiderado: com apenas parte das contas, o saldo inicial vem dos extratos das contas selecionadas.');
     return {
-      periodo: per, nTransacoes: tr.length, nContas: porConta.length,
+      periodo: per, nTransacoes: tr.length, nContas: porConta.length, escopo: esc07 ? { ids: porConta.map(x => x.id), n: porConta.length, completo: !!e.escopoCompleto } : null,
       saldos: { inicial, final: { calculado, extrato, diferenca, status, completo, semSaldo: semFim.map(x => x.rotulo) }, porConta },
       indicadores: {
         operacional: { entradas: r2(op.entradas), saidas: r2(op.saidas), liquido: r2(op.liquido), margem: op.entradas > 0 ? op.liquido / op.entradas : null },
@@ -9629,9 +9645,16 @@ const DFC_RESUMO = {
     const origemIni = { extratos: s.inicial.data ? `saldo dos extratos em ${s.inicial.data.slice(8, 10)}/${s.inicial.data.slice(5, 7)}/${s.inicial.data.slice(0, 4)}` : 'saldo dos extratos do mês anterior', manual: 'informado pela gestão', ausente: 'não informado (considerado zero)' }[s.inicial.origem];
     const kpi = (t, v, x) => `<div class="rx-kpi"><div class="t">${esc(t)}</div><b>${v}</b><div class="d">${x}</div></div>`;
     const linhaQ1 = (rot, v, nota, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${rot}</td>${val(v)}<td>${nota || ''}</td></tr>`;
-    const cab = `<div class="rx-head"><div>${o.logo ? `<img src="${esc(o.logo)}" alt="${esc(o.razao)}">` : ''}</div><div class="rx-tit"><div class="k">Resumo Executivo Oficial</div><h1>Demonstração dos Fluxos de Caixa</h1><div class="s">Método Direto · CPC 03 · padrão institucional</div></div></div>
+    const cab = `<div class="rx-head"><div>${o.logo ? `<img src="${esc(o.logo)}" alt="${esc(o.razao)}">` : ''}</div><div class="rx-tit"><div class="k">Resumo Executivo Oficial</div><h1>Demonstração dos Fluxos de Caixa</h1><div class="s">Método Direto · CPC 03 · padrão institucional</div>${o.escopoCurto ? `<div class="s">${esc(o.escopoCurto)}</div>` : ''}</div></div>
       <table class="rx-id"><tr><td><span class="t">Razão Social</span><b>${esc(o.razao)}</b></td><td><span class="t">CNPJ</span><b>${esc(this.cnpjFmt(o.cnpj))}</b></td><td><span class="t">Período de competência</span><b>${esc(m.periodo.rotulo)}</b></td></tr>
-        <tr><td colspan="2"><span class="t">Critério</span><b>${esc(this.CRITERIO)}</b></td><td><span class="t">Emissão</span><b>${esc(o.emitidoEm || '')}</b></td></tr></table>`;
+        <tr><td colspan="2"><span class="t">Critério</span><b>${esc(this.CRITERIO)}</b></td><td><span class="t">Emissão</span><b>${esc(o.emitidoEm || '')}</b></td></tr>${o.escopoLongo ? `<tr><td colspan="3"><span class="t">Contas bancárias consideradas</span><b style="font-weight:600;font-size:10.5px">${esc(o.escopoLongo)}</b></td></tr>` : ''}</table>`;
+    let tabC07 = ''; // v14.07: com escopo de contas, o Quadro 1 lista linha a linha só as contas incluídas (Banco, Agência/Conta, saldos e variação) com o total
+    if (m.escopo) {
+      const soma = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? this.r2(v.reduce((a, x) => a + x, 0)) : null; };
+      const stC = { conciliado: ['Conciliado', 'ok'], divergente: ['Divergente', 'bad'], sem_inicial: ['Sem saldo inicial', 'warn'], sem_extrato: ['Sem saldo no extrato', 'warn'] };
+      const linhasC = s.porConta.map(k => `<tr><td>${esc(k.banco || '—')}${k.descricao ? `<div class="sub">${esc(k.descricao)}</div>` : ''}</td><td>${esc(k.agConta || k.rotulo)}</td>${val(k.inicial)}${val(k.movimento)}${val(k.finalCalculado)}${val(k.finalExtrato)}<td>${pill(stC[k.status])}${k.status === 'divergente' && k.diferenca != null ? ` <span class="sub">${esc(brl(k.diferenca))}</span>` : ''}</td></tr>`).join('');
+      tabC07 = `<h3>Contas bancárias incluídas nesta emissão (${s.porConta.length})</h3><table class="rx-t rx-c"><thead><tr><th>Banco</th><th>Agência / conta</th><th class="n">Saldo inicial</th><th class="n">Variação líquida</th><th class="n">Saldo final (conciliado)</th><th class="n">Saldo final (extrato)</th><th>Situação</th></tr></thead><tbody>${linhasC}<tr class="s"><td colspan="2">Total das contas incluídas</td>${val(soma(s.porConta, k => k.inicial))}${val(soma(s.porConta, k => k.movimento))}${val(soma(s.porConta, k => k.finalCalculado))}${val(soma(s.porConta, k => k.finalExtrato))}<td></td></tr></tbody></table>${ind.neutras ? `<div class="rx-restr">A variação líquida por conta inclui as transferências entre contas próprias; no consolidado acima elas aparecem separadas, fora da variação líquida do período.</div>` : ''}`;
+    }
     const q1 = `<div class="rx-q"><h2>Quadro 1 — Síntese Executiva e Indicadores de Liquidez</h2>
       <div class="rx-kpis">${kpi('Geração operacional', `<span style="color:${cor(ind.operacional.liquido)}">${brl(ind.operacional.liquido)}</span>`, `margem de caixa ${this.pct(ind.operacional.margem, 1)}`)}${kpi('Variação líquida', `<span style="color:${cor(ind.variacao)}">${brl(ind.variacao)}</span>`, 'do período')}${kpi('Saldo final conciliado', brl(f.calculado), pill(ST[f.status]))}${kpi('Cobertura da dívida', this.vezes(d.valor), esc(this.FAIXA_ROTULO[d.faixa]))}</div>
       <table class="rx-t"><thead><tr><th>Descrição</th><th class="n">Valor (R$)</th><th>Indicador / observação</th></tr></thead><tbody>
@@ -9650,7 +9673,7 @@ const DFC_RESUMO = {
       <tr><td>Amortizações de empréstimos e financiamentos</td>${val(-d.amortizacoes)}<td class="sub">atividades de financiamento (saídas)</td></tr>
       <tr><td>Juros e encargos identificados</td>${val(-d.juros)}<td class="sub">lançamentos de juros dentro de "Tarifas e juros bancários"</td></tr>
       <tr class="s"><td>Índice de Cobertura do Serviço da Dívida</td><td class="n"><b>${this.vezes(d.valor)}</b></td><td>${esc(this.FAIXA_ROTULO[d.faixa])}${d.valor == null ? '' : ` <span class="sub">(caixa operacional antes dos juros ÷ ${brl(d.servico)} de amortizações e juros)</span>`}</td></tr></tbody></table>
-      ${s.porConta.length ? `<h3>Saldos por conta bancária (extratos OFX)</h3><table class="rx-t rx-c"><thead><tr><th>Conta</th><th class="n">Saldo inicial</th><th class="n">Movimento líquido</th><th class="n">Saldo final calculado</th><th class="n">Saldo final (extrato)</th><th class="n">Diferença</th><th>Situação</th></tr></thead><tbody>
+      ${m.escopo ? tabC07 : s.porConta.length ? `<h3>Saldos por conta bancária (extratos OFX)</h3><table class="rx-t rx-c"><thead><tr><th>Conta</th><th class="n">Saldo inicial</th><th class="n">Movimento líquido</th><th class="n">Saldo final calculado</th><th class="n">Saldo final (extrato)</th><th class="n">Diferença</th><th>Situação</th></tr></thead><tbody>
         ${s.porConta.map(k => `<tr><td>${esc(k.rotulo)}</td>${val(k.inicial)}${val(k.movimento)}${val(k.finalCalculado)}${val(k.finalExtrato)}${k.diferenca == null ? '<td class="n">—</td>' : `<td class="n" style="color:${cor(k.diferenca)}">${brl(k.diferenca)}</td>`}<td>${pill(stConta[k.status])}</td></tr>`).join('')}</tbody></table>` : ''}
       ${m.avisos.map(a => `<div class="rx-av">⚠ ${esc(a)}</div>`).join('')}</div>`;
     const colspan = q2.temPrevisto ? 5 : 2;
@@ -9661,7 +9684,7 @@ const DFC_RESUMO = {
       ${q2.grupos.map(bl2).join('')}
       <tr class="t"><td>Variação Líquida de Caixa</td>${val(q2.total.realizado)}${q2.temPrevisto ? `${val(q2.total.previsto)}<td class="n" style="color:${cor(q2.total.variacao)}">${sinal(q2.total.variacao)}</td><td class="n" style="color:${cor(q2.total.variacao)}">${vp(q2.total.pct)}</td>` : ''}</tr>
       ${q2.neutras.length ? `<tr class="g"><td colspan="${colspan}">Movimentações neutras e transferências entre contas próprias (fora da variação líquida)</td></tr>${q2.neutras.map(x => `<tr><td class="i">${esc(x.nome)}</td>${val(x.valor)}${q2.temPrevisto ? '<td></td><td></td><td></td>' : ''}</tr>`).join('')}` : ''}</tbody></table>
-      <div class="rx-restr">Realizado = lançamentos dos extratos bancários (OFX) classificados por categoria; Previsto = premissas do FCX no período. Variação = realizado − previsto (positivo é favorável); variação % sobre o valor previsto.${m.mascarado ? ' Os detalhes da folha de pagamento estão reunidos em linha agregada, por restrição de acesso do emissor.' : ''}</div></div>`;
+      <div class="rx-restr">Realizado = lançamentos dos extratos bancários (OFX) classificados por categoria; Previsto = premissas do FCX no período. Variação = realizado − previsto (positivo é favorável); variação % sobre o valor previsto.${m.escopo && !m.escopo.completo && q2.temPrevisto ? ' O previsto do FCX é apurado para a empresa como um todo, não por conta bancária: com apenas parte das contas, a variação também reflete a diferença de escopo.' : ''}${m.mascarado ? ' Os detalhes da folha de pagamento estão reunidos em linha agregada, por restrição de acesso do emissor.' : ''}</div></div>`;
     const notas = String(o.notas ?? '').trim();
     const q3 = notas ? `<div class="rx-q"><h2>Quadro 3 — Notas Explicativas da Controladoria</h2><div class="rx-nota">${esc(notas)}</div></div>` : '';
     const sg = (o.signatarios || []).slice(0, 2).map(x => `<div class="a"><b>${esc(x.nome) || '&nbsp;'}</b><span>${esc(x.cargo)}</span>${x.registro ? `<span>${esc(x.registro)}</span>` : ''}</div>`).join('');
@@ -9671,6 +9694,126 @@ const DFC_RESUMO = {
   },
 };
 /* DFC_RESUMO:FIM */
+
+/* DFC_MATRIZ:INI */
+/**
+ * v14.07 · Empresas (flag Matriz), contas bancárias associadas como padrão da empresa e escopo de contas do Resumo Executivo da DFC.
+ * Motor puro (sem DOM e sem Repo): recebe as listas e devolve novas listas/resultados, para a tela e para o teste em Node.
+ *   Empresa:  { id, nome, razao, cnpj, situacao?, matriz?: boolean, contasPadrao?: [idDaConta] }   (config/empresas · lista)
+ *   Conta:    { id, apelido, banco, bancoNome, agencia, conta, digito, ativa, titularEmpresaId?, titularCnpj? }  (contasBancarias)
+ * A associação "conta padrão da empresa" mora SÓ na empresa (contasPadrao): a conta nunca guarda uma cópia, então não há como as duas divergirem.
+ */
+const DFC_MATRIZ = {
+  SITUACOES: ['Ativa', 'Inativa', 'Suspensa', 'Inapta', 'Baixada', 'Nula'],
+  MAX_NOMES: 8, // contas listadas por extenso no escopo do documento (o resto vira "e mais N")
+  dig(s) { return String(s ?? '').replace(/\D/g, ''); },
+  fmtCnpj(s) { const d = this.dig(s); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : d; },
+  cnpjOk(v) { const d = this.dig(v); return d.length === 14 && (typeof PARC_PIX === 'undefined' || PARC_PIX.cnpjOk(d)); },
+  sem(s) { return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); },
+  /** "ATIVA", "baixada", "Ativo"… → um dos valores de SITUACOES ('' quando não reconhece) */
+  situacao(v) { const t = this.sem(v); return this.SITUACOES.find(x => this.sem(x) === t) || (t === 'ativo' ? 'Ativa' : t === 'inativo' ? 'Inativa' : ''); },
+  /* ---------------- empresas ---------------- */
+  normalizarEmpresa(e) {
+    if (!e || typeof e !== 'object') return null;
+    const id = String(e.id ?? '').trim(); if (!id) return null;
+    const cp = Array.isArray(e.contasPadrao) ? [...new Set(e.contasPadrao.map(x => String(x ?? '').trim()).filter(Boolean))] : [];
+    return { ...e, id, nome: String(e.nome ?? '').trim(), razao: String(e.razao ?? '').trim(), cnpj: this.dig(e.cnpj), situacao: this.situacao(e.situacao), matriz: e.matriz === true, contasPadrao: cp };
+  },
+  /** lista limpa: sem ids repetidos, sem registros vazios e com no máximo UMA Matriz (a primeira marcada vale) */
+  normalizar(lista) {
+    const vistos = new Set(), out = [];
+    for (const x of Array.isArray(lista) ? lista : []) { const e = this.normalizarEmpresa(x); if (!e || !(e.nome || e.razao) || vistos.has(e.id)) continue; vistos.add(e.id); out.push(e); }
+    let achou = false; out.forEach(e => { if (e.matriz) { if (achou) e.matriz = false; else achou = true; } });
+    return out;
+  },
+  /** a Matriz no topo e, depois dela, as demais empresas na ordem do cadastro */
+  ordenar(lista) { const l = this.normalizar(lista); return [...l.filter(e => e.matriz), ...l.filter(e => !e.matriz)]; },
+  matriz(lista) { return this.normalizar(lista).find(e => e.matriz) || null; },
+  /** empresas que o ambiente oferece: o cadastro gravado; sem cadastro, as de exemplo só fora do Falco (neutralidade white-label) */
+  base(lista, { falco = false, padrao = [] } = {}) { const l = this.normalizar(lista); return l.length ? l : falco ? [] : this.normalizar(padrao); },
+  /** erros que impedem gravar a empresa (lista vazia = pode salvar) */
+  validar(e, lista = [], idOriginal = '') {
+    const er = [], c = this.dig(e && e.cnpj);
+    if (!String((e && e.nome) ?? '').trim()) er.push('Informe o nome da empresa (como aparece no painel).');
+    if (c && !this.cnpjOk(c)) er.push('CNPJ inválido: confira os dígitos verificadores.');
+    if (c && this.normalizar(lista).some(x => x.id !== (idOriginal || (e && e.id)) && x.cnpj === c)) er.push('Já existe outra empresa cadastrada com este CNPJ.');
+    if (e && e.situacao && !this.situacao(e.situacao)) er.push('Situação inválida.');
+    return er;
+  },
+  /** grava (ou inclui) a empresa. Marcar a Matriz desmarca a anterior: → { lista, desmarcou: nome da Matriz anterior | null } */
+  salvarEmpresa(lista, emp) {
+    const l = this.normalizar(lista), e = this.normalizarEmpresa(emp); if (!e) return { lista: l, desmarcou: null };
+    const ant = e.matriz ? l.find(x => x.matriz && x.id !== e.id) : null;
+    const out = (l.some(x => x.id === e.id) ? l.map(x => x.id === e.id ? e : x) : [...l, e]).map(x => e.matriz && x.id !== e.id ? { ...x, matriz: false } : x);
+    return { lista: out, desmarcou: ant ? (ant.nome || ant.razao) : null };
+  },
+  definirContasPadrao(lista, empresaId, ids) {
+    const u = [...new Set((ids || []).map(x => String(x ?? '').trim()).filter(Boolean))];
+    return this.normalizar(lista).map(e => e.id === empresaId ? { ...e, contasPadrao: u } : e);
+  },
+  /** marca/desmarca uma conta como padrão de uma empresa (é o que o checkbox "Conta padrão da Empresa Matriz" faz) */
+  alternarContaPadrao(lista, empresaId, contaId, ligar) {
+    const id = String(contaId ?? '').trim();
+    return this.normalizar(lista).map(e => e.id !== empresaId ? e : { ...e, contasPadrao: ligar ? [...new Set([...e.contasPadrao, id])] : e.contasPadrao.filter(x => x !== id) });
+  },
+  /** conta excluída: sai dos padrões de todas as empresas */
+  removerContaDosPadroes(lista, contaId) { const id = String(contaId ?? ''); return this.normalizar(lista).map(e => ({ ...e, contasPadrao: e.contasPadrao.filter(x => x !== id) })); },
+  /* ---------------- contas ---------------- */
+  /** dados de exibição da conta: Banco, Agência/Conta e Descrição */
+  infoConta(k) {
+    const banco = String(k.banco ?? '').trim(), nome = String(k.bancoNome ?? '').trim();
+    return { id: String(k.id), ativa: k.ativa !== false, banco: [banco, nome && nome !== banco ? nome : ''].filter(Boolean).join(' · ') || '—', agConta: `Ag ${k.agencia || '—'} · CC ${k.conta || '—'}${k.digito ? '-' + k.digito : ''}`, descricao: String(k.apelido ?? '').trim() };
+  },
+  /** titular da conta: a empresa escolhida (com o CNPJ do cadastro) ou só o CNPJ informado */
+  titularRotulo(k, empresas) {
+    const em = k.titularEmpresaId ? this.normalizar(empresas).find(e => e.id === k.titularEmpresaId) : null, c = em ? em.cnpj : this.dig(k.titularCnpj);
+    return [em ? (em.nome || em.razao) : '', c ? this.fmtCnpj(c) : ''].filter(Boolean).join(' · ');
+  },
+  /** selos do vínculo da conta com a empresa escolhida no Resumo: padrão desta empresa / padrão da Matriz / titular / inativa */
+  vinculos(k, empresa, empresas) {
+    const l = this.normalizar(empresas), m = l.find(e => e.matriz), id = String(k.id), out = [];
+    if (empresa && (empresa.contasPadrao || []).includes(id)) out.push({ txt: empresa.matriz ? 'Padrão da Matriz' : 'Padrão de ' + (empresa.nome || empresa.razao), tipo: 'ok' });
+    else if (m && m.contasPadrao.includes(id)) out.push({ txt: 'Padrão da Matriz', tipo: 'info' });
+    const t = this.titularRotulo(k, l); if (t) out.push({ txt: 'Titular: ' + t, tipo: 'neutral' });
+    if (k.ativa === false) out.push({ txt: 'Inativa', tipo: 'neutral' });
+    return out;
+  },
+  /** contas marcadas cujo titular tem outra raiz de CNPJ (8 primeiros dígitos) que a do emissor: só aviso, nunca bloqueia */
+  titularesDivergentes(ids, contas, cnpjEmissor, empresas) {
+    const raiz = this.dig(cnpjEmissor).slice(0, 8); if (raiz.length < 8) return [];
+    const l = this.normalizar(empresas), sel = new Set((ids || []).map(String));
+    return (contas || []).filter(k => { if (!sel.has(String(k.id))) return false; const em = k.titularEmpresaId ? l.find(e => e.id === k.titularEmpresaId) : null, c = em ? em.cnpj : this.dig(k.titularCnpj); return c.length >= 8 && c.slice(0, 8) !== raiz; }).map(k => String(k.id));
+  },
+  /* ---------------- escopo de contas do Resumo ---------------- */
+  /**
+   * Quais contas entram no Resumo. selecionadas = contas marcadas no modal; em branco = contas padrão da empresa escolhida (Matriz ou não).
+   * → { modo: 'manual' | 'padrao' | 'sem_padrao' | 'sem_contas', ids (na ordem do cadastro), n, todas, texto, alerta, orfas, empresaNome }
+   */
+  resolverEscopo({ empresa = null, selecionadas = [], contas = [] } = {}) {
+    const ids = contas.map(k => String(k.id)), tem = new Set(ids), pl = n => n === 1 ? '' : 's', nome = empresa ? (empresa.nome || empresa.razao || 'empresa') : '';
+    const fim = (modo, lista, texto, alerta = '', orfas = []) => ({ modo, ids: lista, n: lista.length, todas: lista.length > 0 && lista.length === ids.length, texto, alerta, orfas, empresaNome: nome });
+    const sel = [...new Set((selecionadas || []).map(String))].filter(id => tem.has(id));
+    if (sel.length) { const l = ids.filter(id => sel.includes(id)); return fim('manual', l, `${l.length} conta${pl(l.length)} marcada${pl(l.length)} manualmente: o demonstrativo considera estritamente ${l.length === 1 ? 'essa conta' : 'essas contas'}.`); }
+    if (!ids.length) { const a = 'Não há contas bancárias cadastradas na DFC: cadastre ao menos uma conta (FCX › DFC › Contas bancárias).'; return fim('sem_contas', [], a, a); }
+    const pad = (empresa && Array.isArray(empresa.contasPadrao) ? empresa.contasPadrao : []).map(String), ok = ids.filter(id => pad.includes(id)), orfas = [...new Set(pad)].filter(id => !tem.has(id));
+    if (ok.length) return fim('padrao', ok, `Nenhuma conta marcada manualmente — serão consideradas automaticamente ${ok.length === 1 ? 'a' : 'as'} ${ok.length} conta${pl(ok.length)} padrão vinculada${pl(ok.length)} à ${nome}.`, '', orfas);
+    const a = !empresa ? 'Nenhuma conta marcada e a empresa emissora não está no cadastro (“Outra empresa”), portanto não há contas padrão: marque ao menos uma conta da lista.'
+      : `Nenhuma conta marcada e a empresa ${nome} ainda não possui contas padrão vinculadas${orfas.length ? ' (os vínculos existentes apontam para contas que foram removidas)' : ''}: marque ao menos uma conta ou configure o vínculo no cadastro da empresa (FCX › DFC › Contas bancárias › Gerenciar Empresas / Matriz).`;
+    return fim('sem_padrao', [], a, a, orfas);
+  },
+  /** erros que impedem a emissão por causa do escopo (lista vazia = pode gerar) */
+  validarEscopo(esc) { return esc && esc.ids && esc.ids.length ? [] : [(esc && esc.alerta) || 'Selecione ao menos uma conta bancária para o Resumo.']; },
+  /** texto do escopo no documento: curto (subtítulo) e longo (as contas incluídas, no máximo MAX_NOMES por extenso) */
+  descreverEscopo(esc, infos, empresa) {
+    const por = new Map((infos || []).map(i => [String(i.id), i])), l = (esc.ids || []).map(id => por.get(String(id))).filter(Boolean), n = (esc.ids || []).length, pl = n === 1 ? '' : 's';
+    const um = i => [i.banco, i.agConta].filter(Boolean).join(' · ') + (i.descricao ? ` (${i.descricao})` : '');
+    const origem = esc.modo === 'padrao' ? (empresa && empresa.matriz ? 'contas padrão da Matriz' : 'contas padrão de ' + (esc.empresaNome || 'empresa')) : esc.todas ? 'todas as contas bancárias cadastradas' : 'contas selecionadas manualmente';
+    return { curto: `Contas consideradas: ${n} conta${pl} bancária${pl} (${origem})`, longo: l.slice(0, this.MAX_NOMES).map(um).join('; ') + (l.length > this.MAX_NOMES ? `; e mais ${l.length - this.MAX_NOMES}` : '') };
+  },
+  /** recorta transações e extratos às contas do escopo (o DFC_RESUMO.montar faz o mesmo ao receber "escopo") */
+  filtrar(d, ids) { const s = new Set((ids || []).map(String)); return { transacoes: (d.transacoes || []).filter(t => s.has(String(t.contaId))), extratos: (d.extratos || []).filter(x => s.has(String(x.contaId))) }; },
+};
+/* DFC_MATRIZ:FIM */
 
 /* ============================ IEO ============================ */
 /* Índice de Eficiência Operacional: cada loja começa o mês com 100 pontos. */
@@ -9844,7 +9987,7 @@ const Laudo = {
   },
 };
 
-if (typeof module !== 'undefined') module.exports = { OFX, ContasBancarias, DFC, DFC_GRUPOS, DFC_REGRAS_PADRAO, DFC_CATEGORIAS, PARC_PIX, PARC_IMP, DFC_RESUMO, IEO, IEO_PADRAO, Laudo, LAUDO_PROMPT };
+if (typeof module !== 'undefined') module.exports = { OFX, ContasBancarias, DFC, DFC_GRUPOS, DFC_REGRAS_PADRAO, DFC_CATEGORIAS, PARC_PIX, PARC_IMP, DFC_RESUMO, DFC_MATRIZ, IEO, IEO_PADRAO, Laudo, LAUDO_PROMPT };
 
 /* =====================================================================
    MÓDULO 4 — RETAGUARDA FINANCEIRA
@@ -13363,18 +13506,22 @@ const FluxoDFC = {
       ${campo('Tipo', 'tipo', c.tipo || 'Conta corrente', { opcoes: ['Conta corrente', 'Conta de arrecadação', 'Poupança', 'Aplicação', 'Cartão de crédito'] })}
       ${campo('Loja vinculada (opcional)', 'lojaId', c.lojaId || '', { opcoes: [['', 'Matriz / administrativo'], ...Repo.todos('lojas').filter(l => l.ativa).sort((a, b) => a.codigo.localeCompare(b.codigo)).map(l => [l.id, `${l.codigo} · ${l.nome}`])] })}
       ${campo('Identificador no OFX (ACCTID)', 'ofxAcctId', c.ofxAcctId, { dica: 'Opcional. Use quando o banco envia a conta num formato diferente (ex.: com agência ou zeros).' })}
-      <div class="field"><span class="lbl">Situação</span><label class="check" style="padding-top:8px"><input type="checkbox" name="ativa" ${c.ativa !== false ? 'checked' : ''}> Conta ativa</label></div></div>`;
+      <div class="field"><span class="lbl">Situação</span><label class="check" style="padding-top:8px"><input type="checkbox" name="ativa" ${c.ativa !== false ? 'checked' : ''}> Conta ativa</label></div>${g07() ? this.camposConta07(c) : ''}</div>`;
   },
   async salvarConta(m, id) {
     const d = UI.lerForm(m);
     if (!d.banco || !d.conta) { UI.toast('Informe banco e conta.'); return null; }
+    const pm07 = g07() && 'padraoMatriz' in d ? !!d.padraoMatriz : null; // v14.07: o vínculo "conta padrão" mora na empresa (config/empresas); a conta nunca guarda cópia
+    if (g07()) { const t = this.normalizaTitular07(d); if (t.erro) { UI.toast(t.erro); return null; } Object.assign(d, t.campos); }
+    delete d.padraoMatriz;
     d.bancoNome = (BANCOS.find(b => b[0] === d.banco) || [])[1] || d.banco;
     if (!d.apelido) d.apelido = d.bancoNome;
     const dup = this.contas().find(c => c.id !== id && ContasBancarias.semZero(c.banco) === ContasBancarias.semZero(d.banco) && ContasBancarias.semZero(c.conta) === ContasBancarias.semZero(d.conta));
     if (dup) { UI.toast('Esta conta já está cadastrada: ' + ContasBancarias.rotulo(dup)); return null; }
     const cid = id || 'cb-' + uid(), antes = id ? Repo.get('contasBancarias', id) : {};
     await Repo.salvar('contasBancarias', cid, { ...antes, ...d }, { modulo: 'fcx', rotulo: 'Conta ' + ContasBancarias.rotulo(d) });
-    UI.toast('Conta salva'); return { id: cid, ...d };
+    UI.toast('Conta salva'); if (pm07 != null) await this.sincronizarPadrao07(cid, pm07).catch(() => UI.toast('A conta foi salva, mas o vínculo de conta padrão da Matriz não pôde ser gravado (cadastro de empresas).'));
+    return { id: cid, ...d };
   },
   abrirConta(id) {
     const c = id ? Repo.get('contasBancarias', id) : {};
@@ -13384,6 +13531,7 @@ const FluxoDFC = {
       if (n) { UI.toast(`A conta tem ${n} transação(ões) importada(s). Desative-a em vez de excluir.`); return false; }
       if (!(await UI.confirmar('Excluir conta', `Excluir ${esc(ContasBancarias.rotulo(c))} do de-para?`, 'Excluir', true))) return false;
       await Repo.excluir('contasBancarias', id, { modulo: 'fcx', rotulo: 'Conta ' + ContasBancarias.rotulo(c) });
+      if (g07()) await this.limparPadroes07(id).catch(() => { }); // v14.07: a conta excluída sai das contas padrão das empresas
     } });
     UI.modal({ titulo: id ? 'Editar conta bancária' : 'Nova conta bancária', largo: true, corpo: this.formConta(c), acoes });
   },
@@ -13393,10 +13541,10 @@ const FluxoDFC = {
      ===================================================================== */
   renderContas() {
     const contas = this.contas(), pode = Auth.can('fcx.dfc.contas');
-    return `<div class="panel"><div class="row between"><div><h2>Contas bancárias (de-para OFX)</h2><p class="sub">Cada extrato OFX é vinculado a uma destas contas pelo banco, agência e conta (ou pelo identificador OFX).</p></div>${pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>
-      ${contas.length ? `<div class="tbl-wrap"><table><thead><tr><th>Conta</th><th>Banco</th><th>Agência</th><th>Conta</th><th>Tipo</th><th>Loja</th><th>ID no OFX</th><th>Última importação</th><th class="num">Último saldo</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>
-        ${contas.map(c => `<tr><td class="cell-main">${esc(c.apelido)}${c.ativa === false ? ' <span class="pill neutral">inativa</span>' : ''}</td><td>${esc(c.banco)} · ${esc(c.bancoNome || '')}</td><td class="mono">${esc(c.agencia || '—')}</td><td class="mono">${esc(c.conta)}${c.digito ? '-' + esc(c.digito) : ''}</td>
-          <td>${esc(c.tipo || '')}</td><td>${esc(c.lojaId ? this.nomeLoja(c.lojaId) : 'Matriz')}</td><td class="mono">${esc(c.ofxAcctId || '—')}</td><td class="mono">${c.ultimaImportacao ? Fmt.dataHora(c.ultimaImportacao) : '—'}</td>
+    return `<div class="panel"><div class="row between"><div><h2>Contas bancárias (de-para OFX)</h2><p class="sub">Cada extrato OFX é vinculado a uma destas contas pelo banco, agência e conta (ou pelo identificador OFX).</p></div>${g07() ? `<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-a="fd-mt-empresas">Gerenciar Empresas / Matriz</button>${pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>` : pode ? '<button class="btn sec" data-a="fd-bc-conta-nova">+ Nova conta</button>' : ''}</div>
+      ${contas.length ? `<div class="tbl-wrap"><table><thead><tr><th>Conta</th><th>Banco</th><th>Agência</th><th>Conta</th><th>Tipo</th>${g07() ? '<th>Titular</th>' : ''}<th>Loja</th><th>ID no OFX</th><th>Última importação</th><th class="num">Último saldo</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>
+        ${contas.map(c => `<tr><td class="cell-main">${esc(c.apelido)}${c.ativa === false ? ' <span class="pill neutral">inativa</span>' : ''}${g07() && this.ehPadraoMatriz07(c.id) ? ' <span class="mt-badge" title="Conta padrão da Empresa Matriz">Padrão da Matriz</span>' : ''}</td><td>${esc(c.banco)} · ${esc(c.bancoNome || '')}</td><td class="mono">${esc(c.agencia || '—')}</td><td class="mono">${esc(c.conta)}${c.digito ? '-' + esc(c.digito) : ''}</td>
+          <td>${esc(c.tipo || '')}</td>${g07() ? `<td>${this.celulaTitular07(c)}</td>` : ''}<td>${esc(c.lojaId ? this.nomeLoja(c.lojaId) : 'Matriz')}</td><td class="mono">${esc(c.ofxAcctId || '—')}</td><td class="mono">${c.ultimaImportacao ? Fmt.dataHora(c.ultimaImportacao) : '—'}</td>
           <td class="num">${c.ultimoSaldo ? Fmt.brl(c.ultimoSaldo.valor) : '—'}</td>${pode ? `<td class="acts"><button class="iconbtn" data-a="fd-bc-conta-editar" data-id="${c.id}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`
         : `<div class="empty">Nenhuma conta cadastrada. Cadastre as contas ou importe um OFX: o painel oferece o cadastro com os dados do arquivo.</div>`}</div>`;
   },
@@ -13790,6 +13938,7 @@ const FluxoDFC = {
       case 'fd-bc-filtro': u.filtro = el.dataset.v; u.limite = 200; return App.render();
       case 'fd-bc-mais': u.limite += 400; return App.render();
       case 'fd-bc-conta-nova': return this.abrirConta(null);
+      case 'fd-mt-empresas': return this.abrirEmpresas07(); // v14.07
       case 'fd-bc-conta-editar': return this.abrirConta(el.dataset.id);
       case 'fd-regra-nova': return this.abrirRegra(null);
       case 'fd-regra-editar': return this.abrirRegra(+el.dataset.i);
@@ -13953,6 +14102,7 @@ Object.assign(FluxoDFC, {
   },
   /** empresas do ambiente ativo (config/empresas). Os nomes de exemplo do Conciliador só valem fora do Falco (neutralidade white-label). */
   empresas06() {
+    if (g07()) return this.empresas07(); // v14.07: a Matriz no topo; no Falco nenhuma empresa de exemplo
     const l = Repo.get('config', 'empresas')?.lista;
     if (Array.isArray(l) && l.length) return l.filter(e => e && e.id && (e.nome || e.razao));
     return typeof Ambiente !== 'undefined' && Ambiente.rc ? [] : (typeof CONC_MP !== 'undefined' ? CONC_MP.EMPRESAS_PADRAO : []).filter(e => e && e.id);
@@ -13960,18 +14110,18 @@ Object.assign(FluxoDFC, {
   /** quem não tem "Pode ver salários" recebe a folha de pagamento agregada nas saídas operacionais */
   semSalarios06() { return !Auth.can('rh.ver_salarios'); },
   /** entrada do motor: lançamentos, saldos dos extratos, previsto do FCX e saldo inicial informado, para o período escolhido */
-  dadosResumo06(per) {
+  dadosResumo06(per, escopo) {
     const meses = per.meses, ant = DFC_RESUMO.mesAnterior(per.de);
     const transacoes = this.transacoes().filter(t => t.data && meses.includes(t.data.slice(0, 7)));
     const extratos = Repo.todos('extratos').filter(d => d.mes === ant || meses.includes(d.mes)).map(d => ({ contaId: d.contaId, mes: d.mes, saldo: d.saldo || null }));
-    const contas = this.contas().map(k => ({ id: k.id, rotulo: ContasBancarias.rotulo(k) }));
+    const contas = this.contas().map(k => ({ id: k.id, rotulo: ContasBancarias.rotulo(k), ...(g07() ? DFC_MATRIZ.infoConta(k) : {}) }));
     const man = Repo.get('config', 'fcx_saldos')?.saldosIniciais?.[per.de];
     let previstoPorMes = null;
     if (FCX.api()) {
       previstoPorMes = {};
       for (const m of meses) { const p = PrevistoFCX.doMes(m); if (!p) { previstoPorMes = null; break; } previstoPorMes[m] = Object.fromEntries(Object.entries(p.porCat).map(([k, v]) => [k, v.valor])); }
     }
-    return { periodo: per, transacoes, contas, extratos, saldoManualInicial: man == null || man === '' ? null : Number(man), previstoPorMes, mascarar: this.semSalarios06() };
+    return { periodo: per, transacoes, contas, extratos, saldoManualInicial: man == null || man === '' ? null : Number(man), previstoPorMes, mascarar: this.semSalarios06(), ...(escopo ? { escopo: escopo.ids, escopoCompleto: !!escopo.todas } : {}) };
   },
   abrirResumo06() {
     if (!this.podeResumo06()) return UI.toast('Seu perfil não tem permissão para emitir o Resumo Executivo da DFC.');
@@ -13981,18 +14131,18 @@ Object.assign(FluxoDFC, {
     const razao0 = e0.razao || (mesmo ? lem.razao : '') || e0.nome || '', cnpj0 = e0.cnpj ? CNPJ.formatar(e0.cnpj) : (mesmo ? lem.cnpj : '') || '';
     const nContas = this.contas().length, fcxOk = !!FCX.api();
     const optMes = (v) => meses.map(m => `<option value="${m}" ${m === v ? 'selected' : ''}>${this.mesLabel(m)}${m === this.mesAtual() ? ' (atual)' : ''}${this.mesesBanco().includes(m) ? '' : ' · sem OFX'}</option>`).join('');
-    const opEmp = [...emps.map(e => [e.id, `${e.nome || e.razao}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ''}`]), ['__outra', 'Outra empresa (informar abaixo)']];
+    const opEmp = [...emps.map(e => [e.id, `${g07() && e.matriz ? '[Matriz] ' : ''}${e.nome || e.razao}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ''}`]), ['__outra', 'Outra empresa (informar abaixo)']];
     const s1 = lem.s1 || {}, s2 = lem.s2 || {};
     UI.modal({
       titulo: 'Resumo Executivo DFC · Padrão Banco / Institucional', largo: true,
-      corpo: `<p class="hint" style="margin-top:0">Documento A4 em retrato (CPC 03, método direto) com síntese e indicadores de liquidez, demonstrativo detalhado (realizado dos extratos OFX × previsto do FCX), notas da controladoria e assinaturas. Considera todas as contas bancárias com extrato no período (${nContas} cadastrada${nContas === 1 ? '' : 's'}).${fcxOk ? '' : ' <b>As premissas do FCX ainda estão sendo lidas</b>: se gerar agora, o Quadro 2 sai só com o realizado.'}${this.semSalarios06() ? ' Seu perfil não vê salários: a folha de pagamento sai reunida com outras saídas operacionais.' : ''}</p>
+      corpo: `<p class="hint" style="margin-top:0">Documento A4 em retrato (CPC 03, método direto) com síntese e indicadores de liquidez, demonstrativo detalhado (realizado dos extratos OFX × previsto do FCX), notas da controladoria e assinaturas. ${g07() ? 'Considera apenas as contas bancárias escolhidas abaixo; em branco, as contas padrão da empresa emissora.' : `Considera todas as contas bancárias com extrato no período (${nContas} cadastrada${nContas === 1 ? '' : 's'}).`}${fcxOk ? '' : ' <b>As premissas do FCX ainda estão sendo lidas</b>: se gerar agora, o Quadro 2 sai só com o realizado.'}${this.semSalarios06() ? ' Seu perfil não vê salários: a folha de pagamento sai reunida com outras saídas operacionais.' : ''}</p>
         <div class="rx-form" data-rx>
           <fieldset><legend>Empresa emissora</legend><div class="sub2">
             <div class="field full"><label class="lbl" for="rxEmp">Empresa (cadastro de empresas do ambiente)</label><select id="rxEmp" name="empresaId">${opEmp.map(([v, l]) => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
             ${campo('Razão Social', 'razao', razao0, { attrs: 'maxlength="120" autocomplete="off"' })}
             ${campo('CNPJ', 'cnpj', cnpj0, { attrs: 'inputmode="numeric" maxlength="18" autocomplete="off" placeholder="00.000.000/0000-00"' })}
           </div></fieldset>
-          <fieldset><legend>Período</legend><div class="sub2">
+          ${g07() ? this.fieldsetContas07(emps, sel) : ''}<fieldset><legend>Período</legend><div class="sub2">
             <div class="field"><label class="lbl" for="rxTipo">Tipo de período</label><select id="rxTipo" name="tipo"><option value="mes">Mês de referência</option><option value="trimestre">Trimestre (3 meses até o mês de referência)</option><option value="ano">Acumulado do ano (janeiro até o mês de referência)</option><option value="personalizado">Intervalo personalizado</option></select></div>
             <div class="field"><label class="lbl" for="rxMes" data-rx-rot-mes>Mês de referência</label><select id="rxMes" name="mes">${optMes(ref)}</select></div>
             <div class="field" data-rx-de hidden><label class="lbl" for="rxDe">Mês inicial</label><select id="rxDe" name="de">${optMes(DFC_RESUMO.somaMes(ref, -2))}</select></div>
@@ -14014,8 +14164,9 @@ Object.assign(FluxoDFC, {
         const $f = n => $(`[name="${n}"]`, m), tipo = $f('tipo'), rot = $('[data-rx-rot-mes]', m), de = $('[data-rx-de]', m), cont = $('[data-rx-cont]', m);
         const ajusta = () => { de.hidden = tipo.value !== 'personalizado'; rot.textContent = tipo.value === 'mes' ? 'Mês de referência' : tipo.value === 'personalizado' ? 'Mês final' : 'Até o mês'; };
         tipo.addEventListener('change', ajusta); ajusta();
-        $f('empresaId').addEventListener('change', () => { const e = emps.find(x => x.id === $f('empresaId').value); if (!e) return; $f('razao').value = e.razao || e.nome || ''; $f('cnpj').value = e.cnpj ? CNPJ.formatar(e.cnpj) : ''; });
+        $f('empresaId').addEventListener('change', () => { const e = this.empresas06().find(x => x.id === $f('empresaId').value); if (!e) return; $f('razao').value = e.razao || e.nome || ''; $f('cnpj').value = e.cnpj ? CNPJ.formatar(e.cnpj) : ''; });
         $f('cnpj').addEventListener('blur', () => { $f('cnpj').value = CNPJ.formatar($f('cnpj').value); });
+        if (g07()) this.ligarContas07(m);
         const conta = () => { cont.textContent = `${$f('notas').value.length} / ${DFC_RESUMO.MAX_NOTAS}`; };
         $f('notas').addEventListener('input', conta); conta();
       },
@@ -14026,16 +14177,165 @@ Object.assign(FluxoDFC, {
     if (!this.podeResumo06()) return UI.toast('Seu perfil não tem permissão para emitir o Resumo Executivo da DFC.');
     const d = UI.lerForm(m), box = $('[data-rx-erros]', m), per = DFC_RESUMO.periodo(d.tipo, d.mes, d.de);
     const sigs = [{ nome: d.s1nome, cargo: d.s1cargo }, { nome: d.s2nome, cargo: d.s2cargo, registro: d.s2crc || '' }];
-    const cfg = { razao: d.razao, cnpj: d.cnpj, periodo: per, notas: d.notas, signatarios: sigs }, er = DFC_RESUMO.validar(cfg);
+    const cfg = { razao: d.razao, cnpj: d.cnpj, periodo: per, notas: d.notas, signatarios: sigs }, sc07 = g07() ? this.escopo07(d) : null, er = [...DFC_RESUMO.validar(cfg), ...(sc07 ? DFC_MATRIZ.validarEscopo(sc07) : [])];
     if (box) box.innerHTML = er.length ? `<div class="note warn"><b>Falta ajustar:</b><ul style="margin:4px 0 0 18px">${er.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
     if (er.length) return UI.toast(er[0]);
     if (!Repo.prontas.has('extratos')) return UI.toast('Aguarde: os extratos ainda estão carregando.');
-    const mod = DFC_RESUMO.montar(this.dadosResumo06(per)), marca = this.marcaDoc(), agora = new Date().toLocaleString('pt-BR');
-    const corpo = DFC_RESUMO.html(mod, { razao: String(d.razao).trim(), cnpj: d.cnpj, logo: LOGO_NAVY, marca, emitidoEm: agora, notas: d.notas, signatarios: sigs });
+    const mod = DFC_RESUMO.montar(this.dadosResumo06(per, sc07)), marca = this.marcaDoc(), agora = new Date().toLocaleString('pt-BR');
+    const corpo = DFC_RESUMO.html(mod, { razao: String(d.razao).trim(), cnpj: d.cnpj, logo: LOGO_NAVY, marca, emitidoEm: agora, notas: d.notas, signatarios: sigs, ...(sc07 ? this.textoEscopo07(sc07, d) : {}) });
     this.lembrar06(false, { empresaId: d.empresaId, razao: String(d.razao).trim(), cnpj: d.cnpj, s1: { nome: d.s1nome, cargo: d.s1cargo }, s2: { nome: d.s2nome, cargo: d.s2cargo, registro: d.s2crc || '' } });
-    try { Audit.registrar({ modulo: 'fcx', acao: 'emitiu', entidade: 'documento', entidadeId: 'dfc-resumo-' + per.de + (per.de === per.ate ? '' : '_' + per.ate), rotulo: `Resumo Executivo DFC · ${per.rotulo}`, detalhe: `${String(d.razao).trim()} · CNPJ ${CNPJ.formatar(d.cnpj)}${mod.mascarado ? ' · folha agregada (perfil sem acesso a salários)' : ''}`, mudancas: [] }); } catch { /* auditoria nunca trava a emissão */ }
+    try { Audit.registrar({ modulo: 'fcx', acao: 'emitiu', entidade: 'documento', entidadeId: 'dfc-resumo-' + per.de + (per.de === per.ate ? '' : '_' + per.ate), rotulo: `Resumo Executivo DFC · ${per.rotulo}`, detalhe: `${String(d.razao).trim()} · CNPJ ${CNPJ.formatar(d.cnpj)}${mod.mascarado ? ' · folha agregada (perfil sem acesso a salários)' : ''}${sc07 ? ' · ' + this.textoEscopo07(sc07, d).escopoCurto + ' [' + sc07.ids.join(', ') + ']' : ''}`, mudancas: [] }); } catch { /* auditoria nunca trava a emissão */ }
     const titulo = 'Resumo Executivo DFC · ' + per.rotulo;
     Documento.previa(titulo, Documento.montar(titulo, corpo, { css: DFC_RESUMO.css(), margem: '12mm 12mm' }), `Resumo_Executivo_DFC_${marca}_${per.de === per.ate ? per.ate : per.de + '_a_' + per.ate}`);
+  },
+});
+
+/* v14.07 · DFC · Empresas (Matriz), contas bancárias padrão e escopo de contas do Resumo Executivo — recurso gestao_v1407 */
+Object.assign(FluxoDFC, {
+  /** editar o cadastro de empresas: a mesma permissão do editor de empresas do Conciliador (no servidor, o documento config/empresas segue só do Master) */
+  podeEmpresas07() { return g07() && Auth.can('retaguarda.adq.taxas'); },
+  /** empresas do ambiente (config/empresas) com a Matriz no topo; sem cadastro, as de exemplo só fora do Falco (white-label) */
+  empresas07() { return DFC_MATRIZ.ordenar(DFC_MATRIZ.base(Repo.get('config', 'empresas')?.lista, { falco: typeof Ambiente !== 'undefined' && !!Ambiente.rc, padrao: typeof CONC_MP !== 'undefined' ? CONC_MP.EMPRESAS_PADRAO : [] })); },
+  ehPadraoMatriz07(id) { const m = DFC_MATRIZ.matriz(this.empresas07()); return !!m && m.contasPadrao.includes(String(id)); },
+  celulaTitular07(c) { const t = DFC_MATRIZ.titularRotulo(c, this.empresas07()); return t ? esc(t) : '<span class="hint">—</span>'; },
+  pills07(vz) { return vz.map(x => `<span class="pill ${x.tipo === 'ok' ? 'ok' : x.tipo === 'info' ? 'info' : 'neutral'}">${esc(x.txt)}</span>`).join(' '); },
+  opcoesEmpresa07(emps, sel) {
+    const op = [...emps.map(e => [e.id, `${e.matriz ? '[Matriz] ' : ''}${e.nome || e.razao}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ''}`]), ['__outra', 'Outra empresa (informar abaixo)']];
+    return op.map(([v, l]) => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(l)}</option>`).join('');
+  },
+
+  /* ---------- Resumo Executivo: seletor de contas, fallback e escopo ---------- */
+  fieldsetContas07(emps, sel) {
+    const contas = this.contas(), e0 = emps.find(e => e.id === sel) || null;
+    const linha = k => { const i = DFC_MATRIZ.infoConta(k); return `<label class="rx-conta" data-conta="${esc(k.id)}"><input type="checkbox" name="contas" value="${esc(k.id)}" data-lista="1"><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')}</div></div><div class="vz">${this.pills07(DFC_MATRIZ.vinculos(k, e0, emps))}</div></label>`; };
+    return `<fieldset><legend>Contas bancárias consideradas no resumo</legend>
+      <p class="hint" style="margin:0 0 8px">Marque as contas que entram no demonstrativo. <b>Em branco</b>, valem automaticamente as contas padrão vinculadas à empresa emissora (cadastro de empresas / Matriz).</p>
+      <div class="rx-acoes"><button type="button" class="btn ghost sm" data-rx-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-rx-limpar>Limpar seleção</button>${this.podeEmpresas07() ? '<button type="button" class="btn ghost sm" data-rx-gerir>Gerenciar Empresas / Matriz</button>' : ''}<span class="n" data-rx-n></span></div>
+      ${contas.length ? `<div class="rx-contas" data-rx-contas role="group" aria-label="Contas bancárias consideradas no resumo">${contas.map(linha).join('')}</div>` : '<div class="empty">Nenhuma conta bancária cadastrada na DFC.</div>'}
+      <div class="rx-esc" data-rx-esc role="status" aria-live="polite"></div></fieldset>`;
+  },
+  /** liga o seletor: ações rápidas, vínculos por empresa e a mensagem do escopo (marcado manualmente × contas padrão × alerta) */
+  ligarContas07(m) {
+    const $f = n => $(`[name="${n}"]`, m), caixa = $('[data-rx-contas]', m), info = $('[data-rx-esc]', m), cont = $('[data-rx-n]', m);
+    const marcadas = () => $$('input[name="contas"]:checked', m).map(i => i.value);
+    const atualizar = () => {
+      const emps = this.empresas06(), e0 = emps.find(e => e.id === $f('empresaId').value) || null, contas = this.contas(), sel = marcadas();
+      const sc = DFC_MATRIZ.resolverEscopo({ empresa: e0, selecionadas: sel, contas });
+      $$('[data-conta]', m).forEach(l => { const k = contas.find(x => String(x.id) === l.dataset.conta); const vz = $('.vz', l); if (k && vz) vz.innerHTML = this.pills07(DFC_MATRIZ.vinculos(k, e0, emps)); });
+      if (cont) cont.textContent = sel.length ? `${sel.length} marcada${sel.length === 1 ? '' : 's'}` : 'nenhuma marcada';
+      const div = sc.modo === 'manual' ? DFC_MATRIZ.titularesDivergentes(sc.ids, contas, $f('cnpj').value, emps) : [];
+      const rot = id => { const k = contas.find(x => String(x.id) === id); return k ? ContasBancarias.rotulo(k) : id; };
+      const extra = [div.length ? `Atenção: ${div.length === 1 ? 'a conta' : 'as contas'} ${div.map(rot).join('; ')} ${div.length === 1 ? 'tem' : 'têm'} como titular outra empresa (CNPJ com raiz diferente da emissora).` : '', sc.n && !sc.todas ? 'O previsto do FCX é da empresa toda: com apenas parte das contas, a variação do Quadro 2 também reflete a diferença de escopo.' : ''].filter(Boolean);
+      info.innerHTML = `<div class="note ${sc.alerta ? 'warn' : ''}">${esc(sc.texto)}${extra.map(x => `<div class="hint" style="margin-top:4px">${esc(x)}</div>`).join('')}</div>`;
+    };
+    const marcarTodas = on => { $$('input[name="contas"]', m).forEach(i => { i.checked = on; }); atualizar(); };
+    if (caixa) caixa.addEventListener('change', atualizar);
+    $('[data-rx-todas]', m)?.addEventListener('click', () => marcarTodas(true));
+    $('[data-rx-limpar]', m)?.addEventListener('click', () => marcarTodas(false));
+    $f('empresaId').addEventListener('change', atualizar);
+    $f('cnpj').addEventListener('input', atualizar);
+    $('[data-rx-gerir]', m)?.addEventListener('click', () => this.abrirEmpresas07({ aoFechar: () => this.recarregar07(m) }));
+    m._atualizarContas07 = atualizar; atualizar();
+  },
+  /** depois de mexer no cadastro de empresas dentro do modal do Resumo: refaz a lista de empresas (mantendo a escolha) e as mensagens */
+  recarregar07(m) {
+    const s = $('[name="empresaId"]', m); if (!s || !document.body.contains(m)) return;
+    const emps = this.empresas06(), v = s.value, novo = emps.some(e => e.id === v) || v === '__outra' ? v : emps[0] ? emps[0].id : '__outra';
+    s.innerHTML = this.opcoesEmpresa07(emps, novo); s.value = novo; s.dispatchEvent(new Event('change', { bubbles: true }));
+  },
+  /** contas do escopo a partir do formulário (d = UI.lerForm do modal): marcadas à mão ou, em branco, as contas padrão da empresa escolhida */
+  escopo07(d) {
+    const e0 = this.empresas06().find(e => e.id === d.empresaId) || null;
+    return DFC_MATRIZ.resolverEscopo({ empresa: e0, selecionadas: d.contas || [], contas: this.contas() });
+  },
+  textoEscopo07(sc, d) {
+    const e0 = this.empresas06().find(e => e.id === d.empresaId) || null, ds = DFC_MATRIZ.descreverEscopo(sc, this.contas().map(k => DFC_MATRIZ.infoConta(k)), e0);
+    return { escopoCurto: ds.curto, escopoLongo: ds.longo };
+  },
+
+  /* ---------- Gerenciar Empresas / Matriz ---------- */
+  corpoEmpresas07() {
+    const emps = this.empresas07(), pode = this.podeEmpresas07(), contas = this.contas(), salvo = !!Repo.get('config', 'empresas')?.lista?.length;
+    const nomeConta = id => { const k = contas.find(x => String(x.id) === id); return k ? (k.apelido || ContasBancarias.rotulo(k)) : null; };
+    const linha = e => { const nomes = e.contasPadrao.map(nomeConta).filter(Boolean); return `<tr><td class="cell-main">${esc(e.nome || e.razao)}${e.matriz ? ' <span class="mt-badge" title="Matriz principal do grupo">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td>${e.situacao ? `<span class="pill ${e.situacao === 'Ativa' ? 'ok' : 'warn'}">${esc(e.situacao)}</span>` : '<span class="hint">—</span>'}</td><td>${nomes.length ? `<b>${nomes.length}</b> <span class="hint">${esc(nomes.slice(0, 3).join(', '))}${nomes.length > 3 ? ` e mais ${nomes.length - 3}` : ''}</span>` : '<span class="hint">nenhuma</span>'}</td>${pode ? `<td class="acts"><button class="iconbtn" data-mt-editar="${esc(e.id)}" aria-label="Editar ${esc(e.nome || e.razao)}">${ICON.editar}</button></td>` : ''}</tr>`; };
+    return `<p class="hint" style="margin-top:0">Cadastro de empresas do ambiente (o mesmo do Conciliador de Meios de Pagamento). Marque a <b>Empresa Matriz</b> e associe a cada empresa as <b>contas bancárias padrão</b>: no Resumo Executivo da DFC, deixar as contas em branco usa essas contas automaticamente.${!salvo && emps.length ? ' <b>Sugestão inicial</b> (ainda não gravada).' : ''}</p>
+      ${pode ? '<div class="row" style="justify-content:flex-end;margin-bottom:8px"><button class="btn sec" data-mt-nova>+ Nova empresa</button></div>' : '<div class="note">Seu perfil consulta o cadastro de empresas, mas não edita.</div>'}
+      ${emps.length ? `<div class="tbl-wrap mt-lista"><table><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th>Situação</th><th>Contas padrão</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${emps.map(linha).join('')}</tbody></table></div>` : '<div class="empty">Nenhuma empresa cadastrada neste ambiente. Use “+ Nova empresa”.</div>'}`;
+  },
+  abrirEmpresas07({ aoFechar } = {}) {
+    if (!g07()) return;
+    UI.modal({ titulo: 'Gerenciar Empresas / Matriz', largo: true, corpo: this.corpoEmpresas07(), acoes: [{ rotulo: 'Fechar', classe: 'sec' }],
+      aoAbrir: m => { this._mgr07 = m; m.addEventListener('click', ev => { const b = ev.target.closest('[data-mt-editar],[data-mt-nova]'); if (b) this.abrirEmpresa07(b.dataset.mtEditar || ''); }); },
+      aoFechar: () => { this._mgr07 = null; if (aoFechar) aoFechar(); } });
+  },
+  atualizarEmpresas07() { const m = this._mgr07; if (m && document.body.contains(m)) { const b = $('.body', m); if (b) b.innerHTML = this.corpoEmpresas07(); } },
+  /** empresa: Razão Social, CNPJ (busca na Receita), Situação, Empresa Matriz e Contas Bancárias Associadas (padrão desta empresa) */
+  abrirEmpresa07(id) {
+    if (!this.podeEmpresas07()) return UI.toast('Seu perfil não pode editar o cadastro de empresas.');
+    const lista = this.empresas07(), orig = id ? lista.find(x => x.id === id) : null, contas = this.contas();
+    const e = orig || { id: '', nome: '', razao: '', cnpj: '', situacao: '', matriz: false, contasPadrao: [] }, outraMatriz = lista.find(x => x.matriz && x.id !== e.id);
+    const emps = lista, linha = k => { const i = DFC_MATRIZ.infoConta(k), t = DFC_MATRIZ.titularRotulo(k, emps), outras = emps.filter(x => x.id !== e.id && x.contasPadrao.includes(String(k.id))).map(x => x.nome || x.razao);
+      return `<label class="rx-conta"><input type="checkbox" name="contasPadrao" value="${esc(k.id)}" data-lista="1" ${e.contasPadrao.includes(String(k.id)) ? 'checked' : ''}><div><div class="t">${esc(i.banco)} · ${esc(i.agConta)}</div><div class="d">${esc(i.descricao || '—')} · Titular: ${t ? esc(t) : 'não informado'}</div></div><div class="vz">${k.ativa === false ? '<span class="pill neutral">Inativa</span>' : ''}${outras.length ? `<span class="pill info" title="Também é padrão de outra empresa">Também em ${esc(outras.join(', '))}</span>` : ''}</div></label>`; };
+    UI.modal({ titulo: id ? 'Empresa · editar' : 'Nova empresa', largo: true,
+      aoAbrir: m => {
+        if (g94()) Cnpj94.ligar(m, { preencher: (d, f) => ({ razao: d.razaoSocial, nome: $('[name="nome"]', f)?.value.trim() ? undefined : d.nomeFantasia || d.razaoSocial, situacao: DFC_MATRIZ.situacao(d.situacao) || undefined }) });
+        const n = $('[data-mt-n]', m), conta = () => { const q = $$('input[name="contasPadrao"]:checked', m).length; if (n) n.textContent = q ? `${q} conta${q === 1 ? '' : 's'} padrão` : 'nenhuma conta padrão'; };
+        const todas = on => { $$('input[name="contasPadrao"]', m).forEach(i => { i.checked = on; }); conta(); };
+        $('[data-mt-todas]', m)?.addEventListener('click', () => todas(true)); $('[data-mt-limpar]', m)?.addEventListener('click', () => todas(false));
+        m.addEventListener('change', ev => { if (ev.target.matches?.('input[name="contasPadrao"]')) conta(); }); conta();
+      },
+      corpo: `<div class="form-grid">${campo('Nome (como aparece no painel)', 'nome', e.nome)}${campo('Razão social', 'razao', e.razao)}${g94() ? Cnpj94.campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '') : campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '', { attrs: 'inputmode="numeric" placeholder="00.000.000/0000-00"' })}${campo('Situação', 'situacao', e.situacao || '', { opcoes: [['', 'Não informada'], ...DFC_MATRIZ.SITUACOES.map(s => [s, s])], dica: 'Preenchida pela consulta do CNPJ na Receita Federal; pode ser ajustada.' })}
+        <div class="field full"><label class="check"><input type="checkbox" name="matriz" ${e.matriz ? 'checked' : ''}> <span><b>Empresa Matriz</b> — a Matriz principal do grupo (só pode haver uma)${outraMatriz ? `. Hoje a Matriz é “${esc(outraMatriz.nome || outraMatriz.razao)}”: marcar esta empresa a desmarca` : ''}.</span></label></div></div>
+        <h3 style="margin:16px 0 4px">Contas Bancárias Associadas (Padrão desta Empresa)</h3>
+        <p class="hint" style="margin:0 0 8px">Marque todas as contas às quais esta empresa tem acesso. No Resumo Executivo da DFC, quando nenhuma conta for marcada à mão, valem estas contas.</p>
+        ${contas.length ? `<div class="rx-acoes"><button type="button" class="btn ghost sm" data-mt-todas>Marcar todas</button><button type="button" class="btn ghost sm" data-mt-limpar>Limpar seleção</button><span class="n" data-mt-n></span></div><div class="mt-contas">${contas.map(linha).join('')}</div>` : '<div class="empty">Nenhuma conta bancária cadastrada na DFC (FCX › DFC › Contas bancárias).</div>'}`,
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar', acao: async m => {
+        const d = UI.lerForm(m), cnpj = String(d.cnpj || '').replace(/\D/g, '');
+        const nova = { ...(orig || {}), id: orig ? orig.id : '', nome: String(d.nome || '').trim(), razao: String(d.razao || '').trim(), cnpj, situacao: d.situacao || '', matriz: !!d.matriz, contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [] };
+        if (!orig) { nova.id = (typeof ConcMP !== 'undefined' ? ConcMP.slug(nova.nome) : '') || 'emp-' + uid(); if (lista.some(x => x.id === nova.id)) nova.id += '-' + uid().slice(-4); }
+        const er = DFC_MATRIZ.validar(nova, lista, orig ? orig.id : ''); if (er.length) { UI.toast(er[0]); return false; }
+        const r = DFC_MATRIZ.salvarEmpresa(lista, nova);
+        await Repo.salvar('config', 'empresas', { lista: r.lista }, { modulo: 'conciliacao', rotulo: `Empresa · ${nova.nome}` });
+        UI.toast(r.desmarcou ? `Empresa salva. “${r.desmarcou}” deixou de ser a Matriz.` : 'Empresa salva');
+        if (typeof ConcMP !== 'undefined' && ConcMP.v70()) setTimeout(() => ConcMP.sincronizarVinculos().catch(() => { }), 30); // v13.70: vincula os ECs pelo CNPJ
+        this.atualizarEmpresas07();
+      } }] });
+  },
+
+  /* ---------- Conta bancária: CNPJ / Empresa titular e Conta padrão da Empresa Matriz ---------- */
+  camposConta07(c) {
+    const emps = this.empresas07(), m = DFC_MATRIZ.matriz(emps), pode = this.podeEmpresas07(), dig = DFC_MATRIZ.dig(c.titularCnpj);
+    const sel = c.titularEmpresaId && emps.some(e => e.id === c.titularEmpresaId) ? c.titularEmpresaId : dig ? '__outro' : '';
+    const op = [['', 'Não informado'], ...emps.map(e => [e.id, `${e.matriz ? '[Matriz] ' : ''}${e.nome || e.razao}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ''}`]), ['__outro', 'Outro CNPJ (informar ao lado)']];
+    const padrao = !!m && !!c.id && m.contasPadrao.includes(String(c.id));
+    if (!this._ct07) { this._ct07 = true; document.addEventListener('change', ev => { const s = ev.target.closest?.('[name="titularEmpresaId"]'); if (s) this.ajustaTitular07(s.closest('.modal')); }); }
+    return `${campo('CNPJ / Empresa titular (opcional)', 'titularEmpresaId', sel, { opcoes: op, dica: 'Quem é dono da conta. Escolha uma empresa do cadastro ou “Outro CNPJ”.' })}
+      <div class="field"><label class="lbl" for="f_titularCnpj">CNPJ do titular</label><input id="f_titularCnpj" type="text" name="titularCnpj" value="${esc(sel === '__outro' ? CNPJ.formatar(dig) : (emps.find(e => e.id === sel)?.cnpj ? CNPJ.formatar(emps.find(e => e.id === sel).cnpj) : ''))}" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" autocomplete="off" ${sel === '__outro' ? '' : 'readonly'}></div>
+      <div class="field full"><label class="check"><input type="checkbox" name="padraoMatriz" ${padrao ? 'checked' : ''} ${m && pode ? '' : 'disabled'}> <span><b>Conta padrão da Empresa Matriz</b>${m ? ` — usada automaticamente no Resumo Executivo da DFC quando nenhuma conta for marcada (Matriz: ${esc(m.nome || m.razao)}).${pode ? '' : ' Só quem edita o cadastro de empresas altera este vínculo.'}` : ' — marque a Empresa Matriz em “Gerenciar Empresas / Matriz” para usar esta opção.'}</span></label></div>`;
+  },
+  /** trocar a empresa titular preenche o CNPJ (somente leitura); "Outro CNPJ" libera a digitação; "Não informado" limpa */
+  ajustaTitular07(modal) {
+    if (!modal) return; const s = $('[name="titularEmpresaId"]', modal), c = $('[name="titularCnpj"]', modal); if (!s || !c) return;
+    if (s.value === '__outro') { c.readOnly = false; c.focus(); return; }
+    const e = this.empresas07().find(x => x.id === s.value); c.readOnly = true; c.value = e && e.cnpj ? CNPJ.formatar(e.cnpj) : '';
+  },
+  normalizaTitular07(d) {
+    const emps = this.empresas07(), v = String(d.titularEmpresaId || ''), dig = DFC_MATRIZ.dig(d.titularCnpj), e = v && v !== '__outro' ? emps.find(x => x.id === v) : null;
+    if (e) return { campos: { titularEmpresaId: e.id, titularCnpj: e.cnpj || '' } };
+    if (!dig) return { campos: { titularEmpresaId: '', titularCnpj: '' } };
+    if (!DFC_MATRIZ.cnpjOk(dig)) return { erro: 'CNPJ do titular inválido: confira os dígitos verificadores.' };
+    return { campos: { titularEmpresaId: '', titularCnpj: dig } };
+  },
+  /** o checkbox "Conta padrão da Empresa Matriz" grava a associação na Matriz (config/empresas); sem permissão ou sem Matriz, não faz nada */
+  async sincronizarPadrao07(cid, ligar) {
+    if (!this.podeEmpresas07()) return;
+    const lista = this.empresas07(), m = DFC_MATRIZ.matriz(lista); if (!m || m.contasPadrao.includes(String(cid)) === !!ligar) return;
+    await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.alternarContaPadrao(lista, m.id, cid, !!ligar) }, { modulo: 'conciliacao', rotulo: `Empresa · ${m.nome || m.razao} · conta padrão` });
+  },
+  async limparPadroes07(cid) {
+    if (!this.podeEmpresas07()) return;
+    const lista = this.empresas07(); if (!lista.some(e => e.contasPadrao.includes(String(cid)))) return;
+    await Repo.salvar('config', 'empresas', { lista: DFC_MATRIZ.removerContaDosPadroes(lista, cid) }, { modulo: 'conciliacao', rotulo: 'Empresas · conta removida dos padrões' });
   },
 });
 
@@ -18909,7 +19209,7 @@ const ConcMP = {
     const pct = v => v == null || v === '' ? '<span class="hint">—</span>' : Fmt.num(Number(v), 2);
     const adqsEmp = e => [...new Set([...ecs.filter(x => x.empresaId === e.id).map(x => x.adquirente), ...Repo.todos(CONC_MP.COL_EC).filter(t => t.nivel === 'empresa' && t.empresaId === e.id).map(t => t.adquirente)])];
     const empresasHtml = `<div class="panel"><div class="row between"><div><h2>Empresas (Razão Social / CNPJ)</h2><p class="sub" style="margin:0">Cada EC é vinculado a uma empresa do grupo${v70 ? ' — automaticamente pelo CNPJ (mesma raiz da matriz e das filiais) quando o cadastro do EC não indica a empresa' : ''}.${salvo ? '' : ' <b>Sugestão inicial</b> (ainda não gravada): Resilienza e Mar Aberto.'}</p></div>${pode ? '<button class="btn sec sm" data-a="cmp-emp-nova">+ Empresa</button>' : ''}</div>
-      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${v70 ? '<th>Taxas por adquirente</th>' : ''}${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const ads = adqsEmp(e); return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b></td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs">${(() => { const n = ecs.filter(x => x.empresaId === e.id).length; return this.v701() ? `<button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button>` : n; })()}</td>
+      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${v70 ? '<th>Taxas por adquirente</th>' : ''}${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const ads = adqsEmp(e); return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && e.matriz ? ' <span class="mt-badge">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs">${(() => { const n = ecs.filter(x => x.empresaId === e.id).length; return this.v701() ? `<button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button>` : n; })()}</td>
         ${v70 ? `<td>${ads.length ? ads.map(ad => `<span class="pill ${this.taxasEmpresa(e.id, ad) ? 'ok' : 'warn'}" title="${this.taxasEmpresa(e.id, ad) ? 'taxas cadastradas' : 'sem taxas'}">${esc(ad)}</span>`).join(' ') : '<span class="hint">—</span>'}</td>` : ''}
         ${pode ? `<td class="acts">${v70 ? `<button class="btn ghost sm" data-a="cmp-emp-taxas" data-id="${esc(e.id)}">Editar Taxas das Adquirentes</button>` : ''}<button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
     const avisos = [semEmp ? `${semEmp} EC(s) sem empresa vinculada${v70 ? ' (CNPJ do EC/TEF e da loja não conferem com nenhuma empresa)' : ''}` : '', semTx ? `${semTx} EC(s) sem taxas contratadas` : '', dups ? `${dups} EC(s) repetido(s) na rede — o EC é a chave da leitura das vendas e precisa ser único` : ''].filter(Boolean);
@@ -19017,13 +19317,14 @@ const ConcMP = {
   },
   abrirEmpresa(id) {
     if (!this.podeTaxas()) return;
+    if (g07() && typeof FluxoDFC !== 'undefined' && FluxoDFC.abrirEmpresa07) return FluxoDFC.abrirEmpresa07(id); // v14.07: Matriz, situação e contas padrão
     const lista = clone(this.empresas()), e = id ? lista.find(x => x.id === id) : { id: '', nome: '', razao: '', cnpj: '' };
     UI.modal({ titulo: id ? 'Empresa · editar' : 'Nova empresa', aoAbrir: m => { if (g94()) Cnpj94.ligarEmpresa(m); }, corpo: `<div class="form-grid">${campo('Nome (como aparece no painel)', 'nome', e.nome)}${campo('Razão social', 'razao', e.razao)}${g94() ? Cnpj94.campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '') : campo('CNPJ', 'cnpj', e.cnpj ? CNPJ.formatar(e.cnpj) : '', { attrs: 'inputmode="numeric" placeholder="00.000.000/0000-00"' })}</div>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar', acao: async m => {
         const d = UI.lerForm(m), cnpj = String(d.cnpj || '').replace(/\D/g, '');
         if (!String(d.nome || '').trim()) { UI.toast('Informe o nome da empresa.'); return false; }
         if (cnpj && !CNPJ.valido(cnpj)) { UI.toast('CNPJ inválido.'); return false; }
-        const novo = { id: e.id || this.slug(d.nome) || 'emp-' + uid(), nome: String(d.nome).trim(), razao: String(d.razao || '').trim(), cnpj };
+        const novo = { ...e, id: e.id || this.slug(d.nome) || 'emp-' + uid(), nome: String(d.nome).trim(), razao: String(d.razao || '').trim(), cnpj };
         if (!e.id && lista.some(x => x.id === novo.id)) novo.id += '-' + uid().slice(-4);
         const out = id ? lista.map(x => x.id === id ? novo : x) : [...lista, novo];
         await Repo.salvar('config', 'empresas', { lista: out }, { modulo: 'conciliacao', rotulo: `Empresa · ${novo.nome}` }); UI.toast('Empresa salva');
@@ -19592,7 +19893,7 @@ const ConcMP = {
     const ecs = this.ecs(), pode = this.podeTaxas(), emp = this.empresas(), salvo = !!Repo.get('config', 'empresas')?.lista?.length, semEmp = ecs.filter(e => !e.empresaId).length;
     return `<div class="panel cmp-emp72"><div class="row between"><div><h2>Empresas (Razão Social / CNPJ)</h2><p class="sub" style="margin:0">Usadas na coluna Empresa / CNPJ das regras e no EC das lojas (vínculo automático pelo CNPJ quando o EC não indica a empresa). Clique no número de ECs para a varredura.${salvo ? '' : ' <b>Sugestão inicial</b> (ainda não gravada): Resilienza e Mar Aberto.'}</p></div><div class="row">${pode ? '<button class="btn ghost sm" data-a="cmp-vincular">Vincular ECs pelo CNPJ</button><button class="btn sec sm" data-a="cmp-emp-nova">+ Empresa</button>' : ''}</div></div>
       ${semEmp ? `<div class="note warn" style="margin:10px 0 0">${semEmp} EC(s) sem empresa vinculada (CNPJ do EC/TEF e da loja não conferem com nenhuma empresa).</div>` : ''}
-      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const n = ecs.filter(x => x.empresaId === e.id).length; return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b></td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs"><button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button></td>${pode ? `<td class="acts"><button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
+      <div class="tbl-wrap" style="margin-top:10px"><table class="nolabel cmp-emp"><thead><tr><th>Empresa</th><th>Razão social</th><th>CNPJ</th><th class="num">ECs</th>${pode ? '<th></th>' : ''}</tr></thead><tbody>${emp.map(e => { const n = ecs.filter(x => x.empresaId === e.id).length; return `<tr data-emp="${esc(e.id)}"><td><b>${esc(e.nome)}</b>${g07() && e.matriz ? ' <span class="mt-badge">Matriz</span>' : ''}</td><td>${esc(e.razao || '—')}</td><td class="mono">${e.cnpj ? esc(CNPJ.formatar(e.cnpj)) : '—'}</td><td class="num cmp-emp-ecs"><button type="button" class="cmp-varr-bt" data-a="cmp-emp-varredura" data-id="${esc(e.id)}" title="Varredura e auditoria dos ECs da empresa">${n}</button></td>${pode ? `<td class="acts"><button class="iconbtn" data-a="cmp-emp-editar" data-id="${esc(e.id)}" aria-label="Editar">${ICON.editar}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div></div>`;
   },
   renderRegras() {
     if (!['adq_taxas', 'lojas'].every(c => Repo.prontas.has(c))) return '<div class="panel"><p class="muted" style="margin:0">Carregando…</p></div>';
