@@ -55,6 +55,8 @@ import { NIVEL } from '../lib/regras.mjs';
 import * as M from '../lib/contabil-motor.mjs';
 import { permissoesEfetivas, normalizarPermissoes, tem } from '../lib/permissoes.mjs';
 import { gravar as gravarDoc } from '../lib/documentos.mjs';
+import { aprovadorDelegado, financeiroDaSessao, PERM_APROVAR_VIAGEM } from '../lib/arvore-rh.mjs';
+import { decisaoEncerramento, registrarAuditoria, EVENTO_SEM_OFX, ativoNaSessao } from '../lib/viagem-1412.mjs';
 import * as RD from '../lib/contabil-radar.mjs';
 import * as CG from '../lib/carga-falco.mjs';
 import { ambienteAtual } from '../lib/ambiente.mjs';
@@ -403,10 +405,14 @@ const reais = c => M.reais(c);
 async function rotaAdiantamentos(req, sess, perms, acao) {
   const d = await corpo(req), master = sess.nivel >= NIVEL.admin;
   if (acao === 'encerrar') {
-    if (!master) throw new ErroHttp(403, 'Só o Master encerra a prestação de contas (dinheiro de viagem é decisão do Master).');
+    const SO_MASTER = 'Só o Master encerra a prestação de contas (dinheiro de viagem é decisão do Master).';
+    if (!master && !(ativoNaSessao(sess) && tem(sess.perms, PERM_APROVAR_VIAGEM))) throw new ErroHttp(403, SO_MASTER); /* v14.12: o Financeiro com viagens.aprovar também encerra (abaixo: nunca o próprio pedido) */
     return tx(async t => {
       const v = await lerViagem(t, d.viagemId); if (v.acerto?.encerradoEm || v.status === 'concluido') throw new ErroHttp(409, 'Esta prestação de contas já foi encerrada.');
-      if (!['aguardando_prestacao', 'prestacao_enviada'].includes(v.status)) throw new ErroHttp(422, 'A prestação só é encerrada depois do pagamento do adiantamento.');
+      if (!master) { const r = aprovadorDelegado({ perms: sess.perms, perfil: sess.perfil, uid: sess.uid, funcionarioId: sess.usuario?.funcionarioId, financeiro: await financeiroDaSessao(sess), viagem: v, recursoAtivo: sess.recursoAtivo });
+        if (!r.ok) throw new ErroHttp(403, r.motivo.startsWith('autoaprovação') ? 'Autoaprovação não é permitida: outro aprovador do Financeiro (ou o Master) precisa encerrar este adiantamento.' : r.motivo === 'fora do setor Financeiro' ? 'Encerrar o adiantamento: Master ou aprovador do setor Financeiro.' : SO_MASTER); }
+      if (!['aguardando_prestacao', 'prestacao_enviada', 'aguardando_ofx'].includes(v.status)) throw new ErroHttp(422, 'A prestação só é encerrada depois do pagamento do adiantamento.');
+      const dec = decisaoEncerramento(v, d.justificativa, ativoNaSessao(sess)); if (dec.erro) throw new ErroHttp(422, dec.erro, { codigo: 'justificativa_ofx' }); /* v14.12: devolução ainda sem crédito no OFX */
       const ac = acertoDaViagem(v); if (ac.semAnalise) throw new ErroHttp(422, `${ac.semAnalise} despesa(s) sem análise gravada: abra o Acerto de Contas, confira a crítica e salve antes de encerrar.`);
       const venc = v.politica?.prazoData && v.politica.prazoData >= hojeISO() ? v.politica.prazoData : hojeISO();
       const titulos = ac.grupos.filter(g => g.saldo).map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, tipo: g.tipo, valor: reais(Math.abs(g.saldo)), status: 'aberto', vencimento: venc }));
@@ -414,9 +420,12 @@ async function rotaAdiantamentos(req, sess, perms, acao) {
          fechado, conta faltando) desfaz o encerramento inteiro e volta para a tela; sem plano de contas, fica "pendente". */
       const contabil = await contabilizarViagem(t, sess, v, ac);
       const acerto = { encerradoEm: new Date().toISOString(), encerradoPor: sess.uid, encerradoPorNome: sess.usuario?.nome || 'Master', adiantado: reais(ac.adiantado), comprovado: reais(ac.comprovado), aprovado: reais(ac.aprovado), glosado: reais(ac.comprovado - ac.aprovado),
-        saldo: reais(ac.adiantado - ac.aprovado), devolver: reais(ac.devolver), reembolsar: reais(ac.reembolsar), grupos: ac.grupos.map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, adiantado: reais(g.adiantado), aprovado: reais(g.aprovado), glosado: reais(g.glosado), saldo: reais(g.saldo), tipo: g.tipo })), titulos, contabil };
+        saldo: reais(ac.adiantado - ac.aprovado), devolver: reais(ac.devolver), reembolsar: reais(ac.reembolsar), grupos: ac.grupos.map(g => ({ funcionarioId: g.funcionarioId, nome: g.nome, adiantado: reais(g.adiantado), aprovado: reais(g.aprovado), glosado: reais(g.glosado), saldo: reais(g.saldo), tipo: g.tipo })), titulos, contabil,
+        ...(dec.semOfx ? { semOfx: { justificativa: dec.justificativa, por: sess.uid, porNome: sess.usuario?.nome || 'Master', em: new Date().toISOString() } } : {}) };
       const txt = `Prestação encerrada (acerto final) · despesas aprovadas ${M.fmt(ac.aprovado)} de ${M.fmt(ac.adiantado)} adiantados${ac.devolver ? ` · a devolver ${M.fmt(ac.devolver)}` : ''}${ac.reembolsar ? ` · a reembolsar ${M.fmt(ac.reembolsar)}` : ''}${contabil.pendente ? ' · contabilização pendente' : ` · lançamentos nº ${contabil.lancamentos.map(l => l.numero).join(', ')}`}`;
-      const { id, ...dados } = v; await gravarDoc(t, sess, CAM_VIAGEM(id), { ...dados, status: 'concluido', concluidoEm: acerto.encerradoEm, concluidoPor: sess.uid, concluidoPorNome: acerto.encerradoPorNome, acerto, historico: histV(v, sess, txt, v.status, 'concluido') });
+      const devolucao = v.devolucao12 ? { devolucao12: { ...v.devolucao12, status: dec.semOfx ? 'encerrada_sem_ofx' : 'confirmada_ofx', encerradaEm: acerto.encerradoEm } } : {};
+      const { id, ...dados } = v; await gravarDoc(t, sess, CAM_VIAGEM(id), { ...dados, ...devolucao, status: 'concluido', concluidoEm: acerto.encerradoEm, concluidoPor: sess.uid, concluidoPorNome: acerto.encerradoPorNome, acerto, historico: histV(v, sess, txt + (dec.semOfx ? ` · encerrada ANTES do crédito no extrato OFX (justificativa registrada)` : ''), v.status, 'concluido') });
+      if (dec.semOfx) await registrarAuditoria(t, sess, { modulo: 'viagens', acao: EVENTO_SEM_OFX, entidade: 'viagem', entidadeId: id, rotulo: `Adiantamento ${v.nome || ''} · ${v.destino || ''}`.trim(), mudancas: [{ campo: 'justificativa', de: '', para: dec.justificativa }, { campo: 'devolução esperada', de: '', para: String(v.devolucao12?.valor ?? '') }], detalhe: 'Encerrado pelo Financeiro antes de o crédito da devolução aparecer no extrato bancário (OFX).' });
       return json(200, { acerto });
     });
   }

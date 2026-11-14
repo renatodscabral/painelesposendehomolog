@@ -119,6 +119,8 @@ export const COLECOES_MATRIZ = {
   rh_folhas: [['rh.ver_salarios'], []],
   /* v13.94: Fornecedores e Clientes (Módulo 13) — contêm CPF de pessoa física: leitura só com a permissão; Loja nunca acessa */
   parceiros: [['parceiros.ver', 'parceiros.editar', 'parceiros.excluir'], ['parceiros.editar', 'parceiros.excluir']],
+  /* v14.11: Locatários / Locadores (Módulo 3) — mesma matriz dos contratos; contêm CPF/CNPJ e chaves PIX: Loja nunca acessa */
+  partes_contratuais: [['lojas.contratos.ver'], ['lojas.contratos.editar', 'lojas.contrato.editar', 'lojas.contratos.excluir']],
 };
 /* v14.04 · DOCUMENTOS avulsos de coleções reservadas ao Master que a matriz libera (caminho sem o prefixo do ambiente → [leitura, gravação]).
    config/dfc guarda as regras de classificação, o De-para FCX → DFC e as categorias personalizadas da DFC: quem tem "Regras de classificação" (fcx.dfc.regras) grava este documento
@@ -131,12 +133,14 @@ const semAmb = c => String(c).replace(/^amb\/[^/]+\//, '');
 export function acessoPorMatriz(sess, caminho, op) {
   if (!sess || sess.trocaPendente || !sess.perms) return false;
   const r = DOCS_MATRIZ[semAmb(caminho)] || COLECOES_MATRIZ[semAmb(caminho).split('/')[0]]; if (!r) return false;
-  if ((op === 'w' || semAmb(caminho).startsWith('parceiros')) && sess.perfil === 'LOJA') return false;
+  if ((op === 'w' || semAmb(caminho).startsWith('parceiros') || semAmb(caminho).startsWith('partes_contratuais')) && sess.perfil === 'LOJA') return false;
   return (op === 'r' ? r[0] : r[1]).some(p => tem(sess.perms, p));
 }
 /** v13.94: excluir exige a permissão própria de exclusão nas coleções liberadas pela matriz (editar não basta). Master sempre pode. */
 export function exclusaoPermitida(sess, caminho) {
   if (DOCS_MATRIZ[semAmb(caminho)]) return !!sess && sess.nivel >= 3 && !sess.trocaPendente; /* v14.04: o documento liberado pela matriz só é excluído pelo Master */
-  if (semAmb(caminho).split('/')[0] !== 'parceiros') return true;
+  const colEx = semAmb(caminho).split('/')[0];
+  if (colEx === 'partes_contratuais') return !!sess && sess.nivel >= 3 || tem(sess?.perms, 'lojas.contratos.excluir'); /* v14.11: excluir locador/locatário exige a permissão própria de exclusão de contratos */
+  if (colEx !== 'parceiros') return true;
   return !!sess && sess.nivel >= 3 || tem(sess?.perms, 'parceiros.excluir');
 }

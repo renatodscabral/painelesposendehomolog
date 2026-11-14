@@ -1,6 +1,6 @@
 # Painel de Gestão Esposende · Netlify + Netlify Database (Postgres)
 
-Versão v14.09. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
+Versão v14.12. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
 **Netlify Functions**. Os dados ficam no servidor: valem em qualquer computador e são sincronizados entre quem está usando.
 
 ## Como funciona
@@ -14,6 +14,7 @@ Netlify Functions (netlify/functions)            Netlify Database (Postgres)
    /api/sessao     → login por CPF no servidor     mudancas          (sincronização entre computadores)
    /api/docs       → ler / gravar / excluir        sessoes           (login, 12 h)
    /api/docs/lote  → gravações em lote             tentativas_login  (bloqueio após 5 erros)
+   /api/docs/massa → importação em massa (v14.11)
    /api/mudancas   → o que mudou desde…            arquivos + arquivo_partes (PDF/imagens)
    /api/arquivos, /_blob/<id> → arquivos           views vw_* para consultas em SQL/BI
    /api/ambientes/<id>/docs → outro ambiente (Master) → /api/inter/* no site de destino (chave entre ambientes)
@@ -24,7 +25,7 @@ Netlify Functions (netlify/functions)            Netlify Database (Postgres)
 - **Regras de acesso no servidor:** as mesmas 39 regras do banco do claude.ai (`netlify/lib/regras.mjs`). O **Master** tem o papel de editor (salários, contratos, DFC, adquirentes, auditoria, Homologação/RC). O **Operacional** tem acesso de uso.
   - Usuários não-Master nunca recebem os hashes de senha.
   - Só alteram o próprio login (senha e último acesso) e não conseguem mudar perfil, permissões ou situação.
-- **Sincronização:** cada gravação entra na tabela `mudancas`. O painel consulta `/api/mudancas` a cada 5 s (30 s com a aba em segundo plano) e relê só as coleções que mudaram.
+- **Sincronização:** cada gravação entra na tabela `mudancas`. O painel consulta `/api/mudancas` e relê só as coleções que mudaram: a cada 5 s (30 s com a aba em segundo plano) até a v14.09 e, **desde a v14.10 (recurso `gestao_v1410`)**, a cada 30 s com a aba em uso, nenhuma consulta com a aba oculta ou sem uso por 10 minutos, e consulta imediata ao voltar, mexer ou gravar (ver a seção v14.10).
   - Exemplo: o desligamento de um funcionário encerra a sessão dele em outro computador.
 - **Arquivos:** contratos, termos e comprovantes vão em partes de 1 MB para o Postgres e são servidos em `/_blob/<id>`, só para quem está logado.
 
@@ -188,7 +189,8 @@ Nunca edite uma migração já aplicada. Crie uma nova em `netlify/database/migr
 
 - Os arquivos anexados (PDF/imagens) ficam no banco de cada site. A Clonagem copia os registros, mas não os arquivos.
 
-- Até 5,5 MB por registro e 15 MB por arquivo.
+- Importação de Fornecedores e Clientes: até **30.000 linhas e 30 MB** por planilha com a v14.11 ligada (antes, 2.000 linhas e 8 MB), gravada em lotes de 2.000 cadastros por requisição; cada requisição de `/api/docs/massa` aceita no máximo 2.000 cadastros e 5 MB de JSON.
+- Até 5,5 MB por registro e 15 MB por arquivo (no painel, 5 MB por anexo e 15 MB por imagem de termo, conferidos antes do envio). Desde a v14.10 as imagens JPG, PNG e WebP são compactadas no navegador antes de subir; PDF segue intacto.
 - Listagens vêm em páginas de até 3,5 MB.
 - A leitura por IA de documentos não existe fora do claude.ai.
 
@@ -987,3 +989,171 @@ Somente front-end (`public/index.html`) e dois testes novos (o cruzamento com o 
 - **Limites a saber:** (1) mudar o **grupo** muda o que o demonstrativo e o Resumo Executivo mostram: uma categoria de **saída** movida para **Financiamento** entra no serviço da dívida (DSCR) do Resumo, e as de entrada/saída movidas para fora do Operacional saem da geração operacional; o modal avisa; (2) o nome ajustado não pode repetir o de outra categoria; (3) planilhas de importação de Fornecedores e Clientes passam a casar a categoria pelo **nome atual** (ou pelo ID); o nome antigo deixa de ser reconhecido; (4) nenhuma mudança de servidor: `config/dfc` já aceita a gravação por quem tem `fcx.dfc.regras`.
 - **Teste (dados fictícios):** `tests/teste-dfc-categorias-padrao-1409.mjs` com **72** verificações em Node (roda o código real de `public/index.html`, sem navegador e sem banco): validação do ajuste (nome saneado, 3 a 60 caracteres, sem repetir, os 4 grupos), ID e sentido nunca mudam, transferência só renomeia, reflexo em `categorias()`, seletor por sentido, demonstrativo, consolidação e Resumo A4, referências pelo ID, exclusão da padrão bloqueada, registros quebrados ignorados, recurso desligado e religado, a tabela (21 lápis, lixeira desabilitada, selo, permissão), o modal (campos travados, validações, gravação, recálculo só quando o grupo muda, restaurar) e a constante `DFC_CATEGORIAS` idêntica à da v14.08 (md5).
 - **Uso:** `node tests/teste-dfc-categorias-padrao-1409.mjs`.
+
+
+## v14.10 · Economia silenciosa de consumo no Netlify: sincronização inteligente e imagens compactadas (recurso `gestao_v1410`)
+
+Versão **só de front-end** (`public/index.html`), sem mudar nenhuma tela e sem nenhum botão novo. O objetivo é gastar menos invocações das Netlify Functions e deixar o Postgres do Netlify entrar em suspensão (*scale-to-zero*) quando ninguém está usando o painel. O backend **não mudou** (`mudancas.mjs`, `arquivos.mjs` e todo o `netlify/` são idênticos aos da v14.09). Com o recurso `gestao_v1410` ativo só na **Homologação**; em **Produção** e na **Falco** passa a valer depois de **"Liberar Versão em Produção"** (a página passa do ciclo antigo para o novo na hora, sem recarregar).
+
+### 1 · Sincronização entre computadores (polling inteligente)
+
+- **Aba em uso:** consulta a cada **30 s** (antes: 5 s). A primeira consulta continua saindo 5 s depois de abrir o painel.
+- **Aba oculta ou minimizada** (`document.visibilityState === 'hidden'`): **nenhuma** consulta (antes: uma a cada 30 s).
+- **Ociosidade de 10 minutos:** sem movimento do mouse, clique, rolagem, toque ou tecla por 10 minutos, **nenhuma** consulta, mesmo com a aba aberta na tela (madrugada, domingos e feriados). Os eventos são vigiados na página e também **dentro do iframe do FCX** (mesma origem), para não tratar como ocioso quem trabalha só no FCX.
+- **Retomada imediata e silenciosa**, sem botão, aviso ou modal: ao **voltar para a aba** (`visibilitychange` para visível ou `focus`), ao **voltar a mexer** depois da ociosidade e ao **concluir qualquer gravação** do painel. Pedidos seguidos viram **uma** consulta: no máximo uma a cada 2 s na volta/interação e uma a cada 5 s em rajada de gravações (a primeira sai na hora). Com a aba oculta nem a gravação consulta (a volta à aba é quem sincroniza).
+- **Falha de rede ou do servidor:** recuo progressivo **60 s → 120 s**; ao responder de novo volta aos 30 s. **Sessão encerrada (401):** a consulta para (sem insistir a cada ciclo) e tenta de novo na próxima volta, interação ou novo login.
+- **Nada se perde na pausa:** o painel guarda o último número da fila de mudanças (`seq`) e, ao retomar, pergunta só o que mudou desde então. Como o servidor guarda o log de mudanças por **3 dias** (`faxina`), se a última consulta bem-sucedida tem **24 h ou mais** (fim de semana, feriadão), a volta **relê também todas as coleções vigiadas** (uma vez). Antes disso relê só o que mudou.
+- **Outros temporizadores que mantinham o banco acordado seguem a mesma pausa:** a revalidação da sessão (a cada 60 s) e a publicação do Resumo do Recebível do relatório matinal (a cada 20 min). Ao voltar, a revalidação roda (já rodava ao voltar à aba) e o Resumo do Recebível é publicado se o que ficou adiado mudou ou passou de 20 min.
+- **Recurso desligado:** vale exatamente o ciclo da v14.09 (5 s em uso, 30 s oculta, sem pausa por ociosidade, sem consulta por gravação).
+- **Estimativa (por pessoa com o painel aberto, só as consultas de sincronização):** 8 h em uso passam de ~5.760 para ~960 consultas; aba oculta passa de ~120 por hora para 0; painel esquecido aberto à noite passa de ~720 por hora para 0 depois dos 10 primeiros minutos.
+
+### 2 · Compactação transparente de imagens antes do envio
+
+- **Quais:** `.jpg`, `.jpeg`, `.png` e `.webp`, no envio de anexos para o servidor (`Arquivos.enviar`: contratos, apólices, comprovantes, vouchers, PDF anexo) e nos termos assinados gravados em Base64 (`Arquivos.reduzirImagem`; a redução antiga de 2000 px/85 % passa a seguir a regra abaixo com o recurso ligado).
+- **Regra:** o maior lado só é reduzido se passar de **1600 px** (proporcional, via `<canvas>`, respeitando a orientação EXIF) e a imagem é regravada em **JPEG com qualidade 0,82**; PNG transparente ganha fundo branco. A versão comprimida **só é usada quando fica menor** que o original; se não ficar (JPEG já otimizado), segue o original, o mesmo arquivo.
+- **Intactos:** **PDF** (o mesmo arquivo, byte a byte, sem sequer abrir), GIF e qualquer outro tipo. Se o navegador não conseguir decodificar a imagem, segue o original, sem erro e sem aviso.
+- **Limites preservados:** 5 MB por anexo e 15 MB por imagem de termo continuam conferidos **antes** da compactação, com as mesmas mensagens (uma imagem acima do limite continua recusada).
+- **Nome e tipo:** a imagem compactada vira `.jpg` / `image/jpeg`; o nome, o tamanho e o tipo gravados no registro são os do arquivo final (o servidor confere partes e tamanho do que recebe).
+- **Efeito no consumo:** o envio ocupa `1 + partes + 1` chamadas (partes de 1 MB). Uma foto de 2,7 MB passou de 5 chamadas para 3; fotos de celular de 3 a 5 MB costumam caber em uma parte só.
+- **Sem passo novo:** acontece durante o envio atual, sem modal, aviso ou botão. A compactação leva cerca de 0,1 s por foto comum.
+
+### O que esta versão NÃO resolve sozinha: a rotina de notificações a cada 5 minutos
+
+A função agendada `notificacoes-agendadas.mjs` roda a cada **5 minutos, 24 horas por dia** (`schedule: '*/5 * * * *'`) e consulta o banco em cada rodada (alertas de falta de caixa, relatório das 07:30, IEO de segunda às 08:00, SLA às 08:30, confirmação do backup). Isso é uma ida ao Postgres a cada 5 minutos, a noite toda, e **por si só impede a suspensão automática do banco**, mesmo com todos os navegadores parados. A v14.10 **não mexe nela** porque os horários e a frequência (a falta de caixa é avisada a cada rodada) são decisão de negócio. Se a economia da madrugada for prioridade, as opções são: limitar o cron às horas de operação (por exemplo `*/5` só entre 10:00 e 01:00 UTC, mantendo a janela do backup das 02:59 UTC), ou espaçar para `*/15` fora do horário comercial. Fica para uma versão própria, com a sua decisão dos horários.
+
+### Limites a saber
+
+1. A pausa por ociosidade olha a interação na página e no iframe do FCX; uma janela de **outra origem** não é vista (o painel não abre nenhuma).
+2. O relatório matinal das 07:30 usa o Resumo do Recebível mais recente: se ninguém usar o painel de madrugada, ele não é atualizado por uma aba esquecida aberta, e o relatório avisa que está defasado, como já fazia quando ninguém abria o painel.
+3. Uma pessoa que fica parada a 9 min 50 s e volta a mexer continua sem pausa; o limite é contado desde a última interação.
+4. Com a aba oculta, uma gravação que termina em segundo plano espera a volta à aba para sincronizar.
+5. A compactação regrava a imagem em JPEG: texto pequeno em foto de documento continua legível a 1600 px, mas quem precisa do arquivo original em alta resolução deve anexá-lo como PDF.
+
+### Teste (dados fictícios)
+
+- `tests/teste-economia-netlify-1410.mjs`: **106** verificações em Node, em segundos, **sem navegador, sem banco e sem esperar de verdade** (relógio e temporizadores simulados rodam 24 h de ociosidade em milissegundos). Roda o código real de `public/index.html` (`SyncEco`, `NetlifyAdapter`, `ImgEco`, `Arquivos.enviar`/`reduzirImagem`) e confere: recurso desligado = ciclo da v14.09; 30 s em uso; pausa com a aba oculta; pausa aos 10 min (exata, sem timers pendentes); retomada imediata ao voltar à aba, mexer (os 8 eventos, inclusive no iframe) e gravar; coalescência de rajadas; recuo 60/120 s e volta a 30 s; 401; releitura geral só depois de 24 h; ativação no meio do uso; imagens (dimensões, qualidade, só-se-ficar-menor, PDF/GIF intactos, limites, menos chamadas); CSS, botões e ações idênticos aos da v14.09; servidor intacto; Regra de Ouro.
+- **Uso:** `node tests/teste-economia-netlify-1410.mjs`.
+- Verificado também fora do ZIP: 32 mutações do código do painel (todas detectadas pelo teste), 34 verificações no Chromium real (mouse, teclado, clique, rolagem, iframe e canvas de verdade, com o relógio simulado do Playwright) e 18 ponta a ponta com o servidor das funções e um Postgres local (Produção antes e depois de liberar o recurso, `/api/arquivos` com imagem compactada e PDF idêntico, dois computadores com um ocioso e outro com a aba oculta).
+
+## v14.11 · Lote 1 de melhorias: pagamentos em acordeão, menu com rolagem, reajuste de contratos pelo Banco Central, Locatários/Locadores e importação de até 30.000 linhas (recurso `gestao_v1411`)
+
+Ativa na **Homologação**; em **Produção** e na **Falco** só depois de "Liberar Versão em Produção" (o recurso vale na hora, sem recarregar). Com o recurso desligado, o painel é o da v14.10. A **Regra de Ouro** foi preservada: `fcx.html`, `contabilidade.html` e `contabilidade_v1391.html` não foram alterados, e nada muda no layout do celular (`<= 768 px`) da Tela Inicial.
+
+### 1 · Tela Inicial: Pagamentos (Saídas) em acordeão (só acima de 768 px)
+
+- Em notebook e iPad (largura acima de 768 px), a lista "Títulos a pagar hoje" das Saídas do Dia ganha um cabeçalho com o resumo (**quantidade de lançamentos e valor total**) e mostra por padrão só os **3 títulos mais próximos do vencimento**, com o botão **"Ver todos os X pagamentos ▾"** / **"Recolher ▴"**.
+- Os títulos ocultos continuam no HTML (só levam o atributo `hidden`), então **Selecionar Todos**, os totais e **Finalizar Aprovações** valem para o lote inteiro, aberto ou recolhido. Abrir e fechar não refaz a tela (mantém a rolagem e as marcações).
+- A ordem é a do vencimento (empate mantém a ordem do FCX). Atenção: nas Saídas do Dia o vencimento de cada título é a **data da saída no FCX**, então, num dia comum, todos têm a mesma data e aparecem os 3 primeiros na ordem do FCX; a ordenação por data só faz diferença quando há saídas de fim de semana ou feriado que caem no mesmo dia útil.
+- **Celular e tablet pequeno (`<= 768 px`):** exatamente como antes (sem cabeçalho, sem botão, sem título oculto).
+
+### 2 · Menu lateral com rolagem própria
+
+- A lista de módulos rola sozinha (`overflow-y: auto`, barra fina e discreta, sem rolagem lateral) em telas de menor altura; a barra superior (logo e ambiente) e o bloco do usuário ficam sempre visíveis. A posição da rolagem é mantida quando a tela é redesenhada e o módulo ativo é trazido para a vista.
+- Vale de 769 px para cima (acima de 900 px, o menu fixo à esquerda; de 769 a 900 px, a gaveta). Em `<= 768 px` nenhuma regra nova vale (o CSS computado do menu é idêntico com e sem a versão).
+
+### 3 · Controles de Contratos (Módulo 3)
+
+**Reajuste anual com o botão "Recalcular"** (contratos de locação e "outros" ativos, com valor e índice):
+
+- **Índices e série oficial:** `IPCA` = série **433**, `IGP-M` = **189**, `INPC` = **188** da API pública e gratuita do Banco Central (SGS, `https://api.bcb.gov.br/dados/serie/bcdata.sgs.<série>/dados?formato=json&dataInicial=…&dataFinal=…`). A consulta é feita **pelo navegador**, uma requisição por série (guardada em memória por 6 horas, limite de 9 s), sem chave e sem passar pelo servidor do painel. `% Manual` e `IVAR` (sem série pública) pedem o percentual; `Fixo (sem índice)` não tem o botão.
+- **Cálculo:** índice acumulado = produto dos fatores `(1 + i/100)` dos **12 meses que terminam no mês anterior ao da data-base** (data-base 01/03/2026 → mar/2025 a fev/2026), arredondado a 2 casas; novo valor = valor atual × (1 + acumulado/100), em centavos.
+- **Prévia comparativa** antes de gravar: **Valor atual**, **Índice acumulado no período** e **Novo valor reajustado** (com a origem, a variação mês a mês e o histórico de reajustes do contrato). Se o acumulado for negativo, uma caixa permite não reduzir o aluguel (piso de 0%).
+- **Fallback manual:** API fora do ar, tempo esgotado, mês ainda não divulgado (a janela exige os 12 meses) ou índice sem série: aparece o motivo e o campo **% manual**; nada é inventado.
+- **Ao confirmar:** regrava `valor_atual` no contrato, acrescenta ao `historico_reajustes` {data-base, índice, percentual aplicado, acumulado, de, para, fonte (API do Banco Central ou percentual manual), janela, série, quem e quando}, leva a **data-base para +1 ano** e aciona o Motor de Aluguel, que atualiza a projeção/provisão de ocupação no FCX (o mesmo caminho de qualquer alteração de contrato). O mesmo ciclo não é reajustado duas vezes sem a confirmação "Reajustar mesmo assim".
+- **Ação em lote** ("Recalcular reajustes", no topo da lista): tabela com os contratos de data-base vencida (há opção para incluir os de data-base futura), % manual por linha, soma "Aluguel mensal: de → para" e confirmação única. No lote, o índice acumulado negativo **não reduz** o aluguel (piso de 0%). Contratos que mudaram depois da prévia são pulados e avisados.
+- Novo campo opcional **% manual de reajuste (a.a.)** no contrato e a opção **% Manual** na lista de índices.
+
+**Aba "Locatários / Locadores"** (coleção `partes_contratuais`, permissões `lojas.contratos.ver/editar/excluir`, nunca para o perfil Loja): Razão Social ou Nome, Nome Fantasia, CPF/CNPJ (validados, sem repetição), Chaves PIX (as mesmas regras dos Fornecedores; uma chave não fica em dois cadastros), Loja/Contrato vinculado (vários) e Categoria DFC padrão das saídas (padrão: **Aluguel, condomínio e ocupação**) e das entradas.
+
+**Cruzamento com os Extratos OFX e a DFC** (v14.05/v14.09): as partes entram no índice do cruzamento como cadastros virtuais (`pc-…`). A saída bancária cujo histórico contenha o **CPF/CNPJ**, a **chave PIX**, a **razão social ou o nome fantasia** (inclusive o nome **truncado pelo banco**, com pelo menos 12 caracteres, no fim do histórico) de uma parte é vinculada a ela e classificada na categoria dela ou, se não houver, em **Aluguel, condomínio e ocupação**; a entrada do locatário vai para a categoria de entrada do cadastro ou para "Outras entradas". Regras: classificação manual e regra explícita da DFC continuam valendo antes do cadastro; em chave ou nome igual num Fornecedor e numa parte, vale a **parte**. Para aplicar a partes cadastradas depois aos extratos já importados, use **"Cruzar Fornecedores, PIX e Contas a Pagar"** na DFC.
+
+### 4 · Fornecedores e Clientes: importação de até 30.000 linhas
+
+- **Limite:** de 2.000 para **30.000 linhas** (30 MB). Vale com a v14.11 ligada **e** o banco do Netlify; sem isso, segue o limite e o caminho antigos.
+- **Navegador:** leitura e validação em fatias de ~25 ms (a tela continua respondendo), com `Map`/`Set` no planejamento, **barra de progresso** em cada etapa (lendo, validando, conferindo cadastros e chaves PIX) e prévia antes de gravar.
+- **Servidor:** novo `POST /api/docs/massa` (`{ colecao: 'parceiros', docs: [{ id, dados }] }`): até **2.000 cadastros e 5 MB por requisição**, **uma única instrução SQL** (`INSERT … SELECT … FROM unnest(…) ON CONFLICT (caminho) DO UPDATE`, idempotente) e **uma** linha de mudança para os outros computadores, numa transação, com a mesma permissão de editar Fornecedores. Só aceita a coleção `parceiros`.
+- **Gravação:** lotes de até 2.000 (e ~4,5 MB), com barra "Gravando cadastros: X de N · lote K de L"; falha transitória (rede, 5xx, 429) é repetida até 3 vezes; lote grande demais (413) é dividido ao meio; perda de acesso (401/403) para e informa quantos ficaram de fora; erro permanente de um lote não impede os demais e o relatório lista o que faltou. Reimportar o mesmo arquivo não duplica nada (retoma de onde parou).
+- **Log de Auditoria:** **um único** registro com o resumo consolidado (linhas lidas, novos, atualizados, chaves PIX vinculadas, recusadas, chaves duplicadas, lotes).
+- **Lista paginada (achado do teste de navegador):** a tela de Fornecedores e Clientes desenhava todas as linhas e ordenava a base várias vezes por tela; com 24.000 cadastros o navegador caiu. Com a v14.11 a lista mostra **200 por página** ("Mostrando 1–200 de 24.000 · página 1 de 120", Anterior/Próxima; a busca e os filtros valem para a base inteira) e a ordenação fica em cache por alteração da coleção.
+
+### Mudanças no servidor (aditivas)
+
+`netlify/functions/docs.mjs` (rota `/api/docs/massa`), `netlify/lib/documentos.mjs` (`gravarMassa`), `netlify/lib/regras.mjs` e `netlify/lib/permissoes.mjs` (coleção `partes_contratuais`). Nenhuma migração, variável de ambiente ou rota existente foi alterada.
+
+### Limites a saber
+
+1. A consulta ao Banco Central parte do navegador de cada pessoa: precisa de internet e a API pública precisa responder (senão, % manual). Fora do Netlify (dentro do claude.ai) a rede costuma bloquear o domínio e vale o % manual.
+2. O Banco Central divulga o IPCA e o INPC em torno do dia 10 do mês seguinte e o IGP-M perto do fim do mês: para uma data-base logo no início do mês, o último mês da janela pode ainda não existir (o painel avisa e pede o percentual).
+3. A importação de `.xlsx` com 30.000 linhas é lida de uma vez pela biblioteca de planilhas (alguns segundos com a tela parada nessa etapa); prefira `.csv` para arquivos muito grandes.
+4. A lista paginada vale só com o recurso ligado; a primeira ordenação de 24.000 cadastros leva uma fração de segundo por alteração da coleção.
+5. O cruzamento das partes com extratos já importados não é automático: rode "Cruzar Fornecedores, PIX e Contas a Pagar" depois de cadastrar ou alterar uma parte.
+
+### Teste (dados fictícios)
+
+- `tests/teste-lote1-1411.mjs`: **101** verificações em Node (sem banco): flag e Regra de Ouro; CSS do menu e do acordeão (só `@media`; bloco de celular intacto); acordeão (3 visíveis, ordem, abrir/recolher, celular igual ao legado); cálculo IPCA/IGP-M/INPC com a API simulada, fallback manual e regravação do "Recalcular" (individual e em lote); vínculo Locador/Locatário × OFX × DFC (documento, chave PIX, nome truncado, sem falso positivo); parser e planejamento de **25.000 linhas** em lotes (idêntico ao síncrono, reimportação idempotente, retomada, nova tentativa, divisão em 413, 403, um só log); lista paginada e ordenação em cache; regras e rota do servidor. **Uso:** `node tests/teste-lote1-1411.mjs`.
+- `tests/teste-massa-db-1411.mjs`: **18** verificações do `/api/docs/massa` com o **Postgres local** (2.000 numa requisição, idempotência, permissões, 401/403/400/413, uma linha de mudança por lote). **Uso:** `bash tests/preparar-banco.sh`, `NETLIFY_DB_URL=… node tests/servidor-local.mjs 8890` e `node tests/teste-massa-db-1411.mjs`.
+- Ajustados por causa desta versão: `tests/teste-economia-netlify-1410.mjs` (CSS e contagem de botões aceitam a v14.10 ou a v14.11) e `tests/teste-ofx-contas-pagar-dfc-1409.mjs` (o ambiente de teste passa a incluir o cadastro de partes).
+- Verificado também fora do ZIP, no Chromium com o servidor local e o Postgres (68 verificações, a API do Banco Central simulada): acordeão a 1440, 1024 e 820 px e igual ao legado a 768 e 390 px; menu com rolagem em 1440×560, 1280×640, 1024×600 e 820×600; Recalcular IPCA, fallback com a API fora do ar e lote; cadastro de locador pela tela e cruzamento de um extrato; importação de 25.000 linhas (24.000 gravadas em 12 requisições, barra de progresso, um log, reimportação sem duplicar) e lista paginada.
+
+## v14.12 · Lote 2 de melhorias: Solicitação de Férias com calendário, organograma como base de aprovação, viagens com aprovação delegada ao Financeiro, prestação por foto, devolução × OFX e ClickBus (recurso `gestao_v1412`)
+
+Ativa na **Homologação**; em **Produção** e na **Falco** só depois de "Liberar Versão em Produção" (o recurso vale na hora, sem recarregar). Com o recurso desligado, o painel **e o servidor** são os da v14.11 (testado: o gestor de topo segue com 403 nos salários, só o Master encerra adiantamentos, nenhum botão novo aparece). A **Regra de Ouro** foi preservada: `fcx.html`, `contabilidade.html` e `contabilidade_v1391.html` não foram alterados e nenhuma linha foi acrescentada dentro das três regiões protegidas do `index.html` (OFX/contas, Adquirentes e Credsystem Módulo 6); o cruzamento OFX × devolução é um invólucro **fora** delas, que chama a importação original e só depois roda o cruzamento.
+
+### 1 · Cadastro de Funcionários (RH)
+
+**Botão "Solicitação de Férias"** no bloco "Férias e folgas" da ficha do colaborador (quem pode pedir: o próprio colaborador, o Master, os superiores dele no organograma, quem edita a equipe no seu escopo e o RH). O modal tem:
+
+- **Dois seletores antes das datas:** "Vender 1/3 das férias (Abono Pecuniário, 10 dias, art. 143 da CLT)" e "Adiantar a 1ª parcela do 13º salário (Lei 4.749/1965)".
+- **Calendário interativo** de dois meses (toque no primeiro e no último dia; navegação por mês; um chip por período). **Até 3 períodos**, somando no máximo 30 dias de gozo (20 com abono). **Regras da CLT conferidas na hora** pela mesma função de validação da v13.93: um dos períodos com **14 dias corridos ou mais** e os demais com **5 ou mais** (passam 15 + 15, 14 + 8 + 8 e 20 + 10).
+- **Prévia estimada em tempo real (bruta):** valor do dia = salário ÷ 30; férias = valor do dia × dias de gozo; 1/3 constitucional; com abono, 10 dias vendidos + 1/3 do abono; com o 13º, **50% do salário**. Mostra uma linha por componente e o total, com a nota "Estimativa bruta, sem INSS, IRRF, descontos nem médias de horas extras/comissões: o valor final é calculado pela folha". Exemplo: salário R$ 3.000,00, 14 dias, abono e 13º = 1.400,00 + 466,67 + 1.000,00 + 333,33 + 1.500,00 = **R$ 4.700,00**.
+- **Respeita a visibilidade do salário:** quem não vê o salário daquele colaborador (permissão "Pode ver salários", Master ou gestor de topo da árvore) **não recebe nenhum valor**, só o aviso de que a prévia está indisponível; as datas e as regras da CLT continuam sendo conferidas.
+- O pedido não altera o cadastro: vai para a **Liberação Remota** com o resumo (períodos, abono, 13º) e só entra no cadastro depois de aprovado.
+
+**Organograma como base da aprovação (objeto `Org12`):** Férias e Folgas de todos os colaboradores abaixo de um nó de topo seguem para o gestor daquele ramo **mesmo com o campo "Gestor direto" vazio**. O pedido grava `rota` = `{ cadeia, imediato, topo }` (só ids) e `gestorId` (o Gestor direto, se houver; senão o superior imediato). Decide quem está na cadeia (superior imediato e todos acima, até o topo do ramo) ou o Master; **ninguém decide o próprio pedido**; sem superior no organograma, volta para o Master. O cartão da Liberação mostra para quem o pedido foi roteado.
+
+**Salários pela árvore (cliente e servidor):** o gestor de topo (quem tem subordinados: "Gestor direto", responsável de departamento, sub-departamentos e lotados) passa a ver o salário **só da própria árvore**. No servidor, `GET /api/docs?caminho=salarios/<id>` devolve 200 se o colaborador está na árvore do usuário e **403 para outros setores**; a listagem da coleção `salarios` vem filtrada e o aviso de mudanças (`/api/mudancas`) chega ao gestor. **Master e quem tem a permissão global `rh.ver_salarios` continuam vendo todos** (a regra nova só acrescenta). Ler pela árvore não dá direito de gravar nem excluir salário. Vale só para o perfil Operacional (Loja nunca) e só com o recurso ligado; o servidor guarda a árvore em memória por 20 s.
+
+### 2 · Viagens e Adiantamentos
+
+**Permissão delegável `viagens.aprovar`** (Gestão de Acessos › Viagens, opção extra que só existe com o recurso; entrou na matriz `netlify/lib/matriz-acessos.mjs`, a que o `netlify/lib/permissoes.mjs` lê, e na tabela do painel). Para usuários **do setor Financeiro** (departamento com "FINANC" no nome ou abaixo de um, como lotado ou responsável) **com a permissão marcada**: aprovam solicitações de viagem e encerram prestações de contas pela Liberação Remota e pela tela de Adiantamentos. **Autoaprovação bloqueada**: o aprovador não pode ser viajante (inclusive em viagem em grupo) nem quem abriu o pedido; perfil Loja nunca aprova. **No servidor** a regra é imposta em `POST /api/contabil/adiantamentos/encerrar` (403 com mensagem própria para "sem permissão", "fora do Financeiro" e "autoaprovação"). A exclusão de adiantamento já pago continua só do Master.
+
+**Notificações padronizadas** (9 eventos: solicitada, aprovada, recusada, paga, prestação enviada, aguardando OFX, crédito localizado, encerrada, encerrada sem OFX):
+
+- **WhatsApp, resumo curto:** status, viajante, destino, período, valor, link direto do painel e a frase "O documento oficial segue por e-mail".
+- **E-mail, versão completa:** assunto, corpo em HTML e texto com todos os fatos, pronto para **anexar o PDF-resumo oficial** (`comPdf`) ou apenas referenciá-lo (Viagens › Imprimir Resumo).
+- O gerador do servidor (`netlify/lib/notif-viagem-1412.mjs`) e o do painel (botão **"Resumo para WhatsApp e e-mail"** no cartão da viagem, com "Copiar texto", "Abrir no WhatsApp" e "Abrir no e-mail") geram **exatamente o mesmo texto** (testado).
+
+**Prestação de contas mobile-first com câmera:** o campo de comprovante usa `accept="image/*,application/pdf" capture="environment"` (abre a câmera traseira no celular) e há o botão "Escolher da galeria ou arquivo". A foto é reduzida antes de anexar e o **SHA-256 do arquivo** é calculado no navegador. A **IA lê** Data, CNPJ e Estabelecimento, Valor Total, Categoria e Nº do cupom/nota, preenche o formulário **para conferência** (mostra a confiança e valida os dígitos do CNPJ) e nada é gravado sem o usuário revisar. Conferências antes de gravar a despesa: **período da viagem**, **política** (por exemplo bebida alcoólica) e **teto diário** (alertas que pedem confirmação, a glosa segue com o Financeiro); **duplicidade** (bloqueia): mesmo arquivo (hash), mesmo cupom do mesmo emitente (CNPJ) ou a combinação CNPJ + data + valor, na própria prestação ou em outra viagem. Para o Financeiro há a opção "lançar mesmo assim" (a despesa fica marcada para a análise).
+
+**Devolução de saldo × extrato OFX:**
+
+- **Comprovante da devolução** lido por IA e validado: valor igual ao saldo (±R$ 0,05), data não futura e não anterior ao pagamento do adiantamento; devolução incompleta ou maior que o saldo é recusada.
+- **Novo status "Aguardando Confirmação Bancária (OFX)":** o viajante conclui a parte dele e o adiantamento **não encerra**.
+- **Cruzamento ao importar o OFX** (Entradas × devoluções pendentes): valor ±R$ 0,05 **e** data na janela de −1 a +5 dias do comprovante **ou** nome do viajante no histórico; um crédito para uma viagem, crédito já vinculado não é reaproveitado, chave = conta + id do lançamento. O crédito aparece no cartão da viagem como **"Crédito localizado no banco"**.
+- **Só o Master ou o aprovador do Financeiro clica "Encerrar Adiantamento"** (antes, "Encerrar Prestação de Contas"). **Encerrar antes de o crédito aparecer no OFX exige justificativa** (mínimo de 10 caracteres, máximo de 500; o servidor responde 422 sem ela) e **grava o evento `encerramento_viagem_sem_ofx` no Log de Auditoria** (ramo `auditoria/<uid>/dias/<dia>`, na **mesma transação** do encerramento), além de `acerto.semOfx` e do estado final da devolução (`encerrada_sem_ofx`, ou `confirmada_ofx` quando o crédito já tinha sido localizado). A regra vale também para o Master.
+
+**ClickBus:** com transporte Ônibus (viagem aprovada ou aguardando prestação), o cartão ganha **"Comprar Passagem no ClickBus"**, que abre `https://www.clickbus.com.br/onibus/<origem-uf>/<destino-uf>?departureDate=AAAA-MM-DD` (por exemplo `recife-pe/caruaru-pe`). Sem cidade e UF de origem e destino, o painel avisa em vez de abrir.
+
+### Mudanças no servidor (aditivas, todas atrás do recurso `gestao_v1412`)
+
+Arquivos novos: `netlify/lib/arvore-rh.mjs` (árvore do organograma, salários liberados, aprovador delegado), `netlify/lib/viagem-1412.mjs` (regra do encerramento sem OFX e gravação do evento de auditoria) e `netlify/lib/notif-viagem-1412.mjs` (e-mail e WhatsApp das viagens). Alterados: `netlify/lib/documentos.mjs` e `netlify/functions/mudancas.mjs` (salário pela árvore), `netlify/functions/contabil.mjs` (rota `encerrar`: aprovador delegado, status `aguardando_ofx`, justificativa e auditoria) e `netlify/lib/matriz-acessos.mjs` (opção `viagens.aprovar`). Nenhuma migração, variável de ambiente ou rota nova.
+
+### Limites a saber
+
+1. **A leitura por IA só existe dentro do claude.ai** (capacidade `sample`). No site do Netlify este pacote não tem chamada de IA no servidor: o comprovante é anexado, o hash é calculado e as conferências (duplicidade, período, política, teto) funcionam sobre o que for digitado, mas os campos **não são preenchidos sozinhos**; o painel avisa "Leitura por IA indisponível neste acesso". Levar a leitura para o Netlify exigiria uma função de servidor com chave de API de IA (decisão e custo do negócio).
+2. A aprovação **delegada** é imposta no servidor só no **encerramento** do adiantamento. A aprovação da solicitação e da prestação pela Liberação Remota segue a regra do painel (a gravação de documentos genéricos continua checada no cliente, como já era para o Master e os gestores).
+3. A **detecção de duplicidade** olha as viagens que o usuário consegue ler.
+4. O vínculo do crédito do OFX com a viagem (`devolucao12.ofx`) é gravado pelo painel de quem importa o extrato (Financeiro); o servidor confia nessa marca ao decidir se exige justificativa. O que o servidor garante é o 422 e a auditoria quando a marca não existe.
+5. O padrão de endereço do ClickBus (`/onibus/<origem-uf>/<destino-uf>`) foi conferido no portal; **o parâmetro de data `departureDate` não pôde ser confirmado**: se o portal não o aceitar, ele apenas ignora a data.
+6. O gerador de notificações das viagens **não está ligado aos disparos automáticos** da Central de Notificações: nesta versão ele entrega o texto pelo botão do cartão da viagem e a função do servidor, pronta para ser chamada.
+7. Na devolução com mais de um viajante (repasse individual) há **um comprovante para a soma dos saldos positivos**.
+8. A cadeia regional/loja do organograma serve ao **roteamento de Férias e Folgas**; a visibilidade de salários usa só a árvore de subordinação (Gestor direto, responsável e departamentos).
+9. O recorte de salários por árvore é **garantido pelo servidor do Netlify** (200 na árvore, 403 fora). Fora do Netlify (painel dentro do claude.ai, sem servidor próprio) o cliente só **esconde** o que não é da árvore: quem filtra a leitura da coleção `salarios` é a regra de acesso da plataforma, que não foi alterada.
+
+### Teste (dados fictícios)
+
+- `tests/teste-lote2-1412.mjs`: **100** verificações em Node, sem navegador e sem banco, sobre o código real do painel e do servidor: recurso e Regra de Ouro; estimativa de férias + 1/3 + abono + 13º, calendário e regras da CLT; prévia só para quem vê o salário; roteamento pelo organograma (colegas e outros ramos não decidem; sem autoaprovação); salário por árvore; permissões delegadas do painel × servidor; resumo de WhatsApp e e-mail (painel = servidor, PDF anexado ou referenciado) e ClickBus; leitura de recibo por IA, duplicidade (hash, cupom, CNPJ + data + valor) e política/período/teto; devolução × OFX (±R$ 0,05, janela de datas, nome, um crédito por viagem) e encerramento sem OFX com justificativa e o evento no Log de Auditoria. **Uso:** `node tests/teste-lote2-1412.mjs`.
+- `tests/teste-lote2-1412-servidor.mjs`: **24** verificações com o **Postgres local** e HTTP real: salário 200 na árvore e 403 fora dela (rota, listagem, aviso de mudanças, gravação negada, Master e `rh.ver_salarios` intactos), aprovador delegado no `encerrar` (permissão, setor, autoaprovação, recurso desligado, 409) e justificativa 422 + evento `encerramento_viagem_sem_ofx`. **Uso:** `bash tests/preparar-banco.sh`, `NETLIFY_DB_URL=… node tests/servidor-local.mjs 8890` e `node tests/teste-lote2-1412-servidor.mjs`.
+- Bateria antiga de navegador (21 testes locais, painel local com a v14.12 ligada), **comparada com a mesma bateria sobre a base da v14.11**: as falhas são as mesmas de antes (testes que comparam as regiões protegidas e o número de botões de arquivo com versões antigas) e há **três diferenças esperadas desta versão**: o botão do acerto passa a se chamar "Encerrar Adiantamento" (o teste da v13.88 procurava "Encerrar Prestação de Contas"), o gestor de topo passa a carregar os salários da própria árvore (o teste da v13.93 esperava que nenhum gestor carregasse a coleção) e o varredor de botões de arquivo conta os 4 campos novos de câmera (a falha de `par-importar-arq` já existia na v14.11).
+- Ajustados por causa desta versão: `tests/teste-economia-netlify-1410.mjs` (contagem de botões da v14.12 e hash do `mudancas.mjs`) e `tests/teste-lote1-1411.mjs` (o CSS do Lote 1 termina onde começa o do Lote 2).
+- Verificado também fora do ZIP, no Chromium com o servidor local e o Postgres (**26 verificações**): recurso desligado e ligado e de novo desligado; ficha, modal de férias (calendário, CLT em tempo real, prévia de R$ 1.866,67 e de R$ 4.700,00), pedido roteado ao Gerente Financeiro sem "Gestor direto", decisão pelo gestor de topo, salário por árvore (200 e 403 reais), ClickBus, resumo de WhatsApp e câmera da prestação. **A leitura por IA, a API do Banco Central e a rede foram simuladas ou ficaram de fora**, e a importação de um OFX real pela tela não foi exercitada no navegador (o cruzamento foi testado sobre o código real em Node).

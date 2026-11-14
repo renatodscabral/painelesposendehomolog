@@ -140,6 +140,11 @@ export default {
     [
      "viagens.importar",
      false
+    ],
+    [
+     "viagens.aprovar",
+     false,
+     "gestao_v1412"
     ]
    ]
   },

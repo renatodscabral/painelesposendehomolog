@@ -3,11 +3,12 @@
    GET    ?colecao=col[&ordem=campo&dir=desc&limite=n][&apos=id] → { docs, proximo }
    PUT    ?caminho=col/id   { dados }                       → grava (substitui)
    DELETE ?caminho=col/id                                   → exclui
-   POST   /api/docs/lote    { ops: [{ op: 'set'|'remove', caminho, dados }] } → grava em lote (uma transação) */
+   POST   /api/docs/lote    { ops: [{ op: 'set'|'remove', caminho, dados }] } → grava em lote (uma transação)
+   POST   /api/docs/massa   { colecao, docs: [{ id, dados }] } → v14.11: grava até 2.000 documentos de uma coleção numa só instrução (importação de planilhas grandes; idempotente) */
 import { tx, faxina } from '../lib/db.mjs';
 import { json, erro, rota, ErroHttp } from '../lib/http.mjs';
 import { sessaoDe } from '../lib/sessao.mjs';
-import { lerDoc, listar, gravar, remover, executarLote } from '../lib/documentos.mjs';
+import { lerDoc, listar, gravar, remover, executarLote, gravarMassa } from '../lib/documentos.mjs';
 
 async function corpoJson(req, max = 6 * 1024 * 1024) {
   const t = await req.text(); if (t.length > max) throw new ErroHttp(413, 'Requisição grande demais.');
@@ -26,6 +27,14 @@ export default rota(async req => {
     return json(200, { resultados });
   }
 
+  if (url.pathname.endsWith('/massa')) { /* v14.11 */
+    if (req.method !== 'POST') return erro(405, 'Método não permitido.');
+    const { colecao, docs } = await corpoJson(req);
+    const r = await gravarMassa(sess, colecao, docs);
+    faxina();
+    return json(200, r);
+  }
+
   const caminho = url.searchParams.get('caminho');
   if (req.method === 'GET') {
     if (caminho) return json(200, { doc: await lerDoc(sess, caminho) });
@@ -37,4 +46,4 @@ export default rota(async req => {
   if (req.method === 'DELETE') { await tx(t => remover(t, sess, caminho)); return json(200, { ok: true }); }
   return erro(405, 'Método não permitido.');
 });
-export const config = { path: ['/api/docs', '/api/docs/lote'] };
+export const config = { path: ['/api/docs', '/api/docs/lote', '/api/docs/massa'] };

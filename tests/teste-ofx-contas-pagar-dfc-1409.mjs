@@ -25,6 +25,7 @@ const dfcCod = corta('const DFC_GRUPOS = {', '/* ============================ IE
 const prevCod = corta('/** Conta contábil do FCX → categoria de saída da DFC, pelo prefixo do código', 'const Cruzamento = {');
 const uiCod = corta('/* v14.09 · Extratos OFX × Contas a Pagar do FCX (FCX → Saídas): cruzamento na importação', '/* v14.06 · DFC · Resumo Executivo Oficial');
 const motorCod = corta('/* CP_OFX:INI */', '/* CP_OFX:FIM */');
+const parcCod = corta('const Parc11 = {', 'const PartesContratuais11 = {'); /* v14.11: fachada do cadastro usada pelo cruzamento (com o recurso desligado = só Fornecedores e Clientes, como na v14.10) */
 
 /** `cfg` = config/dfc simulado; `parc` = cadastros; `lig` = { g09 } (recurso gestao_v1409); `ext` = extratos (docs) */
 const montar = (cfg, parc, lig = { g09: true }, ext = [], prontas = new Set(['parceiros', 'extratos']), acesso = { forn: true, importar: true }) => {
@@ -35,9 +36,9 @@ const montar = (cfg, parc, lig = { g09: true }, ext = [], prontas = new Set(['pa
   const Auth = { can: k => k === 'fcx.dfc.importar' ? acesso.importar : true };
   const g04 = () => true, g05 = () => true, g09 = () => lig.g09;
   const API = { api: null }, FCX = { api: () => API.api, montar() { } };
-  const fn = new Function('Repo', 'g04', 'g05', 'g09', 'FluxoDFC', 'esc', 'Fmt', 'Auth', 'FCX', 'sleep', 'UI',
-    csvCod + '\n' + ofxCod + '\n' + dfcCod + '\n' + prevCod + '\n' + uiCod + '\nreturn { CSV, OFX, DFC, PARC_PIX, CP_OFX, PrevistoFCX, FCX_CONTA_PARA_DFC };');
-  const m = fn(Repo, g04, g05, g09, FluxoDFC, esc, Fmt, Auth, FCX, () => Promise.resolve(), { toast: () => { } });
+  const fn = new Function('Repo', 'g04', 'g05', 'g09', 'FluxoDFC', 'esc', 'Fmt', 'Auth', 'FCX', 'sleep', 'UI', 'g11', 'Acesso',
+    parcCod + '\n' + csvCod + '\n' + ofxCod + '\n' + dfcCod + '\n' + prevCod + '\n' + uiCod + '\nreturn { CSV, OFX, DFC, PARC_PIX, CP_OFX, PrevistoFCX, FCX_CONTA_PARA_DFC };');
+  const m = fn(Repo, g04, g05, g09, FluxoDFC, esc, Fmt, Auth, FCX, () => Promise.resolve(), { toast: () => { } }, () => false, { loja: () => false });
   return { ...m, FluxoDFC, API, Repo };
 };
 const cfg = { doc: null }, parc = new Map(), lig = { g09: true };
