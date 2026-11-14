@@ -2262,7 +2262,7 @@ class NetlifyAdapter {
       for (const lote of lotes) {
         try {
           const r = await this._req('POST', this.api + '/lote', { ops: lote.map(({ op, caminho, dados }) => ({ op, caminho, dados })) });
-          lote.forEach((o, i) => { const x = r.resultados[i]; if (x?.ok) { this._local(o); o.ok(); this._gravou = true; } else { const e = new Error(x?.erro || 'Falha ao gravar.'); e.status = x?.status; e.code = x?.status === 403 ? 'permission-denied' : 'unavailable'; o.falha(e); } });
+          lote.forEach((o, i) => { const x = r.resultados[i]; if (x?.ok) { this._local(o); o.ok(); this._gravou = true; } else { const e = new Error(x?.erro || 'Falha ao gravar.'); e.status = x?.status; e.codigo = x?.codigo || ''; e.code = x?.status === 403 ? 'permission-denied' : 'unavailable'; o.falha(e); } });
         } catch (e) { lote.forEach(o => o.falha(e)); }
       }
     })().finally(() => { this._envio = null; if (this.fila.length) this._descarregar(); else if (this._gravou) { this._gravou = false; if (g10()) SyncEco.gravou(this); } /* v14.10: gravação concluída → consulta imediata e silenciosa */ });
@@ -2271,6 +2271,7 @@ class NetlifyAdapter {
   /** Reflete a própria gravação na hora em quem está vigiando (como o banco do claude.ai). */
   _local(o) {
     const i = o.caminho.lastIndexOf('/'), col = o.caminho.slice(0, i), id = o.caminho.slice(i + 1), w = this.cols.get(col);
+    if (w) w.escrita = (w.escrita || 0) + 1; /* v14.13: marca que houve gravação confirmada nesta coleção (ver _recarregar) */
     if (w?.mapa) { if (o.op === 'set') w.mapa.set(id, { id, ...o.dados }); else w.mapa.delete(id); this._emitir(w); }
     const d = this.docsW.get(o.caminho); if (d) d.forEach(cb => { try { cb(o.op === 'set' ? { id, ...o.dados } : null); } catch { } });
   }
@@ -2288,7 +2289,9 @@ class NetlifyAdapter {
     const w = this.cols.get(col); if (!w) return;
     if (w.carregando) { w.sujo = true; return; }
     w.carregando = (async () => {
-      try { await this._garantirSeq().catch(() => { }); const docs = await this.list(col); if (this.cols.get(col) !== w) return; w.mapa = new Map(docs.map(d => [d.id, d])); this._emitir(w); }
+      try { await this._garantirSeq().catch(() => { }); const esc0 = w.escrita || 0, docs = await this.list(col); if (this.cols.get(col) !== w) return;
+        if (typeof g13 === 'function' && g13() && (w.escrita || 0) !== esc0) { w.sujo = true; return; } /* v14.13: uma gravação foi confirmada enquanto esta leitura viajava: ela pode ser mais velha que a gravação → descarta e lê de novo (nunca regride o que o usuário acabou de salvar) */
+        w.mapa = new Map(docs.map(d => [d.id, d])); this._emitir(w); }
       catch (e) { w.errs.forEach(f => { try { f(e); } catch { } }); }
       finally { w.carregando = null; if (w.sujo) { w.sujo = false; this._recarregar(col); } }
     })();
@@ -2869,6 +2872,7 @@ const Repo = {
   /** v13.46 · documento sem os metadados que o Repo acrescenta (para comparar conteúdo). */
   semMeta(d) { if (!d) return d; const { id, atualizadoEm, atualizadoPor, criadoEm, criadoPor, ...r } = d; return r; },
   prontas: new Set(), // coleções que já receberam o 1º snapshot
+  falhas: {},         // v14.13 · coleção → mensagem, enquanto a ÚLTIMA leitura dela falhou (a tela avisa e não deixa gravar por cima)
   rev: 0,             // sobe a cada mudança em qualquer coleção (cache de cálculos derivados)
   _unsubs: [],
   assinar(col) {
@@ -2879,9 +2883,11 @@ const Repo = {
   _un: {},
   _vigiar(col) {
     const un = Cloud.adapter.watch(col, docs => {
+      if (col === 'config' && typeof Dfc13 !== 'undefined') docs = Dfc13.filtrarSnapshot(docs, this.cols[col]?.get('dfc')); /* v14.13: regras da DFC nunca regridem por um snapshot mais velho ou vazio */
+      delete this.falhas[col];
       this.cols[col] = new Map(docs.map(d => [d.id, this.norm(col, d)])); this._bump(col);
       this.prontas.add(col); App.agendarRender();
-    }, err => { console.warn('assinatura', col, err); this.prontas.add(col); App.agendarRender(); });
+    }, err => { console.warn('assinatura', col, err); if (typeof g13 === 'function' && g13()) this.falhas[col] = String((err && err.message) || err || 'falha de leitura'); this.prontas.add(col); App.agendarRender(); });
     this._un[col] = un; this._unsubs.push(un);
   },
   /** v13.45 · suspende a assinatura (rotinas em lote não disparam um snapshot + redesenho a cada gravação); o cache fica. */
@@ -2892,7 +2898,7 @@ const Repo = {
   /** v13.43 · lojas: código oficial de 2 dígitos na leitura (registros antigos gravados com '006' aparecem como '06'). */
   norm(col, d) { return col === 'lojas' && d && d.codigo != null ? { ...d, codigo: CodLoja.oficial(d.codigo) || d.codigo } : d; },
   /** Relê a coleção direto da base (sem esperar o próximo snapshot da assinatura). */
-  async recarregar(col) { const docs = await Cloud.adapter.list(col); this.cols[col] = new Map(docs.map(d => [d.id, this.norm(col, d)])); this._bump(col); this.prontas.add(col); return docs.length; },
+  async recarregar(col) { let docs = await Cloud.adapter.list(col); if (col === 'config' && typeof Dfc13 !== 'undefined') docs = Dfc13.filtrarSnapshot(docs, this.cols[col]?.get('dfc')); delete this.falhas[col]; this.cols[col] = new Map(docs.map(d => [d.id, this.norm(col, d)])); this._bump(col); this.prontas.add(col); return docs.length; },
   get(col, id) { return (this.cols[col] || new Map()).get(id) || null; },
   async salvar(col, id, dados, meta = {}) {
     Acesso.checarGravacao(col, id, dados, this.get(col, id), meta, 'set'); // v13.83: perfil Loja (ponta) só grava o que é dele
@@ -4255,7 +4261,7 @@ const GestaoAmbientes = {
     try {
       for (const [c, rot, padrao] of this.PARAMS) {
         if (c === 'pe_simulador' && !Auth.can('pe.ver')) continue;
-        const h = (await hom.list(c)).filter(d => !(c === 'config' && d.id === 'recursos')), p = new Map((await prod.list(c)).filter(d => !(c === 'config' && d.id === 'recursos')).map(d => [d.id, d])); // v13.68: a versão (config/recursos) é liberada à parte
+        const h = (await hom.list(c)).filter(d => !(c === 'config' && (d.id === 'recursos' || (typeof g13 === 'function' && g13() && d.id === 'dfc')))), p = new Map((await prod.list(c)).filter(d => !(c === 'config' && (d.id === 'recursos' || (typeof g13 === 'function' && g13() && d.id === 'dfc')))).map(d => [d.id, d])); // v13.68: a versão (config/recursos) é liberada à parte
         const novos = h.filter(d => !p.has(d.id)), alterados = h.filter(d => p.has(d.id) && JSON.stringify(this.limpo(d)) !== JSON.stringify(this.limpo(p.get(d.id))));
         dif.push({ c, rot, padrao, h, novos, alterados, soProd: [...p.keys()].filter(id => !h.some(d => d.id === id)).length, prodDocs: [...p.values()] });
       }
@@ -4379,6 +4385,8 @@ function g10() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g11() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1411'); }
 /** v14.12 · Lote 2 (Solicitação de Férias com calendário e prévia, roteamento pelo organograma, salários da árvore do gestor de topo, viagens com aprovação delegável, prestação por câmera/IA e devolução × OFX): recurso ativo neste ambiente? (independe dos anteriores) */
 function g12() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1412'); }
+/** v14.13 · regras da DFC pétreas, aplicação automática a todos os meses e backups auditados (nuvem × .json): recurso ativo neste ambiente? (independe dos anteriores) */
+function g13() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1413'); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4392,7 +4400,8 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1412: { versao: 'v14.12', titulo: 'Lote 2: Solicitação de Férias com calendário e prévia de valores, férias e folgas roteadas pelo organograma (e salários só da própria árvore do gestor de topo, 403 no servidor fora dela); Viagens com aprovação delegável (viagens.aprovar), notificações padronizadas, Prestação de Contas pelo celular com câmera e leitura por IA (política, período e duplicidade), devolução de saldo conciliada com o extrato OFX e botão ClickBus para ônibus' },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1413: { versao: 'v14.13', titulo: 'Regras de classificação da DFC blindadas no servidor (nunca voltam às de fábrica, gravação confirmada com aviso claro, sem sobrescrita entre abas e computadores), regras aplicadas automaticamente a todos os meses dos extratos OFX (classificação manual preservada) e auditoria completa dos backups: nuvem e arquivo .json com o mesmo escopo por módulo, tabelas de configuração (Central de Notificações, empresas e de-para contábeis) e resumo conferível' },
+  gestao_v1412: { versao: 'v14.12', titulo: 'Lote 2: Solicitação de Férias com calendário e prévia de valores, férias e folgas roteadas pelo organograma (e salários só da própria árvore do gestor de topo, 403 no servidor fora dela); Viagens com aprovação delegável (viagens.aprovar), notificações padronizadas, Prestação de Contas pelo celular com câmera e leitura por IA (política, período e duplicidade), devolução de saldo conciliada com o extrato OFX e botão ClickBus para ônibus' },
   gestao_v1411: { versao: 'v14.11', titulo: 'Lote 1: na Tela Inicial (acima de 768 px) a lista de pagamentos das Saídas do Dia vira um agrupador expansível (resumo com quantidade e total, os 3 mais próximos do vencimento e Ver todos / Recolher); menu lateral com rolagem própria e barra fina; Controles de Contratos com reajuste acumulado de 12 meses pelo IPCA, IGP-M ou INPC (API do Banco Central, com digitação manual se a API falhar), botão Recalcular com prévia, ação em lote e histórico; cadastro de Locatários e Locadores ligado aos Extratos OFX e à DFC (CPF/CNPJ, chave PIX e razão social); importação de Fornecedores e Clientes de até 30.000 linhas, em lotes de 2.000, com barra de progresso' },
     gestao_v1410: { versao: 'v14.10', titulo: 'Economia de consumo no Netlify, sem mudar telas: a sincronização entre computadores consulta a cada 30 s com a aba em uso, pausa com a aba oculta ou sem uso por 10 minutos (e volta na hora ao voltar à aba, mexer de novo ou gravar), recua de 60 s para 120 s se o servidor falhar; a revalidação da sessão e o Resumo do Recebível seguem a mesma pausa; imagens JPG, PNG e WebP são compactadas no navegador antes do envio (lado maior até 1600 px, JPEG 82 %, só quando fica menor) e PDF segue intacto' },
     gestao_v1409: { versao: 'v14.09', titulo: 'DFC · Extratos OFX: as saídas são cruzadas com o Contas a Pagar do FCX (FCX → Saídas) por valor idêntico (±R$ 0,05) e razão social do fornecedor (nome exato ou prefixo normalizado de 12+ caracteres, para nomes truncados pelo banco) na janela de ±5 dias úteis; a Conta Contábil do título define a Categoria DFC pelo De-para FCX → DFC; prioridade: classificação manual, regra explícita, Contas a Pagar, categoria do cadastro de Fornecedores e Clientes, padrão; botão Cruzar Fornecedores, PIX e Contas a Pagar com prévia; categorias padrão da DFC com nome e grupo editáveis (ID interno e sentido travados)' },
@@ -14969,6 +14978,7 @@ const FluxoDFC = {
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar de-para', acao: async m => {
         const novo = { ...mapa };
         $$('select[data-conta]', m).forEach(s => { const k = s.dataset.conta; if (s.value === PrevistoFCX.categoriaPadrao(k)) delete novo[k]; else novo[k] = s.value; });
+        if (g13()) { await Dfc13.salvarMapa(mapa, novo); return; } /* v14.13: sobre o mapa do servidor, só as contas alteradas; grava, confirma e reclassifica todos os meses */
         await Repo.salvar('config', 'dfc', { ...(Repo.get('config', 'dfc') || {}), mapaFCX: novo }, { modulo: 'fcx', rotulo: 'De-para FCX → DFC' });
         UI.toast('De-para salvo');
         if (g09()) { await this.atualizarBaseDFC(this.mesesBanco()); UI.toast('De-para salvo; DFC recalculada com as contas contábeis do Contas a Pagar'); }
@@ -25381,7 +25391,7 @@ const BackupNuvem = {
       const quem = p.criador ? `${esc(p.criador.nome || '—')}${p.criador.cpf ? ` <span class="hint mono">${esc(p.criador.cpf)}</span>` : ''}` : '<span class="hint">Sistema (automático)</span>';
       return `<tr><td data-label="Data / Hora"><b>${esc(Fmt.dataHora(p.dataHora))}</b> <span class="hint">#${p.id}</span></td>
         <td data-label="Tipo"><span class="pill ${t[0]}">${t[1]}</span>${p.nota ? `<div class="hint">${esc(p.nota)}</div>` : ''}</td>
-        <td data-label="Criador">${quem}</td><td data-label="Registros · Tamanho" class="num">${Fmt.num(p.registros)} registros · ${this.tam(p.tamanho)}</td>
+        <td data-label="Criador">${quem}</td><td data-label="Registros · Tamanho" class="num">${Fmt.num(p.registros)} registros · ${this.tam(p.tamanho)}${g13() ? `<br><button class="btn ghost sm" data-a="bkn-conteudo" data-id="${p.id}">Ver conteúdo</button>` : ''}</td>
         ${r ? `<td data-label="" class="bkn-acao acts"><button class="btn sm danger" data-a="bkn-restaurar" data-id="${p.id}">Restaurar esta versão</button></td>` : ''}</tr>`;
     };
     const corpo = !d ? `<p class="hint">${u.ocupado ? 'Carregando os pontos de restauração…' : ''}</p>`
@@ -25400,6 +25410,7 @@ const BackupNuvem = {
     if (!this.pode()) return;
     if (a === 'bkn-criar') return this.criar();
     if (a === 'bkn-atualizar') { this.ui.falhou = false; return this.carregar(); }
+    if (a === 'bkn-conteudo') return this.conteudo(Number(el.dataset.id));
     if (a === 'bkn-restaurar') return this.restaurar(Number(el.dataset.id));
   },
   async carregar() {
@@ -25413,6 +25424,7 @@ const BackupNuvem = {
     try {
       const r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'criar' });
       UI.toast(`Ponto de restauração #${r.ponto.id} criado: ${Fmt.num(r.ponto.registros)} registros (${this.tam(r.ponto.tamanho)}).`);
+      if (r.resumo && g13()) setTimeout(() => Bkp13.mostrar(`Ponto de restauração #${r.ponto.id} criado`, r.resumo), 80); /* v14.13: o que entrou, por módulo */
       try { Audit.registrar({ modulo: 'backup', acao: 'criou', entidade: 'ponto_restauracao', entidadeId: String(r.ponto.id), rotulo: 'Ponto de Restauração na Nuvem (manual)', mudancas: [{ campo: 'registros', de: '', para: String(r.ponto.registros) }] }); } catch { }
     } catch (e) { UI.toast(e.message || String(e)); this.ui.erro = e.message || ''; }
     this.ui.criando = false; await this.carregar();
@@ -25446,7 +25458,7 @@ const BackupNuvem = {
     try { for (const c of Object.keys(Repo.cols || {})) await Repo.recarregar(c).catch(() => { }); } catch { }
     UI.modal({ titulo: 'Ponto de restauração aplicado',
       corpo: `<p style="margin:0 0 8px">O painel voltou ao ponto <b>#${p.id}</b> (${esc(Fmt.dataHora(p.dataHora))}): <b>${Fmt.num(s.criados)}</b> registro(s) recriado(s), <b>${Fmt.num(s.atualizados)}</b> atualizado(s) e <b>${Fmt.num(s.removidos)}</b> removido(s), em ${Fmt.num(s.colecoes)} coleção(ões).${usr ? ' Usuários e acessos também voltaram.' : ''}</p>
-        <p class="hint" style="margin:0">Antes disso foi criado o ponto preventivo <b>#${esc(String(r.preventivo?.id ?? ''))}</b> (${esc(Fmt.dataHora(r.preventivo?.dataHora))}), com o estado de antes da restauração: para desfazer, restaure-o. Recarregue o painel para ver tudo atualizado.</p>`,
+        ${g13() ? Bkp13.htmlRestauro(s) : ''}<p class="hint" style="margin:0">Antes disso foi criado o ponto preventivo <b>#${esc(String(r.preventivo?.id ?? ''))}</b> (${esc(Fmt.dataHora(r.preventivo?.dataHora))}), com o estado de antes da restauração: para desfazer, restaure-o. Recarregue o painel para ver tudo atualizado.</p>`,
       acoes: [{ rotulo: 'Recarregar o painel', acao: () => { location.reload(); return false; } }] });
     this.ui.falhou = false; this.carregar();
   },
@@ -25895,8 +25907,8 @@ const Bkp = {
     let dados; try { dados = JSON.parse(await file.text()); } catch { CargaFeedback.falha('Backup · Restauração', file.name, 'Arquivo inválido: não é um JSON legível.', { arquivos: [arqB] }); return UI.toast('Arquivo inválido.'); }
     if (dados.app !== 'painel-gestao-esposende' || !dados.colecoes) { CargaFeedback.falha('Backup · Restauração', file.name, 'Este arquivo não é um backup do Painel de Gestão.', { arquivos: [arqB] }); return UI.toast('Este arquivo não é um backup do Painel de Gestão.'); }
     UI.toast('Conferindo o backup…');
-    const cols = Object.entries(dados.colecoes).filter(([c, v]) => this.COLECOES.includes(c) && Array.isArray(v) && v.length && ((c !== 'salarios' && c !== 'rh_folhas') || Auth.can('pessoal.salario.ver')) && (c !== 'pdi' || Auth.can('pdi.ver')) && (!['ret_ocorrencias', 'cred_pendencias'].includes(c) || Retaguarda.podeVerOc()) && (!['ec_taxas', 'conc_fechamento'].includes(c) || Auth.can('retaguarda.adq.ver')) && (c !== 'pe_simulador' || Auth.can('pe.ver')));
-    const ignoradas = Object.keys(dados.colecoes).filter(c => !this.COLECOES.includes(c));
+    const cols = Object.entries(dados.colecoes).filter(([c, v]) => this.lista().includes(c) && Array.isArray(v) && v.length && ((c !== 'salarios' && c !== 'rh_folhas') || Auth.can('pessoal.salario.ver')) && (c !== 'pdi' || Auth.can('pdi.ver')) && (!['ret_ocorrencias', 'cred_pendencias'].includes(c) || Retaguarda.podeVerOc()) && (!['ec_taxas', 'conc_fechamento'].includes(c) || Auth.can('retaguarda.adq.ver')) && (c !== 'pe_simulador' || Auth.can('pe.ver')));
+    const ignoradas = Object.keys(dados.colecoes).filter(c => !this.lista().includes(c));
     const atuais = {}; for (const [c] of cols) { try { atuais[c] = new Map((await Cloud.adapter.list(c)).map(d => [d.id, d])); } catch { atuais[c] = new Map(); } }
     const padrao = [...(Auth.can('pdi.ver') ? ['pdi'] : []), 'funcionarios'], risco = { usuarios: 'senhas e permissões do login', config: 'configurações gerais', salarios: 'salários' };
     const linhas = cols.map(([c, v]) => { const novos = v.filter(d => !atuais[c].has(d.id)).length;
@@ -25907,15 +25919,16 @@ const Bkp = {
         <fieldset class="ct-grupo" style="margin-top:12px"><legend>Como gravar</legend>
           <label class="check"><input type="radio" name="modo" value="faltam" checked><span><b>Só o que falta</b> (recomendado): cria os registros que não existem hoje; os atuais não são alterados.</span></label><br>
           <label class="check" style="margin-top:6px"><input type="radio" name="modo" value="substituir"><span><b>Substituir</b>: os registros de mesmo código voltam a ser como estavam no backup (alterações feitas depois se perdem).</span></label></fieldset>
+        ${Bkp13.htmlTabelas(dados)}
         ${ignoradas.length ? `<p class="hint" style="margin:8px 0 0">Ignoradas (não existem nesta versão): ${ignoradas.map(esc).join(', ')}.</p>` : ''}
         <p class="hint" style="margin:8px 0 0">Coleções novas (Credsystem, RH, Resultado Operacional…) que não existiam na versão do backup não são tocadas. O log de auditoria nunca é sobrescrito.</p>`,
       acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Restaurar selecionadas', classe: 'danger', acao: async m => {
-        const escolhidas = cols.filter(([c]) => $(`[name="col_${c}"]`, m)?.checked), modo = $('[name="modo"]:checked', m)?.value || 'faltam';
-        if (!escolhidas.length) { UI.toast('Marque ao menos uma coleção.'); return false; }
+        const escolhidas = cols.filter(([c]) => $(`[name="col_${c}"]`, m)?.checked), modo = $('[name="modo"]:checked', m)?.value || 'faltam'; Bkp13._tab = g13() && !!$('[name="tab13"]', m)?.checked;
+        if (!escolhidas.length && !Bkp13._tab) { UI.toast('Marque ao menos uma coleção.'); return false; }
         setTimeout(() => this.gravarRestauracao(dados, escolhidas, atuais, modo, arqB).catch(e => { if (!CargaFeedback.ativo()) throw e; UI.toast('Falha ao restaurar: ' + (e.message || e)); CargaFeedback.falha('Backup · Restauração', file.name, e, { arquivos: [arqB], mensagem: 'A restauração foi interrompida; o que já foi gravado permanece.' }); }), 30);
       } }] });
     const totB = cols.reduce((a, [, v]) => a + v.length, 0), jaB = cols.reduce((a, [c, v]) => a + v.filter(d => atuais[c].has(d.id)).length, 0);
-    const semAcesso = Object.keys(dados.colecoes).filter(c => this.COLECOES.includes(c) && !cols.some(([k]) => k === c) && Array.isArray(dados.colecoes[c]) && dados.colecoes[c].length);
+    const semAcesso = Object.keys(dados.colecoes).filter(c => this.lista().includes(c) && !cols.some(([k]) => k === c) && Array.isArray(dados.colecoes[c]) && dados.colecoes[c].length);
     CargaFeedback.mostrar({ origem: 'Backup · Restauração', arquivos: [arqB], lidas: totB + semAcesso.reduce((a, c) => a + dados.colecoes[c].length, 0), processadas: totB, ignoradas: semAcesso.reduce((a, c) => a + dados.colecoes[c].length, 0) + ignoradas.length,
       inconsistencias: [...ignoradas.map(c => ({ tipo: 'ignorada', item: 'Coleção ' + c, motivo: 'não existe nesta versão do painel' })), ...semAcesso.map(c => ({ tipo: 'ignorada', item: 'Coleção ' + c, motivo: 'sem permissão de acesso para este usuário (' + dados.colecoes[c].length + ' registro(s))' }))],
       campos: [['Backup gerado em', Fmt.dataHora(dados.geradoEm)], ['Coleções disponíveis', String(cols.length)], ['Registros que já existem hoje', String(jaB)], ['Registros que faltam hoje', String(totB - jaB)]],
@@ -25926,7 +25939,7 @@ const Bkp = {
     for (const [col, docs] of escolhidas) {
       por[col] = 0;
       for (const d of docs) { const { id, ...resto } = d; if (!id || (modo === 'faltam' && atuais[col].has(id))) continue;
-        await Cloud.adapter.set(col + '/' + id, resto); n++; por[col]++; if (n % 20 === 0) await sleep(200); }
+        await (g13() ? Bkp13.gravar(col, id, resto) : Cloud.adapter.set(col + '/' + id, resto)); n++; por[col]++; if (n % 20 === 0) await sleep(200); }
       if (Repo.cols[col]) await Repo.recarregar(col).catch(() => { });
     }
     await Audit.registrar({ modulo: 'backup', acao: 'restaurou', entidade: 'backup', entidadeId: dados.geradoEm, rotulo: `Restauração de backup (${modo === 'faltam' ? 'só o que faltava' : 'substituindo'})`, mudancas: Object.entries(por).map(([c, k]) => ({ campo: c, de: '', para: k + ' registros' })) });
@@ -25935,6 +25948,7 @@ const Bkp = {
     CargaFeedback.mostrar({ origem: 'Backup · Restauração concluída', arquivos: arqB ? [arqB] : [], lidas: totR, processadas: n, ignoradas: totR - n, vazioOk: true,
       campos: [['Modo', modo === 'faltam' ? 'só o que faltava' : 'substituindo registros de mesmo código'], ...Object.entries(por).map(([c, k]) => [c, k + ' registro(s) gravado(s)'])],
       mensagem: totR - n ? (totR - n) + ' registro(s) já existiam e foram mantidos como estavam.' : '' });
+    if (Bkp13._tab) { Bkp13._tab = false; await Bkp13.restaurarTabelas(dados); }
     return por;
   },
   acao(a) { if (a === 'bkp-json') return this.json(); if (a === 'bkp-xlsx') return this.xlsx(); if (a.startsWith('bkp-amb-')) return GestaoAmbientes.acao(a); },
@@ -25942,6 +25956,494 @@ const Bkp = {
 };
 
 /* --------------------------- Eventos globais --------------------------- */
+/* =====================================================================
+   v14.13 · DFC · REGRAS DE CLASSIFICAÇÃO "PÉTREAS" E APLICAÇÃO AUTOMÁTICA A TODOS OS MESES (recurso gestao_v1413)
+   • As regras do usuário (config/dfc.regras), as categorias, os ajustes das categorias padrão e o De-para FCX → DFC são IMUTÁVEIS para rotinas automáticas:
+     nenhuma abertura da tela, login, F5 ou ciclo de sincronização grava config/dfc. Só uma ação do usuário (criar, editar, mover com as setas, excluir) grava, e sempre assim:
+       1) lê o servidor AGORA (nunca grava por cima de uma cópia velha, vazia ou "de fábrica" que a aba tenha na memória);
+       2) aplica a mudança POR ID sobre o que o servidor devolveu (não substitui a lista inteira pela da tela);
+       3) o servidor (netlify/lib/dfc-1413.mjs) confere o contador de versão das regras e recusa (409) o que viria de uma base velha — o painel relê e refaz sozinho;
+       4) só depois da confirmação do servidor mostra "Regras salvas no servidor"; qualquer falha vira um aviso explícito (nunca silenciosa) e nada é gravado pela metade.
+     A semente de fábrica só é enviada quando a leitura confirmou (HTTP 200) que o documento nunca foi inicializado; depois da 1ª gravação o servidor não aceita mais semente.
+     O polling entre abas/computadores nunca troca a lista por uma versão mais antiga ou vazia (filtrarSnapshot) e uma leitura que falhou NÃO vira "lista vazia, pode editar".
+   • Depois de criar/editar/mover/excluir uma regra (ou mexer em categoria, ajuste padrão ou De-para) TODOS os meses importados dos extratos OFX são reclassificados e a base mensal
+     (dfc/AAAA-MM) é regravada, sem tocar nas classificações manuais (transação com cat preenchida: Manual > Regras > Contas a Pagar FCX > categoria do fornecedor/cliente > padrão).
+     Ao trocar o mês (Extratos OFX, DFC do mês, Realizado × Previsto) e ao gerar o Resumo Executivo, as regras vigentes são lidas do servidor e aplicadas antes de exibir.
+     "Recalcular DFC" continua como atalho opcional (força a regravação das bases).
+   ===================================================================== */
+const Dfc13 = {
+  CAM: 'config/dfc', MOTOR: 'm1',
+  ui: { salvando: false, ultimo: null, progresso: '' },
+  _cadeia: Promise.resolve(), _ultLeitura: 0, _baseRegras: null, _baseCat: null, _garantidos: new Set(), _reap: null, _reapOutra: false,
+
+  /* ---------- funções puras (testadas sem tela) ---------- */
+  rev(doc) { const n = Number(doc && doc.regras_rev); return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0; },
+  /** o documento já foi inicializado? (marcador explícito OU já tem a lista de regras, gravada por uma versão anterior) */
+  iniciado(doc) { return !!doc && (doc.regras_inicializadas === true || Array.isArray(doc.regras)); },
+  fabrica() { return clone(DFC_REGRAS_PADRAO); },
+  /** regras vigentes de um documento config/dfc: a lista salva ou, se o documento nunca foi inicializado, a de fábrica (só para exibir: nada disso é gravado sozinho) */
+  regrasDe(doc) { return doc && Array.isArray(doc.regras) ? doc.regras : this.fabrica(); },
+  chaveRegra(r) { return JSON.stringify([String(r && r.id), ((r && r.termos) || []).map(String), String(r && r.sentido), String(r && r.categoria)]); },
+  estavel(v) { return Array.isArray(v) ? v.map(x => this.estavel(x)) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, this.estavel(v[k])])) : v; },
+  chaveGen(v) { return JSON.stringify(this.estavel(v)); },
+  iguais(a, b) { return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((r, i) => this.chaveRegra(r) === this.chaveRegra(b[i])); },
+  /** assinatura (FNV-1a 32 bits) de tudo o que muda a classificação: regras na ordem, categorias, ajustes das padrão e De-para FCX → DFC */
+  sig(cfg) {
+    const t = this.chaveGen({ m: this.MOTOR, r: this.regrasDe(cfg).map(r => JSON.parse(this.chaveRegra(r))), c: (cfg && cfg.categorias) || [], a: (cfg && cfg.ajustesPadrao) || {}, p: (cfg && cfg.mapaFCX) || {} });
+    let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h.toString(16).padStart(8, '0');
+  },
+  sigAtual() { return this.sig(typeof Repo !== 'undefined' ? Repo.get('config', 'dfc') : null); },
+  /** classificação manual do usuário: a transação tem categoria própria (cat) — nenhuma rotina automática a altera */
+  ehManual(t) { return !!(t && t.cat); },
+  erroSumiu(r) { const e = new Error('A regra “' + ((r && (r.termos || []).join(', ')) || (r && r.nome) || (r && r.id) || '') + '” foi excluída em outro computador ou por outra pessoa.'); e.codigo = 'sumiu'; return e; },
+  /**
+   * Aplica ao documento do SERVIDOR (lista S) só a mudança que o usuário fez: `base` é a lista que ele via ao abrir o editor e `intencao` é a que ele salvou.
+   * Excluídas saem de S; editadas substituem a de mesmo id (se sumiu do servidor: erro 'sumiu'); criadas entram depois da que as precedia na tela (ou no topo).
+   * Tudo o que o usuário não tocou — inclusive regras criadas por outras pessoas — fica exatamente como o servidor tem.
+   */
+  mesclar(S, base, intencao, chave = r => this.chaveRegra(r)) {
+    const B = new Map(base.map(r => [r.id, r])), I = new Map(intencao.map(r => [r.id, r])), out = S.map(clone), pos = id => out.findIndex(r => r.id === id);
+    for (const r of base) if (!I.has(r.id)) { const i = pos(r.id); if (i >= 0) out.splice(i, 1); }
+    for (const r of intencao) { if (!B.has(r.id) || chave(r) === chave(B.get(r.id))) continue; const i = pos(r.id); if (i < 0) throw this.erroSumiu(r); out[i] = clone(r); }
+    intencao.forEach((r, k) => {
+      if (B.has(r.id)) return;
+      const i = pos(r.id); if (i >= 0) { out[i] = clone(r); return; }
+      let at = 0; for (let j = k - 1; j >= 0; j--) { const p = pos(intencao[j].id); if (p >= 0) { at = p + 1; break; } }
+      out.splice(at, 0, clone(r));
+    });
+    return out;
+  },
+  /** troca a regra de lugar com a vizinha (delta -1 sobe, +1 desce) na lista do servidor; nos limites não muda nada */
+  mover(S, id, delta) {
+    const i = S.findIndex(r => r.id === id); if (i < 0) throw this.erroSumiu({ id });
+    const out = S.map(clone), j = i + delta; if (j < 0 || j >= out.length) return out;
+    [out[i], out[j]] = [out[j], out[i]]; return out;
+  },
+  /** De-para: só as contas que o usuário mexeu (alteradas, novas ou removidas) vão para o mapa do servidor */
+  mesclarMapa(S, base, intencao) {
+    const out = { ...(S || {}) };
+    for (const k of Object.keys(base || {})) if (!(k in intencao)) delete out[k];
+    for (const k of Object.keys(intencao || {})) if (base[k] !== intencao[k]) out[k] = intencao[k];
+    return out;
+  },
+  /** O que vale no navegador: o snapshot do servidor ou a cópia local? Nunca regride: snapshot com contador de regras MENOR, ou sem o documento, não troca a cópia local já inicializada. */
+  escolher(local, remoto) {
+    if (!local) return remoto;
+    if (!remoto) return this.iniciado(local) ? local : remoto;
+    if (this.rev(remoto) < this.rev(local)) return local;
+    if (this.iniciado(local) && !Array.isArray(remoto.regras) && this.rev(remoto) <= this.rev(local)) return { ...remoto, regras: local.regras, regras_rev: this.rev(local), regras_inicializadas: true };
+    return remoto;
+  },
+  filtrarSnapshot(docs, local) {
+    if (typeof g13 === 'function' && !g13()) return docs;
+    const i = docs.findIndex(d => d.id === 'dfc'), remoto = i >= 0 ? docs[i] : null, esc = this.escolher(local || null, remoto);
+    if (esc === remoto) return docs;
+    const out = docs.slice(); if (i >= 0) out[i] = esc; else if (esc) out.push(esc); return out;
+  },
+  /** o conteúdo da base mensal mudou? (compara sem os metadados nem o horário) */
+  mesmaBase(a, b) { const l = o => { const { id, atualizadoEm, atualizadoPor, criadoEm, criadoPor, ...r } = o || {}; return this.chaveGen(r); }; return l(a) === l(b); },
+
+  /* ---------- leitura e gravação no servidor ---------- */
+  /** leitura FRESCA do servidor (sem cache). Falha de rede/servidor lança erro marcado `leitura` (nada é gravado). */
+  async lerFresco() {
+    try { const d = await Cloud.adapter.get(this.CAM); this._ultLeitura = Date.now(); if (!d) return null; const r = clone(d); delete r.id; return r; }
+    catch (e) { const x = new Error('Não consegui ler as regras no servidor agora (' + ((e && e.message) || e) + ').'); x.leitura = true; throw x; }
+  },
+  _fila(fn) { const r = this._cadeia.then(() => fn()); this._cadeia = r.catch(() => { }); return r; },
+  textoFalha(e) {
+    const c = e && e.codigo;
+    if (e && e.leitura) return e.message;
+    if (c === 'regras_desatualizadas') return 'As regras foram alteradas em outro computador, em outra aba ou por outra pessoa enquanto você editava, e não consegui refazer a sua alteração sobre a versão mais nova. Abra as regras de novo e refaça a alteração.';
+    if (c === 'regras_ja_inicializadas') return 'As regras já foram inicializadas por outro usuário e a semente de fábrica não roda de novo. Abra as regras de novo e refaça a alteração.';
+    if (c === 'sumiu') return e.message + ' A lista foi atualizada: confira e refaça, se ainda for o caso.';
+    return (e && e.message) || 'erro desconhecido';
+  },
+  alertaFalha(e, quando = 'As regras da DFC NÃO foram salvas') {
+    this.ui.ultimo = { ok: false, em: new Date().toISOString(), msg: this.textoFalha(e) };
+    try { UI.alerta(quando, `${esc(this.textoFalha(e))}<br><br><b>Nada foi alterado no servidor.</b> As regras que estavam salvas continuam valendo.`); } catch { }
+    try { App.agendarRender(); } catch { }
+  },
+  /**
+   * Grava config/dfc: LÊ o servidor agora, deixa `mudar(doc, ctx)` aplicar a mudança (por id) e grava esperando a confirmação.
+   * mudar devolve o documento novo (ou null = nada a fazer). tocaRegras: a lista de regras muda → regras_rev = o do servidor + 1 (e semente só se o servidor nunca foi inicializado).
+   * Se o servidor recusar porque a lista mudou no meio do caminho, relê e refaz (até 3 tentativas).
+   */
+  salvarCfg(mudar, { rotulo = 'Regras DFC', detalhe = '', tocaRegras = false, msgOk = 'Configuração da DFC salva no servidor' } = {}) {
+    return this._fila(async () => {
+      if (!Auth.can('fcx.dfc.regras')) { const e = new Error('Seu perfil não tem permissão para alterar as regras da DFC.'); this.alertaFalha(e); throw e; }
+      this.ui.salvando = true;
+      try {
+        for (let tent = 0; ; tent++) {
+          const atual = await this.lerFresco(), ini = this.iniciado(atual), base = atual ? clone(atual) : {};
+          const novo = mudar(base, { iniciado: ini, regras: this.regrasDe(atual), rev: this.rev(atual) });
+          if (!novo) return { alterado: false };
+          delete novo.regras_semente;
+          if (tocaRegras) { novo.regras_rev = this.rev(atual) + 1; novo.regras_inicializadas = true; if (!ini) novo.regras_semente = true; }
+          try { await Repo.salvar('config', 'dfc', novo, { modulo: 'fcx', rotulo, detalhe }); }
+          catch (e) { if (['regras_desatualizadas', 'regras_ja_inicializadas'].includes(e && e.codigo) && tent < 2) { await sleep(150); continue; } throw e; }
+          const d = Repo.cols.config && Repo.cols.config.get('dfc'); if (d) delete d.regras_semente;
+          this.ui.ultimo = { ok: true, em: new Date().toISOString(), msg: msgOk };
+          UI.toast(msgOk); try { App.agendarRender(); } catch { }
+          return { alterado: true, doc: novo };
+        }
+      } catch (e) { this.alertaFalha(e); throw e; }
+      finally { this.ui.salvando = false; }
+    });
+  },
+  /** o editor de regras (modal, que trabalha com a lista inteira) → mudança por id sobre o servidor */
+  async salvarRegras(intencao, detalhe) {
+    const base = this._baseRegras || DFC.regras();
+    const r = await this.salvarCfg((doc, ctx) => { const nova = this.mesclar(ctx.regras, base, intencao); if (ctx.iniciado && this.iguais(nova, ctx.regras)) return null; doc.regras = nova; return doc; },
+      { rotulo: 'Regras DFC', detalhe, tocaRegras: true, msgOk: 'Regras salvas no servidor' });
+    this._baseRegras = null;
+    if (r.alterado) await this.reaplicar('regras', 'Regras salvas no servidor');
+    return r;
+  },
+  async excluirRegra(id, detalhe = 'Regra excluída') {
+    const r = await this.salvarCfg((doc, ctx) => { const nova = ctx.regras.filter(x => x.id !== id); if (ctx.iniciado && nova.length === ctx.regras.length) return null; doc.regras = nova; return doc; },
+      { rotulo: 'Regras DFC', detalhe, tocaRegras: true, msgOk: 'Regras salvas no servidor' });
+    if (r.alterado) await this.reaplicar('regras', 'Regras salvas no servidor');
+    return r;
+  },
+  async moverRegra(id, delta) {
+    const r = await this.salvarCfg((doc, ctx) => { const nova = this.mover(ctx.regras, id, delta); if (ctx.iniciado && this.iguais(nova, ctx.regras)) return null; doc.regras = nova; return doc; },
+      { rotulo: 'Regras DFC', detalhe: 'Prioridade alterada', tocaRegras: true, msgOk: 'Regras salvas no servidor' });
+    if (r.alterado) await this.reaplicar('regras', 'Regras salvas no servidor');
+    return r;
+  },
+  async salvarCategorias(intencao, detalhe) {
+    const base = this._baseCat || (Repo.get('config', 'dfc') && Repo.get('config', 'dfc').categorias) || [];
+    const r = await this.salvarCfg((doc) => { const S = Array.isArray(doc.categorias) ? doc.categorias : [], nova = this.mesclar(S, base, intencao, c => this.chaveGen(c)); if (this.chaveGen(nova) === this.chaveGen(S)) return null; doc.categorias = nova; return doc; },
+      { rotulo: 'Categorias DFC', detalhe, msgOk: 'Categorias salvas no servidor' });
+    this._baseCat = null;
+    if (r.alterado) await this.reaplicar('categorias', 'Categorias salvas no servidor');
+    return r;
+  },
+  async salvarAjuste(id, ajuste, detalhe) {
+    const r = await this.salvarCfg((doc) => {
+      const aj = { ...(doc.ajustesPadrao || {}) }; if (ajuste) aj[id] = { nome: ajuste.nome, grupo: ajuste.grupo }; else delete aj[id];
+      if (this.chaveGen(aj) === this.chaveGen(doc.ajustesPadrao || {})) return null;
+      if (Object.keys(aj).length) doc.ajustesPadrao = aj; else delete doc.ajustesPadrao; return doc; },
+      { rotulo: 'Categorias DFC', detalhe, msgOk: 'Categorias salvas no servidor' });
+    if (r.alterado) await this.reaplicar('categorias', 'Categorias salvas no servidor');
+    return r;
+  },
+  async salvarMapa(base, intencao) {
+    const r = await this.salvarCfg((doc) => { const S = doc.mapaFCX || {}, novo = this.mesclarMapa(S, base || {}, intencao || {}); if (this.chaveGen(novo) === this.chaveGen(S)) return null; doc.mapaFCX = novo; return doc; },
+      { rotulo: 'De-para FCX → DFC', msgOk: 'De-para salvo no servidor' });
+    if (r.alterado) await this.reaplicar('de-para', 'De-para salvo no servidor');
+    return r;
+  },
+
+  /* ---------- aplicação automática a todos os meses ---------- */
+  /** Só grava a base mensal com as regras LIDAS do servidor: leitura que falhou (ou ainda não chegou) nunca vira "regras de fábrica" gravadas em dfc/AAAA-MM. */
+  regrasLidas() { return Repo.prontas.has('config') && !Repo.falhas.config; },
+  /** Recalcula e grava dfc/AAAA-MM de cada mês (só o que mudou ou está sem a assinatura das regras vigentes). Nunca toca nos extratos (classificações manuais ficam como estão). */
+  async atualizarBases(meses, { forcar = false, aoProgredir = null } = {}) {
+    if (!this.regrasLidas()) throw new Error('As regras da DFC ainda não foram lidas do servidor: a base mensal não foi recalculada (nada foi gravado).');
+    await FluxoDFC.esperarForn05();
+    const regras = DFC.regras(), sig = this.sigAtual(), agora = new Date().toISOString(); let gravados = 0, iguais = 0, k = 0;
+    for (const mes of meses) {
+      aoProgredir && aoProgredir(++k, meses.length);
+      const tr = FluxoDFC.transacoes().filter(t => t.data.startsWith(mes)), c = DFC.consolidar(tr, regras), porConta = {};
+      Repo.todos('extratos').filter(d => d.mes === mes && d.saldo).forEach(d => { porConta[d.contaId] = { ...(c.porConta[d.contaId] || {}), saldoFinal: d.saldo.valor, saldoData: d.saldo.data }; });
+      const novo = { mes, entradas: c.entradas, saidas: c.saidas, liquido: c.liquido, transferencias: c.transferencias, semRegra: c.semRegra, transacoes: c.n, porGrupo: c.porGrupo, porCategoria: c.porCategoria,
+        porConta: { ...c.porConta, ...porConta }, porDia: c.porDia, regrasSig: sig };
+      const antes = Repo.get('dfc', mes);
+      if (!forcar && antes && this.mesmaBase(antes, { ...novo, atualizadoEm: antes.atualizadoEm })) { iguais++; continue; }
+      await Repo.salvar('dfc', mes, { ...novo, atualizadoEm: agora }, { modulo: 'fcx', rotulo: 'Base DFC ' + FluxoDFC.mesLabel(mes), detalhe: 'Reclassificada com as regras vigentes', semAudit: true });
+      gravados++;
+    }
+    return { meses: meses.length, gravados, iguais };
+  },
+  async _reaplicarAgora(motivo, msgOk) {
+    const meses = FluxoDFC.mesesBanco();
+    if (!meses.length) { if (msgOk) UI.toast(msgOk + ' · nenhum extrato importado ainda'); return null; }
+    const ld = meses.length > 2 ? UI.carregando(`Aplicando as regras a ${meses.length} meses de extrato…`) : null;
+    try {
+      const r = await this.atualizarBases(meses, { forcar: false, aoProgredir: (i, n) => { this.ui.progresso = `${i}/${n}`; ld && ld.etapa(`Aplicando as regras… mês ${i} de ${n}`); } });
+      this.ui.progresso = '';
+      try { await Audit.registrar({ modulo: 'fcx', acao: 'recalculou', entidade: 'dfc', entidadeId: 'todos-os-meses', rotulo: `Bases mensais da DFC reclassificadas (${motivo})`, mudancas: [{ campo: 'meses', de: '', para: `${r.meses} mês(es) · ${r.gravados} regravado(s) · ${r.iguais} já atualizado(s)` }] }); } catch { }
+      UI.toast(`${msgOk || 'Regras aplicadas'} · ${r.meses} mês(es) reclassificado(s) automaticamente`);
+      return r;
+    } catch (e) { this.ui.progresso = ''; this.alertaFalha(e, 'Alteração salva, mas a base da DFC não foi recalculada'); return null; }
+    finally { ld && ld.fechar(); try { App.agendarRender(); } catch { } }
+  },
+  /** coalesce pedidos seguidos: se já está rodando, roda mais uma vez no fim (com as regras mais novas) */
+  reaplicar(motivo = 'regras', msgOk = '') {
+    this._reapMotivo = motivo; this._reapMsg = msgOk;
+    if (this._reap) { this._reapOutra = true; return this._reap; }
+    this._reap = (async () => { try { do { this._reapOutra = false; await this._reaplicarAgora(this._reapMotivo, this._reapMsg); } while (this._reapOutra); } finally { this._reap = null; } })();
+    return this._reap;
+  },
+  /** botão "Recalcular DFC" (atalho opcional): relê as regras do servidor e regrava todas as bases */
+  async reaplicarManual() {
+    await this.sincronizar(true);
+    const meses = FluxoDFC.mesesBanco(); UI.toast('Recalculando…');
+    try { const r = await this.atualizarBases(meses, { forcar: true }); UI.toast(`DFC recalculada · ${r.meses} mês(es)`); } catch (e) { this.alertaFalha(e, 'A DFC não foi recalculada'); }
+  },
+  /** traz o config/dfc do servidor para a memória SE for mais novo (mesma regra do polling: nunca regride) */
+  async sincronizar(forcar = false) {
+    if (!forcar && Date.now() - this._ultLeitura < 4000) return true;
+    let d; try { d = await this.lerFresco(); } catch (e) { console.warn('[painel][dfc v14.13]', e.message); return false; }
+    const m = Repo.cols.config; if (!m) return true;
+    const local = m.get('dfc') || null, esc = this.escolher(local, d ? { id: 'dfc', ...d } : null);
+    if (esc && esc !== local && this.chaveGen(Repo.semMeta(local)) !== this.chaveGen(Repo.semMeta(esc))) { m.set('dfc', { id: 'dfc', ...clone(esc) }); Repo._bump('config'); }
+    return true;
+  },
+  mesesObsoletos(meses) { const sig = this.sigAtual(), com = new Set(FluxoDFC.mesesBanco()); return meses.filter(m => com.has(m) && (Repo.get('dfc', m) || {}).regrasSig !== sig); },
+  /** antes de exibir um mês (ou gerar o Resumo): lê as regras vigentes e, para quem pode gravar, regrava a base dos meses ainda sem a assinatura das regras de agora. Quem só lê vê sempre o cálculo ao vivo. */
+  async garantirMeses(meses) {
+    if (typeof g13 === 'function' && !g13()) return;
+    if (!Auth.can('fcx.dfc.ver')) return;
+    await this.sincronizar();
+    if (!this.regrasLidas() || !(Auth.can('fcx.dfc.importar') || Auth.can('fcx.dfc.regras'))) return;
+    const velhos = this.mesesObsoletos(meses); if (!velhos.length) return;
+    if (velhos.length > 1) UI.toast(`Aplicando as regras vigentes a ${velhos.length} meses…`);
+    await this.atualizarBases(velhos);
+  },
+  aoRenderizar() {
+    const u = FluxoDFC.ui; if (!u || !u.mes || !['cruzamento', 'dfc', 'extratos'].includes(u.sub)) return;
+    const k = u.mes + '|' + this.sigAtual(); if (this._garantidos.has(k)) return; this._garantidos.add(k);
+    this.garantirMeses([u.mes]).catch(e => console.warn('[painel][dfc v14.13]', (e && e.message) || e));
+  },
+  /** faixa de situação das regras (aba "Regras de classificação") */
+  faixa() {
+    const cfg = Repo.get('config', 'dfc'), falha = Repo.falhas.config, ini = this.iniciado(cfg), u = this.ui;
+    if (falha) return `<div class="note warn" role="alert" style="margin-bottom:12px"><b>Não consegui ler as regras no servidor</b> (${esc(falha)}). O que aparece abaixo pode estar desatualizado; por segurança, qualquer alteração só é gravada depois de reler o servidor, e nenhuma base é recalculada até a leitura voltar.</div>`;
+    const ult = u.ultimo ? (u.ultimo.ok ? ` · última gravação confirmada às ${esc(Fmt.dataHora(u.ultimo.em).slice(-5))}` : ' · <b>a última tentativa de gravação falhou</b>') : '';
+    return `<div class="note ${ini ? '' : 'info'}" style="margin-bottom:12px" data-dfc13-faixa>${ini ? `<b>Regras protegidas no servidor</b> · versão ${this.rev(cfg)} · as suas regras não voltam às de fábrica e valem para todos os meses importados, automaticamente${ult}${u.progresso ? ` · aplicando… ${esc(u.progresso)}` : ''}.`
+      : '<b>Regras de fábrica em uso</b> · ainda não houve personalização: a primeira alteração grava a sua lista no servidor, que a partir daí fica protegida.'}</div>`;
+  },
+};
+/* ---- ganchos no FluxoDFC (todos desligados quando gestao_v1413 está desligado: comportamento da v14.12) ---- */
+Object.assign(FluxoDFC, {
+  _o13: {
+    salvarRegras: FluxoDFC.salvarRegras, salvarCategorias: FluxoDFC.salvarCategorias, salvarAjustePadrao09: FluxoDFC.salvarAjustePadrao09, abrirRegra: FluxoDFC.abrirRegra, abrirCategoria: FluxoDFC.abrirCategoria,
+    excluirCategoria: FluxoDFC.excluirCategoria, acao: FluxoDFC.acao, mudanca: FluxoDFC.mudanca, afterRender: FluxoDFC.afterRender, renderRegras: FluxoDFC.renderRegras, classificarManual: FluxoDFC.classificarManual,
+    atualizarBaseDFC: FluxoDFC.atualizarBaseDFC, gerarResumo06: FluxoDFC.gerarResumo06, gerarResumo08: FluxoDFC.gerarResumo08,
+  },
+  salvarRegras(regras, detalhe) { return g13() ? Dfc13.salvarRegras(regras, detalhe) : this._o13.salvarRegras.call(this, regras, detalhe); },
+  salvarCategorias(lista, detalhe, recalcular) { return g13() ? Dfc13.salvarCategorias(lista, detalhe) : this._o13.salvarCategorias.call(this, lista, detalhe, recalcular); },
+  salvarAjustePadrao09(id, ajuste, detalhe, recalcular) { return g13() ? Dfc13.salvarAjuste(id, ajuste, detalhe) : this._o13.salvarAjustePadrao09.call(this, id, ajuste, detalhe, recalcular); },
+  /** a base que o usuário via ao abrir o editor: a mudança dele é calculada contra ela e aplicada, por id, sobre o servidor */
+  abrirRegra(i) { if (g13()) Dfc13._baseRegras = clone(DFC.regras()); return this._o13.abrirRegra.apply(this, arguments); },
+  abrirCategoria() { if (g13()) Dfc13._baseCat = clone((Repo.get('config', 'dfc') || {}).categorias || []); return this._o13.abrirCategoria.apply(this, arguments); },
+  excluirCategoria() { if (g13()) Dfc13._baseCat = clone((Repo.get('config', 'dfc') || {}).categorias || []); return this._o13.excluirCategoria.apply(this, arguments); },
+  async acao(a, el) {
+    if (g13()) {
+      if (a === 'fd-regra-sobe' || a === 'fd-regra-desce') {
+        if (!Auth.can('fcx.dfc.regras')) return UI.toast('Seu perfil não tem permissão para alterar as regras da DFC.');
+        const r = DFC.regras()[+el.dataset.i]; if (!r) return;
+        try { await Dfc13.moverRegra(r.id, a === 'fd-regra-sobe' ? -1 : 1); } catch { /* o aviso já foi mostrado */ } return;
+      }
+      if (a === 'fd-regra-del') {
+        const r = DFC.regras()[+el.dataset.i]; if (!r) return;
+        if (!(await UI.confirmar('Excluir regra', `Excluir a regra “${esc((r.termos || []).join(', '))}”?`, 'Excluir', true))) return;
+        try { await Dfc13.excluirRegra(r.id); } catch { /* aviso já mostrado */ } return;
+      }
+      if (a === 'fd-dfc-reaplicar') return Dfc13.reaplicarManual();
+    }
+    return this._o13.acao.call(this, a, el);
+  },
+  async mudanca(a, el) {
+    if (g13() && (a === 'fd-f' || a === 'fd-bc' || a === 'fd-dfc') && el.dataset.k === 'mes') { try { await Dfc13.garantirMeses([el.value]); } catch (e) { console.warn('[painel][dfc v14.13]', (e && e.message) || e); } }
+    return this._o13.mudanca.call(this, a, el);
+  },
+  afterRender() { const r = this._o13.afterRender.apply(this, arguments); if (g13()) Dfc13.aoRenderizar(); return r; },
+  renderRegras() {
+    const h = this._o13.renderRegras.apply(this, arguments); if (!g13()) return h;
+    const n = DFC.regras().length;
+    return Dfc13.faixa() + h
+      .replace(/(<button class="iconbtn" data-a="fd-regra-sobe" data-i="(\d+)"[^>]*>↑<\/button>)/g, (m, b, i) => b + `<button class="iconbtn" data-a="fd-regra-desce" data-i="${i}" aria-label="Baixar prioridade" ${+i < n - 1 ? '' : 'disabled'}>↓</button>`)
+      .replace('data-a="fd-dfc-reaplicar">Recalcular DFC<', 'data-a="fd-dfc-reaplicar" title="Opcional: as regras já são aplicadas a todos os meses automaticamente a cada alteração. Este atalho só força a regravação das bases mensais.">Recalcular DFC (opcional)<');
+  },
+  /** classificação manual: marca manual:true junto da categoria (o motor reconhece pela categoria preenchida); a base do mês é regravada com a assinatura vigente */
+  async classificarManual(docId, id, cat) {
+    if (!g13()) return this._o13.classificarManual.call(this, docId, id, cat);
+    const doc = Repo.get('extratos', docId); if (!doc) return;
+    await Repo.salvar('extratos', docId, { ...doc, transacoes: doc.transacoes.map(t => t.id === id ? { ...t, cat, manual: true } : t) }, { modulo: 'fcx', rotulo: 'Classificação DFC', detalhe: `${id} → ${(DFC.cat(cat) || {}).nome}` });
+    await this.atualizarBaseDFC([doc.mes]);
+  },
+  atualizarBaseDFC(meses) { return g13() ? Dfc13.atualizarBases([...meses]) : this._o13.atualizarBaseDFC.call(this, meses); },
+  /** Resumo Executivo: lê as regras vigentes e atualiza as bases do período antes de montar o documento */
+  async gerarResumo06(m) { if (g13()) await this._antesResumo13(m); return this._o13.gerarResumo06.call(this, m); },
+  async gerarResumo08(m) { if (g13()) await this._antesResumo13(m); return this._o13.gerarResumo08.call(this, m); },
+  async _antesResumo13(m) {
+    try { const d = UI.lerForm(m), per = DFC_RESUMO.periodo(d.tipo, d.mes, d.de); await Dfc13.garantirMeses(per.meses || []); } catch (e) { /* período inválido: a validação do próprio Resumo avisa */ }
+  },
+});
+/* =====================================================================
+   v14.13 · AUDITORIA DOS BACKUPS (recurso gestao_v1413) — uma lista só, por "frente" (módulo), nos dois backups
+   • Ponto de restauração na NUVEM (servidor, netlify/lib/backup-nuvem.mjs): TODA coleção da tabela de documentos (menos auditoria, presença, sistema e ramos de ambiente)
+     + as tabelas de configuração (Central de Notificações · regras e disparos, cadastro contábil de empresas, de-para FCX → plano de contas), formato 2, com resumo por frente.
+   • Arquivo .json de CONTINGÊNCIA (aqui): as mesmas coleções (inclusive Fornecedores e Clientes com PIX e categoria DFC, e os anexos dos termos assinados) e, no Netlify, as mesmas
+     tabelas; ao baixar, o painel mostra o resumo por módulo. O catálogo abaixo é gerado a partir do arquivo do servidor (backup-escopo-1413.mjs): o teste automatizado confere os dois.
+   • Fora dos dois, de propósito: log de auditoria (no .json é opcional), presença, arquivos binários enviados (/_blob), livro contábil e plano de contas/parâmetros contábeis.
+   ===================================================================== */
+const Bkp13 = {
+  RAIZES_FORA: ["auditoria", "presenca", "sistema", "amb"],
+  TABELAS: [
+    {"nome": "painel_notificacoes_regras", "rotulo": "Central de Notificações · regras e disparos"},
+    {"nome": "contab_empresas", "rotulo": "Cadastro contábil de empresas"},
+    {"nome": "contab_depara", "rotulo": "De-para FCX → plano de contas"}
+  ],
+  FRENTES: [
+    {"id": "lojas", "rotulo": "Lojas e Ponto de Equilíbrio", "colecoes": ["lojas", "lojas_faturamento", "pe_simulador"]},
+    {"id": "rh", "rotulo": "RH e Organograma (equipe, salários, férias e folgas)", "colecoes": ["funcionarios", "pdi", "salarios", "rh_folhas", "rh_cargos", "rh_centros", "rh_departamentos", "rh_importacoes", "funcionarios/_liberacoes/pedidos"]},
+    {"id": "viagens", "rotulo": "Viagens e Adiantamentos", "colecoes": ["funcionarios/_viagens/pedidos", "funcionarios/_viagens/parametros"]},
+    {"id": "contratos", "rotulo": "Contratos, apólices e reajustes", "colecoes": ["contratos_locacao", "partes_contratuais", "seguros_vigencia", "aluguel_projecoes"]},
+    {"id": "parceiros", "rotulo": "Fornecedores e Clientes (chaves PIX e categoria DFC)", "colecoes": ["parceiros"]},
+    {"id": "dfc", "rotulo": "DFC · contas bancárias, extratos OFX e bases mensais", "colecoes": ["contasBancarias", "extratos", "dfc"]},
+    {"id": "fcx", "rotulo": "FCX · fluxo de caixa, orçamentos e saídas", "colecoes": ["fcx"]},
+    {"id": "retaguarda", "rotulo": "Retaguarda de Loja (faltas, caixas, cofre, IEO, alertas, solicitações)", "colecoes": ["faltas", "caixas", "ret_cofre", "ret_depositos", "ret_ocorrencias", "ret_consumidor", "cred_pendencias", "ieo_ocorrencias", "ieo_fechamentos", "ieo_laudos", "ieo_auto", "ieo_log", "alertas", "solicitacoes"]},
+    {"id": "credsystem", "rotulo": "Credsystem (metas, campanhas, apurações)", "colecoes": ["credsystem", "credsystem_metas", "credsystem_campanhas", "credsystem_apuracoes", "credsystem_base", "credsystem_resultados"]},
+    {"id": "adquirentes", "rotulo": "Auditoria de Adquirentes e conciliação", "colecoes": ["adq_taxas", "adq_auditorias", "adq_excecoes", "ec_taxas", "conc_fechamento"]},
+    {"id": "config", "rotulo": "Configurações (regras e categorias da DFC, empresas e Matriz, parâmetros, versões liberadas)", "colecoes": ["config"]},
+    {"id": "usuarios", "rotulo": "Usuários e permissões", "colecoes": ["usuarios"]},
+    {"id": "notificacoes", "rotulo": "Central de Notificações (regras e disparos)", "colecoes": [], "tabelas": ["painel_notificacoes_regras"]},
+    {"id": "contabil", "rotulo": "Contábil · empresas e de-para", "colecoes": [], "tabelas": ["contab_empresas", "contab_depara"]}
+  ],
+  OUTRAS: {"id": "outras", "rotulo": "Outras coleções (ainda sem frente definida)"},
+  ANEXOS: ['faltas/_anexos/partes', 'ret_ocorrencias/_anexos/partes'], /* termos assinados (DVC e Falta de Caixa) gravados em partes Base64 no próprio banco */
+  _tab: false,
+  frenteDe(colecao) {
+    const c = String(colecao || ''); let melhor = null, tam = -1;
+    for (const f of this.FRENTES) for (const x of f.colecoes) if ((c === x || c.startsWith(x + '/')) && x.length > tam) { melhor = f.id; tam = x.length; }
+    return melhor || 'outras';
+  },
+  /** coleções (exatas) que entram no .json v14.13: as de todas as frentes + os anexos dos termos */
+  colecoes() { return [...new Set([...this.FRENTES.flatMap(f => f.colecoes), ...this.ANEXOS])]; },
+  /** mesmo cálculo do servidor (resumir em backup-escopo-1413.mjs) — colecoes/tabelas: { nome → n } */
+  resumir({ colecoes = {}, tabelas = {}, destaques = null } = {}) {
+    const por = new Map([...this.FRENTES, this.OUTRAS].map(f => [f.id, { id: f.id, rotulo: f.rotulo, itens: [], registros: 0 }]));
+    for (const [c, n] of Object.entries(colecoes)) { const f = por.get(this.frenteDe(c)), k = Number(n) || 0; f.itens.push({ nome: c, tipo: 'colecao', registros: k }); f.registros += k; }
+    for (const t of this.TABELAS) {
+      if (!(t.nome in tabelas)) continue;
+      const dono = this.FRENTES.find(f => (f.tabelas || []).includes(t.nome)), f = por.get(dono ? dono.id : 'outras'), k = Number(tabelas[t.nome]) || 0;
+      f.itens.push({ nome: t.nome, tipo: 'tabela', registros: k }); f.registros += k;
+    }
+    const frentes = [...por.values()].filter(f => f.itens.length || f.id !== 'outras').map(f => ({ ...f, itens: f.itens.sort((a, b) => a.nome.localeCompare(b.nome)) }));
+    const total = frentes.reduce((a, f) => a + f.registros, 0), semFrente = ((frentes.find(f => f.id === 'outras') || {}).itens || []).map(i => i.nome);
+    return { frentes, total, semFrente, destaques: destaques || null, tabelas: Object.keys(tabelas).length };
+  },
+  /** destaques da DFC (regras, categorias, ajustes, De-para) e lista dos documentos de config, lidos das coleções do arquivo */
+  destaquesDe(colecoes) {
+    const cfgs = (colecoes && colecoes.config) || [], d = cfgs.find(x => x.id === 'dfc');
+    const n = a => Array.isArray(a) ? a.length : 0, k = o => o && typeof o === 'object' && !Array.isArray(o) ? Object.keys(o).length : 0;
+    return { dfc: d ? { regras: n(d.regras), categorias: n(d.categorias), ajustesPadrao: k(d.ajustesPadrao), mapaFCX: k(d.mapaFCX), inicializada: d.regras_inicializadas === true || Array.isArray(d.regras) } : null, configDocs: cfgs.map(x => x.id).sort() };
+  },
+  /** as mesmas travas de permissão do backup .json de antes (o servidor também recusa) */
+  permitida(c) {
+    if ((c === 'salarios' || c === 'rh_folhas') && !Auth.can('pessoal.salario.ver')) return false;
+    if (c === 'pdi' && !Auth.can('pdi.ver')) return false;
+    if (['ret_ocorrencias', 'cred_pendencias', 'ret_ocorrencias/_anexos/partes'].includes(c) && !Retaguarda.podeVerOc()) return false;
+    if ((c === 'ec_taxas' || c === 'conc_fechamento') && !Auth.can('retaguarda.adq.ver')) return false;
+    if (c === 'pe_simulador' && !Auth.can('pe.ver')) return false;
+    if (c === 'parceiros' && !(Auth.can('parceiros.ver') || (typeof Parc11 !== 'undefined' && Parc11.le && Parc11.le()))) return false;
+    return true;
+  },
+  /** lê cada coleção; nunca devolve uma coleção "vazia por engano": falha de leitura (que não seja falta de permissão) aborta; sem permissão fica listada em `ocultas` */
+  async coletar(listar, { pode = () => true, incluirAnexos = true } = {}) {
+    const colecoes = {}, falhas = [], ocultas = [];
+    for (const c of this.colecoes()) {
+      if (!incluirAnexos && c.includes('/_anexos/')) continue;
+      if (!pode(c)) { ocultas.push(c); continue; }
+      try { colecoes[c] = await listar(c); }
+      catch (e) { if (e && (e.status === 403 || e.code === 'permission-denied')) ocultas.push(c); else falhas.push(c); }
+    }
+    return { colecoes, falhas, ocultas };
+  },
+  html(res, { rodape = '' } = {}) {
+    const d = res.destaques && res.destaques.dfc;
+    const lin = f => `<tr><td data-label="Módulo"><b>${esc(f.rotulo)}</b></td><td data-label="Conteúdo" class="cell-sub">${f.itens.length ? f.itens.map(i => `${esc(i.nome)} <span class="hint">(${Fmt.num(i.registros)})</span>${i.tipo === 'tabela' ? ' <span class="pill info">tabela</span>' : ''}`).join(' · ') : '<span class="hint">nenhum registro neste ambiente</span>'}</td><td data-label="Registros" class="num"><b>${Fmt.num(f.registros)}</b></td></tr>`;
+    return `<p style="margin:0 0 8px">Total: <b>${Fmt.num(res.total)}</b> registro(s) em <b>${Fmt.num(res.frentes.reduce((a, f) => a + f.itens.filter(i => i.tipo === 'colecao' && i.registros).length, 0))}</b> coleção(ões)${res.tabelas ? ` e <b>${res.tabelas}</b> tabela(s) de configuração` : ''}.</p>
+      ${d ? `<div class="note" style="margin:0 0 8px" data-bkp13-dfc>DFC · <b>${Fmt.num(d.regras)}</b> regra(s) de classificação · <b>${Fmt.num(d.categorias)}</b> categoria(s) personalizada(s) · <b>${Fmt.num(d.ajustesPadrao)}</b> ajuste(s) de categoria padrão · <b>${Fmt.num(d.mapaFCX)}</b> conta(s) no De-para FCX → DFC · ${d.inicializada ? 'regras protegidas (inicializadas)' : 'regras de fábrica (sem personalização)'}.</div>` : ''}
+      ${res.semFrente.length ? `<div class="note warn" style="margin:0 0 8px">Coleções ainda sem módulo definido no catálogo: ${res.semFrente.map(esc).join(', ')}.</div>` : ''}
+      <div class="tbl-wrap" style="max-height:340px"><table class="nolabel"><thead><tr><th>Módulo</th><th>Coleções e tabelas</th><th class="num">Registros</th></tr></thead><tbody>${res.frentes.map(lin).join('')}</tbody></table></div>${rodape}`;
+  },
+  mostrar(titulo, res, opc = {}) { UI.modal({ titulo, largo: true, corpo: this.html(res, opc), acoes: [{ rotulo: 'Fechar', classe: 'sec' }] }); },
+  /** .json v14.13 */
+  async baixar() {
+    const log = !!($('#bkpLog') && $('#bkpLog').checked), anexos = $('#bkpAnx') ? !!$('#bkpAnx').checked : true;
+    UI.toast('Gerando o backup…');
+    const { colecoes, falhas, ocultas } = await this.coletar(c => Cloud.adapter.list(c), { pode: c => this.permitida(c), incluirAnexos: anexos });
+    if (falhas.length) { UI.toast(`Backup NÃO gerado: não consegui ler ${falhas.join(', ')}. Tente de novo em alguns segundos.`); return false; }
+    let tabelas = null, avisoTab = '';
+    if (Cloud.base && Cloud.base.netlify) {
+      try { const r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'tabelas' }); tabelas = r.tabelas || null; }
+      catch (e) { if (e && (e.status === 404 || e.status === 403)) avisoTab = e.status === 403 ? 'As tabelas de configuração (Central de Notificações, empresas e de-para contábeis) não entraram: seu perfil não pode lê-las.' : 'As tabelas de configuração não entraram: o servidor ainda não liberou esta versão.'; else { UI.toast('Backup NÃO gerado: não consegui ler as tabelas de configuração (' + ((e && e.message) || e) + '). Tente de novo.'); return false; } }
+    }
+    const contagem = Object.fromEntries(Object.entries(colecoes).map(([k, v]) => [k, v.length])), tabN = Object.fromEntries(Object.entries(tabelas || {}).map(([k, v]) => [k, v.length]));
+    const resumo = this.resumir({ colecoes: contagem, tabelas: tabN, destaques: this.destaquesDe(colecoes) });
+    const out = { app: 'painel-gestao-esposende', versao: 2, versaoPainel: 'v14.13', geradoEm: new Date().toISOString(), geradoPor: Auth.id, colecoes, ...(tabelas ? { tabelas } : {}),
+      resumo: { total: resumo.total, frentes: resumo.frentes.map(f => ({ id: f.id, registros: f.registros })) } };
+    if (log) out.auditoria = await Audit.carregar({ dias: 400 });
+    const ok = await Documento.baixarArquivo(`backup_painel_esposende_${Ambiente.producao ? '' : Ambiente.id + '_'}${Datas.hojeISO()}.json`, JSON.stringify(out));
+    if (ok) {
+      UI.toast(`Backup gerado: ${resumo.total} registros em ${Object.keys(colecoes).length} coleções${tabelas ? ` e ${Object.keys(tabelas).length} tabelas` : ''}.`);
+      await BackupDiario.registrar(resumo.total).catch(() => { });
+      Audit.registrar({ modulo: 'backup', acao: 'exportou', entidade: 'backup', entidadeId: Datas.hojeISO(), rotulo: 'Backup completo (.json v14.13)', mudancas: [...Object.entries(contagem).map(([k, v]) => ({ campo: k, de: '', para: v + ' registros' })), ...Object.entries(tabN).map(([k, v]) => ({ campo: k + ' (tabela)', de: '', para: v + ' registros' }))] });
+      const notas = [ocultas.length ? `<div class="note warn" style="margin-top:8px">Não entraram por falta de permissão: ${ocultas.map(esc).join(', ')}.</div>` : '', avisoTab ? `<div class="note warn" style="margin-top:8px">${esc(avisoTab)}</div>` : '',
+        '<p class="hint" style="margin:8px 0 0">Ficam de fora de propósito: log de auditoria (opcional na caixa do backup), presença, arquivos binários enviados e o livro contábil.</p>'].join('');
+      setTimeout(() => this.mostrar('Backup (.json) gerado', resumo, { rodape: notas }), 80);
+    }
+    return !!ok;
+  },
+  /** config/dfc restaurado do .json: o servidor só aceita uma lista nova com o contador de versão (o dele + 1); sem lista no arquivo, a do servidor é mantida */
+  async prepararDfc(resto, lerFresco = () => Dfc13.lerFresco()) {
+    const atual = await lerFresco(), d = { ...resto }; delete d.regras_semente; const r = Dfc13.rev(atual);
+    if (Array.isArray(d.regras)) { d.regras_rev = r + 1; d.regras_inicializadas = true; }
+    else if (atual && Array.isArray(atual.regras)) { d.regras = atual.regras; d.regras_rev = r; d.regras_inicializadas = true; }
+    else { delete d.regras_rev; delete d.regras_inicializadas; }
+    return d;
+  },
+  async gravar(col, id, resto) {
+    if (col === 'config' && id === 'dfc') resto = await this.prepararDfc(resto);
+    return Cloud.adapter.set(col + '/' + id, resto);
+  },
+  htmlTabelas(dados) {
+    if (!g13() || !dados.tabelas || typeof dados.tabelas !== 'object' || !(Cloud.base && Cloud.base.netlify) || !GestaoAmbientes.pode()) return '';
+    const lin = this.TABELAS.filter(t => Array.isArray(dados.tabelas[t.nome])).map(t => `${esc(t.rotulo)} (<b>${Fmt.num(dados.tabelas[t.nome].length)}</b>)`);
+    if (!lin.length) return '';
+    return `<fieldset class="ct-grupo" style="margin-top:12px"><legend>Tabelas de configuração do arquivo</legend>
+      <label class="check"><input type="checkbox" name="tab13"><span>Restaurar também: ${lin.join(' · ')}. Cria e atualiza o que está no arquivo (a Central de Notificações volta com os disparos como estavam); o histórico de envios e o livro contábil não mudam. O sistema cria antes um ponto de restauração preventivo.</span></label></fieldset>`;
+  },
+  async restaurarTabelas(dados) {
+    const ld = UI.carregando('Restaurando as tabelas de configuração…'); let r;
+    try { r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'restaurar-tabelas', tabelas: dados.tabelas }); }
+    catch (e) { ld.fechar(); UI.toast('Tabelas de configuração NÃO restauradas: ' + ((e && e.message) || e)); return null; }
+    ld.fechar();
+    const lin = (r.tabelas || []).map(t => `<tr><td>${esc(t.rotulo)}</td><td class="num">${Fmt.num(t.noPonto)}</td><td class="num">${Fmt.num(t.criadas)}</td><td class="num">${Fmt.num(t.atualizadas)}</td><td class="num">${Fmt.num(t.removidas)}</td></tr>`).join('');
+    UI.modal({ titulo: 'Tabelas de configuração restauradas', largo: true, corpo: `<div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Tabela</th><th class="num">No arquivo</th><th class="num">Criadas</th><th class="num">Atualizadas</th><th class="num">Removidas</th></tr></thead><tbody>${lin || '<tr><td colspan="5" class="hint">Nenhuma tabela aplicada.</td></tr>'}</tbody></table></div>
+      ${(r.avisos || []).length ? `<div class="note warn" style="margin-top:8px">${r.avisos.map(esc).join('<br>')}</div>` : ''}<p class="hint" style="margin:8px 0 0">Ponto preventivo #${esc(String(r.preventivo && r.preventivo.id))} criado antes da restauração.</p>`, acoes: [{ rotulo: 'Fechar', classe: 'sec' }] });
+    return r;
+  },
+  /** resumo da restauração de um ponto da nuvem (tabelas e avisos) */
+  htmlRestauro(s) {
+    const t = (s && s.tabelas) || [], av = (s && s.avisos) || [];
+    return (t.length ? `<p style="margin:0 0 8px">Tabelas de configuração: ${t.map(x => `${esc(x.rotulo)} (<b>${Fmt.num(x.criadas)}</b> criada(s), <b>${Fmt.num(x.atualizadas)}</b> atualizada(s)${x.removidas ? `, <b>${Fmt.num(x.removidas)}</b> removida(s)` : ''})`).join(' · ')}.</p>` : '') + (av.length ? `<div class="note warn" style="margin:0 0 8px">${av.map(esc).join('<br>')}</div>` : '');
+  },
+};
+Object.assign(Bkp, {
+  _o13: { json: Bkp.json, render: Bkp.render },
+  /** coleções válidas do .json: a lista de antes, ou o catálogo por frente (v14.13) */
+  lista() { return g13() ? Bkp13.colecoes() : this.COLECOES; },
+  async json() { return g13() ? Bkp13.baixar() : this._o13.json.call(this); },
+  render() {
+    const h = this._o13.render.apply(this, arguments); if (!g13()) return h;
+    return h.split('<label class="check"><input type="checkbox" id="bkpLog"> Incluir log de auditoria</label>').join('<label class="check"><input type="checkbox" id="bkpLog"> Incluir log de auditoria</label>\n          <label class="check"><input type="checkbox" id="bkpAnx" checked> Incluir os anexos dos termos assinados (DVC e Falta de Caixa; pode deixar o arquivo grande)</label>\n          <p class="hint" style="margin:8px 0 0">v14.13: o arquivo traz o mesmo escopo do ponto de restauração na nuvem, por módulo (inclui Fornecedores e Clientes, regras e categorias da DFC, empresas e a Central de Notificações) e mostra o resumo ao baixar.</p>');
+  },
+});
+Object.assign(BackupNuvem, {
+  /** botão "Ver conteúdo" de um ponto: o que ele guarda, por módulo (pontos antigos, sem o detalhe, mostram só as coleções) */
+  async conteudo(id) {
+    let r; try { r = await Cloud.base._req('POST', '/api/backup-nuvem', { acao: 'conteudo', id }); } catch (e) { return UI.toast('Não consegui abrir o conteúdo do ponto: ' + ((e && e.message) || e)); }
+    Bkp13.mostrar(`Conteúdo do ponto #${id}`, r.resumo, { rodape: r.resumo.formato >= 2 ? '' : '<p class="hint" style="margin:8px 0 0">Ponto criado antes da v14.13: guarda as coleções do painel, sem as tabelas de configuração.</p>' });
+  },
+});
+
 const ROTEADOR = [
   [/^sol-/, () => Solicitacoes], // v13.60
   [/^bsc-/, () => BSC], // v14.03 · Balanced Scorecard

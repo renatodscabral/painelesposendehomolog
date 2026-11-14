@@ -2,7 +2,9 @@
    O cron do Netlify é sempre em UTC; o Brasil não tem horário de verão desde 2019, então 23:59 (UTC−3) = 02:59 UTC → "59 2 * * *".
    Regras do Netlify: só roda no deploy PUBLICADO (não em deploy preview nem branch deploy), não tem URL e tem limite de 30 s.
    Cada site (Produção, Homologação, Falco) roda a própria rotina no próprio banco. Idempotente: se já houve um ponto agendado nas últimas
-   20 horas (nova tentativa do Netlify, por exemplo), não cria outro. Para testar sem esperar: Netlify › Functions › backup-agendado › Run now. */
+   20 horas (nova tentativa do Netlify, por exemplo), não cria outro.
+   v14.13: com o recurso gestao_v1413 ativo (Homologação: sempre; Produção/Falco: depois de "Liberar Versão em Produção", lido de config/recursos porque a rotina não tem sessão)
+   o ponto sai no formato 2, igual ao manual e ao do primeiro acesso: documentos + tabelas de configuração (Central de Notificações, empresas e de-para contábeis) + contagens e destaques da DFC. Para testar sem esperar: Netlify › Functions › backup-agendado › Run now. */
 import { agendado } from '../lib/backup-nuvem.mjs';
 
 export default async () => {

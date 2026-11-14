@@ -4,6 +4,7 @@ import { ErroHttp } from './http.mjs';
 import { NIVEL, exigido, validarCaminho, partes, ehUsuarios, lojaPodeGravar } from './regras.mjs';
 import { acessoPorMatriz, exclusaoPermitida } from './permissoes.mjs';
 import { podeLerSalarioDoc, salariosLiberados, ehColecaoSalarios } from './arvore-rh.mjs';
+import { protegerConfigDfc } from './dfc-1413.mjs';
 
 export const LIMITE_DOC = 5.5 * 1024 * 1024;   // bytes de JSON por documento
 export const LIMITE_PAGINA = 3.5 * 1024 * 1024; // bytes de JSON por página de listagem (resposta da função ≤ 6 MB)
@@ -74,6 +75,7 @@ export async function gravar(t, sess, caminho, dados) {
       if (sess.trocaPendente && trocou && d.trocarSenha === false) await t('UPDATE sessoes SET troca_pendente = false WHERE token_hash = $1', [sess.tokenHash]);
     }
   }
+  d = await protegerConfigDfc(t, sess, caminho, d); /* v14.13: regras da DFC pétreas (config/dfc) — só com o recurso gestao_v1413 */
   const texto = JSON.stringify(d);
   if (Buffer.byteLength(texto) > LIMITE_DOC) throw new ErroHttp(413, 'Registro grande demais (limite de 5,5 MB por documento).');
   const { colecao, docId } = partes(caminho);
@@ -105,7 +107,7 @@ export async function executarLote(sess, ops, permitido = () => true) {
         if (!permitido(o.op, caminho)) throw new ErroHttp(403, 'Operação não permitida entre estes ambientes.');
         if (o.op === 'remove') await remover(t, sess, caminho); else await gravar(t, sess, caminho, o.dados);
         await t('RELEASE SAVEPOINT op'); out.push({ ok: true });
-      } catch (e) { await t('ROLLBACK TO SAVEPOINT op'); if (!e.status) throw e; out.push({ ok: false, status: e.status, erro: e.message }); }
+      } catch (e) { await t('ROLLBACK TO SAVEPOINT op'); if (!e.status) throw e; out.push({ ok: false, status: e.status, erro: e.message, ...(e.extra?.codigo ? { codigo: e.extra.codigo } : {}) }); } /* v14.13: o motivo (ex.: regras_desatualizadas) chega ao painel */
     }
     return out;
   });
