@@ -81,7 +81,7 @@ function ambiente({ g14 = true, g15 = true } = {}) {
   const ConcMP = { SUBS72: [['cruzamento', 'Conciliação e Cruzamento'], ['regras', 'Regras de Taxa Contratuais'], ['resumo', 'Resumo do Fechamento']], ui: { sub: 'regras' }, v72: () => true,
     renderCredito() { return 'ORIGINAL-CREDITO'; }, renderRegras() { return 'ORIGINAL-REGRAS'; }, empresa: id => emp[id] || null, nomeEmpresa: id => emp[id]?.nome || id || '—', empresas: () => Object.values(emp), ecInfo: () => null };
   const mocks = {
-    Repo, ConcMP, g14: () => ctx.flag, g15: () => ctx.flag15 && ctx.flag, Datas: { hojeISO: () => '2026-11-17' }, Recursos: { ativo: () => true }, Auth: { can: (...x) => (ctx.pode ? ctx.pode(...x) : true), id: 'u-teste' }, Libs: {}, DFC: { classificar: () => ({}) },
+    Repo, ConcMP, g14: () => ctx.flag, g15: () => ctx.flag15 && ctx.flag, g18: () => false /* v14.18.1: o Gravar ERP consulta g18() (a ponte OP = CX); aqui o recurso da v14.18 fica desligado, como na v14.15 */, Datas: { hojeISO: () => '2026-11-17' }, Recursos: { ativo: () => true }, Auth: { can: (...x) => (ctx.pode ? ctx.pode(...x) : true), id: 'u-teste' }, Libs: {}, DFC: { classificar: () => ({}) },
     ContasBancarias: { rotulo: c => c.apelido }, Retaguarda: {}, CNPJ: undefined,
     Fmt: { brl: n => 'R$' + Number(n).toFixed(2), brl0: n => 'R$' + Math.round(n), num: n => String(n), data: d => String(d ?? '').replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1'), dataHora: d => d, pct: n => Number(n).toFixed(2) + '%' },
     UI: { toast: m => ctx.toasts.push(m), modal(o) { ctx.modais.push(o); return { el: {} }; }, confirmar: async () => { ctx.confirmou++; return true; }, confirmarImpacto: async () => true, lerForm: () => ({}) },

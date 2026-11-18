@@ -66,7 +66,7 @@ const fmtCnpj = s => s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$
 const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function ambiente({ g14 = true, g15 = true, g17 = true, g18 = true } = {}) {
-  const S = { adq_taxas: new Map(), adq_contratos: new Map(), adq_lotes: new Map(), adq_agendas: new Map(), adq_erp: new Map(), contasBancarias: new Map(), extratos: new Map(), lojas: new Map(), config: new Map() };
+  const S = { adq_taxas: new Map(), adq_contratos: new Map(), adq_lotes: new Map(), adq_agendas: new Map(), adq_erp: new Map(), contasBancarias: new Map(), extratos: new Map(), lojas: new Map(), config: new Map(), credsystem: new Map() };
   const V = {}; let tic = 0; const bump = c => { V[c] = (V[c] || 0) + 1; };
   const Repo = {
     cols: S, prontas: new Set(Object.keys(S)), todos: c => [...(S[c] || new Map()).values()], get: (c, id) => (S[c] || new Map()).get(id) || null, versao: c => V[c] || 0,
@@ -83,7 +83,7 @@ function ambiente({ g14 = true, g15 = true, g17 = true, g18 = true } = {}) {
     Datas: { hojeISO: () => '2026-11-17', iso: d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }, Recursos: { ativo: () => true }, Auth: { can: (...x) => (ctx.pode ? ctx.pode(...x) : true), id: 'u-teste' }, Libs: {}, FCX: { api: () => ctx.fcxApi || null, get versao() { return ctx.fcxVer || 1; }, montar() {} }, g07: () => false,
     ContasBancarias: { rotulo: c => c.apelido }, Retaguarda: { mesAnterior: m => { const [y, mm] = m.split('-').map(Number); const d = new Date(Date.UTC(y, mm - 2, 1)); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); } }, CNPJ: undefined, LOGO_NAVY: 'data:image/png;base64,AAAA', $: () => null,
     Fmt: { brl: n => 'R$' + Number(n).toFixed(2), brl0: n => 'R$' + Math.round(n), num: (n, d = 0) => Number(n).toFixed(d), data: d => String(d ?? '').replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1'), dataHora: d => d, pct: (n, d = 2) => Number(n).toFixed(d) + '%' },
-    UI: { toast: m => ctx.toasts.push(m), modal(o) { ctx.modais.push(o); return { el: {} }; }, confirmar: async () => { ctx.confirmou++; return true; }, confirmarImpacto: async () => { ctx.confirmou++; return true; }, lerForm: () => ctx.form || ({}) },
+    UI: { toast: m => ctx.toasts.push(m), modal(o) { ctx.modais.push(o); return { el: {} }; }, confirmar: async (...x) => { ctx.confirmou++; ctx.confirmacoes = (ctx.confirmacoes || []); ctx.confirmacoes.push(x); return !ctx.recusar; }, confirmarImpacto: async () => { ctx.confirmou++; return true; }, lerForm: () => ctx.form || ({}) },
     App: { render() { ctx.renders = (ctx.renders || 0) + 1; }, agendarRender() { } }, Audit: { registrar: a => { ctx.audits.push(a); return Promise.resolve(); } },
     Documento: { baixarArquivo(nome, blob) { ctx.baixados.push([nome, blob]); return true; }, montar: (t, corpo, o) => ({ titulo: t, corpo, opcoes: o }), previa: (t, doc, nome) => { ctx.previas.push({ titulo: t, doc, nome }); } }, CSV: { gerar: m => m.map(l => l.join(';')).join('\n') },
     registrarBase: m => ctx.bases.push(m), g09: () => true, g11: () => false, Acesso: { loja: () => false }, esc: escH,
@@ -151,7 +151,7 @@ function cenario1({ g18 = true, comMar = true } = {}) {
   /* tabela única */
   const E = cenario1({ g18: true }), off = cenario1({ g18: false });
   const h = E.Adq14.renderContratos(), ho = off.Adq14.renderContratos();
-  chk('v14.18 ligada: título "Contratos × Conta Bancária × Lojas e ECs" e as 8 colunas pedidas, nesta ordem', /<h2>Contratos × Conta Bancária × Lojas e ECs<\/h2>/.test(h) && /<th>Adquirente<\/th><th>Empresa \/ CNPJ<\/th><th>Conta Bancária \(OFX\)<\/th><th>Lojas Vinculadas<\/th><th>ECs<\/th><th class="num">Bandeiras com Taxa<\/th><th class="num">Lotes<\/th><th class="num">Ações<\/th>/.test(h), h.slice(0, 600));
+  chk('v14.18 ligada: título "Contratos × Conta Bancária × Lojas e ECs" e as colunas pedidas, nesta ordem (v14.18.2: + Antecipação vigente na competência)', /<h2>Contratos × Conta Bancária × Lojas e ECs<\/h2>/.test(h) && /<th>Adquirente<\/th><th>Empresa \/ CNPJ<\/th><th>Conta Bancária \(OFX\)<\/th><th>Lojas Vinculadas<\/th><th>ECs<\/th><th title="[^"]*">Antecipação vigente · [^<]*<\/th><th class="num">Bandeiras com Taxa<\/th><th class="num">Lotes<\/th><th class="num">Ações<\/th>/.test(h), h.slice(0, 600));
   chk('a tabela duplicada "Lojas do ERP e Estabelecimentos (EC) por contrato" some (uma só tabela de contratos na tela)', !/Lojas do ERP e Estabelecimentos \(EC\) por contrato/.test(h) && (h.match(/<table/g) || []).length === 1, (h.match(/<table/g) || []).length);
   chk('desligada (v14.17): continuam as duas tabelas antigas (contratos + "Lojas do ERP e Estabelecimentos (EC) por contrato") — nada muda para quem não usa o recurso', /Contratos × Conta Bancária de Crédito \(OFX\)/.test(ho) && /Lojas do ERP e Estabelecimentos \(EC\) por contrato/.test(ho) && (ho.match(/<table/g) || []).length === 2 && !/Lojas e ECs<\/h2>/.test(ho));
   chk('cada contrato mostra suas lojas e ECs em chips; "+N no Cadastro" avisa o que o Cadastro de Lojas tem a mais; botão Puxar do Cadastro na linha e para todos', /<span class="a15-chip">EC /.test(h) === false && /\+2 no Cadastro/.test(h) && /data-a="a14-contrato-puxar"/.test(h) && /data-a="a14-contratos-puxar-todos"/.test(h), h);
@@ -519,11 +519,308 @@ const CAT = (E, t) => E.DFC.classificar(t, undefined, { ov18: true });
    5 · DOCUMENTAÇÃO, VERSÃO E RECURSO
    ===================================================================== */
 {
-  const readme = fs.readFileSync(path.join(raiz, 'README.md'), 'utf8'), i18 = readme.indexOf('## v14.18'), i17 = readme.indexOf('## v14.17'), sec = readme.slice(i18, i17);
-  chk('README: "Versão v14.18." na abertura e a seção "## v14.18" vem antes da v14.17, com o recurso gestao_v1418, os quatro itens, o aviso dos nomes de categoria e os limites', /Versão v14\.18\./.test(readme) && i18 > 0 && i18 < i17 && /gestao_v1418/.test(sec) && ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'rec_cartoes', 'rec_credsystem', 'Limites a saber'].every(t => sec.includes(t)), sec.slice(0, 200));
+  const readme = fs.readFileSync(path.join(raiz, 'README.md'), 'utf8'), i18 = readme.indexOf('## v14.18 ·'), i181 = readme.indexOf('## v14.18.1 ·'), i17 = readme.indexOf('## v14.17'), sec = readme.slice(i18, i17);
+  chk('README: "Versão v14.18." na abertura e a seção "## v14.18" vem antes da v14.17, com o recurso gestao_v1418, os quatro itens, o aviso dos nomes de categoria e os limites', /Versão v14\.(18(\.1|\.2)?|19)\./.test(readme) && i18 > 0 && i18 < i17 && /gestao_v1418/.test(sec) && ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'rec_cartoes', 'rec_credsystem', 'Limites a saber'].every(t => sec.includes(t)), sec.slice(0, 200));
   chk('README: a seção documenta o Quadro 3 do A4, o Quadro 5 do Laudo, o seletor do Previsto (auto / sempre / FCX) e que o fcx.html não foi alterado', /Quadro 3 — Reconciliação de Recebíveis de Cartões/.test(sec) && /Quadro 5/.test(sec) && /dfc_cartoes18/.test(sec) && /fcx\.html[^.]*não foram alterados|não foram alterados/.test(sec));
+  const s181 = readme.slice(i181, i18);
+  chk('README: a seção "## v14.18.1" (antes da v14.18) documenta OP = CX, o agrupamento por Dt Venda + Loja, a regra mista do DC, a coleção credsystem / cartLote, a permissão, o aviso "Valores da coluna Cartão atualizados via importação ERP (OP = CX)" e a Regra de Ouro', i181 > 0 && i181 < i18 && ['OP = CX', 'Dt Venda', 'Regra mista', 'regra mista', 'credsystem', 'cartLote', 'retaguarda.credsystem.importar', 'Valores da coluna Cartão atualizados via importação ERP (OP = CX)', 'fcx.html', 'Limites a saber', '182 verificações'].every(t => s181.includes(t)), s181.slice(0, 200));
+  const i182 = readme.indexOf('## v14.18.2 ·'), s182 = readme.slice(i182, i181);
+  chk('README: "Versão v14.18.2." (ou v14.19, que a sucede) na abertura e a seção "## v14.18.2" (antes da v14.18.1) documenta as Vigências de Antecipação: Data Início / Data Fim em aberto, a migração (01/01/2000), a trava de sobreposição com a mensagem, a taxa pela Dt Venda (SafraPay: data do pagamento), "Múltiplas vigências no período", vigAnt, os limites e a Regra de Ouro', /Versão v14\.(18\.2|19)\./.test(readme) && i182 > 0 && i182 < i181 && ['gestao_v1418', 'vigAnt', 'Data Início', 'Em aberto', '01/01/2000', 'Período conflitante com a vigência já cadastrada', 'Múltiplas vigências no período', 'Dt Venda', 'data do pagamento', 'Limites a saber', 'Regra de Ouro', '255 verificações', 'fcx.html'].every(t => s182.includes(t)), s182.slice(0, 200));
   chk('recurso gestao_v1418 cadastrado na lista de recursos (v14.18) e dependente da gestao_v1417 (g18 = recurso && g17)', /gestao_v1418: \{ versao: 'v14\.18'/.test(html) && /function g18\(\) \{[^}]*Recursos\.ativo\('gestao_v1418'\) && g17\(\)/.test(html));
   chk('o painel anuncia a versão v14.18 no cabeçalho', /v14\.18/.test(html.match(/id="versao"[^>]*>[^<]*/)?.[0] || '') || /VERSAO\s*=\s*'v14\.18'|versao:\s*'v14\.18'/.test(html) || /v14\.18 · /.test(html));
+}
+
+
+/* =====================================================================
+   6 · v14.18.1 · GRAVAR ERP → RETAGUARDA / RECEBÍVEIS: RECEBIMENTOS DE PRESTAÇÃO (OP = CX) AGRUPADOS POR Dt Venda + Loja
+   ===================================================================== */
+const FX6 = (() => {
+  const CAB = ['Loja', 'Dt Venda', 'Dt Crédito', 'Adq', 'Descrição', 'Vda Bruta', ' MDR', 'Vda Líquida', 'Vencimento', 'Antecipação', 'Tx Extra', 'OP', 'DC'];
+  const nulls = n => Array(n).fill(null);
+  const L = (loja, dv, bruto, op, dc, cod = '304', desc = 'CREDSYSTEM CARTAO PROPRIO') => [loja, dv, '10/02/2026', cod, desc, bruto, 0, bruto, '10/02/2026', 0, 0, op, dc];
+  const linhas = [
+    L('5', '02/01/2026', 100, 'CX', 'CR'), L('5', '02/01/2026', 50.5, 'CX', 'CR'), L('5', '02/01/2026', 20, 'CX', 'DB'),                    // loja "5" → 05 · Credsystem: CR soma, DB (estorno) subtrai → 130,50
+    L('05', '02/01/2026', 30, 'CX', 'DB', '300', 'GETNET CARTAO DEBITO'),                                                                   // regra mista: fora da Credsystem a linha CX SOMA, mesmo com DC = DB → 160,50
+    L('28', '03/01/2026', 200, 'CX', 'CR'), L('28', '03/01/2026', 999, 'VE', 'CR'),                                                       // a venda normal (VE) não entra
+    L('99', '03/01/2026', 40, 'CX', 'CR'),                                                                                                  // loja sem cadastro: não grava
+    L('31', '04/01/2026', 77, 'CX', 'CR', '303', 'QR LINX PIX'), L('31', '04/01/2026', 10, 'VE', 'CR'),                                    // QR-LINX é informativo; a loja 31 está no arquivo, mas sem OP = CX
+    L('05', '05/01/2026', 15, 'CX', 'CR'), L('05', '05/01/2026', 15, 'CX', 'DB'),                                                           // compra e estorno: fecha em zero
+  ];
+  const rows = () => [['Apuração dos Créditos', ...nulls(12)], ['Período: 01/01/2026 a 31/01/2026', ...nulls(12)], nulls(13), CAB, ...linhas];
+  const lj = (cod, nome) => ({ id: 'loja-' + cod.padStart(3, '0'), codigo: cod, nome, ativa: true, cnpj: '', adquirentes: [] });
+  const cenario = ({ g18 = true, pre = true } = {}) => {
+    const E = ambiente({ g18 }); [lj('05', 'Loja Praia'), lj('28', 'Loja Centro'), lj('31', 'Loja Norte'), lj('40', 'Loja Sul')].forEach(l => E.S.lojas.set(l.id, l)); E.bump('lojas');
+    if (pre) {
+      const put = (id, linhasDoc, extra = {}) => E.S.credsystem.set(id, { id, data: id, linhas: linhasDoc, arquivos: [{ nome: 'websystem.xlsx', em: 'x', por: 'u1' }], ...extra });
+      // 02/01: a loja 05 já tem Dinheiro, PIX, Cartão manual, PIX de LOTE e um Cartão de LOTE antigo (sem a marca da ponte): só o Cartão da prestação é substituído
+      put('2026-01-02', [{ chave: 'loja-005', lojaId: 'loja-005', texto: '05 - Loja Praia', web: 500, din: 10, cart: 20, pix: 5, cartLote: 999, pixLote: 7, lote: { cart: 999, pix: 7, arquivo: 'antigo.xlsx', em: 'x' } }, { chave: 'loja-040', lojaId: 'loja-040', texto: '40 - Loja Sul', web: 100, din: 100, cart: null, pix: null }]);
+      // 04/01: valor que ESTA ponte gravou antes na loja 31 (está no arquivo sem OP = CX → é limpo) e um LOTE antigo na 28 (não está no arquivo → fica)
+      put('2026-01-04', [{ chave: 'loja-031', lojaId: 'loja-031', texto: '31 - Loja Norte', web: 30, din: null, cart: null, pix: null, cartLote: 55, lote: { cart: 55, arquivo: 'x', em: 'x', origem: 'apuracao-op-cx' } }, { chave: 'loja-028', lojaId: 'loja-028', texto: '28 - Loja Centro', web: 10, din: null, cart: null, pix: null, cartLote: 5, lote: { cart: 5, arquivo: 'antigo.xlsx', em: 'x' } }]);
+      // 05/01: valor desta ponte na loja 05 que agora fecha em zero → sai; a linha ficaria vazia e é retirada do documento
+      put('2026-01-05', [{ chave: 'loja-005', lojaId: 'loja-005', texto: '05 - Loja Praia', web: 0, din: null, cart: null, pix: null, cartLote: 77, lote: { cart: 77, arquivo: 'x', em: 'x', origem: 'apuracao-op-cx' } }]);
+      E.bump('credsystem');
+    }
+    return E;
+  };
+  const cred = E => [...E.S.credsystem.values()].sort((a, b) => a.id.localeCompare(b.id));
+  const lin = (E, dia, chave) => E.S.credsystem.get(dia)?.linhas.find(l => l.chave === chave);
+  return { rows, cenario, cred, lin, linhas };
+})();
+{
+  const E = FX6.cenario(), { Adq15, Adq18, CodLoja } = E, lido = Adq15.lerErpLinhas(FX6.rows(), 'Apuração dos Créditos jan.xlsx', 'ApuraCreditos'), ag = Adq18.cx.agregar(lido);
+  chk('v14.18.1 · leitor: QR-LINX (informativo) com OP = CX é contado à parte (cxInformativo) e NÃO entra nos grupos; as demais linhas CX viram grupos com op = CX', igual(lido.cxInformativo, { 'QR-LINX': { n: 1, bruto: 77 } }) && !lido.periodos[0].grupos.some(g => g.adqNome === 'QR-LINX') && lido.periodos[0].grupos.filter(g => g.op === 'CX').length === 7, lido.cxInformativo);
+  chk('normaliza o código da filial como o Cadastro de Lojas: "5" e "05" → 05 → loja-005 (CodLoja.oficial/id)', CodLoja.oficial('5') === '05' && CodLoja.id('5') === 'loja-005' && Adq18.cx.lojaDe('5').rot === '05' && Adq18.cx.lojaDe('5').lojaId === 'loja-005' && Adq18.cx.lojaDe('99').cadastrada === false);
+  chk('agrupa OP = CX por Dt Venda + Loja: 3 lançamentos (05 em 02/01 = 160,50 · 28 em 03/01 = 200 · 05 em 05/01 = 0); a venda normal (OP = VE) fica de fora', ag.itens.length === 3 && igual(ag.itens.map(i => [i.dv, i.rot, i.valor, i.n]), [['2026-01-02', '05', 160.5, 4], ['2026-01-03', '28', 200, 1], ['2026-01-05', '05', 0, 2]]), ag.itens);
+  chk('regra mista do DC: na Credsystem DB subtrai (100 + 50,50 − 20) e nas demais adquirentes (Getnet) a linha CX soma mesmo com DC = DB (+30): loja 05 em 02/01 = R$ 160,50', Adq18.cx.valor({ adqNome: 'CREDSYSTEM', dc: 'DB', bruto: 20 }) === -20 && Adq18.cx.valor({ adqNome: 'GETNET', adqCod: '300', dc: 'DB', bruto: 30 }) === 30 && Adq18.cx.valor({ adqNome: '', adqCod: '304', dc: 'DB', bruto: 5 }) === -5 && ag.itens[0].valor === 160.5);
+  chk('totais do quadro: 8 linhas OP = CX (R$ 400,50), das quais 7 (R$ 360,50) vão para a Retaguarda; 3 dias × 2 lojas; estorno Credsystem = 2 linhas (−R$ 35,00)', ag.linhas === 8 && ag.total === 400.5 && ag.gravLinhas === 7 && ag.gravTotal === 360.5 && ag.nDias === 3 && ag.nLojas === 2 && ag.estornos.n === 2 && ag.estornos.valor === -35, ag);
+  chk('loja sem cadastro (99) não é gravada e é listada com linhas e valor; QR-LINX informativo é avisado e não entra', ag.semCadastro.length === 1 && ag.semCadastro[0].rot === '99' && ag.semCadastroLinhas === 1 && ag.semCadastroValor === 40 && ag.informativosN === 1 && ag.informativosBruto === 77);
+  chk('arquivo sem nenhuma linha OP = CX: temCx = false e o aviso diz que nada será enviado', (() => { const l2 = Adq15.lerErpLinhas([['Apuração dos Créditos', ...Array(12).fill(null)], Array(13).fill(null), Array(13).fill(null), ['Loja', 'Dt Venda', 'Dt Crédito', 'Adq', 'Descrição', 'Vda Bruta', ' MDR', 'Vda Líquida', 'Vencimento', 'Antecipação', 'Tx Extra', 'OP', 'DC'], FX6.linhas[5]], 'sem.xlsx', 'ApuraCreditos'); const a = Adq18.cx.agregar(l2); return !a.temCx && /nenhuma linha neste arquivo/.test(Adq18.cx.painelHtml(l2)); })());
+
+  // quadro de leitura (antes do Gravar ERP) e confirmação
+  const painel = Adq18.cx.painelHtml(lido);
+  chk('quadro de leitura do ERP: "Recebimento de Prestação (OP = CX)" com 7 linhas, R$ 360,50, 3 dias × 2 lojas, adquirentes, loja sem cadastro e informativo; lista Dt Venda × Loja', /Recebimento de Prestação \(OP = CX\)/.test(painel) && /7 linha\(s\) · R\$360\.50/.test(painel) && /3 dia\(s\) × 2 loja\(s\)/.test(painel) && /CREDSYSTEM/.test(painel) && /99 \(R\$40\.00\)/.test(painel) && /QR-LINX/.test(painel) && /Dinheiro e PIX lançados à mão não são alterados/.test(painel) && /02\/01\/2026/.test(painel), painel.slice(0, 600));
+  E.ctx = null; E.pode = () => false; const semPerm = Adq18.cx.painelHtml(lido); E.pode = null;
+  chk('sem permissão na Retaguarda › Conciliação Credsystem o quadro avisa que a prestação NÃO será enviada', /NÃO será enviada/.test(semPerm) && !/NÃO será enviada/.test(painel));
+}
+{
+  // gravação pela ponte (função de gravar) com a Retaguarda já tendo lançamentos manuais
+  const E = FX6.cenario(), { Adq15, Adq18 } = E, lido = Adq15.lerErpLinhas(FX6.rows(), 'Apuração dos Créditos jan.xlsx', 'ApuraCreditos'), v0 = E.Repo.versao('credsystem');
+  const r = await Adq18.cx.gravar(lido), d2 = FX6.lin(E, '2026-01-02', 'loja-005'), d3 = FX6.lin(E, '2026-01-03', 'loja-028'), outras = E.S.credsystem.get('2026-01-02').linhas.find(l => l.chave === 'loja-040');
+  chk('gravar: estado ok; 4 dias tocados (02, 03, 04 e 05/01), 2 lançamentos escritos (05 em 02/01 e 28 em 03/01) e 2 valores antigos da ponte zerados (31 em 04/01 e 05 em 05/01, que fecha em zero); números do aviso = 7 linhas · R$ 360,50 · 3 dias × 2 lojas', r.estado === 'ok' && r.docs === 4 && r.escritas === 2 && r.limpas === 2 && r.gravLinhas === 7 && r.gravTotal === 360.5 && r.dias === 3 && r.lojas === 2, r);
+  chk('loja 05 em 02/01: o Cartão da prestação (cartLote) passa a 160,50 e a marca da ponte (origem OP = CX, 4 linhas); Dinheiro 10, PIX 5 e Cartão digitado 20 ficam intactos; o PIX de LOTE antigo (7) é preservado', d2 && d2.cartLote === 160.5 && d2.din === 10 && d2.pix === 5 && d2.cart === 20 && d2.pixLote === 7 && d2.web === 500 && d2.lote.origem === 'apuracao-op-cx' && d2.lote.linhas === 4 && d2.lote.pix === 7 && d2.lote.arquivo === 'Apuração dos Créditos jan.xlsx', d2);
+  chk('outra loja do mesmo dia (40), que não está no arquivo, não é tocada; dia novo (03/01) é criado com a loja 28 = 200 e Websystem 0 (como a ponte do LOTE fazia)', igual(outras, { chave: 'loja-040', lojaId: 'loja-040', texto: '40 - Loja Sul', web: 100, din: 100, cart: null, pix: null }) && d3 && d3.cartLote === 200 && d3.web === 0 && d3.din === null && d3.lojaId === 'loja-028', { outras, d3 });
+  chk('a loja sem cadastro (99) NÃO foi gravada em nenhum documento (nem como texto)', !FX6.cred(E).some(d => d.linhas.some(l => /99/.test(l.chave) || /99/.test(l.texto || ''))));
+  const d4 = FX6.lin(E, '2026-01-04', 'loja-031'), d4b = FX6.lin(E, '2026-01-04', 'loja-028');
+  chk('loja 31 em 04/01 está no arquivo sem OP = CX: o valor que a própria ponte gravara antes (55) é zerado (a linha fica pelo Websystem 30); o LOTE antigo da loja 28, que não está no arquivo, fica (5)', d4 && d4.cartLote === null && !d4.lote && d4.web === 30 && d4b && d4b.cartLote === 5 && d4b.lote.arquivo === 'antigo.xlsx', { d4, d4b });
+  chk('05/01: compra e estorno fecham em zero → o valor antigo da ponte é zerado e a linha que ficou vazia sai do documento (o documento continua existindo)', E.S.credsystem.get('2026-01-05') && E.S.credsystem.get('2026-01-05').linhas.length === 0);
+  chk('cada documento gravado na Retaguarda (módulo retaguarda) tem a trilha do arquivo "(ERP · OP = CX)" e uma única entrada de auditoria resume a gravação', E.S.credsystem.get('2026-01-02').arquivos.at(-1).nome === 'Apuração dos Créditos jan.xlsx (ERP · OP = CX)' && E.gravacoes.filter(g => g.c === 'credsystem').every(g => g.aud.modulo === 'retaguarda' && g.aud.semAudit === true) && E.audits.filter(a => a.entidade === 'credsystem').length === 1 && /7 linha\(s\) OP = CX/.test(E.audits.at(-1).detalhe), E.audits.at(-1));
+  const n1 = E.gravacoes.length, r2x = await Adq18.cx.gravar(lido);
+  chk('idempotente: gravar o mesmo arquivo de novo não regrava nenhum documento (nada mudou) e o resultado é o mesmo', r2x.estado === 'ok' && r2x.docs === 0 && E.gravacoes.length === n1 && r2x.gravTotal === 360.5);
+  const bi = E.S.credsystem.get('2026-01-02').linhas.find(l => l.chave === 'loja-005').cartLote;
+  // reimportação com valor corrigido: substitui (não soma)
+  const linhasCorr = FX6.linhas.map(x => x[0] === '5' && x[1] === '02/01/2026' && x[5] === 100 ? [...x.slice(0, 5), 300, 0, 300, ...x.slice(8)] : x), corr = Adq15.lerErpLinhas([['Apuração dos Créditos', ...Array(12).fill(null)], Array(13).fill(null), Array(13).fill(null), FX6.rows()[3], ...linhasCorr], 'corrigido.xlsx', 'ApuraCreditos');
+  await Adq18.cx.gravar(corr);
+  chk('reimportação com o valor corrigido SUBSTITUI o Cartão da prestação do dia × loja (160,50 → 360,50), sem somar com o que já estava', bi === 160.5 && FX6.lin(E, '2026-01-02', 'loja-005').cartLote === 360.5 && FX6.lin(E, '2026-01-02', 'loja-005').din === 10);
+  // dia antigo (LOTE no próprio Cartão, antes da v13.74.3): sai do Cartão para não somar duas vezes
+  const base = { linhas: [{ chave: 'loja-028', lojaId: 'loja-028', texto: '28', web: 0, cart: 150, cartLote: null, pix: null, din: 20, lote: { cart: 150, arquivo: 'x' } }] }, ap = Adq18.cx.aplicarDia('2026-01-03', base, Adq18.cx.agregar(lido), 'a.xlsx');
+  chk('dia legado (LOTE gravado dentro do Cartão): o Cartão antigo igual ao LOTE sai (não soma duas vezes) e o Dinheiro 20 fica; se o Cartão for diferente do LOTE (digitado), ele fica', ap.linhas[0].cart === null && ap.linhas[0].cartLote === 200 && ap.linhas[0].din === 20 && Adq18.cx.aplicarDia('2026-01-03', { linhas: [{ chave: 'loja-028', web: 0, cart: 99, lote: { cart: 150 } }] }, Adq18.cx.agregar(lido), 'a.xlsx').linhas[0].cart === 99);
+}
+{
+  // sem permissão: o ERP é gravado, a Retaguarda não é tocada e o aviso diz isso
+  const E = FX6.cenario(), { Adq15, Adq18 } = E, lido = Adq15.lerErpLinhas(FX6.rows(), 'x.xlsx', 'ApuraCreditos'); E.pode = p => p !== 'retaguarda.credsystem.importar' && p !== 'retaguarda.credsystem.editar';
+  const r = await Adq18.cx.gravar(lido);
+  chk('sem retaguarda.credsystem.importar/editar: estado sem-permissao, nada gravado na Retaguarda e o aviso informa linhas e valor que NÃO foram enviados (8 · R$ 400,50)', r.estado === 'sem-permissao' && E.gravacoes.filter(g => g.c === 'credsystem').length === 0 && /NÃO enviadas à Retaguarda: sem permissão/.test(Adq18.cx.sufixoToast(r)) && r.linhas === 8 && r.total === 400.5);
+  E.pode = p => p === 'retaguarda.credsystem.editar'; const r2x = await Adq18.cx.gravar(lido);
+  chk('basta uma das duas permissões (aqui só "editar") para a ponte gravar', r2x.estado === 'ok' && r2x.docs === 4);
+}
+{
+  // fluxo do botão Gravar ERP (código real de gravarErp) — recurso ligado
+  const E = FX6.cenario(), { Adq15, Adq18 } = E, lido = Adq15.lerErpLinhas(FX6.rows(), 'Apuração dos Créditos jan.xlsx', 'ApuraCreditos');
+  E.recusar = true; Adq15.ui.erp = { lido }; await Adq15.gravarErp();
+  chk('Gravar ERP com a confirmação RECUSADA: nada é gravado (nem o ERP nem a Retaguarda) e a leitura continua na tela', E.gravacoes.length === 0 && Adq15.ui.erp && Adq15._ocupado === false && E.confirmou === 1 && /Recebimento de Prestação \(OP = CX\)/.test(E.confirmacoes[0][0]) && /7<\/b> linha\(s\)/.test(E.confirmacoes[0][1]) && /R\$360\.50/.test(E.confirmacoes[0][1]), E.confirmacoes);
+  E.recusar = false; await Adq15.gravarErp();
+  const toast = E.toasts.at(-1), cx = E.gravacoes.filter(g => g.c === 'credsystem'), erp = E.gravacoes.filter(g => g.c === 'adq_erp');
+  chk('Gravar ERP confirmado: grava as partes e o resumo do ERP e a Retaguarda; o aviso mostra "ERP gravado…" e "Retaguarda: 7 linha(s) OP = CX · R$ 360,50 gravadas no Cartão (3 dia(s) × 2 loja(s)) · 1 de loja sem cadastro ficaram de fora"', erp.length >= 2 && cx.length === 4 && /ERP gravado: 1 competência\(s\)/.test(toast) && /Retaguarda: 7 linha\(s\) OP = CX · R\$360\.50 gravadas no Cartão \(3 dia\(s\) × 2 loja\(s\)\)/.test(toast) && /1 de loja sem cadastro ficaram de fora/.test(toast), toast);
+  const card = Adq18.cx.cardResultado();
+  chk('depois de gravar a leitura some e fica o cartão do resultado com linhas, total, dias × lojas e lançamentos escritos; "Entendi" o fecha', !Adq15.ui.erp && /gravado nos Recebíveis \/ Retaguarda/.test(card) && /7 linha\(s\) · R\$360\.50 em 3 dia\(s\) × 2 loja\(s\)/.test(card) && /2 lançamento\(s\) dia × loja, 2 zerado\(s\)/.test(card) && /a15-erp-cx-ok/.test(card));
+  await Adq15.acao('a15-erp-cx-ok', { dataset: {} }); chk('o botão Entendi limpa o cartão do resultado', Adq18.cx.cardResultado() === '' && Adq18.cx.ultimo === null);
+  // aviso da Retaguarda › Conciliação
+  const linhasRt = [...E.S.credsystem.values()].flatMap(d => d.linhas.map(l => ({ ...l, data: d.id, docId: d.id }))), cartLote = Adq15.r2(linhasRt.reduce((s, l) => s + (l.cartLote || 0), 0)), av = Adq18.cx.avisoRetaguarda(linhasRt, cartLote);
+  chk('aviso da tela de Conciliação da Retaguarda: "Valores da coluna Cartão atualizados via importação ERP (OP = CX)" com o total de prestação (R$ 360,50 = 160,50 + 200), lançamentos, dias × lojas e o LOTE antigo à parte', /Valores da coluna Cartão atualizados via importação ERP \(OP = CX\)/.test(av) && /R\$360\.50/.test(av) && /2 lançamento\(s\) em 2 dia\(s\) × 2 loja\(s\)/.test(av) && /Mais R\$5\.00 de prestações \(LOTE\) de importações anteriores/.test(av), av);
+  chk('sem valores desta ponte na tela o aviso não aparece (volta o texto antigo do LOTE)', Adq18.cx.avisoRetaguarda([{ chave: 'a', cartLote: 9, lote: { cart: 9, arquivo: 'x' } }], 9) === null);
+}
+{
+  // recurso desligado = comportamento da v14.17: sem confirmação, sem Retaguarda, sem aviso
+  const E = FX6.cenario({ g18: false }), { Adq15 } = E, lido = Adq15.lerErpLinhas(FX6.rows(), 'x.xlsx', 'ApuraCreditos'); Adq15.ui.erp = { lido }; await Adq15.gravarErp();
+  chk('gestao_v1418 desligado: Gravar ERP grava só o ERP (sem confirmação nova, sem tocar na Retaguarda e sem texto de OP = CX no aviso)', E.confirmou === 0 && E.gravacoes.filter(g => g.c === 'credsystem').length === 0 && E.gravacoes.some(g => g.c === 'adq_erp') && /ERP gravado: 1 competência\(s\)/.test(E.toasts.at(-1)) && !/Retaguarda|OP = CX/.test(E.toasts.at(-1)) && E.Adq18.cx.ultimo === null, E.toasts.at(-1));
+}
+{
+  // ganchos no código real: tudo atrás de g18(); o aviso antigo do LOTE continua quando não há valores desta ponte
+  const gr = corta('  async gravarErp() {', '  async excluirErp(comp) {');
+  chk('gravarErp: a confirmação vem ANTES de _ocupado = true (recusar não trava o botão) e a ponte roda depois das partes do ERP, ambas atrás de g18()', /if \(g18\(\) && !\(await Adq18\.cx\.confirmar\(L\.lido\)\)\) return;[^]*?this\._ocupado = true/.test(gr) && /const cx18 = g18\(\) \? await Adq18\.cx\.gravar\(L\.lido\) : null;/.test(gr) && gr.indexOf('Adq18.cx.confirmar') < gr.indexOf('this._ocupado = true') && gr.indexOf('Repo.salvar(ADQ15.COL_ERP') < gr.indexOf('Adq18.cx.gravar'));
+  chk('quadro na leitura (antes do botão Gravar ERP) e cartão do resultado na tela de importação, ambos atrás de g18()', html.includes("${g18() ? Adq18.cx.painelHtml(lido) : ''}<div class=\"row\" style=\"margin-top:10px\"><button class=\"btn\" data-a=\"a15-erp-gravar\"") && html.includes("${L ? this.renderLeituraErp(L) : ''}${g18() ? Adq18.cx.cardResultado() : ''}"));
+  chk('aviso da Retaguarda: usa o novo texto só com g18() e valores desta ponte; senão mantém "Cartão inclui … recebimentos de prestação (LOTE) no débito" como na v14.17', html.includes("${(g18() && Adq18.cx.avisoRetaguarda(linhas, cartLote)) || (cartLote ? `<p class=\"hint cs-lote\" style=\"margin:0 0 8px\">Cartão inclui <b>${Fmt.brl(cartLote)}</b> de recebimentos de prestação (LOTE) no débito, gravados pela Conciliação de Meios de Pagamento a partir do ERP.</p>` : '')}"));
+  chk('selo do recurso gestao_v1418 cita o v14.18.1 (Gravar ERP → Retaguarda › Conciliação, OP = CX)', /gestao_v1418: \{ versao: 'v14\.18', titulo: '[^']*v14\.18\.1: o Gravar ERP envia os Recebimentos de Prestação \(OP = CX\)/.test(html));
+  chk('a ponte NÃO usa o campo de Dinheiro/PIX: só `cartLote` e a marca `lote` são escritos (aplicarDia) — Dinheiro, PIX, PIX de LOTE e Cartão manual não aparecem entre os campos que ela altera', !/\bdin:\s*it\./.test(corta('  aplicarDia(dv, base, ag', '  /** remove o valor que ESTA ponte')) && !/\bpix:\s*it\./.test(corta('  aplicarDia(dv, base, ag', '  /** remove o valor que ESTA ponte')));
+}
+
+/* =====================================================================
+   7 · v14.18.2 · MÚLTIPLAS TAXAS DE ANTECIPAÇÃO POR PERÍODO DE VIGÊNCIA (por contrato)
+     (a) cadastro de várias faixas em períodos distintos (adicionar, editar, excluir; gravação com auditoria);
+     (b) bloqueio de sobreposição de datas (inclusive faixa com Data Fim em aberto, 1 dia de sobreposição e a mensagem do período conflitante);
+     (c) cálculo com a taxa de cada período (Getnet por Dt Venda, SafraPay pela data do arquivo; troca no meio do mês), Painel Executivo, Laudo, saldo/DFC;
+         retrocompatibilidade com contratos legados (taxa única da regra = 1ª faixa em aberto), recurso desligado e lacunas.
+   ===================================================================== */
+const VG = (E) => E.Adq18.vig;
+const V_ID = FX.CT.res, V_SAF = FX.CT.saf;
+const grava = (E, id, lista) => { const d = E.S.adq_contratos.get(id); d.vigAnt = lista; E.bump('adq_contratos'); };
+const calcGn = E => E.Adq14.calcularMes('2026-01').get(E.Adq14.idLote('GETNET', CNPJ_RES, '2026-01'));
+const calcSf = E => E.Adq14.calcularMes('2026-01').get(E.Adq14.idLote('SAFRAPAY', CNPJ_RES, '2026-01'));
+const setRegraAnt = (E, adq, taxa) => { E.S.adq_taxas.forEach(r => { if (r.adquirente === adq) r.antecipacao.taxa = taxa; }); E.bump('adq_taxas'); };
+const vg = (id, ini, fim, taxa, x = {}) => ({ id, ini, fim, taxa, unidade: 'am', metodo: 'simples', obs: '', ...x });
+{
+  /* ---------- (a) pura: datas, taxas, rótulos ---------- */
+  const E = ambiente(), V = VG(E);
+  chk('datas: DD/MM/AAAA e ISO viram ISO; data inexistente (31/02) e texto viram vazio', V.iso('15/01/2026') === '2026-01-15' && V.iso('2026-01-15') === '2026-01-15' && V.iso('31/02/2026') === '' && V.iso('abc') === '' && V.br('2026-01-15') === '15/01/2026');
+  chk('taxa: "1,49", "1.49" e 1.49 valem 1,49; vazio e texto não são taxa', V.taxaNum('1,49') === 1.49 && V.taxaNum('1.49') === 1.49 && V.taxaNum(1.49) === 1.49 && V.taxaNum('') === null && V.taxaNum('x') === null);
+  chk('rótulo da taxa com unidade: "1,49% a.m." e "18,00% a.a."', V.rotTaxa({ taxa: 1.49, unidade: 'am' }) === '1,49% a.m.' && V.rotTaxa({ taxa: 18, unidade: 'aa' }) === '18,00% a.a.');
+  /* validações simples */
+  const vz = (nova, lista = []) => V.validar(lista, nova);
+  chk('Data Início é obrigatória', /Informe a Data Início/.test(vz({ ini: '', fim: '', taxa: '1,49' }).erro) && !vz({ ini: '', taxa: '1,49' }).ok);
+  chk('Data Fim anterior à Data Início é recusada, com as duas datas na mensagem', vz({ ini: '10/02/2026', fim: '09/02/2026', taxa: '1,49' }).erro === 'A Data Fim (09/02/2026) não pode ser anterior à Data Início (10/02/2026).');
+  chk('Data Fim igual à Data Início (faixa de um dia) é aceita; Data Fim em branco = Em aberto', vz({ ini: '10/02/2026', fim: '10/02/2026', taxa: '1,49' }).ok && vz({ ini: '10/02/2026', fim: '', taxa: '1,49' }).ok);
+  chk('datas fora do formato e taxa em branco/negativa/acima de 100 são recusadas', /Data Início inválida/.test(vz({ ini: '2026/02/10', taxa: '1' }).erro) && /Data Fim inválida/.test(vz({ ini: '10/02/2026', fim: '31/02/2026', taxa: '1' }).erro) && /Informe a taxa/.test(vz({ ini: '10/02/2026', taxa: '' }).erro) && !vz({ ini: '10/02/2026', taxa: '-1' }).ok && !vz({ ini: '10/02/2026', taxa: '101' }).ok);
+}
+{
+  /* ---------- (a) cadastro de várias faixas por período + (b) bloqueio de sobreposição ---------- */
+  const E = await FX.cenario({ fimMes: true }), V = VG(E), A0 = [];
+  let r = V.inserir(A0, { ini: '01/01/2026', fim: '31/01/2026', taxa: '1,49', obs: 'Contrato original' }); const l1 = r.lista;
+  chk('adiciona a 1ª faixa (01/01/2026 a 31/01/2026 · 1,49% a.m.) com id e observação', !r.erro && l1.length === 1 && l1[0].id === 'v1' && l1[0].ini === '2026-01-01' && l1[0].fim === '2026-01-31' && l1[0].taxa === 1.49 && l1[0].obs === 'Contrato original', r);
+  r = V.inserir(l1, { ini: '01/02/2026', fim: '28/02/2026', taxa: '1,79', obs: 'Renegociação comercial' }); const l2 = r.lista;
+  chk('adiciona a 2ª faixa em período distinto (começa em 01/02, o dia seguinte ao fim da 1ª): sem conflito, ordenadas por Data Início', !r.erro && l2.length === 2 && l2[1].id === 'v2' && l2.map(x => x.ini).join() === '2026-01-01,2026-02-01');
+  r = V.inserir(l2, { ini: '01/03/2026', fim: '', taxa: '2,10' }); const l3 = r.lista;
+  chk('adiciona uma 3ª faixa em aberto (Data Fim em branco = vigente até nova alteração)', !r.erro && l3.length === 3 && l3[2].fim === '' && l3[2].ini === '2026-03-01');
+  chk('o mesmo contrato guarda quantas faixas quiser em períodos que não se tocam (3 faixas, sem lacuna entre elas)', V.validarLista(l3).ok && V.lacunas(l3).length === 0);
+  /* sobreposição */
+  const MSG = 'Período conflitante com a vigência já cadastrada de 01/01/2026 a 31/01/2026 (1,49% a.m.). Ajuste as datas antes de salvar.';
+  const c1 = V.inserir(l1, { ini: '15/01/2026', fim: '28/02/2026', taxa: '1,79' });
+  chk('sobreposição é BLOQUEADA com a mensagem do período conflitante (texto do pedido)', c1.erro === MSG && c1.lista === l1, c1.erro);
+  chk('1 único dia de sobreposição também bloqueia: a faixa que termina em 31/01 não aceita outra começando em 31/01', V.inserir(l1, { ini: '31/01/2026', fim: '', taxa: '1,79' }).erro === MSG && !V.inserir(l1, { ini: '01/02/2026', fim: '', taxa: '1,79' }).erro);
+  chk('faixa nova que engloba uma existente (começa antes e termina depois) também conflita', V.inserir(l1, { ini: '15/12/2025', fim: '15/02/2026', taxa: '1,00' }).erro === MSG);
+  chk('faixa nova DENTRO de uma existente conflita', V.inserir(l1, { ini: '10/01/2026', fim: '20/01/2026', taxa: '1,00' }).erro === MSG);
+  /* em aberto */
+  const abertoNova = V.inserir(V.inserir([], { ini: '01/02/2026', fim: '', taxa: '1,79' }).lista, { ini: '01/03/2026', fim: '31/03/2026', taxa: '2,00' });
+  chk('faixa existente em aberto (infinito futuro): qualquer faixa posterior conflita, e a mensagem diz "até nova alteração"', abertoNova.erro === 'Período conflitante com a vigência já cadastrada de 01/02/2026 até nova alteração (1,79% a.m.). Ajuste as datas antes de salvar.', abertoNova.erro);
+  const lAb = V.inserir([], { ini: '01/02/2026', fim: '', taxa: '1,79' }).lista;
+  chk('faixa NOVA em aberto conflita com qualquer faixa que comece depois dela (Data Fim vazia = infinito futuro)', V.inserir(V.inserir([], { ini: '01/03/2026', fim: '31/03/2026', taxa: '2,00' }).lista, { ini: '01/01/2026', fim: '', taxa: '1,00' }).erro.startsWith('Período conflitante com a vigência já cadastrada de 01/03/2026 a 31/03/2026'));
+  chk('faixa fechada ANTES da faixa em aberto é aceita (01/01 a 31/01, depois 01/02 em aberto)', !V.inserir(lAb, { ini: '01/01/2026', fim: '31/01/2026', taxa: '1,49' }).erro && V.inserir(lAb, { ini: '01/01/2026', fim: '31/01/2026', taxa: '1,49' }).lista.length === 2);
+  /* edição e exclusão */
+  let e = V.substituir(l3, 'v2', { ini: '01/02/2026', fim: '28/02/2026', taxa: '1,85', obs: 'Reajuste' });
+  chk('editar uma faixa sem mudar o período não conflita com ela mesma e troca a taxa/observação', !e.erro && e.lista.find(x => x.id === 'v2').taxa === 1.85 && e.lista.find(x => x.id === 'v2').obs === 'Reajuste' && e.lista.length === 3);
+  e = V.substituir(l3, 'v2', { ini: '31/01/2026', fim: '28/02/2026', taxa: '1,79' });
+  chk('editar a faixa para invadir o último dia da vizinha é bloqueado (mesma mensagem)', e.erro === MSG && e.lista === l3);
+  e = V.substituir(l3, 'v1', { ini: '01/01/2026', fim: '15/01/2026', taxa: '1,49' });
+  chk('encurtar a 1ª faixa abre uma lacuna que a tela avisa (16/01 a 31/01 sem taxa), sem bloquear', !e.erro && igual(V.lacunas(e.lista), [{ ini: '2026-01-16', fim: '2026-01-31' }]), V.lacunas(e.lista));
+  chk('sem nenhuma faixa em aberto a tela avisa a partir de que dia não há taxa (ex.: a última termina em 28/02/2026 → 01/03/2026) e some quando uma faixa fica em aberto', V.semTaxaApos(V.remover(l3, 'v3').lista) === '2026-03-01' && V.semTaxaApos(l3) === '' && V.semTaxaApos([]) === '' && /Nenhuma vigência está em aberto: a partir de <b>01\/03\/2026<\/b>/.test(V.avisosHtml({ itens: V.remover(l3, 'v3').lista, virtual: false, divergentes: [] })));
+  const d = V.remover(l3, 'v2').lista;
+  chk('excluir uma faixa remove só ela (as outras seguem) e libera o período para uma nova faixa', d.length === 2 && !d.some(x => x.id === 'v2') && !V.inserir(d, { ini: '01/02/2026', fim: '28/02/2026', taxa: '1,70' }).erro);
+  chk('o id novo nunca repete um existente, mesmo depois de excluir no meio', V.novoId([{ id: 'v1' }, { id: 'v3' }]) === 'v4' && V.novoId([]) === 'v1');
+  chk('validação da lista inteira (antes de gravar): acusa qualquer par sobreposto, mesmo vindo de dado antigo', !V.validarLista([vg('a', '2026-01-01', '2026-01-31', 1), vg('b', '2026-01-31', '', 2)]).ok && V.validarLista([vg('a', '2026-01-01', '2026-01-31', 1), vg('b', '2026-02-01', '', 2)]).ok);
+  /* gravação no contrato com auditoria; o resto do contrato não muda */
+  const antes = JSON.parse(JSON.stringify(E.S.adq_contratos.get(V_ID))), est = V.estadoInicial(E.Adq14.contrato(V_ID));
+  chk('contrato legado abre com a taxa da regra (1,60% a.m.) como 1ª faixa em aberto, "migrada" e ainda não gravada', est.virtual && est.itens.length === 1 && est.itens[0].ini === '2000-01-01' && est.itens[0].fim === '' && est.itens[0].taxa === 1.6 && est.itens[0].migrada === true && !antes.vigAnt, est);
+  const g0 = await V.gravar(V_ID, est);
+  chk('sem mexer nas vigências, "Salvar contrato" NÃO grava vigências (o contrato legado segue com a taxa da regra)', g0 === false && !E.S.adq_contratos.get(V_ID).vigAnt);
+  est.itens = l3; est.tocou = true; est.virtual = false; E.gravacoes.length = 0;
+  const g1 = await V.gravar(V_ID, est), dc = E.S.adq_contratos.get(V_ID);
+  chk('gravar as 3 vigências no contrato (adq_contratos.vigAnt) preserva conta, lojas e adquirente', g1 === true && dc.vigAnt.length === 3 && dc.contaId === 'ct-a' && igual(dc.lojas, antes.lojas) && dc.adquirente === 'GETNET' && dc.ativo === true, dc);
+  chk('a gravação sai com auditoria: módulo conciliacao, rótulo do contrato e o detalhe com cada período e taxa', E.gravacoes.at(-1).aud?.modulo === 'conciliacao' && /Vigências de antecipação \(3\): 01\/01\/2026 → 31\/01\/2026 · 1,49% a\.m\./.test(E.gravacoes.at(-1).aud?.detalhe || '') && /01\/03\/2026 → em aberto · 2,10% a\.m\./.test(E.gravacoes.at(-1).aud?.detalhe || ''), E.gravacoes.at(-1).aud);
+  chk('o contrato lido de volta traz as vigências ordenadas e normalizadas', V.lista(E.Adq14.contrato(V_ID)).itens.map(x => x.id).join() === 'v1,v2,v3' && !V.lista(E.Adq14.contrato(V_ID)).virtual);
+  est.itens = [vg('a', '2026-01-01', '2026-01-31', 1), vg('b', '2026-01-31', '', 2)]; let erroG = ''; try { await V.gravar(V_ID, est); } catch (x) { erroG = x.message; }
+  chk('gravar uma lista com sobreposição é recusado (nada é gravado) — a trava vale também no salvamento do contrato', /Período conflitante/.test(erroG) && E.S.adq_contratos.get(V_ID).vigAnt.length === 3, erroG);
+  /* Salvar contrato no modal: com vigências já gravadas elas sobrevivem ao salvar outros campos */
+  E.Adq14.abrirContrato(V_ID); const Mo = E.modais.at(-1); E.form = { contaId: 'ct-a', observacao: 'x', lojas: '01, 02', ecs: '' }; await Mo.acoes[1].acao({});
+  chk('Salvar contrato (sem tocar nas vigências) mantém as 3 vigências gravadas', E.S.adq_contratos.get(V_ID).vigAnt.length === 3 && E.S.adq_contratos.get(V_ID).observacao === 'x');
+  chk('o modal traz o bloco "Vigências de Antecipação (taxa por período)" com a sub-tabela, o formulário (Data Início, Data Fim, taxa, unidade, método, observação) e Editar/Excluir por faixa', /Vigências de Antecipação \(taxa por período\)/.test(Mo.corpo) && /data-vact="edit" data-vid="v1"/.test(Mo.corpo) && /data-vact="del" data-vid="v3"/.test(Mo.corpo) && /data-vf="ini"/.test(Mo.corpo) && /data-vf="fim"/.test(Mo.corpo) && /data-vf="taxa"/.test(Mo.corpo) && /data-vf="obs"/.test(Mo.corpo) && /Em aberto/.test(Mo.corpo) && /01\/03\/2026/.test(Mo.corpo), Mo.corpo.slice(-1500));
+  const Eoff = ambiente({ g18: false }); Eoff.S.adq_contratos.set(V_ID, { id: V_ID, adquirente: 'GETNET', empresaId: 'resilienza', contaId: 'x', ativo: true }); Eoff.bump('adq_contratos'); Eoff.S.contasBancarias.set('x', { id: 'x', apelido: 'X', ativa: true }); Eoff.Adq14.abrirContrato(V_ID);
+  chk('recurso desligado: o modal do contrato não tem o bloco de vigências (v14.17 intacta)', !/Vigências de Antecipação/.test(Eoff.modais.at(-1).corpo));
+}
+{
+  /* ---------- (c) cálculo: cada taxa em seu período (Getnet por Dt Venda), troca no meio do mês, e os pontos do painel ---------- */
+  const E = await FX.cenario({ fimMes: true }), V = VG(E), { Adq14 } = E, SPLIT = '2026-01-15';
+  const base = calcGn(E), regraG = Adq14.regraDe('GETNET', 'Visa', 'resilienza'), gr = base.lote.grupos;
+  const antG = (taxa, g) => Adq14.antecipacaoGrupo({ ...regraG, antecipacao: { taxa, unidade: 'am', metodo: 'simples' } }, g, g.bruto - g.mdr).ant;
+  const cred = gr.filter(g => g.mod !== 'debito');
+  chk('cenário: vendas de crédito antes e depois de 15/01 (05/01 e 30/01) — o mês tem troca de taxa no meio', cred.some(g => g.dv <= SPLIT) && cred.some(g => g.dv > SPLIT), cred.map(g => g.dv));
+  const antLegado = base.k.antec, espLegado = base.k.esperado;
+  chk('sem vigências, o motor usa a taxa da regra (1,60% a.m.) como sempre: antecipação = Σ do grupo na taxa 1,60', perto(antLegado, cred.reduce((s, g) => s + antG(1.6, g), 0), 0.03), { antLegado });
+  grava(E, V_ID, [vg('v1', '2026-01-01', SPLIT, 1.0), vg('v2', '2026-01-16', '', 2.5, { obs: 'Renegociação comercial' })]);
+  const mix = calcGn(E), esperadoOr = cred.reduce((s, g) => s + antG(g.dv <= SPLIT ? 1.0 : 2.5, g), 0);
+  chk('Getnet: cada venda usa a taxa vigente na SUA Dt Venda — antecipação do mês = Σ (vendas até 15/01 a 1,00% + vendas depois a 2,50%), nem 1,60% nem uma média', perto(mix.k.antec, esperadoOr, 0.03) && !perto(mix.k.antec, antLegado, 0.5), { mix: mix.k.antec, esperadoOr, antLegado });
+  const so1 = cred.filter(g => g.dv <= SPLIT).reduce((s, g) => s + antG(1.0, g), 0), so25 = cred.filter(g => g.dv > SPLIT).reduce((s, g) => s + antG(2.5, g), 0);
+  chk('a taxa de cada faixa vale só para as vendas dela: a parte antes de 15/01 sai de 1,00% e a parte depois, de 2,50% (decomposição exata)', perto(so1 + so25, mix.k.antec, 0.03) && so1 > 0 && so25 > 0, { so1, so25 });
+  const lerLegado1 = cred.reduce((s, g) => s + antG(1.0, g), 0), lerLegado25 = cred.reduce((s, g) => s + antG(2.5, g), 0);
+  chk('a antecipação do mês fica ENTRE as dos dois cenários únicos (tudo a 1,00% < misto < tudo a 2,50%)', lerLegado1 < mix.k.antec && mix.k.antec < lerLegado25, { lerLegado1, lerLegado25, mix: mix.k.antec });
+  chk('Líquido Esperado acompanha: esperado = esperado legado + (antecipação a 1,60% − antecipação mista) — a diferença é só a taxa de antecipação', perto(mix.k.esperado, espLegado + (antLegado - mix.k.antec), 0.05), { esp: mix.k.esperado, espLegado, antLegado, ant: mix.k.antec });
+  const dg = E.Adq18.diasGetnet(mix), somaDg = [...dg.values()].reduce((s, x) => s + x.ant, 0);
+  chk('o dia a dia do repasse (base do Previsto da DFC, da antecipação apurada no OFX e do saldo a receber) usa as mesmas faixas: Σ antecipação por dia = antecipação do mês', perto(somaDg, mix.k.antec, 0.05), { somaDg, ant: mix.k.antec });
+  /* uma faixa só, cobrindo o mês: idêntica ao cenário legado com a taxa da regra trocada */
+  grava(E, V_ID, [vg('v1', '2026-01-01', '', 1.0)]); const um = calcGn(E).k.antec; setRegraAnt(E, 'GETNET', 1.0); grava(E, V_ID, []); const leg1 = calcGn(E).k.antec; setRegraAnt(E, 'GETNET', 1.6);
+  chk('uma única faixa (1,00%) cobrindo o mês dá exatamente o mesmo resultado do cadastro antigo com 1,00% na regra (a vigência substitui a taxa da regra sem mudar a conta)', perto(um, leg1, 0.005) && um > 0, { um, leg1 });
+  /* unidade a.a. e método composto vêm da faixa */
+  grava(E, V_ID, [vg('v1', '2026-01-01', '', 18, { unidade: 'aa', metodo: 'composto' })]);
+  const aa = calcGn(E).k.antec, ref = cred.reduce((s, g) => s + Adq14.antecipacaoGrupo({ ...regraG, antecipacao: { taxa: 18, unidade: 'aa', metodo: 'composto' } }, g, g.bruto - g.mdr).ant, 0);
+  chk('unidade (% a.a.) e método (composto) da faixa são respeitados pela mesma função de cálculo', perto(aa, ref, 0.03) && ref > 0, { aa, ref });
+  /* lacuna: data fora das faixas → sem taxa de antecipação, sinalizado (nunca cai em outra taxa) */
+  grava(E, V_ID, [vg('v1', '2026-01-01', '2026-01-10', 1.0)]); const lac = calcGn(E), s05 = cred.filter(g => g.dv <= '2026-01-10').reduce((s, g) => s + antG(1.0, g), 0);
+  chk('vendas depois do fim da única faixa (30/01) ficam SEM taxa de antecipação: só entram as de até 10/01 e o motor sinaliza "sem taxa de antecipação" para o resto', perto(lac.k.antec, s05, 0.03) && lac.semTaxa.some(x => /sem taxa de antecipação/.test(x.rotulo) && /Visa/.test(x.rotulo)), { ant: lac.k.antec, s05, semTaxa: lac.semTaxa });
+  /* recurso desligado: vigências gravadas não têm efeito (v14.17/v14.18.1) */
+  const Eoff = await FX.cenario({ fimMes: true, g18: false }); grava(Eoff, V_ID, [vg('v1', '2026-01-01', SPLIT, 1.0), vg('v2', '2026-01-16', '', 2.5)]);
+  chk('RECURSO DESLIGADO: as vigências gravadas são ignoradas e o motor usa a taxa da regra, como na v14.18.1', perto(calcGn(Eoff).k.antec, antLegado, 0.005));
+  /* a regra original nunca é alterada e a cópia é memorizada */
+  grava(E, V_ID, [vg('v1', '2026-01-01', SPLIT, 1.0), vg('v2', '2026-01-16', '', 2.5)]); const r0 = Adq14.regraDe('GETNET', 'Visa', 'resilienza'), ra = Adq14.regraDe('GETNET', 'Visa', 'resilienza', '2026-01-05'), rb = Adq14.regraDe('GETNET', 'Visa', 'resilienza', '2026-01-10'), rc = Adq14.regraDe('GETNET', 'Visa', 'resilienza', '2026-01-20');
+  chk('a regra original (cadastro) continua com 1,60% depois das consultas; a faixa devolve uma cópia com a taxa dela, memorizada para o mesmo período', r0.antecipacao.taxa === 1.6 && ra.antecipacao.taxa === 1.0 && rc.antecipacao.taxa === 2.5 && ra === rb && ra !== rc && ra.prazoRepasse === r0.prazoRepasse && ra.mdr === r0.mdr && ra._vig.id === 'v1' && rc._vig.id === 'v2');
+  chk('regraDe sem data (ou com recurso desligado) devolve a regra de sempre', Adq14.regraDe('GETNET', 'Visa', 'resilienza') === r0 && V.regraEm(r0, 'resilienza', '') === r0);
+  /* ---------- Painel Executivo, Laudo, tabela de contratos ---------- */
+  OFX_JAN(E); const I = E.Adq17.indicadores('2026-01', '*'), Rg = rowIdx(I, V_ID).ant;
+  chk('Painel Executivo (Getnet): taxa contratada é a média PONDERADA pela base de cada venda (entre 1,00 e 2,50, nunca 1,60) e o contrato é marcado com "Múltiplas vigências no período"', Rg.multiVig === true && Rg.contratadoAm > 1.0 && Rg.contratadoAm < 2.5 && /1,00% a\.m\./.test(Rg.vigTxt) && /2,50% a\.m\./.test(Rg.vigTxt), { c: Rg.contratadoAm, v: Rg.vigTxt });
+  chk('o consolidado repete o aviso e lista os períodos (vigTxt com contrato, taxas e datas)', I.consolidado.ant.multiVig === true && /01\/01\/2026 a 15\/01\/2026/.test(I.consolidado.ant.vigTxt) && /16\/01\/2026 até nova alteração/.test(I.consolidado.ant.vigTxt), I.consolidado.ant.vigTxt);
+  const painel = E.Adq17.renderPainel();
+  chk('tela do Painel Executivo mostra "Múltiplas vigências no período" (consolidado e linha do contrato)', (painel.match(/Múltiplas vigências no período/g) || []).length >= 2, (painel.match(/Múltiplas vigências no período/g) || []).length);
+  const laudo = E.Adq17.htmlLaudo(I, { razao: 'Resilienza Negocios Ltda', cnpj: CNPJ_RES, marca: 'Esposende', emitidoEm: '17/11/2026', notas: '', signatarios: [] });
+  chk('Laudo Operacional (A4) traz o mesmo aviso e as faixas na linha da Antecipação', /Múltiplas vigências no período/.test(laudo) && /2,50% a\.m\./.test(laudo));
+  E.Adq17.exportarCsv(); const csv = await E.baixados.at(-1)[1].text();
+  chk('Exportar KPIs (.csv): a Antecipação do consolidado e uma linha do contrato dizem "múltiplas vigências no período" com as faixas', /Antecipação;[^\n]*múltiplas vigências no período: [^\n]*1,00% a\.m\./.test(csv.replace(/\r/g, '')) && /Contrato;[^;]*;Antecipação · múltiplas vigências no período;;[\d,]+;[^\n]*2,50% a\.m\./.test(csv.replace(/\r/g, '')), csv.split('\n').filter(l => /vigências/.test(l)).join(' || '));
+  E.Adq14.ui.mes = '2026-01'; const tj = E.Adq14.renderContratos(); E.Adq14.ui.mes = '2026-02'; const tf = E.Adq14.renderContratos(); E.Adq14.ui.mes = '2026-01';
+  chk('tabela Contratos × Conta Bancária × Lojas e ECs: janeiro (troca no mês) mostra "Múltiplas vigências no período" com os dias de cada taxa; fevereiro mostra a taxa vigente (2,50% a.m.)', /Antecipação vigente · /.test(tj) && /Múltiplas vigências no período/.test(tj) && /1,00% a\.m\. \(01\/01\/2026 a 15\/01\/2026 · 15 dia\(s\)\)/.test(tj) && /2,50% a\.m\. \(16\/01\/2026 a 31\/01\/2026 · 16 dia\(s\)\)/.test(tj) && /<b>2,50% a\.m\.<\/b>/.test(tf) && !/<b>Múltiplas vigências no período<\/b>/.test(tf.split('SAFRAPAY')[0] || ''), tj.match(/data-a18v-vig>.{0,500}/)?.[0]);
+  const rj = V.resumoCompetencia(E.Adq14.contrato(V_ID), '2026-01'), rf = V.resumoCompetencia(E.Adq14.contrato(V_ID), '2026-02'), rd = V.resumoCompetencia(E.Adq14.contrato(V_ID), '2025-12');
+  chk('taxa vigente por competência: janeiro = múltiplas, fevereiro = 2,50% a.m. (única), dezembro/2025 = sem taxa vigente', rj.modo === 'multipla' && rj.segs.length === 2 && rf.modo === 'unica' && rf.rotulo === '2,50% a.m.' && rd.modo === 'sem');
+  const rleg = V.resumoCompetencia(E.Adq14.contrato(V_SAF), '2026-01');
+  chk('contrato sem vigências gravadas (SafraPay) mostra a taxa da regra como a 1ª faixa migrada, sem aviso de múltiplas', rleg.modo === 'legado' && rleg.rotulo === '1,60% a.m.' && /cadastro de taxas/.test(rleg.sub));
+}
+{
+  /* ---------- SafraPay: a data do pagamento do arquivo de Recebíveis é a data de referência ---------- */
+  const E = await FX.cenario({ fimMes: true }), V = VG(E), base = calcSf(E), cols = E.Adq14.SF_COLS;
+  const linhas = base.lote.vendas.map(a => Object.fromEntries(cols.map((c, j) => [c, a[j]])));
+  const central = (taxaDe) => linhas.reduce((s, v) => s + r2((taxaDe(v) / 100) * (v.sBaseK - 1 / 30 * v.sBase)), 0);
+  chk('SafraPay legado: teto/estimativa a 1,60% a.m. em todas as vendas (conferência do cálculo por fora)', perto(base.k.antecContr, central(() => 1.6), 0.05), { k: base.k.antecContr });
+  grava(E, V_SAF, [vg('v1', '2026-01-01', '2026-01-06', 1.0), vg('v2', '2026-01-07', '', 2.0)]); const mix = calcSf(E);
+  chk('SafraPay: pagamentos até 06/01 usam 1,00% a.m. e os de 07/01 em diante 2,00% a.m. (estimativa contratual por venda)', perto(mix.k.antecContr, central(v => v.dp <= '2026-01-06' ? 1.0 : 2.0), 0.05) && !perto(mix.k.antecContr, base.k.antecContr, 0.5), { mix: mix.k.antecContr, ref: central(v => v.dp <= '2026-01-06' ? 1.0 : 2.0) });
+  const tetoMix = mix.conf.reduce((s, c) => s + (c.antMax || 0), 0), tetoRef = linhas.reduce((s, v) => s + r2((v.dp <= '2026-01-06' ? 0.01 : 0.02) * (v.sBaseK + 3 / 30 * v.sBase)), 0);
+  chk('o teto de antecipação (máximo plausível) também segue a faixa de cada venda', perto(tetoMix, tetoRef, 0.06), { tetoMix, tetoRef });
+  OFX_JAN(E); const I = E.Adq17.indicadores('2026-01', '*'), S = rowIdx(I, V_SAF).ant;
+  chk('Painel Executivo (SafraPay): pondera a taxa contratada pela base de cada venda e avisa "Múltiplas vigências no período"', S.multiVig === true && S.contratadoAm > 1.0 && S.contratadoAm < 2.0 && /1,00% a\.m\./.test(S.vigTxt) && /2,00% a\.m\./.test(S.vigTxt), { c: S.contratadoAm, v: S.vigTxt });
+  grava(E, V_SAF, [vg('v1', '2026-01-01', '', 2.0)]); const um = rowIdx(E.Adq17.indicadores('2026-01', '*'), V_SAF).ant;
+  chk('com uma faixa só, o painel mostra a taxa dela (2,00% a.m.) e NÃO mostra "Múltiplas vigências"', um.multiVig === false && perto(um.contratadoAm, 2.0, 0.005), um);
+}
+{
+  /* ---------- retrocompatibilidade: contrato legado (taxa única) ---------- */
+  const E = await FX.cenario({ fimMes: true }), V = VG(E), E17 = await FX.cenario({ fimMes: true, g18: false });
+  const a = calcGn(E), b = calcGn(E17);
+  chk('contrato legado (sem vigências): o cálculo é IDÊNTICO ao da v14.18.1 — antecipação, esperado, taxa e dias do repasse', igual(a.k, b.k) && igual(a.dias, b.dias) && igual(a.semTaxa, b.semTaxa));
+  const l = V.lista(E.Adq14.contrato(V_ID)), m = l.itens[0];
+  chk('a taxa única do formato anterior aparece como a 1ª faixa vigente, em aberto (Data Fim vazia), com a mesma taxa, unidade e método — dados preservados', l.virtual && l.itens.length === 1 && m.fim === '' && m.taxa === 1.6 && m.unidade === 'am' && m.metodo === 'simples' && m.migrada);
+  chk('antes de qualquer edição a regra não é tocada: o contrato continua sem o campo vigAnt', !E.S.adq_contratos.get(V_ID).vigAnt && E.Adq14.regraDe('GETNET', 'Visa', 'resilienza', '2026-01-05') === E.Adq14.regraDe('GETNET', 'Visa', 'resilienza'));
+  const est = V.estadoInicial(E.Adq14.contrato(V_ID)); est.tocou = true; await V.gravar(V_ID, est);
+  chk('gravar a faixa migrada tal como está (mesma taxa, desde 01/01/2000 em aberto) mantém o cálculo idêntico ao legado', E.S.adq_contratos.get(V_ID).vigAnt.length === 1 && E.S.adq_contratos.get(V_ID).vigAnt[0].migrada === true && igual(calcGn(E).k, b.k));
+  /* nova taxa a partir de uma data exige antes fechar a faixa migrada (sem sobreposição) */
+  const lm = V.lista(E.Adq14.contrato(V_ID)).itens, c = V.inserir(lm, { ini: '16/01/2026', fim: '', taxa: '2,50' });
+  chk('com a faixa migrada em aberto, uma nova taxa a partir de 16/01 é bloqueada até a Data Fim da migrada ser ajustada', /Período conflitante com a vigência já cadastrada de 01\/01\/2000 até nova alteração \(1,60% a\.m\.\)/.test(c.erro), c.erro);
+  const fe = V.substituir(lm, 'mig', { ini: '01/01/2000', fim: '15/01/2026', taxa: '1,60' }), n = V.inserir(fe.lista, { ini: '16/01/2026', fim: '', taxa: '2,50' });
+  chk('ajustada a Data Fim da migrada para 15/01/2026, a nova faixa (16/01 em aberto) é aceita e a faixa migrada mantém a marca', !fe.erro && !n.erro && n.lista.length === 2 && n.lista[0].migrada === true);
+  grava(E, V_ID, n.lista.map(x => ({ ...x }))); const mx = calcGn(E), esp = a.k.antec;
+  chk('com a migrada (1,60% até 15/01) + a nova (2,50% depois), só as vendas depois de 15/01 mudam: antecipação maior que a legada, vendas até 15/01 intactas', mx.k.antec > esp + 0.5, { mx: mx.k.antec, esp });
+  /* bandeiras com taxas diferentes no cadastro: a migração avisa */
+  const E2 = await FX.cenario({ fimMes: true, mcSemAnt: true }); E2.S.adq_taxas.set('adq-getnet__visa__emp-resilienza', { ...E2.S.adq_taxas.get('adq-getnet__todas__emp-resilienza'), id: 'adq-getnet__visa__emp-resilienza', bandeira: 'VISA', antecipacao: { taxa: 1.9, unidade: 'am', metodo: 'simples' } }); E2.bump('adq_taxas'); E2.Adq14.calcularMes('2026-01');
+  const dv = VG(E2).derivada(E2.Adq14.contrato(V_ID));
+  chk('bandeiras com taxas de antecipação diferentes: a migração usa a da regra "Todas" e lista as divergentes para a tela avisar', dv.v.taxa === 1.6 && dv.divergentes.some(x => x.bandeira === 'VISA' && /1,90% a\.m\./.test(x.rotulo)), dv);
+  chk('a tela mostra o aviso das taxas diferentes por bandeira ao abrir o contrato (a vigência passa a valer para todas)', /taxas de antecipação diferentes no cadastro de taxas/.test(VG(E2).avisosHtml(VG(E2).estadoInicial(E2.Adq14.contrato(V_ID)))));
+}
+{
+  /* ---------- documentação do recurso no código ---------- */
+  chk('selo do recurso gestao_v1418 cita as Vigências de Antecipação (v14.18.2)', /gestao_v1418: \{ versao: 'v14\.18', titulo: '[^']*v14\.18\.2: Vigências de Antecipação por contrato/.test(html));
+  chk('ganchos de data nos pontos de cálculo: Getnet (g.dv), SafraPay (v.dp), ERP × adquirente, prazo médio/taxa contratada, dias do repasse e parcelas do saldo, e a venda da Conciliação de Meios de Pagamento', ['this.regraDe(A, g.band, emp, g.dv)', 'this.regraDe(A, v.band, emp, v.dp)', 'Adq14.regraDe(lote.adquirente, g.band, calc.empresaId, g.dv)', 'Adq14.regraDe(calc.adquirente, g.band, calc.empresaId, g.dv)', 'Adq14.regraDe(A, g.band, emp, g.dv), baseLiq', 'Adq14.regraDe(A, g.band, emp, g.dv), out', 'Adq18.vig.regraEm(rg, info.empresaId, Adq18.vig.iso(v.data))'].every(t => html.includes(t)));
+  chk('o motor da Conciliação de Meios de Pagamento (região protegida ADQ_CFG → PARTE_EXTRATO) NÃO foi tocado: a taxa de antecipação dele continua a da regra (Regra de Ouro)', !/Adq18\.vig/.test(html.slice(html.indexOf('const ADQ_CFG'), html.indexOf('const PARTE_EXTRATO = 900;'))));
 }
 
 console.log(`\n${OK.length} ok · ${FAIL.length} falha(s)`);

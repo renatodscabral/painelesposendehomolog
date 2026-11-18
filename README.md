@@ -1,6 +1,6 @@
 # Painel de Gestão Esposende · Netlify + Netlify Database (Postgres)
 
-Versão v14.18. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
+Versão v14.19. O painel roda no Netlify com um banco **Postgres gerenciado (Netlify Database)** e as rotas da API em
 **Netlify Functions**. Os dados ficam no servidor: valem em qualquer computador e são sincronizados entre quem está usando.
 
 ## Como funciona
@@ -1158,6 +1158,110 @@ Arquivos novos: `netlify/lib/arvore-rh.mjs` (árvore do organograma, salários l
 - Ajustados por causa desta versão: `tests/teste-economia-netlify-1410.mjs` (contagem de botões da v14.12 e hash do `mudancas.mjs`) e `tests/teste-lote1-1411.mjs` (o CSS do Lote 1 termina onde começa o do Lote 2).
 - Verificado também fora do ZIP, no Chromium com o servidor local e o Postgres (**26 verificações**): recurso desligado e ligado e de novo desligado; ficha, modal de férias (calendário, CLT em tempo real, prévia de R$ 1.866,67 e de R$ 4.700,00), pedido roteado ao Gerente Financeiro sem "Gestor direto", decisão pelo gestor de topo, salário por árvore (200 e 403 reais), ClickBus, resumo de WhatsApp e câmera da prestação. **A leitura por IA, a API do Banco Central e a rede foram simuladas ou ficaram de fora**, e a importação de um OFX real pela tela não foi exercitada no navegador (o cruzamento foi testado sobre o código real em Node).
 
+
+## v14.19 · Conciliação de Cartões simplificada e automática: DFC limpo, tela em 3 blocos, cruzamento em 2 níveis e Líquido após a Taxa Efetiva Total (recurso `gestao_v1419`, depende da `gestao_v1418`)
+
+Recurso novo `gestao_v1419` (depende da v14.18, que depende da v14.17): ativo na **Homologação**; em **Produção** e na **Falco** só depois de "Liberar Versão em Produção". **Desligado = v14.18.2**, tela por tela, e **ligar / desligar é só leitura**: nenhuma migração, variável de ambiente, rota ou mudança no servidor, e nenhum dado é apagado ou regravado (contratos, lotes, ERP, extratos e as Lojas e ECs já gravadas nos contratos ficam como estão). O pacote traz também, num único ZIP, a v14.18.1 (OP = CX) e a v14.18.2 (várias taxas de antecipação por vigência), que continuam funcionando com a v14.19 ligada.
+
+**Item 1 · DFC limpo e 100% automático.** Some o bloco azul "Auditoria de Adquirentes × DFC" e os seus dois seletores ("Categoria dos créditos auditados" e "Previsto dos cartões"): não há mais pergunta nem parâmetro. As regras e as classificações manuais do usuário continuam mandando; só o crédito que a Auditoria casou com um repasse **e** que não tem categoria específica (ou está em "Outras entradas operacionais") vira **Recebimento de cartões (adquirentes)** (`rec_cartoes`) ou **Recebimento Credsystem** (`rec_credsystem`). O **Previsto** das linhas de cartões é o **Líquido Esperado da Auditoria** por data de repasse sempre que há lotes auditados na competência (mesmo que o FCX tenha meta); sem lotes, o FCX segue como estava. A configuração antiga gravada em `config/dfc_cartoes18` deixa de ser lida (não é apagada). No lugar do bloco fica um selo de uma linha: **"Cartões conciliados automaticamente: R$ X"**. A DFC também assina sozinha os lotes, contratos, agendas e ERP da Conciliação, de modo que o selo e a classificação já valem quando a DFC é a primeira tela aberta na sessão.
+
+**Item 2 · Conciliação de Cartões em 3 blocos** (some a sequência de 3 etapas e o Painel Executivo antigo):
+
+1. **Barra de carga compacta:** competência, status (ERP importado · Adquirentes `x/y` contratos · OFX `x/y` contas com extrato), botões **Importar ERP**, **Importar Adquirente** e **Recalcular**, e o acordeão **"Ver arquivos importados (X)"** (lotes, agendas, ERP e extratos lidos, com excluir / reimportar). Os painéis de importação abrem na própria barra.
+2. **Uma linha de 4 cards:** **Faturamento conciliado ERP × Adquirente** (só o que é comparável; Getnet com contrato faltando aparece como "só informativo") · **Custo financeiro total / Taxa Efetiva** (MDR, Antecipação, tarifas / aluguel de POS e retenções) · **Repasse bancário** (OFX × esperado, % de realização, dias em trânsito e furo) · **Saldo a receber futuro** (bruto − taxas efetivas = líquido final).
+3. **Tabela única agrupada por Adquirente:** uma linha de subtotal por adquirente e, abaixo, os contratos (colunas Contrato / CNPJ · Bruto ERP · Bruto Adquirente · Dif. ERP × Adq. · MDR efet. × contr. · Antecipação · Taxa efetiva total · Creditado OFX · Trânsito · Situação). Clicar numa linha abre o detalhe com duas abas: **(a) Dia a dia ERP × Adquirente** e **(b) Antecipação ERP × Contrato & Extratos OFX**. Há o seletor de visualização (Todos · cada adquirente · cada contrato), "só divergências", o Laudo (A4) e o CSV, e um acordeão "Detalhamentos e controles" com a composição da taxa, a ponte, o saldo e os extratos OFX lidos.
+
+**Item 3 · Cruzamento em 2 níveis e contrato sem lojas.** O ERP (Apuração dos Créditos) traz todos os CNPJs juntos e não diz de qual contrato é cada venda, então:
+
+- **Nível 1 · ERP × Adquirente (consolidado):** o bruto do ERP por adquirente contra a **soma dos contratos importados** da adquirente, por **Dt Venda + Bandeira + Modalidade** (SafraPay: Dt Venda + Bandeira), tolerância de ± R$ 0,50 por dia. Se **nem todos os contratos** da adquirente têm arquivo no mês, o comparativo é **só informativo** ("X de Y contratos importados"): não gera divergência e não enche as Maiores Divergências de linhas falsas de "ERP R$ 0,00". Quando todos estão importados, as divergências aparecem como "GETNET (consolidado)".
+- **Nível 2 · por contrato:** MDR, antecipação, saldo a receber e batimento com a Conta Bancária (OFX) seguem individuais. Na linha do contrato o ERP aparece como **"Conferido no consolidado [Adquirente]"**.
+- **Cadastro de contratos** só pede **Adquirente, Empresa / CNPJ, Conta Bancária (OFX)** e as **Regras de Taxa** (MDR por bandeira e as Vigências de Antecipação do contrato). Saem **Lojas Vinculadas**, **ECs** e **Puxar do Cadastro**. Salvar um contrato antigo **não apaga** as lojas e ECs que já estavam gravadas; a Credsystem (ERP × OFX direto), quando precisa separar as lojas de dois contratos, usa o **Cadastro de Lojas** sozinha.
+
+**Item 4 · Líquido Esperado abate a Taxa Efetiva Total completa.** Taxa Efetiva Total = **MDR efetivo + antecipação efetiva + tarifas e aluguel de POS + retenções / chargebacks**; **Líquido Esperado após taxas = Bruto conciliado − Taxa Efetiva Total** (um só número para o card, o Laudo e o saldo). Os débitos de POS e de retenção são buscados também nas **demais contas bancárias do mesmo CNPJ / empresa** que têm extrato importado, e só entram os que citam a adquirente (ou os termos de aluguel / tarifa / chargeback de POS); **cada lançamento entra uma vez só** (a conta de crédito de outro contrato é dona dos próprios débitos; o genérico só vai para um contrato quando a empresa tem um único contrato de cartões, senão fica sem dono e é avisado). Sem nenhum débito explícito de aluguel de POS no OFX do CNPJ no mês, soma-se o **aluguel de POS cadastrado por filial** (Cadastro de Lojas › Máquinas POS) e a linha diz **"apurado pelo cadastro de POS"**. A **ponte** até o **crédito esperado no banco** (o que o Quadro 3 do Laudo procura no OFX) aparece aberta: líquido esperado + tarifas de POS e retenções (debitadas à parte) + antecipação efetiva − estimada ± resíduo explícito. O **Saldo a Receber** (card, série mensal e Quadro 5 do Laudo) passa a ser **"Saldo Bruto Futuro − Taxas Efetivas Abatidas = Saldo Líquido Final a Receber"**, com as mesmas taxas do painel e o rateio proporcional por mês de pagamento (a diferença de centavos vai para o último mês).
+
+**Itens 5 e 6.** Seguem como entregues: **OP = CX → Retaguarda / Recebíveis** (regra mista, v14.18.1) e **múltiplas taxas de antecipação por vigência** (v14.18.2, com trava de sobreposição). Com a v14.19 ligada o modal do contrato mostra e grava as vigências, e salvar sem mexer nelas não as apaga.
+
+**Onde aparece.** Auditoria de Adquirentes › Conciliação de Cartões (3 blocos) · Regras de Taxa Contratuais › Contratos × Conta Bancária · FCX › DFC (selo, classificação e Previsto) · Laudo Operacional Mensal (A4: Quadros 1, 2, 3 e 5, parecer sugerido) · Exportar KPIs (.csv).
+
+**Limites a saber**
+
+1. O **Líquido Esperado após taxas** e o **crédito esperado no banco** são números diferentes de propósito: a adquirente repassa o líquido pela antecipação **estimada** do contrato e os débitos de POS e retenções saem à parte; a ponte mostra a diferença e um resíduo (estornos da Credsystem, parcelas em trânsito de outro mês) quando passa de R$ 0,01.
+2. O **Previsto da DFC** continua em base de caixa: é o Líquido Esperado da Auditoria pela **data do repasse**, não pela data da venda.
+3. O **Nível 1** só vira diferença quando todos os contratos cadastrados da adquirente têm arquivo na competência; cadastre apenas os contratos que de fato existem para a comparação fechar.
+4. O **saldo por mês de pagamento** é um rateio proporcional das taxas do mês pelo saldo bruto de cada mês (projeção gerencial, não um lançamento contábil).
+5. A **busca ampliada de POS / retenções** depende de a conta bancária ter titular (empresa ou CNPJ) ou ser conta padrão da empresa; o débito genérico em outra conta que não cita a adquirente fica sem dono quando a empresa tem mais de um contrato de cartões (aparece num aviso).
+6. As Lojas e ECs já gravadas nos contratos **não são mais mostradas nem usadas** pelo cruzamento ERP × adquirente; continuam no cadastro, e o Cadastro de Lojas é a fonte do aluguel de POS e das lojas da Credsystem.
+7. O motor legado da Conciliação de Meios de Pagamento (região protegida pela Regra de Ouro) **não foi alterado**.
+
+**Testes e Regra de Ouro.** `tests/teste-cartoes-dfc-1419.mjs` com **214 verificações** (Regra de Ouro; recurso desligado = v14.18.2; DFC automático; nível 1 e 2 e cadastro de contratos; Taxa Efetiva Total, ponte e saldo; tela em 3 blocos, Laudo e CSV; OP = CX e vigências de antecipação com a v14.19 ligada; documentação) mais as baterias anteriores sem alteração de resultado. Navegador + servidor real (Netlify Functions emuladas + Postgres): **41 verificações** do novo roteiro e as 3 suítes antigas com o recurso desligado. `public/fcx.html`, `public/contabilidade.html` e `public/contabilidade_v1391.html` ficam **byte a byte iguais** aos da v14.17, e as regiões protegidas do painel (OFX/contas, adquirentes e FCX, Credsystem, motor CP_OFX, regras e categorias padrão da DFC) mantêm os mesmos md5.
+
+## v14.18.2 · Múltiplas Taxas de Antecipação por Período de Vigência (ajuste na v14.18, recurso `gestao_v1418`)
+
+Ajuste dentro do mesmo recurso da v14.18: ativo na **Homologação**; em **Produção** e na **Falco** só depois de "Liberar Versão em Produção". **Desligado = comportamento da v14.18.1** (sem a coluna e sem o bloco de vigências; o motor usa a taxa da regra). **Só front-end:** nenhuma migração, variável de ambiente, rota ou mudança no servidor. O dado novo é o campo `vigAnt` dentro do documento do contrato (coleção `adq_contratos`, que já existia).
+
+**Onde fica.** Auditoria de Adquirentes › Regras de Taxa Contratuais › tabela **Contratos × Conta Bancária × Lojas e ECs** › **Editar** › bloco **Vigências de Antecipação (taxa por período)**. Cada contrato (Adquirente + Empresa / CNPJ) passa a ter uma lista de faixas, em vez de uma taxa de antecipação única:
+
+- **Data Início** (obrigatória, `DD/MM/AAAA`, com máscara) · **Data Fim** (opcional; em branco = **Em aberto / vigente até nova alteração**) · **Taxa** com a **Unidade** (`% a.m.` ou `% a.a.`) e o **Método** (simples pro rata ou composto), que são os mesmos parâmetros que a taxa de antecipação do contrato já tinha · **Observação** (ex.: "Renegociação comercial").
+- **Adicionar, Editar e Excluir** faixas à vontade. A lista é trabalhada na tela e só **grava ao clicar em Salvar contrato** (com auditoria: módulo conciliação, cada período e taxa no detalhe). Salvar o contrato sem mexer nas vigências **não** grava nada novo.
+- **Migração automática (retrocompatibilidade).** Contrato sem vigências gravadas mostra a taxa de antecipação do formato anterior (a das Regras de Taxa Contratuais) como a **1ª faixa, em aberto**, marcada "migrada" (início `01/01/2000`, para cobrir qualquer venda antiga). Enquanto o usuário não mexer, **os cálculos não mudam** (o motor segue usando a taxa da regra); a faixa migrada é gravada no contrato na primeira edição das vigências.
+
+**Validação estrita contra sobreposição.** Antes de gravar uma faixa nova ou editada no mesmo contrato:
+
+- a **Data Fim** (quando preenchida) não pode ser anterior à Data Início (faixa de um dia, Início = Fim, vale);
+- o intervalo `[Data Início, Data Fim]`, com Data Fim vazia contada como **infinito futuro**, **não pode tocar nenhuma outra faixa do contrato, nem em 1 dia**: se uma termina em 31/01/2026, a próxima começa em 01/02/2026;
+- em caso de conflito o salvamento é **bloqueado** com o período conflitante, por exemplo: *"Período conflitante com a vigência já cadastrada de 01/01/2026 a 31/01/2026 (1,49% a.m.). Ajuste as datas antes de salvar."* (faixa em aberto: *"… de 01/02/2026 até nova alteração (1,79% a.m.) …"*). A mesma trava vale na lista inteira, no momento de Salvar contrato.
+- Para cadastrar uma taxa nova num contrato legado, primeiro feche a faixa migrada (Editar → Data Fim = dia anterior) e depois adicione a nova.
+
+**Motor de cálculo.** Toda vez que o motor precisa da taxa de antecipação, ele busca a faixa do contrato cuja vigência cobre a **Dt Venda** da operação: **teto / estimativa de antecipação**, **Líquido Esperado** (que é o Previsto da DFC), **Taxa Efetiva**, **prazo médio e taxa contratada ponderada** do Painel Executivo e do Laudo, **dia a dia do repasse** (antecipação apurada no OFX) e **Saldo a Receber**. Numa competência com troca de taxa no meio do mês, **cada venda usa a taxa do seu dia** (a taxa vale só para as vendas da sua vigência, sem média nem rateio): é o resultado proporcional exato, e a taxa contratada do painel é a média ponderada pela base de cada venda.
+
+- **Getnet:** a Dt Venda do grupo de vendas. **SafraPay (Recebíveis):** a planilha só traz a **data do pagamento** (não há Dt Venda), que é a data de referência da venda (e a da competência do lote).
+- Data **fora de qualquer faixa** de um contrato com vigências ⇒ **sem taxa de antecipação** naquela data: o motor sinaliza "sem taxa de antecipação" (como já fazia para regra sem taxa) e nunca cai em outra taxa; a tela avisa lacunas entre faixas e quando **nenhuma faixa está em aberto** ("a partir de 16/01/2026 as vendas são auditadas sem taxa de antecipação").
+- A regra original nunca é alterada: o motor recebe uma cópia da regra com a taxa da faixa (memorizada). MDR, prazo de repasse e a marca "100% antecipado" continuam vindo da regra.
+
+**Onde aparece.**
+
+- **Contratos × Conta Bancária × Lojas e ECs:** nova coluna **"Antecipação vigente · mês"** (mês = competência escolhida na Auditoria): a taxa vigente na competência ou **"Múltiplas vigências no período"** quando há troca dentro do mês, com cada taxa, o período recortado no mês e os dias (ex.: "1,60% a.m. (01/01/2026 a 15/01/2026 · 15 dia(s)) · 2,50% a.m. (16/01/2026 a 31/01/2026 · 16 dia(s))").
+- **Painel Executivo (Conciliação de Cartões):** na linha **Antecipação** (consolidado) e na do contrato: "Múltiplas vigências no período" com as faixas; contrato com uma faixa só mostra "taxa vigente X% a.m.".
+- **Laudo Operacional (A4)** e **Exportar KPIs (.csv):** o mesmo aviso e as faixas na linha da Antecipação (e uma linha por contrato no CSV).
+
+**Limites a saber**
+
+1. **As vigências valem para todas as bandeiras do contrato.** Hoje a taxa de antecipação mora em cada regra (adquirente + bandeira + empresa); a faixa do contrato a substitui para todas as bandeiras daquela adquirente + empresa. Se o cadastro de taxas tinha taxas de antecipação **diferentes por bandeira**, a migração usa a da regra "Todas" (senão a mais comum) e a tela **avisa** as divergentes (a vigência gravada passa a valer para todas).
+2. **Contrato sem vigências gravadas** segue com a taxa da regra (nada muda). O campo de taxa de antecipação da regra continua existindo e serve de base para a migração e para esses contratos.
+3. **Excluir uma faixa não reabre a anterior** (fica um intervalo sem taxa, avisado na tela). Reabra a anterior apagando a Data Fim dela.
+4. **Meses já importados são recalculados na hora** com as faixas (o cálculo parte do lote guardado; nada de taxa fica gravado no lote). Mexer nas vigências muda a Auditoria, o Painel e a DFC dos meses afetados.
+5. **Conciliação de Meios de Pagamento (v13.69, ERP × adquirente)**: o trecho do motor legado está na região protegida pela Regra de Ouro e **não foi alterado**; só a venda dessa tela que lê a taxa de antecipação (`taxasVenda`, fora da região protegida) passou a usar a faixa. O motor protegido continua com a taxa da regra.
+6. O limite é de 60 faixas por contrato.
+
+**Testes e Regra de Ouro.** `tests/teste-contratos-taxas-dfc-1418.mjs` agora com **255 verificações** (182 até a v14.18.1 + 73 das vigências: cadastro de várias faixas em períodos distintos, bloqueio de sobreposição inclusive com Data Fim em aberto e de 1 dia, mensagem do período conflitante, cálculo de cada taxa no seu período na Getnet e na SafraPay com troca no meio do mês, unidade a.a. e método composto, lacunas, Painel / Laudo / tabela de contratos / CSV, contrato legado idêntico à v14.18.1, recurso desligado e ganchos no código). Conferido também no Chromium real com o servidor real e o Postgres: **25/25** do roteiro das vigências (inclusive a tela de conflito, salvar, recarregar, editar e excluir), 14/14 da ponte OP = CX e 36/36 da v14.18. **`fcx.html`, `contabilidade.html` e `contabilidade_v1391.html` não foram alterados** (md5 do `fcx.html` `640800e0…`) e os trechos protegidos do painel seguem idênticos.
+
+## v14.18.1 · Gravar ERP grava os Recebimentos de Prestação (`OP = CX`) na Retaguarda › Conciliação (ajuste pontual na v14.18, recurso `gestao_v1418`)
+
+Ajuste dentro do mesmo recurso da v14.18: ativo na **Homologação**; em **Produção** e na **Falco** só depois de "Liberar Versão em Produção". **Desligado = comportamento da v14.18** (sem confirmação nova, sem tocar na Retaguarda). **Só front-end:** nenhuma migração, variável de ambiente, rota ou mudança no servidor.
+
+No layout atual da **Apuração dos Créditos** (aba `ApuraCreditos`) a prestação / carnê paga no POS vem na coluna **`OP = CX`** (antes vinha como `DOCUMENTO = LOTE…`). Ao clicar em **Gravar ERP** na **Conciliação de Cartões (por Contrato / CNPJ)**:
+
+- **Agrupa por `Dt Venda` + `Loja`.** O código da filial é normalizado como o Cadastro de Lojas (`5` → `05` → `loja-005`). Linhas `OP = VE` (venda) não entram.
+- **Regra mista do sinal (decidida com o Renato).** Na **Credsystem (Adq 304)** `DC = DB` é estorno e **subtrai**; nas **demais adquirentes** (Getnet, SafraPay…) **toda linha CX soma** (Vda Bruta com o próprio sinal), porque nesse layout o DC das vendas é débito/crédito do cartão, não estorno.
+- **Grava na Retaguarda › Conciliação Credsystem, coluna Cartão.** A estrutura que alimenta Recebíveis / Recebível Diário é a coleção `credsystem` (um documento por dia, uma linha por loja); o campo é `cartLote` (Cartão da prestação) e a marca `lote.origem = 'apuracao-op-cx'`. O pedido citava `state.conciliacaoCredsystem`, que não existe no código: é essa a estrutura equivalente (`PainelFCX.recebiveis` soma `cartLote`).
+- **Substitui só o que está no arquivo, sem somar com o que já estava.** Reimportar o arquivo corrigido troca o valor do dia × loja; reimportar o mesmo arquivo não regrava nada. Um dia × loja que está no arquivo **sem** `OP = CX` só é zerado se o valor anterior tinha sido gravado por esta ponte (compra e estorno que fecham em zero também zeram).
+- **Não toca em Dinheiro, PIX, PIX de LOTE nem no Cartão digitado à mão.** Esses campos nem são lidos pela gravação; o LOTE antigo (importação do layout antigo, sem a marca da ponte) é substituído só no dia × loja que o arquivo traz.
+- **Linhas novas** nascem com **Websystem = 0** (como a ponte do LOTE fazia) e aparecem como divergência até o arquivo do Websystem ser importado.
+
+**Feedback transparente**
+
+- **Quadro de leitura do ERP:** "Recebimento de Prestação (OP = CX) → Recebíveis / Retaguarda" com **linhas e R$**, dias × lojas, adquirentes, o que ficou de fora e a lista "Dt Venda × Loja" que será gravada.
+- **Confirmação do Gravar ERP** (só quando o arquivo tem `OP = CX`): repete as linhas e o total, e avisa que só esses dias × lojas são substituídos. Recusar não grava nada (nem o ERP).
+- **Depois de gravar:** o aviso (toast) e um cartão na tela do ERP mostram **quantas linhas e quantos R$ de `OP = CX` foram gravados** nos Recebíveis / Retaguarda (e quantos lançamentos dia × loja).
+- **Retaguarda › Conciliação:** o aviso do Cartão agora diz "**Valores da coluna Cartão atualizados via importação ERP (OP = CX)**", com o total, os lançamentos e o LOTE antigo à parte. Sem valores desta ponte, o texto antigo do LOTE continua.
+
+**Limites a saber**
+
+1. **Permissão:** gravar na Retaguarda exige `retaguarda.credsystem.importar` ou `retaguarda.credsystem.editar`. Sem elas o ERP grava normalmente e o painel avisa (quadro, confirmação, aviso e cartão) que a prestação **NÃO foi enviada**.
+2. **Loja sem cadastro** no Cadastro de Lojas não é gravada (não existe a loja na Retaguarda): fica listada com linhas e valor. **QR-LINX e CREDNOSSO** continuam só informativos: as linhas CX deles são contadas e avisadas, não gravadas.
+3. A ponte grava o **Cartão da prestação**; PIX de prestação (`pixLote`) segue vindo só do layout antigo / digitação.
+
+**Testes e Regra de Ouro.** `tests/teste-contratos-taxas-dfc-1418.mjs` agora com **182 verificações** (148 da v14.18 + 34 da ponte: agrupamento por `Dt Venda` + `Loja` das linhas `OP = CX` do `ApuraCreditos` e gravação na Retaguarda, regra mista, preservação de Dinheiro / PIX / Cartão manual, substituição sem somar, idempotência, sem permissão, recurso desligado e ganchos no código). `teste-economia-netlify-1410` com o baseline de botões 528 / 615 / 408 (só o "Entendi") e `teste-triangulacao-erp-safra-ofx-1415` com o stub `g18`. Conferido também no Chromium real com o servidor real (14/14 da ponte e 36/36 da v14.18). **`fcx.html`, `contabilidade.html` e `contabilidade_v1391.html` não foram alterados** (md5 do `fcx.html` `640800e0…`) e os trechos protegidos do painel seguem idênticos.
 
 ## v14.18 · Contratos × Conta Bancária × Lojas e ECs em tabela única, Taxa Efetiva com Antecipação Apurada, Saldo a Receber com abatimento mensal e Auditoria de Adquirentes × DFC (recurso `gestao_v1418`)
 
