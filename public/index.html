@@ -4395,6 +4395,8 @@ function g15() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
 function g16() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1416'); }
 /** v14.17 · Conciliação de Cartões (painel de KPIs + Laudo Operacional) e DFC (desdobramento de lotes CNAB): recurso ativo neste ambiente? (depende da v14.16; desligado, tudo se comporta como na v14.16) */
 function g17() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1417') && g16(); }
+/** v14.18 · contratos em tabela única com Lojas/ECs do Cadastro, taxa efetiva apurada, abatimento mensal no saldo a receber e Auditoria × DFC: recurso ativo neste ambiente? (depende da v14.17; desligado, tudo se comporta como na v14.17) */
+function g18() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1418') && g17(); }
 function g96() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1396'); }
 function g95() { return typeof Recursos !== 'undefined' && Recursos.ativo('backup_nuvem_v1395'); }
 function g94() { return typeof Recursos !== 'undefined' && Recursos.ativo('gestao_v1394'); }
@@ -4408,7 +4410,8 @@ function g93() { return typeof Recursos !== 'undefined' && Recursos.ativo('gesta
  * (o documento config/recursos da Homologação vai para a Produção junto com as Configurações gerais, e também para a Falco).
  */
 const Recursos = {
-  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1417: { versao: 'v14.17', titulo: 'Conciliação de Cartões: painel executivo de custos e taxas (faturamento bruto conciliado ERP × adquirente e diferença não conciliada, taxa efetiva total em R$ e % com MDR efetivo × contratado, antecipação com prazo médio e excesso sobre o teto, tarifas/aluguel de POS e retenções do OFX, saúde do repasse bancário com furos, liquidado a menor/a maior e valores em virada de mês, comparativo por contrato/CNPJ e ranking das maiores divergências) e Laudo Operacional Mensal em A4 (Imprimir / Salvar PDF, Baixar PDF) com parecer editável, código de verificação e assinaturas; DFC: desdobramento analítico de lotes CNAB (CNAB, PAGTO FORNECEDORES, REMESSA, ARQUIVO PAG ou marcado na tabela) pelos títulos Pago do Contas a Pagar do FCX — consumo 1 para 1 primeiro, rateio virtual por categoria com trava de teto e alerta de excedente, extrato e saldo do banco idênticos, selo e detalhe na linha do extrato e botão Recalcular Desdobramento CNAB; complemento: leitor único com detecção automática dos dois layouts reais de Contas a Pagar / Baixas do ERP (modelo atual em CSV/XLSX e modelo antigo em Excel) no FCX → Saídas e no botão Importar Baixas do ERP (CNAB) da DFC, com data e conta do pagamento, tabela editável de Itens do ERP → Conta Contábil / Categoria DFC e desdobramento CNAB filtrado por data e conta de pagamento' },
+  LISTA: { pe_v1365: { versao: 'v13.65', titulo: 'Ponto de Equilíbrio: cards reativos ao mês e realizado por mês normalizado' }, ret_credsystem_v1366: { versao: 'v13.66', titulo: 'Retaguarda: aba Pendências Credsystem (cancelamentos, ocorrências e baixas indevidas)' }, seg_v1367: { versao: 'v13.67', titulo: 'Data da Última Conciliação nos depósitos, trava de alto risco nas exclusões e Reverter Ação no log' }, versoes_v1368: { versao: 'v13.68', titulo: 'Versão ativa no cabeçalho e quadro Versões dos Ambientes' }, pe_v13681: { versao: 'v13.68.1', titulo: 'Ponto de Equilíbrio: realizado estrito (R$ 0 sem importação) e projeção opcional pela média cadastral' }, conc_v1369: { versao: 'v13.69', titulo: 'Conciliação de Meios de Pagamento (Crédito de Terceiros por EC, Depósitos, Pix, Esposende Card e Resumo do Fechamento) e ECs por empresa' }, adq_emp_v13691: { versao: 'v13.69.1', titulo: 'Regras de taxa (adquirente + bandeira) por Empresa / CNPJ, com Todas / Padrão como reserva' }, conc_tx_v1370: { versao: 'v13.70', titulo: 'Taxas por Empresa/CNPJ + Adquirente com herança para os ECs e vínculo automático do EC pelo CNPJ' }, conc_varr_v13701: { versao: 'v13.70.1', titulo: 'Varredura e auditoria dos ECs por empresa (lojas × ECs, múltiplos ECs, duplicados e legados)' }, conc_getnet_v1371: { versao: 'v13.71', titulo: 'Conciliação Getnet (ERP × extrato), auditoria de MDR, custo de POS e antecipação com abatimento do aluguel das maquininhas' }, conc_erp_v13711: { versao: 'v13.71.1', titulo: 'Leitor da Apuração dos Créditos (ERP): cabeçalho nas 10 primeiras linhas, nomes reais das colunas e descarte de títulos e totais' }, conc_unif_v1372: { versao: 'v13.72', titulo: 'Fonte única de taxas (Regras de Taxa) e Auditoria de Adquirentes unificada: Conciliação e Cruzamento, Regras de Taxa Contratuais e Resumo do Fechamento' }, conc_det_v1373: { versao: 'v13.73', titulo: 'ERP Analítico Detalhado: trava de totais, prestações (LOTE) na Conciliação Credsystem, PIX - POS com a taxa do FCX e fechamento pelo sistema' }, conc_ofx_v1374: { versao: 'v13.74', titulo: 'Conciliação bancária: vendas do dia D × extrato OFX do dia D+1 (débito Getnet por bandeira, antecipação Getnet, PIX Credsystem, Pix direto e sangrias), autorizações NSU/AUT e relatório de conciliados, divergências e pendências' }, conc_lote_v13741: { versao: 'v13.74.1', titulo: 'Débito esperado no banco inclui as prestações (DOCUMENTO LOTE, COMPLEMENTO em branco) pelo valor líquido' }, conc_leitura_v13742: { versao: 'v13.74.2', titulo: 'Garantia de leitura do ERP: classificação Débito (DEBITO ou LOTE) × Crédito (CREDITO ou PAR), quadro de leitura por operadora e filtro de conta que não descarta lançamentos sem empresa' }, ret_lote_v13743: { versao: 'v13.74.3', titulo: 'Recebimentos de prestação (LOTE) gravados na Conciliação dos Recebimentos da Retaguarda como cartão de débito, somados aos demais recebimentos em cartão'  }, fcx_semanas_v1377: { versao: 'v13.77', titulo: 'FCX: semana informada no Peso dos dias (visão e Orçamento semanais seguem a semana cadastrada), coluna "Saldo do período" e valores em R$ fixos na linha do Saldo acumulado'  }, fcx_recebivel_v1378: { versao: 'v13.78', titulo: 'FCX: aba Recebível Diário (relatório de Contas a Pagar e Receber para a diretoria, em paisagem) com crítica de carga, cartão da Conciliação, prestação da Retaguarda, semanas seguintes com farol e saídas detalhadas'  }, fcx_recebivel_v1379: { versao: 'v13.79', titulo: 'Recebível Diário: capa só com tabelas (saídas por conta e por forma de pagamento), R$ com centavos em todas as células, LOTE só do arquivo, detalhamento com quebra de linha e A4 paisagem' }, fcx_recebivel_v1380: { versao: 'v13.80', titulo: 'Recebível Diário: cartão por adquirente e bandeira (bruto, MDR, antecipação, POS e líquido), Credsystem como recebível futuro no vencimento, Prestação em Débito, Resumo Consolidado de Entradas com gráfico e gráfico da previsão semanal' }, fcx_recebivel_v1381: { versao: 'v13.81', titulo: 'Recebível Diário: capa executiva com um único Consolidado de Entradas (Vendas + Prestações) por meio de pagamento, cartão por adquirente e Saídas do dia lado a lado' }, fcx_recebivel_v1382: { versao: 'v13.82', titulo: 'Recebível Diário: impressão/PDF limpos (sem formulário e alertas), Capa → Semanas → Detalhamentos com folha nova e linhas inteiras, saídas por fornecedor e valor, máscara de moeda nos campos' }, acessos_v1383: { versao: 'v13.83.1', titulo: 'Gestão de Acessos: sub-permissões por tela e ação lidas pelo roteador, perfil Loja (ponta) com "Pode solicitar viagem" e CPF validado, permissão Visão / Dashboard com o Resumo do Recebível do Dia na Tela Inicial' }, acessos_v1384: { versao: 'v13.84', titulo: 'Gestão de Acessos: "Colaboradores sem acesso" recolhido num agrupador com contador (busca e filtros dentro)' }, fcx_periodo_v1385: { versao: 'v13.85', titulo: 'FCX · Visualização: período por calendário (Data Inicial / Data Final) e detalhamento diário com agrupadores de Entradas e Saídas' }, contabil_v1386: { versao: 'v13.86', titulo: 'Módulo Contábil (Módulo 12): plano de contas único, partidas dobradas, relatórios e o plano de contas do FCX lido do Contábil (somente leitura no FCX)' }, rd_cartao_v1387: { versao: 'v13.87', titulo: 'Recebível Diário: prestação no cartão como "Débito <bandeira>" com MDR, débito × crédito por adquirente, Resumo de Fechamento por Adquirente e Credsystem só consolidada' }, gestao_v1418: { versao: 'v14.18', titulo: 'Contratos de adquirentes em tabela única (Contratos × Conta Bancária × Lojas e ECs) com Lojas e ECs puxados sozinhos do Cadastro de Lojas por adquirente e empresa/CNPJ (botão Puxar Lojas e ECs do Cadastro de Lojas, editáveis à mão); taxa efetiva com Antecipação Efetiva da coluna da adquirente ou Apurada contra o repasse líquido do OFX (Getnet) e leitor ampliado de tarifas/aluguel de POS e retenções/chargebacks na conta do contrato; abatimento mensal de MDR, antecipação, tarifas e retenções no Saldo a Receber de Antecipações (Bruto − Taxas = Líquido disponível); Auditoria de Adquirentes na DFC (créditos auditados com a categoria de cartões, Líquido Esperado como Previsto em Realizado × Previsto e quadro Reconciliação de Recebíveis de Cartões no Resumo Executivo A4)' },
+  gestao_v1417: { versao: 'v14.17', titulo: 'Conciliação de Cartões: painel executivo de custos e taxas (faturamento bruto conciliado ERP × adquirente e diferença não conciliada, taxa efetiva total em R$ e % com MDR efetivo × contratado, antecipação com prazo médio e excesso sobre o teto, tarifas/aluguel de POS e retenções do OFX, saúde do repasse bancário com furos, liquidado a menor/a maior e valores em virada de mês, comparativo por contrato/CNPJ e ranking das maiores divergências) e Laudo Operacional Mensal em A4 (Imprimir / Salvar PDF, Baixar PDF) com parecer editável, código de verificação e assinaturas; DFC: desdobramento analítico de lotes CNAB (CNAB, PAGTO FORNECEDORES, REMESSA, ARQUIVO PAG ou marcado na tabela) pelos títulos Pago do Contas a Pagar do FCX — consumo 1 para 1 primeiro, rateio virtual por categoria com trava de teto e alerta de excedente, extrato e saldo do banco idênticos, selo e detalhe na linha do extrato e botão Recalcular Desdobramento CNAB; complemento: leitor único com detecção automática dos dois layouts reais de Contas a Pagar / Baixas do ERP (modelo atual em CSV/XLSX e modelo antigo em Excel) no FCX → Saídas e no botão Importar Baixas do ERP (CNAB) da DFC, com data e conta do pagamento, tabela editável de Itens do ERP → Conta Contábil / Categoria DFC e desdobramento CNAB filtrado por data e conta de pagamento' },
   gestao_v1416: { versao: 'v14.16', titulo: 'DFC · Extratos: nenhum lançamento do OFX é mais descartado quando o banco repete o FITID/CHECKNUM (Caixa: terminal repetido em dezenas de depósitos do mesmo dia e entre DEB PIX CHAVE e TAR PIX) — a identidade passa a ser FITID + data + valor + histórico + ocorrência, e reimportar o mesmo arquivo continua bloqueado; importação do extrato em Excel (.xls/.xlsx) da Caixa com a Conta Bancária obrigatória (ignora SALDO DIA e valor zero, lê valores como - 136.200,00, usa CPF/CNPJ e Nome/Razão Social no cruzamento com Fornecedores e Clientes e guarda o saldo final do extrato); botão para limpar/reimportar os extratos de uma conta no mês; extratos gravados em partes por tamanho (≤ 200 KB)' },
   gestao_v1415: { versao: 'v14.15.1', titulo: 'Triangulação ERP × Adquirentes (Getnet, SafraPay e Credsystem) × Banco (OFX): ERP Apuração dos Créditos (aba ApuraCreditos) importado por competência, gravado em partes de JSON puro de até 250 KB e ligado aos contratos por Loja; a Credsystem (Adq 304) é conciliada direto com o OFX pela Dt Crédito (Vda Líquida − Antecipação − Tx Extra; estornos DB subtraem); a Auditoria de Adquirentes fica em 3 sub-abas (Conciliação de Cartões por Contrato / CNPJ, Regras de Taxa Contratuais e Resumo do Fechamento), abre na primeira, em 3 etapas lineares (ERP unificado · adquirente por contrato com CNPJ conferido · OFX lido sozinho no DFC), e a sub-aba legada Conciliação e Cruzamento fica oculta; SafraPay com dois layouts (Agenda de Vendas e Recebíveis de antecipação, guardados à parte); batimento ERP × adquirente (Getnet: Dt Venda + Bandeira + Modalidade somando VE + CX, ±R$ 0,50/dia; SafraPay: Agenda), Agenda × Recebíveis por NSU + Autorização + Terminal, KPIs ERP → adquirente → líquido esperado → crédito no OFX e a blindagem da busca no DFC/OFX consolidada (aviso “sem OFX no período”). Depende da v14.14' },
   gestao_v1414: { versao: 'v14.14', titulo: 'Conciliação de Cartões por contrato: cada contrato (Adquirente + Empresa / CNPJ) tem a Conta Bancária de Crédito (OFX) obrigatória; arquivos da Getnet (.csv) e da SafraPay (.xlsx) importados isolados por Adquirente + CNPJ + Competência (um CNPJ nunca sobrescreve outro), com lista de arquivos carregados, conferência do MDR e da antecipação com as regras de taxa e do repasse só no OFX da conta vinculada (por contrato ou consolidado), botão Recalcular; ERP opcional e Credsystem inalterados' },
@@ -14807,7 +14810,7 @@ const FluxoDFC = {
     if (!meses.length) return `<div class="panel"><div class="empty">Nenhum extrato importado. Use “${g16() ? 'Importar Extrato (OFX / Excel)' : 'Importar OFX'}” (aceita vários arquivos de uma vez).${contas.length ? '' : ' Se a conta ainda não estiver no de-para, o painel oferece o cadastro com os dados do arquivo.'}</div></div>`;
     if (!meses.includes(u.mes)) return `<div class="panel"><div class="empty">Nenhum extrato importado para ${this.mesLabel(u.mes)}. Meses com extrato: ${meses.slice(0, 6).map(m => this.mesLabel(m)).join(', ')}.</div></div>`;
     const regras = DFC.regras();
-    const todas = this.transacoes().filter(t => t.data.startsWith(u.mes) && (!u.conta || t.contaId === u.conta)).map(t => ({ ...t, cls: DFC.classificar(t, regras) }));
+    const todas = this.transacoes().filter(t => t.data.startsWith(u.mes) && (!u.conta || t.contaId === u.conta)).map(t => ({ ...t, cls: DFC.classificar(t, regras, { ov18: true }) }));
     const q = this.norm(u.busca);
     const lista = todas.filter(t => (u.filtro === 'todas' || (u.filtro === 'sem' && t.cls.origem === 'padrão') || (u.filtro === 'e' && t.valor > 0) || (u.filtro === 's' && t.valor < 0)) && (!q || this.norm(t.hist).includes(q) || this.buscaForn05(t, q)) && this.filtroForn05(t))
       .sort((a, b) => b.data.localeCompare(a.data) || Math.abs(b.valor) - Math.abs(a.valor));
@@ -14914,7 +14917,7 @@ const FluxoDFC = {
         ${u.sub === 'cruzamento' ? `<div class="row">${Auth.can('fcx.dfc.regras') ? '<button class="btn ghost" data-a="fd-mapa">De-para FCX → DFC</button>' : ''}${Auth.can('fcx.dfc.contas') ? '<button class="btn sec" data-a="fd-saldo">Saldo inicial do mês</button>' : ''}${this.botoesExport('cruzamento')}</div>` : u.sub === 'dfc' ? `<div class="row">${this.botaoResumo06()}${this.botoesExport('dfc')}</div>` : ''}</div>` : ''}`;
     this._czDados = null; this._dfcDados = null;
     const corpo = { cruzamento: () => this.renderCruzamento(), dfc: () => this.renderDFC(), extratos: () => this.renderExtratos(), contas: () => this.renderContas(), regras: () => this.renderRegras() }[u.sub] || (() => this.renderCruzamento());
-    return topo + (comMes && g17() ? this.painelCnab17() : '') + corpo();
+    return topo + (comMes && g17() ? this.painelCnab17() : '') + (comMes && g18() ? this.painelCartoes18() : '') + corpo();
   },
   afterRender() {
     if (this.ui.sub === 'cruzamento' && this._czDados) this.graficosCruzamento(this._czDados);
@@ -14938,14 +14941,14 @@ const FluxoDFC = {
     const grafico = `<div class="panel"><h2>Saldo de caixa no mês</h2><p class="sub">Azul: realizado pelos extratos. Laranja tracejado: projeção a partir de hoje com as premissas do FCX (vencidos entram hoje). Cinza: o que o FCX previa para o mês inteiro. Saldo inicial ${esc(c.saldo.origem)}.</p>
       <div class="chart-box"><canvas id="czSaldo" role="img" aria-label="Saldo realizado, projetado e previsto no mês"></canvas></div></div>`;
     const v4 = g04(), grupos = v4 ? DFC.GRUPOS_CAT : ['OPERACIONAL', 'INVESTIMENTO', 'FINANCIAMENTO'], temNaoOp = v4 && DFC.categorias().some(x => x.grupo === 'NAO_OPERACIONAL' && !DFC.neutra(x));
-    const comp = l => l.itens.length ? `<details class="log"><summary>composição no FCX (${l.itens.length})</summary>${l.itens.slice(0, 12).map(([k, v]) => `<div class="chg">${esc(k)}: <b>${Fmt.brl(v)}</b></div>`).join('')}${l.itens.length > 12 ? `<div class="chg">… e mais ${l.itens.length - 12}</div>` : ''}</details>` : '';
-    const linha = l => `<tr><td style="padding-left:24px">${esc(l.nome)} <span class="hint">(${l.sentido === 'E' ? 'entrada' : 'saída'})</span>${comp(l)}</td>
+    const comp = l => l.itens.length ? `<details class="log"><summary>composição ${l.fontePrev18 ? 'na Auditoria de Adquirentes' : 'no FCX'} (${l.itens.length})</summary>${l.itens.slice(0, 12).map(([k, v]) => `<div class="chg">${esc(k)}: <b>${Fmt.brl(v)}</b></div>`).join('')}${l.itens.length > 12 ? `<div class="chg">… e mais ${l.itens.length - 12}</div>` : ''}</details>` : '';
+    const linha = l => `<tr><td style="padding-left:24px">${esc(l.nome)} <span class="hint">(${l.sentido === 'E' ? 'entrada' : 'saída'})</span>${l.fontePrev18 ? ' <span class="pill info" title="Previsto = Líquido Esperado da Auditoria de Adquirentes (o FCX não tem meta específica para esta categoria, ou a chave está em Sempre)">previsto: Auditoria</span>' : ''}${comp(l)}</td>
       <td class="num">${Fmt.brl(l.previsto)}</td><td class="num">${Fmt.brl(l.realizado)}${l.nReal ? `<div class="cell-sub">${l.nReal} lançamento(s)</div>` : ''}</td>
       <td class="num"><b style="color:var(${l.dif === 0 ? '--ink-soft' : l.favoravel ? '--ok' : '--bad'})">${l.dif > 0 ? '+' : ''}${Fmt.brl(l.dif)}</b></td><td class="num">${pct(l.pct)}</td>
       <td>${!l.previsto ? '<span class="pill neutral">sem previsão</span>' : !l.realizado ? '<span class="pill warn">não realizado</span>' : `<span class="pill ${l.favoravel ? 'ok' : 'bad'}">${l.favoravel ? 'favorável' : 'desfavorável'}</span>`}</td></tr>`;
     const tot = arr => ({ p: arr.reduce((a, l) => a + (l.sentido === 'E' ? 1 : -1) * l.previsto, 0), r: arr.reduce((a, l) => a + (l.sentido === 'E' ? 1 : -1) * l.realizado, 0) });
     const tabela = `<div class="panel"><h2>Categoria a categoria · ${this.mesLabel(u.mes)}</h2><p class="sub">Previsto = premissas do FCX no mês (vendas líquidas por meio de pagamento na data de recebimento, prestação e saídas por conta contábil). Realizado = transações do OFX classificadas na mesma categoria. Diferença = realizado − previsto (em receitas, positivo é favorável; em despesas, negativo é favorável).</p>
-      ${c.linhas.length ? `<div class="tbl-wrap"><table class="cz"><thead><tr><th>Categoria</th><th class="num">Previsto (FCX)</th><th class="num">Realizado (DFC)</th><th class="num">Diferença</th><th class="num">Realização</th><th>Leitura</th></tr></thead><tbody>
+      ${c.linhas.length ? `<div class="tbl-wrap"><table class="cz"><thead><tr><th>Categoria</th><th class="num">Previsto (${c.previstoAud18 && c.previstoAud18.length ? 'FCX / Auditoria' : 'FCX'})</th><th class="num">Realizado (DFC)</th><th class="num">Diferença</th><th class="num">Realização</th><th>Leitura</th></tr></thead><tbody>
       ${grupos.map(g => { const ls = c.linhas.filter(l => l.grupo === g); if (!ls.length && !(g === 'NAO_OPERACIONAL' && temNaoOp)) return ''; const t = tot(ls);
         if (!v4) return `<tr class="grp"><td class="span-all" colspan="6"><b>${esc(DFC_GRUPOS[g].split(' (')[0])}</b> <span class="hint">· líquido previsto ${Fmt.brl(t.p)} · realizado ${Fmt.brl(t.r)}</span></td></tr>${ls.map(linha).join('')}`;
         return `<tr class="grp"><td class="span-all" colspan="6"><b>${esc(DFC_GRUPOS[g].split(' (')[0])}</b></td></tr>${ls.length ? ls.map(linha).join('') : '<tr><td class="span-all hint" colspan="6" style="padding-left:24px">Sem previsto nem realizado neste mês.</td></tr>'}${this.subtotalCZ(DFC.ROTULO_SUBTOTAL[g], t)}`; }).join('')}
@@ -15122,6 +15125,7 @@ const FluxoDFC = {
     if (a === 'fd-bc' || a === 'fd-dfc') { this.ui[el.dataset.k] = el.value; this.ui.limite = 200; return App.render(); }
     if (a === 'fd-bc-cat') return this.classificarManual(el.dataset.doc, el.dataset.id, el.value);
     if (a === 'fd-cnab-cfg') return g17() ? this.salvarCfg17(el.dataset.k, el.value) : undefined; // v14.17
+    if (a === 'fd-cartoes-cfg') return g18() ? this.salvarCfg18(el.dataset.k, el.value) : undefined; // v14.18
     if (a === 'fd-bc-upload') {
       const fs = [...el.files]; el.value = ''; if (!fs.length) return;
       try { await this.importarOFX(fs); App.render(); } catch (e) { UI.toast((g16() ? 'Falha ao ler o extrato: ' : 'Falha ao ler o OFX: ') + e.message); }
@@ -28170,7 +28174,7 @@ const Adq17 = {
       const id = c.contrato.id, calc = c.calc, k = calc?.k || {}, rp = cruz.porContrato[id] || null, bruto = brutoDe(c), cred = c.contrato.adquirente === 'CREDSYSTEM';
       const o = ofx.get(grupoConta(c)), brutoConta = o ? o.contratos.reduce((s, i) => s + brutoDe(T.contratos.find(z => z.contrato.id === i)), 0) : 0, fat = brutoConta > 0 ? bruto / brutoConta : (o && o.contratos.length ? 1 / o.contratos.length : 0);
       const tarifaR = o ? this.r2(o.tarifa.reduce((s, t) => s + t.valor, 0) * fat) : 0, retR = o ? this.r2(o.retencao.reduce((s, t) => s + t.valor, 0) * fat) : 0;
-      const mdr = calc ? this.mdrDe(calc) : null, ant = calc ? this.antDe(c) : null;
+      const mdr = calc ? this.mdrDe(calc) : null, ant = calc ? this.antDe(c, { cruz, o, fim, usados: o ? (o.usados ||= new Map()) : new Map() }) : null;
       const difBruto = c.comparavel ? this.r2(c.k.cmpErp - c.k.cmpAdq) : null;
       const transito = this.r2(linhas.filter(l => l.data > fim && l.contratos.includes(id)).reduce((s, l) => s + (l.partes?.[id] ?? (l.contratos.length === 1 ? l.esperado : 0)), 0));
       const esperado = rp ? rp.esperado : 0, creditado = rp ? rp.creditado : 0, semOfx = rp ? rp.vSemofx : 0, audit = this.r2(esperado - semOfx);
@@ -28265,7 +28269,7 @@ const Adq17 = {
         <tr><td colspan="3"><span class="t">Código de verificação</span><b class="lop-cod">${E(cod)}</b> <span class="sub" style="font-size:8.5px;color:#585E7F">identifica os números deste laudo (competência, escopo e valores): ao recalcular o painel com os mesmos dados, o código se repete.</span></td></tr></table>`;
     const dif = c.bruto.difR;
     const q1 = `<div class="lop-q nq"><h2>Quadro 1 — Indicadores de Custos, Taxas Efetivas e Antecipação</h2>
-      <div class="rx-kpis">${kpi('Faturamento bruto conciliado', brl(c.bruto.base), c.bruto.comparaveis ? `base de cálculo das taxas · ERP ${brl(c.bruto.cmpErp)} × Adquirente ${brl(c.bruto.cmpAdq)} (contratos comparáveis)` : 'base de cálculo das taxas · sem contrato comparável ERP × Adquirente')}${kpi('Taxa efetiva total', `${brl(c.taxa.r)}`, `${pc(c.taxa.pct)} do bruto`)}${kpi('MDR efetivo × contratado', c.mdr.difR == null ? 'sem regra' : `<span style="color:${cor(c.mdr.difR, 'pos')}">${brl(c.mdr.difR)}</span>`, c.mdr.difR == null ? '' : `${pc(c.mdr.efetivoBasePct)} × ${pc(c.mdr.contratadoPct)} (${pp(c.mdr.difPp)})`)}${kpi('Antecipação', brl(c.ant.efetivoR), c.ant.prazoMedio != null ? `prazo médio ${c.ant.prazoMedio} dia(s)` : pc(c.ant.efetivoPct) + ' do bruto')}</div>
+      <div class="rx-kpis">${kpi('Faturamento bruto conciliado', brl(c.bruto.base), c.bruto.comparaveis ? `base de cálculo das taxas · ERP ${brl(c.bruto.cmpErp)} × Adquirente ${brl(c.bruto.cmpAdq)} (contratos comparáveis)` : 'base de cálculo das taxas · sem contrato comparável ERP × Adquirente')}${kpi('Taxa efetiva total', `${brl(c.taxa.r)}`, `${pc(c.taxa.pct)} do bruto`)}${kpi('MDR efetivo × contratado', c.mdr.difR == null ? 'sem regra' : `<span style="color:${cor(c.mdr.difR, 'pos')}">${brl(c.mdr.difR)}</span>`, c.mdr.difR == null ? '' : `${pc(c.mdr.efetivoBasePct)} × ${pc(c.mdr.contratadoPct)} (${pp(c.mdr.difPp)})`)}${kpi('Antecipação', brl(c.ant.efetivoR), (g18() && c.ant.fontes?.length ? Adq18.antOrigemResumo(c.ant.fontes) + ' · ' : '') + (c.ant.prazoMedio != null ? `prazo médio ${c.ant.prazoMedio} dia(s)` : pc(c.ant.efetivoPct) + ' do bruto'))}</div>
       <table class="lop-t nq"><thead><tr><th>Indicador</th><th class="n">Valor (R$)</th><th class="n">% sobre o bruto</th><th>Leitura</th></tr></thead><tbody>
       <tr class="g"><td colspan="4">Faturamento bruto conciliado (ERP × Adquirente)</td></tr>
       <tr><td>Base de cálculo das taxas (bruto conciliado)</td><td class="n">${brl(c.bruto.base)}</td><td class="n">${pc(100)}</td><td><span class="sub">bruto dos lotes da competência que serve de base ao MDR e à antecipação</span></td></tr>
@@ -28274,9 +28278,9 @@ const Adq17 = {
       <tr><td>Diferença não conciliada</td>${cv(dif, 'pos')}<td class="n">${pc(c.bruto.difPct)}</td><td><span class="sub">${c.bruto.diasDiv} dia(s) divergente(s) · divergência bruta ${brl(c.bruto.vDiv)}</span></td></tr>
       <tr class="g"><td colspan="4">Taxa efetiva total, por componente</td></tr>
       <tr><td>MDR efetivo</td><td class="n">${brl(c.mdr.efetivoR)}</td><td class="n">${pc(c.mdr.efetivoPct)}</td><td><span class="sub">${c.mdr.contratadoR == null ? 'sem regra contratual cadastrada' : `contratado ${brl(c.mdr.contratadoR)} (${pc(c.mdr.contratadoPct)}) sobre ${brl(c.mdr.base)} com regra · efetivo na mesma base ${pc(c.mdr.efetivoBasePct)} · diferença a maior ${brl(c.mdr.aMaiorR)}, a menor ${brl(c.mdr.aMenorR)}`}</span></td></tr>
-      <tr><td>Antecipação</td><td class="n">${brl(c.ant.efetivoR)}</td><td class="n">${pc(c.ant.efetivoPct)}</td><td><span class="sub">${c.ant.efetivoAm != null ? `${pc(c.ant.efetivoAm)} a.m. efetivo × ${pc(c.ant.contratadoAm)} a.m. contratado · ` : ''}${c.ant.prazoMedio != null ? `prazo médio ${c.ant.prazoMedio} dia(s) · ` : ''}teto contratual ${brl(c.ant.tetoR)} · excesso ${brl(c.ant.excessoR)}</span></td></tr>
-      <tr><td>Tarifas e aluguel de POS (OFX)</td><td class="n">${brl(c.tarifas.posR)}</td><td class="n">${pc(c.tarifas.posPct)}</td><td></td></tr>
-      <tr><td>Retenções bancárias (OFX)</td><td class="n">${brl(c.tarifas.retencaoR)}</td><td class="n">${pc(c.tarifas.retencaoPct)}</td><td></td></tr>
+      <tr><td>Antecipação</td><td class="n">${brl(c.ant.efetivoR)}</td><td class="n">${pc(c.ant.efetivoPct)}</td><td><span class="sub">${c.ant.efetivoAm != null ? `${pc(c.ant.efetivoAm)} a.m. efetivo × ${pc(c.ant.contratadoAm)} a.m. contratado · ` : ''}${c.ant.prazoMedio != null ? `prazo médio ${c.ant.prazoMedio} dia(s) · ` : ''}teto contratual ${brl(c.ant.tetoR)} · excesso ${brl(c.ant.excessoR)}</span>${g18() ? Adq18.antOrigemHtml(c.ant, 'sub') : ''}</td></tr>
+      <tr><td>Tarifas e aluguel de POS (OFX)</td><td class="n">${brl(c.tarifas.posR)}</td><td class="n">${pc(c.tarifas.posPct)}</td><td>${g18() ? Adq18.leituraTarifa(c.tarifas, 'tarifa', 'sub') : ''}</td></tr>
+      <tr><td>${g18() ? 'Retenções / Chargebacks bancários (OFX)' : 'Retenções bancárias (OFX)'}</td><td class="n">${brl(c.tarifas.retencaoR)}</td><td class="n">${pc(c.tarifas.retencaoPct)}</td><td>${g18() ? Adq18.leituraTarifa(c.tarifas, 'retencao', 'sub') : ''}</td></tr>
       <tr class="t"><td>Taxa efetiva total</td><td class="n">${brl(c.taxa.r)}</td><td class="n">${pc(c.taxa.pct)}</td><td></td></tr></tbody></table></div>`;
     const nq = n => n <= 12 ? ' nq' : '';
     const rc = I.contratos.map(r => `<tr><td>${E(r.rotulo)}<span class="sub">CNPJ ${E(DFC_RESUMO.cnpjFmt(r.cnpj))}${r.direto ? ' · ERP × OFX direto' : ''}</span></td><td class="n">${brl(r.bruto.base)}</td>${cv(r.bruto.difR, 'pos')}<td class="n">${r.mdr?.temRegra ? `${pc(r.mdr.efetivoBasePct)} × ${pc(r.mdr.contratadoPct)}` : (r.mdr ? pc(r.mdr.efetivoPct) : '—')}</td><td class="n">${brl(r.ant?.efetivoR)}</td><td class="n">${brl(this.r2(r.tarifaR + r.retencaoR))}</td><td class="n">${pc(r.taxa.pct)}</td><td class="n">${pc(r.repasse.realizacaoPct, 1)}</td><td>${pill(r.situacao)}</td></tr>`).join('');
@@ -28303,7 +28307,7 @@ const Adq17 = {
     const nota = `<div class="lop-q nq"><h2>Parecer / Notas da Controladoria</h2><div class="rx-nota">${o.notas && String(o.notas).trim() ? E(String(o.notas).trim()) : 'Sem notas adicionais da controladoria para esta competência.'}</div></div>`;
     const ass = `<div class="rx-ass"><div class="rx-loc">${E(o.local || '')}Emitido em ${E(o.emitidoEm || '')}.</div><div class="rx-sign">${[0, 1].map(i => { const s = sigs[i] || { nome: '', cargo: i ? 'Controladoria' : 'Gestor Financeiro' }; return `<div class="a"><b>${E(s.nome || '______________________________')}</b><span>${E(s.cargo || '')}${s.registro ? ' · ' + E(s.registro) : ''}</span></div>`; }).join('')}</div></div>`;
     const fim = `<div class="rx-fim">Painel de Gestão ${E(o.marca || '')} — Laudo Operacional Mensal da Conciliação de Cartões, competência ${E(Adq14.mesLabel(I.mes))}. Os valores acompanham a tela “Conciliação de Cartões (por Contrato / CNPJ)”. Código de verificação ${E(cod)}.</div>`;
-    return cab + q1 + q2 + q3 + q4 + nota + ass + fim;
+    return cab + q1 + q2 + q3 + q4 + (g18() ? Adq18.quadroSaldoLaudo(I, E, brl, pc) : '') + nota + ass + fim;
   },
 };
 
@@ -28331,9 +28335,9 @@ Object.assign(Adq17, {
       ${kpi('MDR efetivo × contratado', dMdr == null ? 'sem regra' : `<span class="${sgn(dMdr)}">${f(dMdr)}</span>`, dMdr == null ? 'sem regra de MDR cadastrada' : `${p(c.mdr.efetivoBasePct)} × ${p(c.mdr.contratadoPct)} (${dMdr > this.TOL ? 'a maior' : dMdr < -this.TOL ? 'a menor' : 'no contrato'})`, dMdr != null && dMdr > this.TOL ? 'warn' : '')}</div>`;
     const comp = `<h3 class="a17-sub">Composição da taxa efetiva</h3><div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Componente</th><th class="num">Efetivo (R$)</th><th class="num">% do bruto</th><th>Contratado / teto</th><th>Diferença / excesso</th></tr></thead><tbody>
       <tr><td><b>MDR</b></td><td class="num">${f(c.mdr.efetivoR)}</td><td class="num">${p(c.mdr.efetivoPct)}</td><td>${c.mdr.contratadoR == null ? '<span class="muted">sem regra</span>' : `${f(c.mdr.contratadoR)} · ${p(c.mdr.contratadoPct)} sobre ${f(c.mdr.base)}<div class="cell-sub">efetivo na mesma base: ${p(c.mdr.efetivoBasePct)}</div>`}</td><td>${c.mdr.difR == null ? '—' : `<span class="${sgn(c.mdr.difR)}">${f(c.mdr.difR)} · ${pp(c.mdr.difPp)}</span><div class="cell-sub">a maior ${f(c.mdr.aMaiorR)} · a menor ${f(c.mdr.aMenorR)}</div>`}</td></tr>
-      <tr><td><b>Antecipação</b></td><td class="num">${f(c.ant.efetivoR)}</td><td class="num">${p(c.ant.efetivoPct)}</td><td>${c.ant.tetoR ? `teto ${f(c.ant.tetoR)}` : '<span class="muted">sem teto</span>'}${c.ant.efetivoAm != null ? `<div class="cell-sub">${p(c.ant.efetivoAm)} a.m. efetivo × ${p(c.ant.contratadoAm)} a.m. contratado</div>` : ''}</td><td>${c.ant.excessoR > this.TOL ? `<span class="a17-neg">excesso ${f(c.ant.excessoR)}</span>` : '<span class="a17-pos">dentro do contrato</span>'}${c.ant.prazoMedio != null ? `<div class="cell-sub">prazo médio antecipado: ${c.ant.prazoMedio} dia(s)</div>` : ''}</td></tr>
-      <tr><td><b>Tarifas e aluguel de POS</b> <span class="cell-sub">(OFX do mês)</span></td><td class="num">${f(c.tarifas.posR)}</td><td class="num">${p(c.tarifas.posPct)}</td><td>—</td><td>—</td></tr>
-      <tr><td><b>Retenções bancárias</b> <span class="cell-sub">(OFX do mês)</span></td><td class="num">${f(c.tarifas.retencaoR)}</td><td class="num">${p(c.tarifas.retencaoPct)}</td><td>—</td><td>—</td></tr>
+      <tr><td><b>Antecipação</b></td><td class="num">${f(c.ant.efetivoR)}</td><td class="num">${p(c.ant.efetivoPct)}</td><td>${c.ant.tetoR ? `teto ${f(c.ant.tetoR)}` : '<span class="muted">sem teto</span>'}${c.ant.efetivoAm != null ? `<div class="cell-sub">${p(c.ant.efetivoAm)} a.m. efetivo × ${p(c.ant.contratadoAm)} a.m. contratado</div>` : ''}${g18() ? Adq18.antOrigemHtml(c.ant) : ''}</td><td>${c.ant.excessoR > this.TOL ? `<span class="a17-neg">excesso ${f(c.ant.excessoR)}</span>` : '<span class="a17-pos">dentro do contrato</span>'}${c.ant.prazoMedio != null ? `<div class="cell-sub">prazo médio antecipado: ${c.ant.prazoMedio} dia(s)</div>` : ''}</td></tr>
+      <tr><td><b>Tarifas e aluguel de POS</b> <span class="cell-sub">(OFX do mês)</span></td><td class="num">${f(c.tarifas.posR)}</td><td class="num">${p(c.tarifas.posPct)}</td><td>${g18() ? Adq18.leituraTarifa(c.tarifas, 'tarifa') : '—'}</td><td>—</td></tr>
+      <tr><td><b>${g18() ? 'Retenções / Chargebacks bancários' : 'Retenções bancárias'}</b> <span class="cell-sub">(OFX do mês)</span></td><td class="num">${f(c.tarifas.retencaoR)}</td><td class="num">${p(c.tarifas.retencaoPct)}</td><td>${g18() ? Adq18.leituraTarifa(c.tarifas, 'retencao') : '—'}</td><td>—</td></tr>
       <tr class="tot"><td><b>Taxa efetiva total</b></td><td class="num"><b>${f(c.taxa.r)}</b></td><td class="num"><b>${p(c.taxa.pct)}</b></td><td></td><td></td></tr></tbody></table></div>`;
     const k2 = `<h3 class="a17-sub">Saúde do repasse bancário (OFX)</h3><div class="kpis">${kpi('Líquido esperado × creditado', `${f(R.creditado)} <span class="cell-sub">de ${f(R.auditavel)}</span>`, `realização ${R.realizacaoPct == null ? '—' : Fmt.pct(R.realizacaoPct, 1)} dos dias com extrato`, R.realizacaoPct != null && R.realizacaoPct < 99.5 ? 'warn' : 'ok')}
       ${kpi('Furos de repasse', f(R.furoR), `${R.furoDias} dia(s) sem crédito no OFX`, R.furoR > 0.5 ? 'warn' : '')}
@@ -28343,7 +28347,7 @@ Object.assign(Adq17, {
     const lin = I.contratos.map(r => `<tr><td><b>${esc(r.adquirente)}</b> · ${esc(ConcMP.nomeEmpresa(r.empresaId))}<div class="cell-sub">CNPJ ${esc(CNPJ.formatar(r.cnpj) || '—')}${r.direto ? ' · ERP × OFX direto' : ''}</div></td>
       <td class="num">${f(r.bruto.base)}</td><td class="num ${sgn(r.bruto.difR)}">${r.bruto.comparavel ? f(r.bruto.difR) : '—'}</td>
       <td class="num">${r.mdr?.temRegra ? `${p(r.mdr.efetivoBasePct)} × ${p(r.mdr.contratadoPct)}<div class="cell-sub">${f(r.mdr.difR)}</div>` : r.mdr ? `${p(r.mdr.efetivoPct)}<div class="cell-sub">sem regra</div>` : '—'}</td>
-      <td class="num">${f(r.ant?.efetivoR ?? 0)}<div class="cell-sub">${r.ant?.prazoMedio != null ? r.ant.prazoMedio + ' dia(s)' : ''}${r.ant?.excessoR > this.TOL ? ` · excesso ${f(r.ant.excessoR)}` : ''}</div></td>
+      <td class="num">${f(r.ant?.efetivoR ?? 0)}<div class="cell-sub">${r.ant?.prazoMedio != null ? r.ant.prazoMedio + ' dia(s)' : ''}${r.ant?.excessoR > this.TOL ? ` · excesso ${f(r.ant.excessoR)}` : ''}</div>${g18() && r.ant?.origem ? `<div class="cell-sub" title="${esc(r.ant.fonte)}">${esc(ADQ18.ORIGEM_CURTO[r.ant.origem] || r.ant.origem)}</div>` : ''}</td>
       <td class="num">${f(this.r2(r.tarifaR + r.retencaoR))}</td><td class="num">${p(r.taxa.pct)}</td>
       <td class="num">${r.repasse.realizacaoPct == null ? '—' : Fmt.pct(r.repasse.realizacaoPct, 1)}<div class="cell-sub">${r.repasse.furoR > 0 ? 'furo ' + f(r.repasse.furoR) : ''}${r.repasse.menorR > 0 ? ' menor ' + f(r.repasse.menorR) : ''}${r.repasse.maiorR > 0 ? ' maior ' + f(r.repasse.maiorR) : ''}</div></td>
       <td class="num">${f(r.repasse.transitoR)}</td><td><span class="pill ${sit[r.situacao]}">${esc(ADQ17.ROT_SIT[r.situacao])}</span></td></tr>`).join('');
@@ -28355,7 +28359,7 @@ Object.assign(Adq17, {
     return `<div class="panel a14 a15 a17 a14-sec" id="a17-painel"><div class="a17-bar"><div><h2>Painel Executivo · Custos e Taxas de Cartões</h2><p class="sub" style="margin:0">${esc(Adq14.mesLabel(u.mes))} · ${esc(I.escopo)} · tudo calculado a partir da conciliação abaixo (ERP × adquirente × OFX)</p></div>
       <div class="row"><div class="field" style="min-width:280px"><label class="lbl" for="a17f">Escopo</label><select id="a17f" data-a="a17-filtro">${opts.map(([v, r]) => `<option value="${esc(v)}" ${v === u.filtro ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>
         <button class="btn" style="align-self:end" data-a="a17-laudo" title="Gera o Laudo Operacional Mensal em A4 (pré-visualização com Imprimir / Salvar PDF e Baixar PDF)">Imprimir Laudo Operacional (PDF)</button><button class="btn ghost sm" style="align-self:end" data-a="a17-csv">Exportar KPIs (.csv)</button></div></div>
-      ${k1}${comp}${k2}${tab}${rk}${av}</div>`;
+      ${k1}${comp}${g18() ? Adq18.htmlSaldo(u.mes, u.filtro) : ''}${k2}${tab}${rk}${av}</div>`;
   },
 
   /* ---------------- Laudo: modal (empresa, parecer, signatários) → pré-visualização A4 ---------------- */
@@ -28425,11 +28429,12 @@ Object.assign(Adq17, {
     const put = (b, k, ind, v, pc, ob = '') => L.push([b, k, ind, n(v), pc == null ? '' : String(pc).replace('.', ','), ob]);
     put('Consolidado', I.escopo, 'Faturamento bruto', c.bruto.base, null, `ERP ${n(c.bruto.cmpErp)} × adquirente ${n(c.bruto.cmpAdq)} (contratos comparáveis)`); put('Consolidado', I.escopo, 'Diferença não conciliada', c.bruto.difR, c.bruto.difPct);
     put('Consolidado', I.escopo, 'MDR efetivo', c.mdr.efetivoR, c.mdr.efetivoPct, c.mdr.contratadoR == null ? 'sem regra' : `contratado ${n(c.mdr.contratadoR)} (${String(c.mdr.contratadoPct).replace('.', ',')}%) · dif. ${n(c.mdr.difR)}`);
-    put('Consolidado', I.escopo, 'Antecipação', c.ant.efetivoR, c.ant.efetivoPct, `prazo médio ${c.ant.prazoMedio ?? '—'} dia(s) · excesso ${n(c.ant.excessoR)}`);
-    put('Consolidado', I.escopo, 'Tarifas / aluguel de POS', c.tarifas.posR, c.tarifas.posPct); put('Consolidado', I.escopo, 'Retenções bancárias', c.tarifas.retencaoR, c.tarifas.retencaoPct); put('Consolidado', I.escopo, 'Taxa efetiva total', c.taxa.r, c.taxa.pct);
+    put('Consolidado', I.escopo, 'Antecipação', c.ant.efetivoR, c.ant.efetivoPct, `prazo médio ${c.ant.prazoMedio ?? '—'} dia(s) · excesso ${n(c.ant.excessoR)}${g18() ? ' · origem: ' + Adq18.antOrigemResumo(c.ant.fontes) : ''}`);
+    put('Consolidado', I.escopo, g18() ? 'Tarifas e aluguel de POS' : 'Tarifas / aluguel de POS', c.tarifas.posR, c.tarifas.posPct); put('Consolidado', I.escopo, g18() ? 'Retenções / Chargebacks bancários' : 'Retenções bancárias', c.tarifas.retencaoR, c.tarifas.retencaoPct); put('Consolidado', I.escopo, 'Taxa efetiva total', c.taxa.r, c.taxa.pct);
     put('Repasse', I.escopo, 'Líquido esperado', c.repasse.esperado, null); put('Repasse', I.escopo, 'Líquido creditado', c.repasse.creditado, c.repasse.realizacaoPct, 'realização sobre os dias com extrato');
     put('Repasse', I.escopo, 'Furos', c.repasse.furoR, null, `${c.repasse.furoDias} dia(s)`); put('Repasse', I.escopo, 'Liquidado a menor', c.repasse.menorR, null, `${c.repasse.menorDias} dia(s)`); put('Repasse', I.escopo, 'Liquidado a maior', c.repasse.maiorR, null, `${c.repasse.maiorDias} dia(s)`); put('Repasse', I.escopo, 'Virada de mês / trânsito', c.repasse.transitoR, null);
-    I.contratos.forEach(r => { put('Contrato', r.rotulo, 'Bruto', r.bruto.base, null, `CNPJ ${CNPJ.formatar(r.cnpj)}`); put('Contrato', r.rotulo, 'Taxa efetiva', r.taxa.r, r.taxa.pct); put('Contrato', r.rotulo, 'Realização', r.repasse.creditado, r.repasse.realizacaoPct, ADQ17.ROT_SIT[r.situacao]); });
+    I.contratos.forEach(r => { if (g18() && r.ant?.origem) put('Contrato', r.rotulo, 'Antecipação efetiva', r.ant.efetivoR, r.ant.efetivoPct, r.ant.fonte); put('Contrato', r.rotulo, 'Bruto', r.bruto.base, null, `CNPJ ${CNPJ.formatar(r.cnpj)}`); put('Contrato', r.rotulo, 'Taxa efetiva', r.taxa.r, r.taxa.pct); put('Contrato', r.rotulo, 'Realização', r.repasse.creditado, r.repasse.realizacaoPct, ADQ17.ROT_SIT[r.situacao]); });
+    if (g18()) Adq18.linhasCsvSaldo(u.mes, u.filtro, n, put);
     I.ranking.forEach((x, i) => put('Divergência ' + (i + 1), x.contrato, this.ROT(x.tipo), x.valor, null, `${x.ref} · ${x.desc}`));
     Documento.baixarArquivo(`kpis_cartoes_${u.mes}.csv`, new Blob(['﻿' + CSV.gerar(L, ';')], { type: 'text/csv;charset=utf-8' }));
   },
@@ -29151,6 +29156,739 @@ Object.assign(FluxoDFC, {
 });
 
 /* ---- fim v14.17 ---- */
+
+/* =====================================================================
+   v14.18 · CONTRATOS EM TABELA ÚNICA, TAXA EFETIVA APURADA, ABATIMENTO MENSAL NO SALDO A RECEBER E AUDITORIA × DFC — recurso gestao_v1418
+   ===================================================================== */
+/* =====================================================================
+   v14.18 · ITEM 1 · CONTRATOS × CONTA BANCÁRIA × LOJAS E ECs — LÓGICA PURA (recurso gestao_v1418, depende de gestao_v1417)
+   O contrato (Adquirente + Empresa / CNPJ) passa a ler sozinho, no Cadastro de Lojas (Módulo 2), as filiais ATIVAS que têm aquela adquirente
+   e a empresa do contrato (empresa do EC; sem ela, CNPJ do TEF/EC e, por último, CNPJ da loja), e devolve:
+     • as lojas (código oficial de 2 dígitos, como a coluna Loja do ERP) e os Estabelecimentos Comerciais (EC) para pré-preencher o contrato;
+     • o que ficou de fora e por quê (outra empresa, sem empresa definida com mais de um contrato da adquirente, EC em branco).
+   Nada é gravado aqui: a tela pré-preenche e o usuário confere, edita à mão e salva (salvarSinc grava no contrato, com auditoria).
+   ===================================================================== */
+const ADQ18 = {
+  RECURSO: 'gestao_v1418',
+  /** origem do vínculo loja × empresa, em linguagem de tela */
+  VIA: { manual: 'empresa escolhida no cadastro da loja', cnpj: 'CNPJ do EC/TEF', 'cnpj-loja': 'CNPJ da loja', 'sem-empresa': 'sem empresa definida (contrato único da adquirente)' },
+};
+const Adq18 = {
+  dig: v => String(v ?? '').replace(/\D/g, ''),
+  /** Código da loja como o ERP e o contrato usam (2 dígitos: 05). Não numérico (ex.: CD) fica como está, em caixa alta. */
+  rotLoja(l) {
+    const o = typeof CodLoja !== 'undefined' ? CodLoja.oficial(l?.codigo) : '';
+    return Adq15.lojaRot(Adq15.lojaKey(o || l?.codigo || ''));
+  },
+  ordenar(a) { return [...a].sort((x, y) => String(x).localeCompare(String(y), 'pt-BR', { numeric: true })); },
+  /** empresa do cadastro (Módulo 2) de uma linha de adquirente: escolha manual > CNPJ do TEF/EC > CNPJ da loja. Não depende do recurso de vínculo automático. */
+  empresaDaLinha(a, loja) {
+    if (a?.empresaId) return { id: a.empresaId, via: a.empresaAuto ? (a.empresaVia || 'cnpj') : 'manual' };
+    const e = ConcMP.empresaPorCnpj(a?.cnpjTef || a?.cnpj); if (e) return { id: e.id, via: 'cnpj' };
+    const el = ConcMP.empresaPorCnpj(loja?.cnpj); return el ? { id: el.id, via: 'cnpj-loja' } : { id: '', via: '' };
+  },
+  /**
+   * Lojas e ECs do Cadastro de Lojas que pertencem ao contrato { adquirente, empresaId, id? }.
+   * Devolve { lojas:[código], ecs:[EC], itens:[{lojaId,codigo,nome,ec,empresaId,via}], semEmpresa:[…], outraEmpresa:[…], semEc:[…] }.
+   * Só filiais ativas. Linha da loja sem empresa definida entra apenas quando este é o ÚNICO contrato da adquirente (com mais de um, entra em semEmpresa para o usuário decidir).
+   */
+  doCadastro(c) {
+    const A = Adq14.chave(c.adquirente), outros = Adq14.contratos().filter(x => x.adquirente === A && x.id !== c.id && x.empresaId !== c.empresaId);
+    const itens = [], semEmpresa = [], outraEmpresa = [], semEc = [];
+    Repo.todos('lojas').filter(l => l.ativa !== false).forEach(l => (l.adquirentes || []).forEach(a => {
+      if (!a || ConcMP.canonAdq(a.adquirente) !== A) return;
+      const emp = this.empresaDaLinha(a, l), ec = String(a.ec ?? '').trim(), base = { lojaId: l.id, codigo: this.rotLoja(l), nome: l.nome || '', ec, empresaId: emp.id, via: emp.via };
+      if (emp.id && emp.id !== c.empresaId) return void outraEmpresa.push(base);
+      if (!emp.id && outros.length) return void semEmpresa.push(base);
+      itens.push(emp.id ? base : { ...base, via: 'sem-empresa' }); if (!ec) semEc.push(base);
+    }));
+    itens.sort((x, y) => String(x.codigo).localeCompare(String(y.codigo), 'pt-BR', { numeric: true }) || String(x.ec).localeCompare(String(y.ec), 'pt-BR', { numeric: true }));
+    return { adquirente: A, empresaId: c.empresaId, lojas: this.ordenar([...new Set(itens.map(i => i.codigo).filter(Boolean))]), ecs: this.ordenar([...new Set(itens.map(i => i.ec).filter(Boolean))]), itens, semEmpresa, outraEmpresa, semEc };
+  },
+  lista: t => [...new Set(String(Array.isArray(t) ? t.join(',') : t ?? '').split(/[\s,;]+/).map(v => v.trim()).filter(Boolean))],
+  /** União do que já está no contrato (ou digitado) com o que o Cadastro de Lojas indica: nada que foi digitado à mão se perde. Devolve também só o que é novo. */
+  unir(lojasAtuais, ecsAtuais, cad) {
+    const L = this.lista(lojasAtuais).map(x => Adq15.lojaRot(Adq15.lojaKey(x))), E = this.lista(ecsAtuais);
+    const nl = cad.lojas.filter(x => !L.some(y => Adq15.lojaKey(y) === Adq15.lojaKey(x))), ne = cad.ecs.filter(x => !E.includes(x));
+    return { lojas: this.ordenar([...new Set([...L, ...nl])]), ecs: this.ordenar([...new Set([...E, ...ne])]), novasLojas: nl, novosEcs: ne };
+  },
+  /** Sugestão do Cadastro para um contrato já salvo (o que ainda não está nele). Memorizada pelas versões das lojas, das empresas e dos contratos. */
+  sugestao(c) {
+    const v = [Repo.versao('lojas'), Repo.versao('config'), Repo.versao(ADQ14.COL_C), Adq14._rev].join('|');
+    if (this._sg?.v !== v) this._sg = { v, m: new Map() };
+    if (!this._sg.m.has(c.id)) { const cad = this.doCadastro(c); this._sg.m.set(c.id, { cad, ...this.unir(c.lojas, c.ecs, cad) }); }
+    return this._sg.m.get(c.id);
+  },
+  /** Grava lojas e ECs no contrato (com a marca da última puxada do Cadastro e a trilha de auditoria). */
+  async salvarSinc(id, lojas, ecs, detalhe) {
+    const c = Repo.get(ADQ14.COL_C, id); if (!c) throw new Error('Contrato não encontrado.'); const { id: _, ...x } = c;
+    const L = [...new Set(this.lista(lojas).map(l => Adq15.lojaRot(Adq15.lojaKey(l))))];
+    await Repo.salvar(ADQ14.COL_C, id, { ...x, lojas: L, ecs: this.lista(ecs), sincCadastroEm: new Date().toISOString() }, { modulo: 'conciliacao', rotulo: `Contrato · ${Adq14.rotuloContrato(c)}`, detalhe: detalhe || 'Lojas e ECs puxados do Cadastro de Lojas' });
+    Adq14._rev++; Adq15._memo = null; this._sg = null;
+  },
+  /** Puxa do Cadastro para um contrato salvo e grava (união com o que já estava). Devolve o resumo. */
+  async puxar(id) {
+    const c = Adq14.contrato(id); if (!c) throw new Error('Contrato não encontrado.'); if (!Adq14.podeTaxas()) throw new Error('Seu perfil não pode alterar contratos.');
+    const cad = this.doCadastro(c), u = this.unir(c.lojas, c.ecs, cad);
+    await this.salvarSinc(id, u.lojas, u.ecs, `Puxado do Cadastro de Lojas: +${u.novasLojas.length} loja(s)${u.novasLojas.length ? ' (' + u.novasLojas.join(', ') + ')' : ''} e +${u.novosEcs.length} EC(s)${u.novosEcs.length ? ' (' + u.novosEcs.join(', ') + ')' : ''}`);
+    return { ...u, cad };
+  },
+  /** Resumo textual do que o Cadastro encontrou (modal e tabela). */
+  resumoTxt(cad) {
+    const p = [`${cad.lojas.length} loja(s) e ${cad.ecs.length} EC(s) no Cadastro de Lojas`];
+    if (cad.outraEmpresa.length) p.push(`${cad.outraEmpresa.length} vínculo(s) de outra empresa ficaram de fora`);
+    if (cad.semEmpresa.length) p.push(`${cad.semEmpresa.length} sem empresa definida (há mais de um contrato desta adquirente) ficaram de fora`);
+    if (cad.semEc.length) p.push(`${cad.semEc.length} sem EC preenchido`);
+    return p.join(' · ');
+  },
+};
+/* ---- fim da lógica v14.18 · Item 1 ---- */
+
+/* =====================================================================
+   v14.18 · ITEM 1 · TELA — tabela única "Contratos × Conta Bancária × Lojas e ECs" (some a tabela duplicada "Lojas do ERP e Estabelecimentos (EC) por contrato")
+   e modal "Contrato · editar" com Lojas e ECs pré-preenchidos do Cadastro de Lojas + botão "Puxar Lojas e ECs do Cadastro de Lojas". Tudo atrás de g18(): desligado, a tela é a da v14.17.
+   ===================================================================== */
+Object.assign(Adq14, { _o18: { renderContratos: Adq14.renderContratos, acao: Adq14.acao } });
+Object.assign(Adq14, {
+  renderContratos() {
+    if (!g18()) return Adq14._o18.renderContratos.apply(this, arguments);
+    this.estilo(); Adq15.estilo(); this.garantirAssinaturas(); if (!this.pronto()) return '<div class="panel"><p class="muted" style="margin:0">Carregando contratos…</p></div>';
+    const pode = this.podeTaxas(), cs = this.contratos(), pend = this.pendentes(), conf = Adq15.conflitosLojas();
+    const chips = (arr, pre = '') => arr.map(x => `<span class="a15-chip">${pre}${esc(x)}</span>`).join('');
+    const lin = c => {
+      const ok = !!this.conta(c.contaId), cn = this.cnpjDe(c.empresaId), sg = Adq18.sugestao(c), lojas = [...Adq15.lojasDe(c)].map(l => Adq15.lojaRot(l)), ecs = c.ecs || [];
+      const novo = (n, rot) => n.length ? `<div class="cell-sub"><span class="pill info" title="Está no Cadastro de Lojas e ainda não neste contrato">+${n.length} no Cadastro</span> ${esc(n.join(', '))}</div>` : '';
+      return `<tr data-id="${esc(c.id)}"><td><b>${esc(c.adquirente)}</b></td><td>${esc(ConcMP.nomeEmpresa(c.empresaId))}<div class="cell-sub mono">${cn.length === 14 ? esc(CNPJ.formatar(cn)) : '<span class="pill warn">sem CNPJ no cadastro</span>'}</div></td>
+        <td>${ok ? esc(this.rotuloConta(c.contaId)) : '<span class="pill bad">conta não encontrada</span>'}</td>
+        <td>${chips(lojas) || '<span class="cell-sub">— todas (se for o único contrato da adquirente)</span>'}${novo(sg.novasLojas)}${c.sincCadastroEm ? `<div class="cell-sub">Cadastro puxado em ${esc(Fmt.dataHora(c.sincCadastroEm))}</div>` : ''}</td>
+        <td>${chips(ecs, 'EC ') || '—'}${novo(sg.novosEcs)}</td>
+        <td class="num">${this.nBandeiras(c)}</td><td class="num">${this.nLotes(c)}</td>
+        <td class="num">${pode ? `<button class="btn ghost sm" data-a="a14-contrato-editar" data-id="${esc(c.id)}">Editar</button> <button class="btn ghost sm" data-a="a14-contrato-puxar" data-id="${esc(c.id)}" title="Lê o Cadastro de Lojas e junta as lojas e ECs desta adquirente e empresa ao contrato">Puxar do Cadastro</button> <button class="btn ghost sm" data-a="a14-contrato-remover" data-id="${esc(c.id)}">Remover</button>` : ''}</td></tr>`;
+    };
+    const pendentes = cs.filter(c => { const s = Adq18.sugestao(c); return s.novasLojas.length || s.novosEcs.length; }).length;
+    return `<div class="panel a14 a15 a14-contratos" id="a18-contratos"><div class="row between"><div><h2>Contratos × Conta Bancária × Lojas e ECs</h2><p class="sub" style="margin:0">Cada contrato (Adquirente + Empresa / CNPJ) reúne tudo em uma só linha: a conta corrente que recebe o repasse (as contas são as do FCX / Extratos OFX), as <b>Lojas</b> do ERP (coluna Loja da Apuração dos Créditos) e os <b>Estabelecimentos Comerciais (EC)</b>. Lojas e ECs vêm do <b>Cadastro de Lojas</b> (Módulo 2, filiais ativas com a adquirente e a empresa do contrato) e continuam editáveis à mão. Contrato único da adquirente, sem lojas, recebe o ERP inteiro dela. As taxas do contrato são as regras abaixo (adquirente + bandeira + Empresa / CNPJ).</p></div><div class="row">${pode && cs.length ? `<button class="btn sec sm" data-a="a14-contratos-puxar-todos" title="Junta aos contratos as lojas e ECs do Cadastro de Lojas">Puxar Lojas e ECs do Cadastro (todos)</button>` : ''}${pode ? '<button class="btn sec sm" data-a="a14-contrato-novo">+ Contrato</button>' : ''}</div></div>
+      ${pend.length ? `<div class="note warn" style="margin:10px 0 0">Há regras por empresa sem contrato (sem Conta Bancária de Crédito): ${pend.map(p => `<b>${esc(p.adquirente)} · ${esc(ConcMP.nomeEmpresa(p.empresaId))}</b>${pode ? ` <button class="btn ghost sm" data-a="a14-contrato-novo" data-adq="${esc(p.adquirente)}" data-emp="${esc(p.empresaId)}">Vincular conta</button>` : ''}`).join(' · ')}</div>` : ''}
+      ${conf.length ? `<div class="note warn" style="margin:10px 0 0">Loja ligada a mais de um contrato da mesma adquirente (o ERP dela seria contado duas vezes): ${conf.map(x => `<b>${esc(x.adq)} · loja ${esc(Adq15.lojaRot(x.loja))}</b> em ${x.contratos.map(esc).join(' e ')}`).join('; ')}.</div>` : ''}
+      ${pendentes ? `<div class="note" style="margin:10px 0 0">${pendentes} contrato(s) com lojas ou ECs no Cadastro de Lojas que ainda não estão neles (marcados com <b>+ no Cadastro</b>). Use <b>Puxar do Cadastro</b> na linha, ou <b>Editar</b> para conferir antes.</div>` : ''}
+      ${cs.length ? `<div class="tbl-wrap" style="margin-top:10px"><table class="nolabel"><thead><tr><th>Adquirente</th><th>Empresa / CNPJ</th><th>Conta Bancária (OFX)</th><th>Lojas Vinculadas</th><th>ECs</th><th class="num">Bandeiras com Taxa</th><th class="num">Lotes</th><th class="num">Ações</th></tr></thead><tbody>${cs.map(lin).join('')}</tbody></table></div>` : '<p class="muted" style="margin:10px 0 0">Nenhum contrato cadastrado. Ex.: GETNET · Resilienza → Conta A; GETNET · Mar Aberto → Conta B; SAFRAPAY · Resilienza → Conta C.</p>'}</div>`;
+  },
+  async acao(a, el) {
+    if (g18()) { if (a === 'a14-contrato-puxar') return this.puxarUI18(el.dataset.id); if (a === 'a14-contratos-puxar-todos') return this.puxarTodosUI18(); }
+    return Adq14._o18.acao.apply(this, arguments);
+  },
+  async puxarUI18(id) {
+    try { const r = await Adq18.puxar(id); UI.toast(r.novasLojas.length || r.novosEcs.length ? `Cadastro de Lojas: +${r.novasLojas.length} loja(s) e +${r.novosEcs.length} EC(s) no contrato` : 'Contrato já está igual ao Cadastro de Lojas'); }
+    catch (e) { UI.toast((e && e.message) || String(e)); } finally { App.render(); }
+  },
+  async puxarTodosUI18() {
+    if (!this.podeTaxas()) return; const cs = this.contratos().map(c => ({ c, s: Adq18.sugestao(c) })).filter(x => x.s.novasLojas.length || x.s.novosEcs.length);
+    if (!cs.length) return UI.toast('Todos os contratos já estão iguais ao Cadastro de Lojas');
+    if (!(await UI.confirmarImpacto('Puxar Lojas e ECs do Cadastro de Lojas', `${cs.length} contrato(s) recebem lojas e ECs que estão no Cadastro de Lojas e ainda não neles: ${cs.map(x => `<b>${esc(this.rotuloContrato(x.c))}</b> (+${x.s.novasLojas.length} loja(s), +${x.s.novosEcs.length} EC(s))`).join('; ')}. O que já estava no contrato é mantido.`, { acao: 'editar', rotulo: 'Puxar do Cadastro' }))) return;
+    let n = 0; try { for (const x of cs) { await Adq18.puxar(x.c.id); n++; } UI.toast(`${n} contrato(s) atualizado(s) pelo Cadastro de Lojas`); } catch (e) { UI.toast((e && e.message) || String(e)); } finally { App.render(); }
+  },
+});
+
+/** prévia (no modal) do que o Cadastro de Lojas indica para a adquirente + empresa escolhidas */
+Adq18.previaHtml = function (cad, atual) {
+  const E = esc, nova = (arr, v) => arr.includes(v);
+  const lin = i => `<tr><td class="mono">${E(i.codigo)}</td><td>${E(i.nome)}</td><td class="mono">${E(i.ec || '—')}</td><td>${i.empresaId ? E(ConcMP.nomeEmpresa(i.empresaId)) : '—'}<div class="cell-sub">${E(ADQ18.VIA[i.via] || '')}</div></td></tr>`;
+  const aviso = (arr, t) => arr.length ? `<div class="note warn" style="margin-top:6px"><b>${arr.length}</b> ${t}: ${arr.slice(0, 8).map(i => `${E(i.codigo)}${i.ec ? ' · EC ' + E(i.ec) : ''}${i.empresaId ? ' (' + E(ConcMP.nomeEmpresa(i.empresaId)) + ')' : ''}`).join('; ')}${arr.length > 8 ? '…' : ''}.</div>` : '';
+  return `<div class="cell-sub" style="margin:2px 0 4px">${E(this.resumoTxt(cad))}.</div>
+    ${cad.itens.length ? `<details style="margin-top:4px"><summary style="cursor:pointer">Ver as ${cad.itens.length} linha(s) do Cadastro de Lojas usadas</summary><div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Loja</th><th>Nome</th><th>EC</th><th>Empresa · vínculo</th></tr></thead><tbody>${cad.itens.map(lin).join('')}</tbody></table></div></details>` : '<div class="note" style="margin-top:6px">Nenhuma filial ativa do Cadastro de Lojas tem esta adquirente com esta empresa. Cadastre em <b>Gestão de Lojas › adquirentes e TI</b> (EC e Empresa) ou digite à mão.</div>'}
+    ${aviso(cad.semEmpresa, 'linha(s) de loja sem empresa definida ficaram de fora (há mais de um contrato desta adquirente: escolha a Empresa no cadastro da loja)')}${aviso(cad.outraEmpresa, 'linha(s) de loja de outra empresa não entram neste contrato')}${aviso(cad.semEc, 'linha(s) de loja entraram sem EC preenchido')}`;
+};
+
+Object.assign(Adq15, { _o18: { abrirContrato: Adq15.abrirContrato } });
+Object.assign(Adq15, {
+  abrirContrato(id, pre = {}) {
+    if (!g18()) return Adq15._o18.abrirContrato.apply(this, arguments);
+    if (!Adq14.podeTaxas()) return;
+    const c = id ? Repo.get(ADQ14.COL_C, id) : { adquirente: Adq14.chave(pre.adquirente || 'GETNET'), empresaId: pre.empresaId || '', contaId: '', observacao: '', lojas: [], ecs: [] };
+    if (id && !c) return;
+    const adqs = [...new Set([...ADQ14.ADQS, ADQ_CREDSYSTEM, ...AdqTaxas.adquirentes().filter(a => a !== ADQ_CREDSYSTEM)])], emps = ConcMP.empresas(), contas = Adq14.contas(), dis = id ? 'disabled' : '';
+    const cad0 = c.empresaId ? Adq18.doCadastro({ id: id || '', adquirente: c.adquirente, empresaId: c.empresaId }) : null, u0 = cad0 ? Adq18.unir(c.lojas, c.ecs, cad0) : { lojas: Adq18.lista(c.lojas), ecs: Adq18.lista(c.ecs), novasLojas: [], novosEcs: [] };
+    const msg0 = !cad0 ? 'Escolha a Empresa / CNPJ para o painel ler o Cadastro de Lojas.' : (u0.novasLojas.length || u0.novosEcs.length) ? `Pré-preenchido do Cadastro de Lojas: +${u0.novasLojas.length} loja(s) e +${u0.novosEcs.length} EC(s) além do que já estava no contrato. Confira e clique em Salvar contrato.` : 'Lojas e ECs conferem com o Cadastro de Lojas.';
+    UI.modal({ titulo: id ? 'Contrato · editar' : 'Novo contrato', largo: true, corpo: `<div class="form-grid a14">
+        ${campo('Adquirente', 'adquirente', c.adquirente, { opcoes: adqs.map(a => [a, a + (ADQ14.ADQS.includes(a) ? '' : a === ADQ_CREDSYSTEM ? ' (conciliação direta ERP × OFX, sem arquivo da adquirente)' : ' (sem leitor de arquivo ainda)')]), attrs: dis })}
+        ${campo('Empresa / CNPJ', 'empresaId', c.empresaId, { opcoes: [['', 'Selecione a empresa…'], ...emps.map(e => [e.id, `${e.nome}${e.cnpj ? ' · ' + CNPJ.formatar(e.cnpj) : ' · (sem CNPJ)'}`])], attrs: dis })}
+        ${campo('Conta Bancária de Crédito (OFX) — obrigatória', 'contaId', c.contaId, { full: true, opcoes: [['', 'Selecione a conta que recebe o repasse…'], ...contas.map(x => [x.id, ContasBancarias.rotulo(x)])], dica: contas.length ? 'Só aparecem as contas já cadastradas no FCX / Extratos OFX.' : '<b>Nenhuma conta cadastrada.</b> Cadastre a conta em FCX › Extratos OFX (De-para de contas) antes de criar o contrato.' })}
+        ${campo('Lojas do ERP vinculadas a este contrato (opcional)', 'lojas', u0.lojas.join(', '), { full: true, dica: 'Códigos da coluna Loja da Apuração dos Créditos, separados por vírgula. Ex.: 05, 28, 31. Vêm do Cadastro de Lojas (filiais ativas com esta adquirente e empresa) e podem ser editados à mão. Em branco = o ERP inteiro da adquirente (só vale se for o único contrato dela). Credsystem: as lojas ligadas definem quais linhas do ERP (Adq 304) formam o repasse esperado deste contrato.' })}
+        ${campo('Estabelecimentos Comerciais / EC (opcional)', 'ecs', u0.ecs.join(', '), { full: true, dica: 'Ex.: 1454475 (SafraPay). Vêm do Cadastro de Lojas e podem ser editados à mão. Servem de conferência com a Agenda e os Recebíveis.' })}
+        <div class="field full" data-a18-bloco><div class="row between" style="align-items:center"><span class="hint" data-a18-msg style="margin:0">${esc(msg0)}</span><button type="button" class="btn sec sm" data-a18-puxar>Puxar Lojas e ECs do Cadastro de Lojas</button></div><div data-a18-prev>${cad0 ? Adq18.previaHtml(cad0, u0) : ''}</div></div>
+        ${campo('Observação (opcional)', 'observacao', c.observacao || '', { full: true })}</div>`,
+      aoAbrir: m => {
+        const $n = n => m.querySelector(`[name="${n}"]`), msg = m.querySelector('[data-a18-msg]'), prev = m.querySelector('[data-a18-prev]'); let manual = !!id;
+        const puxar = (aviso = true) => {
+          const A = $n('adquirente').value, emp = $n('empresaId').value; if (!emp) { prev.innerHTML = ''; msg.textContent = 'Escolha a Empresa / CNPJ para o painel ler o Cadastro de Lojas.'; if (aviso) UI.toast('Escolha a Empresa / CNPJ do contrato primeiro.'); return; }
+          const cad = Adq18.doCadastro({ id: id || Adq14.idContrato(A, emp), adquirente: A, empresaId: emp }), u = Adq18.unir($n('lojas').value, $n('ecs').value, cad);
+          $n('lojas').value = u.lojas.join(', '); $n('ecs').value = u.ecs.join(', '); prev.innerHTML = Adq18.previaHtml(cad, u);
+          msg.textContent = `Puxado do Cadastro de Lojas: +${u.novasLojas.length} loja(s) e +${u.novosEcs.length} EC(s). Confira e clique em Salvar contrato.`;
+          if (aviso) UI.toast(u.novasLojas.length || u.novosEcs.length ? `Cadastro de Lojas: +${u.novasLojas.length} loja(s) e +${u.novosEcs.length} EC(s)` : 'Nada novo: o contrato já tem as lojas e ECs do Cadastro');
+        };
+        m.querySelector('[data-a18-puxar]').addEventListener('click', () => puxar(true));
+        if (!id) { ['adquirente', 'empresaId'].forEach(n => $n(n).addEventListener('change', () => { if (!manual) { $n('lojas').value = ''; $n('ecs').value = ''; } puxar(false); })); ['lojas', 'ecs'].forEach(n => $n(n).addEventListener('input', e => { if (e.isTrusted) manual = true; })); }
+      },
+      acoes: [{ rotulo: 'Cancelar', classe: 'sec' }, { rotulo: 'Salvar contrato', acao: async m => {
+        const d = UI.lerForm(m), v = { adquirente: id ? c.adquirente : d.adquirente, empresaId: id ? c.empresaId : d.empresaId, contaId: d.contaId, observacao: d.observacao };
+        const err = Adq14.validarContrato(v); if (err) { UI.toast(err); return false; }
+        try { const cid = await Adq14._o15.salvarContrato.call(Adq14, v); await Adq15.salvarVinculos(cid, { lojas: d.lojas, ecs: d.ecs });
+          const conf = Adq15.conflitosLojas().filter(x => x.adq === Adq14.chave(v.adquirente)); UI.toast(conf.length ? 'Contrato salvo — atenção: há loja ligada a mais de um contrato desta adquirente' : 'Contrato salvo'); Adq18._sg = null; } catch (e) { UI.toast((e && e.message) || String(e)); return false; }
+      } }] });
+  },
+});
+/* ---- fim da tela v14.18 · Item 1 ---- */
+
+/* =====================================================================
+   v14.18 · ITENS 2 e 3 · TAXA EFETIVA (Antecipação Efetiva × Apurada, tarifas de POS, retenções/chargebacks) E SALDO A RECEBER COM ABATIMENTO MENSAL — LÓGICA PURA
+   Tudo atrás de g18(): desligado, os números e as telas são os da v14.17. Nada é gravado: são indicadores calculados sobre a conciliação que o painel já faz.
+   ITEM 2
+     • Antecipação Efetiva = a coluna EXATA do arquivo quando a adquirente a entrega (SafraPay: "Taxa de Antecipação" dos Recebíveis; Credsystem: "Antecipação" do ERP, Adq 304).
+       Quando não entrega (Getnet: o extrato detalhado traz só Bruto e MDR) calcula-se a "Antecipação Efetiva Apurada" contra o repasse no OFX:
+           (Bruto − MDR efetivo) − líquido efetivamente creditado no OFX, dia de repasse a dia de repasse,
+       ajustada por (a) virada de mês / trânsito (repasse ainda sem crédito fica fora da conta e entra pela estimativa do contrato), (b) tarifas/aluguel de POS e retenções
+       debitados no OFX que explicam um crédito a menor, e tomando o teto/estimativa do contrato como referência de excesso.
+       A linha sempre diz a origem (coluna da adquirente × apuração no OFX × ERP × estimativa pelo contrato) e NUNCA fica em R$ 0,00 quando há antecipação contratada sobre vendas a crédito.
+     • Leitor de débitos do OFX ampliado (na conta do contrato): ALUGUEL POS/MAQ, MAQUINETA, TARIFA CARTAO, COMISSAO (com adquirente) → "Tarifas e aluguel de POS";
+       RETENCAO, CHARGEBACK, ESTORNO, AJUSTE, DEBITO ADQ e débito que cita a adquirente (GETNET, SAFRA, CREDSYSTEM) → "Retenções / Chargebacks bancários". As duas somam na Taxa Efetiva Total.
+   ITEM 3
+     • Saldo a Receber de Antecipações / Recebíveis Futuros: saldo BRUTO (valor de face das parcelas a receber depois da data de corte, vindas dos lotes da Getnet, dos Recebíveis/Agenda da SafraPay
+       e do ERP da Credsystem) menos o abatimento do mês (MDR efetivo + antecipação efetiva + tarifas/aluguel de POS + retenções) = saldo LÍQUIDO disponível a receber, com a série mensal do abatimento.
+   ===================================================================== */
+Object.assign(ADQ18, {
+  /** aluguel/tarifa de POS que se bastam sozinhos (não precisam citar a adquirente) */
+  POS_FORTE: /\b(ALUGUEL (DE |DO |DA )?(POS|MAQ\w*|EQUIPAMENTO\w*|TERMINAL)|MAQUINETA\w*|MAQUININHA\w*|TARIFA (DE |DO |DA )?(CARTAO|CARTOES|POS|MAQ\w*|ADQ\w*)|MENSALIDADE (DE |DO |DA )?(POS|MAQ\w*|TERMINAL|EQUIPAMENTO\w*))\b/,
+  COMISSAO: /\bCOMISSAO\b/,
+  RET: /\b(RETEN\w*|RETID\w*|BLOQ\w*|CHARGEBACK|CONTESTAC\w*|CANCELAMENTO|ESTORNO|AJUSTE|DEBITO ADQ\w*|DEB ADQ\w*)\b/,
+  /** o histórico "fala" de cartão / adquirente (exigido para os termos genéricos: COMISSAO, ESTORNO, AJUSTE…) */
+  ADQ_DICA: /\b(GETNET|SAFRA\w*|CREDSYSTEM|ADQ\w*|CARTAO|CARTOES|POS|MAQ\w*)\b/,
+  /** débito que só cita a adquirente mas é transferência/pagamento comum não é retenção */
+  TRANSF: /\b(PIX|TED|DOC|TRANSF\w*|PAGTO|PAGAMENTO|BOLETO|TRIBUT\w*|IMPOSTO|FORNECEDOR\w*)\b/,
+  /** folga sobre o teto/estimativa do contrato (arredondamento, dias úteis): excesso só acima de 5% da estimativa e de R$ 1,00 */
+  TOL_EXC_PCT: 0.05, TOL_EXC_ABS: 1,
+  ORIGEM_ROT: { coluna: 'coluna da adquirente', 'apuracao-ofx': 'apurada no OFX', 'apuracao-parcial': 'apurada no OFX + estimativa do contrato', erp: 'coluna Antecipação do ERP', estimativa: 'estimativa pelo contrato' },
+  ORIGEM_CURTO: { coluna: 'coluna da adquirente', 'apuracao-ofx': 'apuração OFX', 'apuracao-parcial': 'apuração OFX + estimativa', erp: 'ERP', estimativa: 'estimativa do contrato' },
+});
+Object.assign(Adq18, {
+  r2: n => Math.round((Number(n) + Number.EPSILON) * 100) / 100,
+  /* ---------------- ITEM 2 · débitos do OFX (tarifas de POS × retenções/chargebacks) ---------------- */
+  /** { tipo:'tarifa'|'retencao', motivo } para um débito do OFX (histórico já normalizado em t.h), ou null se não é custo de adquirente. `P` = padrões das adquirentes (Adq14.padroes). */
+  classificarDebito(t, P) {
+    const h = t.h, lista = [...P.values()], cita = lista.some(p => Adq14.bate(h, p)), dica = cita || ADQ18.ADQ_DICA.test(h);
+    const forte = h.match(ADQ18.POS_FORTE);
+    if (forte && !(/^MAQUIN/.test(forte[0]) && !cita && ADQ18.TRANSF.test(h))) return { tipo: 'tarifa', motivo: forte[0] }; // "PIX … MAQUINETA" para um fornecedor não é aluguel de POS
+    if (Adq14.tarifaPos(t, null) || lista.some(p => Adq14.tarifaPos(t, p))) return { tipo: 'tarifa', motivo: 'aluguel/tarifa de POS' };
+    if (dica && ADQ18.COMISSAO.test(h)) return { tipo: 'tarifa', motivo: 'COMISSAO' };
+    const r = h.match(ADQ18.RET); if (dica && r) return { tipo: 'retencao', motivo: r[0] };
+    if (cita && !ADQ18.TRANSF.test(h)) return { tipo: 'retencao', motivo: 'débito citando a adquirente' };
+    return null;
+  },
+  /** Débitos de custo de adquirente do mês na conta (e contas equivalentes): { grupo, tarifa[], retencao[], fora[] (lançados depois do fim do mês) } */
+  debitosOfx(contaId, mes) {
+    const b = Adq14.bancoConta(contaId), de = mes + '-01', fim = Adq17.fimMes(mes), P = Adq14.padroes(), tarifa = [], retencao = [], fora = [];
+    for (const t of b.deb) {
+      const k = this.classificarDebito(t, P); if (!k) continue;
+      const it = { id: t.id, data: t.data, valor: this.r2(-t.valor), hist: t.hist, h: t.h, tipo: k.tipo, motivo: k.motivo };
+      if (t.data < de || t.data > fim) { if (t.data > fim) fora.push(it); continue; }
+      (k.tipo === 'tarifa' ? tarifa : retencao).push(it);
+    }
+    return { grupo: b.grupo, tarifa, retencao, fora };
+  },
+
+  /* ---------------- ITEM 2 · Antecipação Efetiva ---------------- */
+  /** Dia de repasse a dia de repasse do lote Getnet SEM o desconto de antecipação: { base: (bruto − MDR) que a adquirente repassa, ant: antecipação estimada pelo contrato } — mesmas regras do calcularGetnet. */
+  diasGetnet(calc) {
+    const A = calc.adquirente, emp = calc.empresaId, m = new Map(), add = (d, base, ant) => { const x = m.get(d) || m.set(d, { base: 0, ant: 0 }).get(d); x.base += base; x.ant += ant; };
+    for (const g of calc.lote?.grupos || []) {
+      const regra = Adq14.regraDe(A, g.band, emp), baseLiq = g.bruto - g.mdr;
+      if (g.mod === 'debito' || !regra) { const d = g.mod === 'debito' ? (g.dp || DiasUteis.somar(g.dv, 1)) : (g.dp || Adq14.somaDias(g.dv, 30)); add(DiasUteis.proximo(d), Adq14.r2(g.liq), 0); continue; }
+      if (regra.antecipado) { const a = Adq14.antecipacaoGrupo(regra, g, baseLiq); add(a.rep, Adq14.r2(baseLiq), a.ant); continue; }
+      const np = /emissor|vista/.test(Adq14.norm(g.forma)) || g.parc <= 1 ? 1 : g.parc;
+      for (let j = 0; j < np; j++) add(DiasUteis.proximo(Adq14.somaDias(g.dp || Adq14.somaDias(g.dv, 30), 30 * j)), Adq14.r2(baseLiq / np), 0);
+    }
+    m.forEach(x => { x.base = this.r2(x.base); x.ant = this.r2(x.ant); }); return m;
+  },
+  /**
+   * Antecipação Efetiva Apurada da Getnet no mês (contrato `c` do triangular), dia de repasse a dia de repasse:
+   *     apurada_dia = (bruto − MDR efetivo)_dia − (líquido creditado no OFX + tarifas/retenções do OFX que explicam a diferença)
+   * ctx = { cruz, o (débitos do OFX da conta: tarifa/retencao/fora), fim, usados: Map id-do-débito → valor já consumido por outro contrato/dia }.
+   * Só entram os dias com repasse conferido no OFX (ok / liquidado a menor); trânsito (virada de mês), furo, sem OFX e liquidado a maior ficam fora e entram pela estimativa do contrato.
+   */
+  apurarGetnet(c, ctx) {
+    const calc = c.calc, id = c.contrato.id, adq = AdqTaxas.adqId(calc.adquirente), dias = this.diasGetnet(calc), P = Adq14.padroes(), mine = P.get(adq), outras = [...P.entries()].filter(([a]) => a !== adq).map(([, p]) => p);
+    const temAnt = (calc.lote?.grupos || []).some(g => g.mod !== 'debito' && Adq14.regraDe(calc.adquirente, g.band, calc.empresaId)?.antecipado);
+    const deb = ctx.o ? [...ctx.o.tarifa, ...ctx.o.retencao, ...ctx.o.fora] : [], uso = ctx.usados || new Map();
+    const r = { base: 0, apurada: 0, estAud: 0, estPend: 0, dAud: 0, dPend: 0, dTransito: 0, dFuro: 0, dSemOfx: 0, dMaior: 0, explicado: 0, basePend: 0, residual: 0, dias: [] };
+    const linhas = (ctx.cruz.linhas || []).filter(l => l.adq === adq && l.contratos.includes(id));
+    for (const l of linhas) {
+      const d = dias.get(l.data); if (!d) continue; const f = l.esperado ? (l.partes[id] || 0) / l.esperado : 0, cred = l.creditado * f, esp = d.base - d.ant;
+      const aud = ['ok', 'menor'].includes(l.status) && cred > 0.004;
+      if (!aud) { // sem crédito conferido neste dia: fica fora da apuração e entra pela estimativa do contrato
+        r.estPend += d.ant; r.basePend += d.base; r.dPend++;
+        if (l.data > ctx.fim) r.dTransito++; else if (l.status === 'furo') r.dFuro++; else if (l.status === 'semofx') r.dSemOfx++; else if (l.status === 'maior') r.dMaior++;
+        continue;
+      }
+      let explicado = 0; const falta = esp - cred;
+      if (l.status === 'menor' && falta > l.tol * f) { // crédito a menor: tarifas/retenções do OFX na janela do repasse explicam parte da diferença (cada débito é consumido uma só vez)
+        let sobra = falta; for (const t of deb) { if (sobra <= 0.004) break; if (!l.janela.includes(t.data) || (outras.some(p => Adq14.bate(t.h, p)) && !Adq14.bate(t.h, mine))) continue;
+          const livre = t.valor - (uso.get(t.id) || 0), v = Math.min(sobra, livre); if (v <= 0.004) continue; explicado += v; sobra -= v; uso.set(t.id, (uso.get(t.id) || 0) + v); }
+      }
+      const ap = d.base - (cred + explicado);
+      if (!temAnt && d.ant <= 0.004 && ap > l.tol * f) { r.residual += ap; r.dAud++; r.base += d.base; r.explicado += explicado; continue; } // contrato sem antecipação e diferença sem explicação: é divergência de repasse, não antecipação
+      const apC = Math.max(0, ap); r.base += d.base; r.apurada += apC; r.estAud += d.ant; r.explicado += explicado; r.dAud++; r.dias.push({ data: l.data, base: d.base, creditado: this.r2(cred), explicado: this.r2(explicado), apurada: this.r2(apC), est: d.ant });
+    }
+    Object.keys(r).forEach(k => { if (typeof r[k] === 'number' && !k.startsWith('d')) r[k] = this.r2(r[k]); });
+    return r;
+  },
+  /**
+   * Antecipação do contrato com a origem do número (g18). Substitui Adq17.antDe quando há contexto de OFX; sem ele cai na v14.17.
+   * Devolve o mesmo objeto da v14.17 + { origem, fonte, apuradaOfxR, estimadaPendenteR, diasApurados, diasPendentes, coberturaPct, erpR, semEvidenciaOfx }.
+   */
+  antEfetiva(c, ctx) {
+    const base = Adq17._o18.antDe.call(Adq17, c), adq = c.contrato.adquirente, calc = c.calc, k = calc?.k || {}; if (!base) return base;
+    if (adq === 'SAFRAPAY') return { ...base, origem: 'coluna', fonte: 'coluna "Taxa de Antecipação" do arquivo de Recebíveis da SafraPay (valor exato do arquivo)' };
+    if (adq !== 'GETNET') return { ...base, origem: adq === 'CREDSYSTEM' ? 'coluna' : 'erp', fonte: adq === 'CREDSYSTEM' ? 'coluna "Antecipação" do ERP (Adq 304, valor exato do arquivo)' : 'ERP (Antecipação)' };
+    /* Getnet: o extrato detalhado só traz Bruto e MDR → apuração contra o líquido creditado no OFX */
+    const est = k.antec || 0, erpR = base.efetivoR || 0, ap = ctx ? this.apurarGetnet(c, ctx) : null, bruto = k.bruto || 0, aud = ap ? ap.dAud : 0, ressalva = 'o extrato detalhado da Getnet traz só Bruto e MDR';
+    const pend = ap && ap.dPend ? [ap.dTransito && `${ap.dTransito} em trânsito/virada de mês`, ap.dFuro && `${ap.dFuro} com furo`, ap.dSemOfx && `${ap.dSemOfx} sem OFX importado`, ap.dMaior && `${ap.dMaior} liquidado(s) a maior`].filter(Boolean).join(', ') : '';
+    const temCredito = (calc?.lote?.grupos || []).some(g => g.mod !== 'debito');
+    let efetivo, origem, fonte, semEvidenciaOfx = false;
+    if (ap && ap.base > 0.004 && aud > 0 && (est > 0.004 || ap.apurada > 0.004)) {
+      efetivo = this.r2(ap.apurada + ap.estPend); origem = ap.estPend > 0.004 ? 'apuracao-parcial' : 'apuracao-ofx';
+      fonte = `apurada no OFX: (bruto − MDR efetivo) − líquido creditado, em ${aud} dia(s) de repasse conferido(s) (${Fmt.brl(ap.apurada)})${ap.estPend > 0.004 ? ` + estimativa do contrato nos ${ap.dPend} dia(s) sem repasse conferido (${Fmt.brl(ap.estPend)}: ${pend})` : ''}${ap.explicado > 0.004 ? ` · ${Fmt.brl(ap.explicado)} de tarifas/retenções do OFX descontados da diferença` : ''}; ${ressalva}`;
+    } else if (erpR > 0.004) { efetivo = erpR; origem = 'erp'; fonte = `coluna Antecipação do ERP (Apuração dos Créditos): nenhum repasse conferido no OFX para apurar${pend ? ' (' + pend + ')' : ''}; ${ressalva}`; }
+    else { efetivo = this.r2(est); origem = 'estimativa'; fonte = est > 0.004 ? `estimativa pelo contrato (taxa de antecipação × prazo das parcelas): nenhum repasse conferido no OFX${pend ? ' (' + pend + ')' : ''} e sem ERP para apurar; ${ressalva}` : `sem antecipação contratada ou calculada nas vendas do lote; ${ressalva}`; }
+    if (origem.startsWith('apuracao') && efetivo <= 0.004 && est > 0.004 && temCredito) { efetivo = this.r2(est); origem = 'estimativa'; semEvidenciaOfx = true; fonte = `estimativa pelo contrato: o OFX conferido não mostrou desconto de antecipação (líquido creditado ≥ bruto − MDR); ${ressalva}`; }
+    const cap = est > 0.004 ? this.r2(est) : null, estRef = ap ? this.r2(ap.estAud) : 0, apAud = ap ? ap.apurada : 0, folga = Math.max(ADQ18.TOL_EXC_ABS, estRef * ADQ18.TOL_EXC_PCT);
+    const excesso = origem.startsWith('apuracao') && apAud - estRef > folga ? this.r2(apAud - estRef) : (origem === 'erp' ? base.excessoR : 0);
+    const p = Adq17.prazoAnt(calc), efetivoAm = p && p.baseMes > 0 ? Adq17.pct(efetivo, p.baseMes) : null;
+    return { ...base, efetivoR: efetivo, efetivoPct: Adq17.pct(efetivo, bruto), contratadoR: cap, tetoR: cap, excessoR: excesso, efetivoAm, difAmPp: efetivoAm != null && base.contratadoAm ? this.r2(efetivoAm - base.contratadoAm) : null,
+      origem, fonte, apuradaOfxR: ap ? ap.apurada : 0, estimadaPendenteR: ap ? ap.estPend : 0, diasApurados: aud, diasPendentes: ap ? ap.dPend : 0, coberturaPct: ap && (ap.base + ap.basePend) > 0 ? Adq17.pct(ap.base, ap.base + ap.basePend) : null, erpR, semEvidenciaOfx, temRegra: cap != null };
+  },
+  origemTxt(a) { return a ? (ADQ18.ORIGEM_ROT[a.origem] || a.origem || '') : ''; },
+});
+
+/* ---------------- ITEM 3 · Saldo a Receber de Antecipações / Recebíveis Futuros, com abatimento mensal ---------------- */
+Object.assign(Adq18, {
+  /** Parcelas (data → valor de face) de um grupo de vendas Getnet — as mesmas datas do calcularGetnet. */
+  parcelasGetnet(g, A, emp) {
+    const regra = Adq14.regraDe(A, g.band, emp), out = [];
+    if (g.mod === 'debito' || !regra) { const d = g.mod === 'debito' ? (g.dp || DiasUteis.somar(g.dv, 1)) : (g.dp || Adq14.somaDias(g.dv, 30)); out.push([DiasUteis.proximo(d), g.bruto]); return out; }
+    if (regra.antecipado) { const a = Adq14.antecipacaoGrupo(regra, g, g.bruto - g.mdr); out.push([a.rep, g.bruto]); return out; }
+    const np = /emissor|vista/.test(Adq14.norm(g.forma)) || g.parc <= 1 ? 1 : g.parc;
+    for (let j = 0; j < np; j++) out.push([DiasUteis.proximo(Adq14.somaDias(g.dp || Adq14.somaDias(g.dv, 30), 30 * j)), g.bruto / np]); return out;
+  },
+  /** Saldo bruto a receber de UM contrato na data de corte (parcelas com pagamento depois do corte de vendas feitas até o corte). */
+  saldoContrato(c, corte) {
+    const adq = c.adquirente, o = { id: c.id, rotulo: Adq14.rotuloContrato(c), adquirente: adq, bruto: 0, parcelas: 0, fonte: '', avisos: [], porMes: {} };
+    const soma = (data, v) => { o.bruto += v; o.parcelas++; const m = data.slice(0, 7); o.porMes[m] = (o.porMes[m] || 0) + v; };
+    if (adq === 'GETNET') {
+      Adq14.lotes().filter(l => l.adquirente === 'GETNET' && l.empresaId === c.empresaId).forEach(l => (l.grupos || []).forEach(g => { if (g.dv > corte) return; this.parcelasGetnet(g, 'GETNET', c.empresaId).forEach(([d, v]) => { if (d > corte) soma(d, v); }); }));
+      o.fonte = 'lotes da Getnet: parcelas a vencer depois do corte, a valor bruto (antes de MDR e antecipação)';
+    } else if (adq === 'SAFRAPAY') {
+      const dvPorChave = new Map(); Adq15.agendas().filter(a => a.empresaId === c.empresaId).forEach(a => Adq15.vendasAgenda(a).forEach(v => dvPorChave.set(Adq15.keyVenda(v.nsu, v.aut, v.terminal), v.dv)));
+      let semAgenda = 0;
+      Adq14.lotes().filter(l => l.adquirente === 'SAFRAPAY' && l.empresaId === c.empresaId).forEach(l => (l.vendas || []).forEach(a => { const v = Object.fromEntries(Adq14.SF_COLS.map((k, j) => [k, a[j]])); if (!(v.dp > corte)) return; const dv = dvPorChave.get(Adq15.keyVenda(v.nsu, v.aut, v.terminal)); if (dv == null) semAgenda++; else if (dv > corte) return; soma(v.dp, Number(v.valor) || 0); }));
+      let venc = 0; new Set(Adq15.agendas().filter(a => a.empresaId === c.empresaId).map(a => a.competencia)).forEach(m => { const x = Adq15.cruzarAgendaRecebiveis(c, m); if (!x) return; x.res.aguardando.forEach(v => { if (v.dv <= corte && v.previsto > corte) soma(v.previsto, Adq15.c(v.bruto) / 100); }); venc += x.tot.vVencida; });
+      o.fonte = 'SafraPay: Recebíveis com pagamento futuro + vendas da Agenda ainda sem Recebível (aguardando), a valor bruto';
+      if (semAgenda) o.avisos.push(`${semAgenda} parcela(s) dos Recebíveis sem a venda na Agenda: assumidas como vendidas até o corte.`);
+      if (venc > 0.004) o.avisos.push(`${Fmt.brl(venc)} de vendas da Agenda já vencidas e sem Recebível não entram no saldo (são divergência, não saldo futuro).`);
+    } else if (adq === 'CREDSYSTEM') {
+      Adq15.mesesErp().forEach(m => Adq15.erpDoContrato(c, m).grupos.forEach(g => { if (!g.dcr || (g.dv && g.dv > corte)) return; const d = DiasUteis.proximo(g.dcr); if (d > corte) soma(d, (g.dc === 'DB' ? -1 : 1) * Math.abs(Adq15.c(g.bruto) / 100)); }));
+      o.fonte = 'ERP (Adq 304): vendas com Dt Crédito depois do corte, a valor bruto (estornos DB subtraem)';
+    } else o.fonte = 'sem leitor de arquivo para esta adquirente';
+    o.bruto = this.r2(o.bruto); Object.keys(o.porMes).forEach(m => o.porMes[m] = this.r2(o.porMes[m])); return o;
+  },
+  /** Data de corte da competência: o último dia do mês; no mês corrente (ainda em curso), hoje. */
+  corteDe(mes) { const fim = Adq17.fimMes(mes), hoje = Datas.hojeISO(); return hoje < fim && hoje.slice(0, 7) === mes ? hoje : fim; },
+  /**
+   * { mes, corte, porContrato[], consolidado:{saldoBruto, taxas:{mdrR,antR,tarifaR,retencaoR,totalR}, saldoLiquido, abatidoPct}, serie[] (abatimento por competência), avisos[] }
+   * O abatimento do mês é o da Taxa Efetiva Total apurada no Painel Executivo (Item 2) no mesmo escopo.
+   */
+  saldoReceber(mes, filtro = '*', n = 6) {
+    const chave = ['adq_lotes', 'adq_agendas', 'adq_erp', 'adq_contratos', 'adq_taxas', 'config', 'lojas', 'extratos', 'contasBancarias'].map(c => Repo.versao(c)).join('.') + '|' + Adq14._rev + '|' + mes + '|' + filtro + '|' + n + '|' + Datas.hojeISO();
+    if (this._sr?.v === chave) return this._sr.r;
+    const I = Adq17.indicadores(mes, filtro), corte = this.corteDe(mes), cs = Adq14.contratos().filter(c => (filtro === '*' || !filtro || c.id === filtro) && ADQ15.ADQS_TRI.includes(c.adquirente));
+    const porContrato = cs.map(c => { const s = this.saldoContrato(c, corte), r = I.contratos.find(x => x.id === c.id), t = r ? { mdrR: r.mdr?.efetivoR || 0, antR: r.ant?.efetivoR || 0, tarifaR: r.tarifaR || 0, retencaoR: r.retencaoR || 0 } : { mdrR: 0, antR: 0, tarifaR: 0, retencaoR: 0 };
+      const total = this.r2(t.mdrR + t.antR + t.tarifaR + t.retencaoR); return { ...s, taxas: { ...t, totalR: total }, liquido: this.r2(s.bruto - total) }; });
+    const S = f => this.r2(porContrato.reduce((s, x) => s + f(x), 0)), tx = I.consolidado.taxa, bruto = S(x => x.bruto);
+    const consolidado = { saldoBruto: bruto, parcelas: porContrato.reduce((s, x) => s + x.parcelas, 0), taxas: { mdrR: tx.mdrR, antR: tx.antR, tarifaR: tx.tarifaR, retencaoR: tx.retencaoR, totalR: tx.r }, saldoLiquido: this.r2(bruto - tx.r), abatidoPct: bruto > 0.004 ? Adq17.pct(tx.r, bruto) : null };
+    const porMes = {}; porContrato.forEach(x => Object.entries(x.porMes).forEach(([m, v]) => porMes[m] = this.r2((porMes[m] || 0) + v)));
+    const m0 = Adq17._memo; let serie;
+    try {
+      const meses = [...new Set(Adq14.mesesComLote())].filter(m => m <= mes).sort().reverse().slice(0, n);
+      serie = meses.map(m => { const J = m === mes ? I : Adq17.indicadores(m, filtro), t = J.consolidado.taxa; return { mes: m, bruto: J.consolidado.bruto.base, mdrR: t.mdrR, antR: t.antR, tarifaR: t.tarifaR, retencaoR: t.retencaoR, totalR: t.r, pct: t.pct }; });
+    } finally { Adq17._memo = m0; }
+    const avisos = []; porContrato.forEach(x => x.avisos.forEach(a => avisos.push(`${x.rotulo}: ${a}`)));
+    if (!cs.length) avisos.push('Nenhum contrato de Getnet, SafraPay ou Credsystem no escopo.');
+    const r = { mes, filtro, escopo: I.escopo, corte, porContrato, consolidado, porMes, serie, avisos }; this._sr = { v: chave, r }; return r;
+  },
+});
+
+/* ---------------- ganchos: o motor da v14.17 passa a usar os leitores e a origem da antecipação da v14.18 (g18) ---------------- */
+Object.assign(Adq17, { _o18: { antDe: Adq17.antDe, debitosOfx: Adq17.debitosOfx, indicadores: Adq17.indicadores, parecerSugerido: Adq17.parecerSugerido } });
+Object.assign(Adq18, {
+  /** Fontes da antecipação por contrato, em texto curto para o painel / laudo / CSV. */
+  antFontesTxt(fontes, ate = 4) {
+    const L = (fontes || []).map(f => `${f.rotulo}: ${ADQ18.ORIGEM_CURTO[f.origem] || f.origem}${f.origem === 'apuracao-ofx' || f.origem === 'apuracao-parcial' ? ` (${Fmt.brl(f.apuradaOfxR)}${f.estimadaPendenteR > 0.004 ? ` + ${Fmt.brl(f.estimadaPendenteR)} estimados pelo contrato` : ''})` : ''}${f.semEvidenciaOfx ? ' — sem desconto visível no OFX' : ''}`);
+    return L.length > ate ? [...L.slice(0, ate), `+${L.length - ate} contrato(s)`] : L;
+  },
+  /** Origem do número da Antecipação do consolidado numa só frase (para a linha da tabela e o CSV). */
+  antOrigemResumo(fontes) {
+    const o = [...new Set((fontes || []).map(f => f.origem))]; if (!o.length) return '';
+    return o.map(x => ADQ18.ORIGEM_ROT[x] || x).join(' · ');
+  },
+  /** Linha extra do parecer: de onde veio a Antecipação e o que ficou estimado. */
+  parecerAnt(I) {
+    const f = I.consolidado.ant.fontes || []; if (!f.length) return '';
+    const p = f.map(x => `${x.rotulo} — ${ADQ18.ORIGEM_ROT[x.origem] || x.origem}${x.origem.startsWith('apuracao') ? ` (${Fmt.brl(x.apuradaOfxR)}${x.estimadaPendenteR > 0.004 ? ` + ${Fmt.brl(x.estimadaPendenteR)} estimados pelo contrato nos dias sem repasse conferido` : ''})` : ''}${x.semEvidenciaOfx ? ' (o OFX conferido não mostrou desconto de antecipação; mantida a estimativa pelo contrato)' : ''}`);
+    return `Origem da antecipação: ${p.join('; ')}.`;
+  },
+  /** Avisos do painel para a antecipação (Getnet traz só Bruto e MDR). */
+  avisosAnt(I) {
+    const a = []; (I.contratos || []).forEach(r => { const x = r.ant; if (!x || r.adquirente !== 'GETNET') return;
+      if (x.semEvidenciaOfx) a.push(`${r.rotulo}: antecipação mantida pela estimativa do contrato — o líquido creditado no OFX não mostrou desconto de antecipação (a Getnet traz só Bruto e MDR no extrato detalhado).`);
+      else if (x.origem === 'estimativa') a.push(`${r.rotulo}: antecipação estimada pelo contrato — não há repasse conferido no OFX nem coluna de antecipação no ERP para apurar o valor efetivo.`);
+      else if (x.origem === 'apuracao-parcial') a.push(`${r.rotulo}: antecipação apurada no OFX em ${x.diasApurados} dia(s) de repasse (${Fmt.brl(x.apuradaOfxR)}); ${x.diasPendentes} dia(s) sem repasse conferido entram pela estimativa do contrato (${Fmt.brl(x.estimadaPendenteR)}).`); });
+    return a;
+  },
+});
+Object.assign(Adq17, {
+  debitosOfx() { return g18() ? Adq18.debitosOfx.apply(Adq18, arguments) : Adq17._o18.debitosOfx.apply(this, arguments); },
+  antDe(c, ctx) { return g18() && ctx ? Adq18.antEfetiva(c, ctx) : Adq17._o18.antDe.apply(this, arguments); },
+  indicadores(mes, filtro = '*') {
+    const g = g18(); if (this._g18 !== g) { this._g18 = g; this._memo = null; }
+    const I = Adq17._o18.indicadores.apply(this, arguments); if (!g || I._g18) return I;
+    const c = I.consolidado;
+    c.tarifas.nPos = I.tarifasPorConta.reduce((s, x) => s + x.tarifa.length, 0); c.tarifas.nRet = I.tarifasPorConta.reduce((s, x) => s + x.retencao.length, 0);
+    c.tarifas.termosPos = [...new Set(I.tarifasPorConta.flatMap(x => x.tarifa).map(t => t.motivo).filter(Boolean))].sort(); c.tarifas.termosRet = [...new Set(I.tarifasPorConta.flatMap(x => x.retencao).map(t => t.motivo).filter(Boolean))].sort();
+    c.ant.fontes = I.contratos.filter(r => r.ant).map(r => ({ rotulo: r.rotulo, adquirente: r.adquirente, origem: r.ant.origem, fonte: r.ant.fonte, efetivoR: r.ant.efetivoR, apuradaOfxR: r.ant.apuradaOfxR || 0, estimadaPendenteR: r.ant.estimadaPendenteR || 0, semEvidenciaOfx: !!r.ant.semEvidenciaOfx }));
+    I.avisos.push(...Adq18.avisosAnt(I)); I._g18 = true; return I;
+  },
+  parecerSugerido(I) {
+    const t = Adq17._o18.parecerSugerido.apply(this, arguments); if (!g18()) return t;
+    const x = Adq18.parecerAnt(I); if (!x) return t; const L = t.split('\n'), i = L.findIndex(l => /^Antecipação /.test(l));
+    L.splice(i >= 0 ? i + 1 : 1, 0, x); return L.join('\n');
+  },
+});
+/* ---- fim da lógica v14.18 · Itens 2 e 3 ---- */
+
+/* =====================================================================
+   v14.18 · ITENS 2 e 3 · TELA: origem da antecipação, leitura de tarifas/retenções, controle "Saldo a Receber de Antecipações / Recebíveis Futuros"
+   com o abatimento mensal das taxas (card Saldo Bruto − Taxas = Saldo Líquido) no Painel Executivo, no Laudo (Quadro 5) e no CSV. Tudo atrás de g18().
+   ===================================================================== */
+Object.assign(Adq18, {
+  esc: s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])),
+  TERMOS_POS: 'ALUGUEL POS/MAQ, MAQUINETA, TARIFA CARTAO, MENSALIDADE POS, COMISSAO (com adquirente)',
+  TERMOS_RET: 'RETENCAO, CHARGEBACK, ESTORNO, AJUSTE, DEBITO ADQ, débitos que citam GETNET / SAFRA / CREDSYSTEM',
+  /** Leitura de uma linha de tarifa/retenção (quantos lançamentos do OFX e quais termos); `cls` = classe do subtexto (painel: cell-sub · laudo: sub). */
+  leituraTarifa(t, tipo, cls = 'cell-sub') {
+    const n = tipo === 'tarifa' ? t.nPos : t.nRet, termos = (tipo === 'tarifa' ? t.termosPos : t.termosRet) || [];
+    const txt = n ? `${n} lançamento(s) no OFX da conta do contrato${termos.length ? ' · ' + termos.join(', ') : ''}` : `nenhum lançamento encontrado no OFX da conta do contrato · termos lidos: ${tipo === 'tarifa' ? this.TERMOS_POS : this.TERMOS_RET}`;
+    return `<span class="${cls}">${this.esc(txt)}</span>`;
+  },
+  /** Origem da antecipação do consolidado: uma linha por contrato (coluna da adquirente × apurada no OFX × ERP × estimativa). */
+  antOrigemHtml(ant, cls = 'cell-sub') {
+    return this.antFontesTxt(ant?.fontes).map(x => `<div class="${cls}">${this.esc(x)}</div>`).join('');
+  },
+  /* ---------------- Painel Executivo ---------------- */
+  htmlSaldo(mes, filtro) {
+    const S = this.saldoReceber(mes, filtro), c = S.consolidado, f = Fmt.brl, p = n => n == null ? '—' : Fmt.pct(n, 2), E = this.esc, d = Adq14.fmtDia;
+    if (!S.porContrato.length) return '';
+    const kpi = (r, v, x = '', cl = '') => `<div class="kpi ${cl}"><div class="k">${r}</div><div class="v">${v}</div>${x ? `<div class="d">${x}</div>` : ''}</div>`;
+    const k = `<div class="kpis a18-saldo-kpis">${kpi('Saldo Bruto a Receber', f(c.saldoBruto), `${Fmt.num(c.parcelas)} parcela(s) com pagamento depois de ${d(S.corte)} · valor de face`)}
+      ${kpi('(−) Taxas / Antecipação Cobradas no Mês', f(c.taxas.totalR), `${c.abatidoPct == null ? '' : p(c.abatidoPct) + ' do saldo bruto · '}MDR ${f(c.taxas.mdrR)} + antecipação ${f(c.taxas.antR)} + tarifas de POS ${f(c.taxas.tarifaR)} + retenções ${f(c.taxas.retencaoR)}`, c.taxas.totalR > 0.004 ? 'warn' : '')}
+      ${kpi('(=) Saldo Líquido Disponível a Receber', f(c.saldoLiquido), 'saldo bruto − taxas do mês', 'ok')}</div>`;
+    const lin = S.porContrato.map(x => `<tr><td><b>${E(x.rotulo)}</b><div class="cell-sub">${E(x.fonte)}</div>${x.avisos.map(a => `<div class="cell-sub a17-neg">${E(a)}</div>`).join('')}</td>
+      <td class="num">${f(x.bruto)}<div class="cell-sub">${x.parcelas} parcela(s)</div></td><td class="num">${f(x.taxas.mdrR)}</td><td class="num">${f(x.taxas.antR)}</td><td class="num">${f(x.taxas.tarifaR)}</td><td class="num">${f(x.taxas.retencaoR)}</td><td class="num"><b>${f(x.taxas.totalR)}</b></td><td class="num"><b>${f(x.liquido)}</b></td></tr>`).join('');
+    const tab = `<div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Contrato / fonte do saldo</th><th class="num">Saldo bruto a receber</th><th class="num">MDR do mês</th><th class="num">Antecipação do mês</th><th class="num">Tarifas de POS</th><th class="num">Retenções / chargebacks</th><th class="num">Total abatido</th><th class="num">Saldo líquido</th></tr></thead><tbody>${lin}
+      <tr class="tot"><td><b>Total</b></td><td class="num"><b>${f(c.saldoBruto)}</b></td><td class="num"><b>${f(c.taxas.mdrR)}</b></td><td class="num"><b>${f(c.taxas.antR)}</b></td><td class="num"><b>${f(c.taxas.tarifaR)}</b></td><td class="num"><b>${f(c.taxas.retencaoR)}</b></td><td class="num"><b>${f(c.taxas.totalR)}</b></td><td class="num"><b>${f(c.saldoLiquido)}</b></td></tr></tbody></table></div>`;
+    const meses = Object.keys(S.porMes).sort(), fut = meses.length ? `<h4 class="a17-sub" style="font-size:13px">Recebíveis futuros por mês de pagamento (valor de face)</h4><div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Mês do pagamento</th><th class="num">Saldo bruto</th></tr></thead><tbody>${meses.map(m => `<tr><td>${E(Adq14.mesLabel(m))}</td><td class="num">${f(S.porMes[m])}</td></tr>`).join('')}</tbody></table></div>` : '';
+    const sr = `<h4 class="a17-sub" style="font-size:13px">Abatimento mensal das taxas (últimas ${S.serie.length} competência(s))</h4><div class="tbl-wrap"><table class="nolabel"><thead><tr><th>Competência</th><th class="num">Bruto conciliado</th><th class="num">MDR</th><th class="num">Antecipação</th><th class="num">Tarifas de POS</th><th class="num">Retenções</th><th class="num">Total abatido</th><th class="num">% do bruto</th></tr></thead><tbody>${S.serie.map(x => `<tr><td>${E(Adq14.mesLabel(x.mes))}</td><td class="num">${f(x.bruto)}</td><td class="num">${f(x.mdrR)}</td><td class="num">${f(x.antR)}</td><td class="num">${f(x.tarifaR)}</td><td class="num">${f(x.retencaoR)}</td><td class="num"><b>${f(x.totalR)}</b></td><td class="num">${p(x.pct)}</td></tr>`).join('')}</tbody></table></div>`;
+    const nota = `<p class="hint" style="margin:6px 0 0">Saldo bruto = valor de face das parcelas ainda não pagas na data de corte (${E(d(S.corte))}) de vendas feitas até essa data, vindas dos lotes da Getnet, dos Recebíveis e da Agenda da SafraPay e do ERP da Credsystem. O abatimento do mês é a Taxa Efetiva Total apurada acima (MDR + antecipação + tarifas de POS + retenções); o saldo líquido é uma projeção gerencial e não substitui o extrato.</p>`;
+    const av = S.avisos.length ? `<div class="note a17-av">${S.avisos.map(E).join('<br>')}</div>` : '';
+    return `<h3 class="a17-sub" id="a18-saldo">Saldo a Receber de Antecipações / Recebíveis Futuros · Abatimento Mensal</h3>${k}${tab}${fut}${sr}${nota}${av}`;
+  },
+  /* ---------------- Laudo A4: Quadro 5 ---------------- */
+  quadroSaldoLaudo(I, E, brl, pc) {
+    const S = this.saldoReceber(I.mes, I.filtro), c = S.consolidado; if (!S.porContrato.length) return '';
+    const rows = S.porContrato.map(x => `<tr><td>${E(x.rotulo)}<span class="sub">${E(x.fonte)}</span></td><td class="n">${brl(x.bruto)}</td><td class="n">${brl(x.taxas.mdrR)}</td><td class="n">${brl(x.taxas.antR)}</td><td class="n">${brl(this.r2(x.taxas.tarifaR + x.taxas.retencaoR))}</td><td class="n">${brl(x.taxas.totalR)}</td><td class="n">${brl(x.liquido)}</td></tr>`).join('');
+    const sr = S.serie.map(x => `<tr><td>${E(Adq14.mesLabel(x.mes))}</td><td class="n">${brl(x.bruto)}</td><td class="n">${brl(x.mdrR)}</td><td class="n">${brl(x.antR)}</td><td class="n">${brl(this.r2(x.tarifaR + x.retencaoR))}</td><td class="n">${brl(x.totalR)}</td><td class="n">${pc(x.pct)}</td></tr>`).join('');
+    return `<div class="lop-q"><h2>Quadro 5 — Saldo a Receber de Antecipações / Recebíveis Futuros e Abatimento Mensal das Taxas</h2>
+      <div class="rx-kpis"><div class="rx-kpi"><div class="t">Saldo bruto a receber</div><b>${brl(c.saldoBruto)}</b><div class="d">${c.parcelas} parcela(s) após ${E(Adq14.fmtDia(S.corte))}</div></div><div class="rx-kpi"><div class="t">(−) Taxas / antecipação do mês</div><b>${brl(c.taxas.totalR)}</b><div class="d">${c.abatidoPct == null ? '' : pc(c.abatidoPct) + ' do saldo bruto'}</div></div><div class="rx-kpi"><div class="t">(=) Saldo líquido disponível</div><b>${brl(c.saldoLiquido)}</b><div class="d">saldo bruto − taxas do mês</div></div></div>
+      <table class="lop-t nq"><thead><tr><th>Contrato / fonte</th><th class="n">Saldo bruto</th><th class="n">MDR</th><th class="n">Antecipação</th><th class="n">Tarifas + retenções</th><th class="n">Total abatido</th><th class="n">Saldo líquido</th></tr></thead><tbody>${rows}<tr class="t"><td>Total</td><td class="n">${brl(c.saldoBruto)}</td><td class="n">${brl(c.taxas.mdrR)}</td><td class="n">${brl(c.taxas.antR)}</td><td class="n">${brl(this.r2(c.taxas.tarifaR + c.taxas.retencaoR))}</td><td class="n">${brl(c.taxas.totalR)}</td><td class="n">${brl(c.saldoLiquido)}</td></tr></tbody></table>
+      <h3>Abatimento mensal das taxas</h3><table class="lop-t nq"><thead><tr><th>Competência</th><th class="n">Bruto conciliado</th><th class="n">MDR</th><th class="n">Antecipação</th><th class="n">Tarifas + retenções</th><th class="n">Total abatido</th><th class="n">% do bruto</th></tr></thead><tbody>${sr}</tbody></table>
+      <div class="rx-restr">Saldo bruto = valor de face das parcelas com pagamento depois do corte de vendas feitas até o corte (Getnet: lotes; SafraPay: Recebíveis e Agenda; Credsystem: ERP). Projeção gerencial: não substitui o extrato bancário.</div></div>`;
+  },
+  /** Linhas do CSV (mesmo formato do exportador da v14.17: [bloco, contrato, indicador, valor, %, observação]) para o saldo e a origem da antecipação. */
+  linhasCsvSaldo(mes, filtro, n, put) {
+    const S = this.saldoReceber(mes, filtro), c = S.consolidado; if (!S.porContrato.length) return;
+    put('Saldo a receber', S.escopo, 'Saldo bruto a receber', c.saldoBruto, null, `corte ${Adq14.fmtDia(S.corte)} · ${c.parcelas} parcela(s)`);
+    put('Saldo a receber', S.escopo, '(-) Taxas / antecipação cobradas no mês', c.taxas.totalR, c.abatidoPct, 'MDR + antecipação + tarifas de POS + retenções');
+    put('Saldo a receber', S.escopo, '(=) Saldo líquido disponível a receber', c.saldoLiquido, null);
+    S.porContrato.forEach(x => put('Saldo a receber', x.rotulo, 'Saldo bruto / líquido', x.bruto, null, `taxas ${n(x.taxas.totalR)} · líquido ${n(x.liquido)} · ${x.fonte}`));
+    S.serie.forEach(x => put('Abatimento mensal', Adq14.mesLabel(x.mes), 'Taxas abatidas', x.totalR, x.pct, `MDR ${n(x.mdrR)} · antecipação ${n(x.antR)} · tarifas POS ${n(x.tarifaR)} · retenções ${n(x.retencaoR)}`));
+  },
+});
+
+/* =====================================================================
+   v14.18 · ITEM 4 · AUDITORIA DE ADQUIRENTES × DFC (FCX › DFC: DFC do mês, Realizado × Previsto e Resumo Executivo Oficial A4) — tudo atrás de g18()
+   Desligado, a DFC é a da v14.17. Ligado:
+     • CLASSIFICAÇÃO: todo crédito do OFX que a Auditoria casou com o repasse de uma adquirente (Getnet, SafraPay → "Recebimento de cartões (adquirentes)"; Credsystem → "Recebimento
+       Credsystem") ganha essa categoria na DFC quando NÃO tem classificação manual nem outra categoria específica (cai em "Outras entradas operacionais", por regra ou por padrão).
+       A sobreposição é virtual (não regrava o extrato) e só vale dentro da leitura da DFC (consolidar): o motor da Auditoria sempre lê a classificação ORIGINAL — nada de circularidade.
+     • PREVISTO: no Realizado × Previsto, as linhas dos cartões podem mostrar o "Líquido Esperado" da Auditoria (por data de repasse) como previsto. Chave config/dfc_cartoes18:
+       "auto" (padrão: só onde o FCX não tem meta específica para a categoria) · "sempre" · "fcx" (como na v14.17). A projeção de saldo do mês segue 100% pelo FCX (o fcx.html não é alterado).
+     • RESUMO EXECUTIVO OFICIAL (A4): novo quadro "Reconciliação de Recebíveis de Cartões (Auditoria × Caixa OFX)": Faturamento Bruto → (−) MDR → (−) Antecipação → (−) Tarifas POS/Retenções
+       → (=) Líquido Esperado na Competência → (+/−) Virada de Mês / Trânsito e Divergências → (=) Total Creditado no OFX. A ponte fecha sempre ao centavo e mostra o que a compõe.
+   ===================================================================== */
+Object.assign(ADQ18, {
+  K_CFG: 'dfc_cartoes18',
+  CAT_TERCEIROS: 'rec_cartoes', CAT_CREDSYSTEM: 'rec_credsystem',
+  /** a Auditoria de um mês vê parcelas que caem em meses seguintes: para classificar um crédito de agosto, também auditamos as competências anteriores */
+  MESES_ATRAS: 6,
+  ORIGEM_DFC: 'auditoria_cartoes',
+  MODOS_PREV: { auto: 'Auditoria só onde o FCX não tem meta específica', sempre: 'Sempre o Líquido Esperado da Auditoria', fcx: 'Somente o FCX (como na v14.17)' },
+});
+Object.assign(Adq18, {
+  /** configuração da DFC × Auditoria (config/dfc_cartoes18), igual para todos os usuários */
+  cfg() {
+    const d = (typeof Repo !== 'undefined' && Repo.get('config', ADQ18.K_CFG)) || {};
+    return { modoPrevisto: ['auto', 'sempre', 'fcx'].includes(d.modoPrevisto) ? d.modoPrevisto : 'auto', classificar: d.classificar !== false };
+  },
+  /** recurso ligado e Auditoria de Adquirentes disponível */
+  ativoDfc() { return g18() && Adq17.ativo(); },
+  _chaveCx() { return ['adq_lotes', 'adq_agendas', 'adq_erp', 'adq_contratos', 'adq_taxas', 'config', 'lojas', 'extratos', 'contasBancarias'].map(c => Repo.versao(c)).join('.') + '|' + Datas.hojeISO(); },
+  /** [mês − MESES_ATRAS … mês], do mais antigo ao mais novo */
+  janela(mes) {
+    const [y, m] = String(mes).split('-').map(Number), out = [];
+    for (let i = ADQ18.MESES_ATRAS; i >= 0; i--) { const d = new Date(Date.UTC(y, m - 1 - i, 1)); out.push(d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')); }
+    return out;
+  },
+  /** categoria da DFC de um repasse (linha da Auditoria): Credsystem tem categoria própria; as demais adquirentes ficam em Recebimento de cartões */
+  catDe(l) { return /CREDSYSTEM/i.test(String(l.adquirente || '') + ' ' + String(l.adq || '')) ? ADQ18.CAT_CREDSYSTEM : ADQ18.CAT_TERCEIROS; },
+  /**
+   * Memória da Auditoria para a DFC: linhas de repasse por competência e, por crédito do OFX, a adquirente que o casou. Reconstruída quando qualquer base muda.
+   * Cada mês é auditado uma única vez (memo próprio); o crédito disputado por duas competências fica com a mais antiga.
+   */
+  _cx18(mes) {
+    if (!this.ativoDfc()) return null;
+    const v = this._chaveCx();
+    if (!this._cx || this._cx.v !== v) this._cx = { v, feitos: new Set(), linhas: new Map(), creditos: new Map(), lotes: new Set(Adq14.mesesComLote()), erros: [] };
+    const cx = this._cx;
+    for (const m of this.janela(mes)) { if (cx.feitos.has(m)) continue; cx.feitos.add(m); if (cx.lotes.has(m)) this._auditarMes(m); }
+    return cx;
+  },
+  _auditarMes(m) {
+    const cx = this._cx, a0 = Adq14._memoA, i0 = Adq17._memo, ov0 = typeof DFC !== 'undefined' ? DFC._ov18 : 0;
+    try {
+      if (typeof DFC !== 'undefined') DFC._ov18 = 0; // o motor da Auditoria lê a classificação ORIGINAL da DFC (sem sobreposição, sem recursão)
+      const A = Adq14.auditar(m, '*'), linhas = (A.cruz && A.cruz.linhas) || [];
+      cx.linhas.set(m, linhas);
+      linhas.forEach(l => { const cat = this.catDe(l); (l.creditos || []).forEach(c => { const o = cx.creditos.get(c.id); if (o && o.mesAud <= m) return; cx.creditos.set(c.id, { cat, adq: l.adq, adquirente: l.adquirente, data: c.data, valor: c.valor, contaId: l.contaId, mesAud: m, status: l.status }); }); });
+    } catch (e) { cx.erros.push(m + ': ' + String((e && e.message) || e)); } finally { Adq14._memoA = a0; Adq17._memo = i0; if (typeof DFC !== 'undefined') DFC._ov18 = ov0; }
+  },
+  /** aplica a sobreposição à classificação de um crédito do extrato; devolve a mesma classificação quando não há o que mudar */
+  sobrepor(t, r) {
+    if (!r || !t || !(t.valor > 0) || t.cat || r.origem === 'manual' || r.categoria !== 'rec_outros') return r; // só crédito sem classificação manual e ainda em "Outras entradas operacionais"
+    if (!this.cfg().classificar) return r;
+    const cx = this._cx18(String(t.data || '').slice(0, 7)); if (!cx) return r;
+    const c = cx.creditos.get(String(t.docId) + '|' + String(t.id)); if (!c || !DFC.cat(c.cat)) return r;
+    return { categoria: c.cat, origem: ADQ18.ORIGEM_DFC, adq: c.adq, adquirente: c.adquirente, mesAud: c.mesAud, de: r.origem };
+  },
+
+  /* ---------------- Previsto: Líquido Esperado da Auditoria por data de repasse ---------------- */
+  /** { rec_cartoes: { valor, itens:[[rótulo, valor]] }, rec_credsystem: {…} } — soma do Líquido Esperado das linhas de repasse cuja DATA cai no mês (de qualquer competência da janela) */
+  previstoCartoes(mes) {
+    const cx = this._cx18(mes); if (!cx) return {};
+    const out = {};
+    for (const m of this.janela(mes)) (cx.linhas.get(m) || []).forEach(l => {
+      if (!String(l.data).startsWith(mes) || !(l.esperado > 0)) return;
+      const cat = this.catDe(l), o = out[cat] ||= { valor: 0, itens: {} }, rot = `${l.adquirente} · vendas de ${Adq14.mesLabel(m)}`;
+      o.valor += l.esperado; o.itens[rot] = (o.itens[rot] || 0) + l.esperado;
+    });
+    Object.values(out).forEach(o => { o.valor = this.r2(o.valor); o.itens = Object.entries(o.itens).map(([k, v]) => [k, this.r2(v)]).sort((a, b) => b[1] - a[1]); });
+    return out;
+  },
+  /** Realizado × Previsto: troca o previsto das linhas de cartões pelo da Auditoria, conforme o modo escolhido; o resto do cálculo (despesas, projeção de saldo) fica como o FCX entrega */
+  previstoNoCruzamento(c, mes) {
+    const cfg = this.cfg(); if (!c || !this.ativoDfc() || cfg.modoPrevisto === 'fcx') return c;
+    const P = this.previstoCartoes(mes), aplic = [], r2 = n => this.r2(n); let delta = 0;
+    for (const id of [ADQ18.CAT_TERCEIROS, ADQ18.CAT_CREDSYSTEM]) {
+      const aud = P[id], cat = DFC.cat(id); if (!aud || aud.valor <= 0.004 || !cat) continue;
+      const i = c.linhas.findIndex(l => l.id === id), l0 = i >= 0 ? c.linhas[i] : null, fcx = l0 ? l0.previsto : 0;
+      if (cfg.modoPrevisto === 'auto' && fcx > 0.004) continue; // o FCX tem meta específica para a categoria
+      const real = l0 ? l0.realizado : r2(Math.abs((c.dfc.porCategoria[id] || {}).valor || 0)), nReal = l0 ? l0.nReal : ((c.dfc.porCategoria[id] || {}).n || 0), dif = r2(real - aud.valor);
+      const nova = { ...(l0 || cat), previsto: aud.valor, realizado: real, dif, pct: aud.valor ? real / aud.valor : null, favoravel: dif >= 0, itens: aud.itens, nReal, fontePrev18: 'auditoria', previstoFcx18: fcx };
+      if (i >= 0) c.linhas[i] = nova; else c.linhas.push(nova);
+      delta += aud.valor - fcx; aplic.push({ id, nome: cat.nome, valor: aud.valor, fcxR: fcx });
+    }
+    if (!aplic.length) return c;
+    const ordem = DFC.categorias().map(x => x.id); c.linhas.sort((a, b) => ordem.indexOf(a.id) - ordem.indexOf(b.id));
+    c.receitas = { ...c.receitas, previsto: r2(c.receitas.previsto + delta) }; c.receitas.taxa = c.receitas.previsto ? c.receitas.realizado / c.receitas.previsto : null;
+    c.previstoAud18 = aplic; return c;
+  },
+  /** Resumo Executivo (Quadro 2): o previsto por mês/categoria segue a mesma regra do Realizado × Previsto */
+  previstoResumo(prev, meses) {
+    const cfg = this.cfg(); if (!prev || !this.ativoDfc() || cfg.modoPrevisto === 'fcx') return prev;
+    meses.forEach(m => {
+      const P = this.previstoCartoes(m), o = prev[m] ||= {};
+      for (const id of [ADQ18.CAT_TERCEIROS, ADQ18.CAT_CREDSYSTEM]) { const aud = P[id], fcx = Number(o[id]) || 0; if (!aud || aud.valor <= 0.004) continue; if (cfg.modoPrevisto === 'auto' && fcx > 0.004) continue; o[id] = aud.valor; }
+    });
+    return prev;
+  },
+
+  /* ---------------- painel da DFC: o que a Auditoria mudou no mês ---------------- */
+  resumoDfc(mes, tr) {
+    const cx = this._cx18(mes); if (!cx || !cx.lotes.size) return null;
+    const por = {};
+    (tr || []).forEach(t => { if (!(t.valor > 0) || !String(t.data).startsWith(mes)) return; const r = DFC.classificar(t, undefined, { ov18: true }); if (r.origem === ADQ18.ORIGEM_DFC) { const o = por[r.categoria] ||= { n: 0, valor: 0 }; o.n++; o.valor += t.valor; } });
+    Object.values(por).forEach(o => { o.valor = this.r2(o.valor); });
+    return { mes, cfg: this.cfg(), por, previsto: this.previstoCartoes(mes), erros: cx.erros };
+  },
+
+  /* ---------------- Resumo Executivo A4: Reconciliação de Recebíveis de Cartões (Auditoria × Caixa OFX) ---------------- */
+  /**
+   * meses = competências do período do Resumo; escopoIds = contas bancárias escolhidas (null = todas).
+   * Competência: os mesmos números do Painel Executivo de Cartões (bruto, MDR efetivo, antecipação efetiva, tarifas de POS e retenções) dos contratos cujas contas estão no escopo.
+   * Caixa: créditos do OFX que a Auditoria casou, com data DENTRO do período. A diferença entre os dois é explicada, com o que sobra em "outras diferenças".
+   */
+  reconciliar(meses, escopoIds) {
+    if (!this.ativoDfc() || !meses || !meses.length) return null;
+    const S = escopoIds && escopoIds.length ? new Set(escopoIds.map(String)) : null, r2 = n => this.r2(n);
+    const noEscopo = cid => !S || (!!cid && Adq14.contasEquivalentes(cid).ids.some(i => S.has(String(i))));
+    const de = meses[0] + '-01', ate = Adq17.fimMes(meses[meses.length - 1]);
+    let bruto = 0, mdrR = 0, antR = 0, tarR = 0, retR = 0, nContr = 0; const rotulos = new Set();
+    const i0 = Adq17._memo, a0 = Adq14._memoA;
+    try {
+      for (const m of meses) { const I = Adq17.indicadores(m, '*'); I.contratos.forEach(r => { if (!noEscopo(r.contrato.contaId)) return; nContr++; rotulos.add(r.adquirente); bruto += r.bruto.base || 0; mdrR += r.mdr ? r.mdr.efetivoR : 0; antR += r.ant ? r.ant.efetivoR : 0; tarR += r.tarifaR || 0; retR += r.retencaoR || 0; }); }
+    } finally { Adq17._memo = i0; Adq14._memoA = a0; }
+    if (!nContr) return null;
+    meses.forEach(m => this._cx18(m)); const cx = this._cx; if (!cx) return null;
+    const ultimo = meses[meses.length - 1];
+    let ePer = 0, transito = 0, semOfx = 0, diverg = 0, diasSemOfx = 0;
+    meses.forEach(m => (cx.linhas.get(m) || []).forEach(l => {
+      if (!noEscopo(l.contaId)) return;
+      let cl = 0, depois = 0;
+      (l.creditos || []).forEach(c => { const o = cx.creditos.get(c.id); if (!o || o.mesAud !== m) return; if (c.data > ate) depois += c.valor; else if (c.data >= de) cl += c.valor; });
+      ePer += l.esperado;
+      if (l.data > ate) transito += l.esperado - cl;                    // repasse esperado para depois do período
+      else { transito += depois; const resto = l.esperado - cl - depois; if (l.status === 'semofx') { semOfx += resto; diasSemOfx++; } else diverg -= resto; } // crédito caindo após o fim do período também é trânsito
+    }));
+    let creditado = 0, virada = 0, nCred = 0;
+    cx.creditos.forEach(c => { if (c.data < de || c.data > ate || c.mesAud > ultimo || !noEscopo(c.contaId)) return; creditado += c.valor; nCred++; if (c.mesAud < meses[0]) virada += c.valor; });
+    const liquido = r2(bruto - mdrR - antR - tarR - retR), B = { viradaR: r2(virada), transitoR: r2(transito), divergenciaR: r2(diverg), semOfxR: r2(semOfx) };
+    const outras = r2(creditado - (liquido + B.viradaR - B.transitoR - B.semOfxR + B.divergenciaR));
+    const q = { periodo: { de, ate, meses: meses.slice() }, nContratos: nContr, adquirentes: [...rotulos].sort(), bruto: r2(bruto), mdrR: r2(mdrR), antR: r2(antR), tarifaR: r2(tarR), retencaoR: r2(retR), liquido,
+      ponte: { ...B, outrasR: outras, totalR: r2(creditado - liquido), teoricaOutrasR: r2(ePer - liquido) }, creditado: r2(creditado), nCreditos: nCred, avisos: [] };
+    const sem = meses.filter(m => !cx.lotes.has(m)); if (sem.length) q.avisos.push(`Sem arquivo de adquirente (lotes) em: ${sem.map(m => Adq14.mesLabel(m)).join(', ')}.`);
+    if (diasSemOfx) q.avisos.push(`${diasSemOfx} dia(s) de repasse sem OFX importado no período: o valor esperado aparece em "dias de repasse sem OFX".`);
+    if (cx.erros.length) q.avisos.push('Parte da Auditoria não pôde ser lida: ' + cx.erros.join('; '));
+    if (!q.bruto && !q.creditado) return null;
+    return q;
+  },
+  htmlReconciliacao(q) {
+    const E = s => DFC_RESUMO.esc(s), brl = n => DFC_RESUMO.brl(n), cor = v => v > 0.004 ? '#1D7A4E' : v < -0.004 ? '#B63A2F' : '#585E7F';
+    const val = v => `<td class="n" style="color:${cor(v)}">${brl(v)}</td>`, pc = (a, b) => b > 0.004 ? ' · ' + String((a / b * 100).toFixed(2)).replace('.', ',') + '% do bruto' : '';
+    const lin = (rot, v, obs, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${rot}</td>${val(v)}<td>${obs || ''}</td></tr>`, sub = (rot, v, obs) => Math.abs(v) < 0.005 ? '' : `<tr><td class="i">${rot}</td>${val(v)}<td class="sub">${obs || ''}</td></tr>`;
+    const p = q.ponte, per = q.periodo.meses.length > 1 ? `${Adq14.mesLabel(q.periodo.meses[0])} a ${Adq14.mesLabel(q.periodo.meses[q.periodo.meses.length - 1])}` : Adq14.mesLabel(q.periodo.meses[0]);
+    return `<div class="rx-q"><h2>Quadro 3 — Reconciliação de Recebíveis de Cartões (Auditoria × Caixa OFX)</h2>
+      <table class="rx-t"><thead><tr><th>Descrição</th><th class="n">Valor (R$)</th><th>Observação</th></tr></thead><tbody>
+      ${lin('Faturamento bruto de cartões na competência', q.bruto, `${E(q.adquirentes.join(', '))} · ${q.nContratos} contrato(s) · ${E(per)}`, 'g')}
+      ${lin('(−) MDR efetivo', -q.mdrR, pc(q.mdrR, q.bruto).slice(3))}
+      ${lin('(−) Antecipação efetiva', -q.antR, pc(q.antR, q.bruto).slice(3))}
+      ${lin('(−) Tarifas e aluguel de POS / retenções e chargebacks', -(q.tarifaR + q.retencaoR), `POS ${brl(q.tarifaR)} · retenções ${brl(q.retencaoR)}`)}
+      ${lin('(=) Líquido esperado na competência', q.liquido, '<span class="sub">bruto − taxas efetivas (as mesmas do Painel Executivo de Cartões)</span>', 's')}
+      ${lin('(+/−) Virada de mês / trânsito e divergências', p.totalR, '<span class="sub">repasses que cruzam competências e diferenças apuradas pela Auditoria</span>')}
+      ${sub('(+) Recebido de competências anteriores (virada de mês)', p.viradaR, 'parcelas e repasses de vendas de meses anteriores creditados no período')}
+      ${sub('(−) A receber depois do período (trânsito)', -p.transitoR, 'repasses esperados para depois do último dia do período')}
+      ${sub('(+/−) Créditos a menor, a maior e furos conferidos', p.divergenciaR, 'diferença entre o esperado e o creditado nos dias de repasse conferidos')}
+      ${sub('(−) Dias de repasse sem OFX importado', -p.semOfxR, 'ainda não conferidos: importe o extrato do banco')}
+      ${sub('(+/−) Outras diferenças de apuração', p.outrasR, 'Líquido Esperado da Auditoria × bruto − taxas efetivas (tarifas e retenções debitadas à parte, antecipação estimada, arredondamentos)')}
+      ${lin('(=) Total creditado no OFX (casado pela Auditoria)', q.creditado, `${q.nCreditos} crédito(s) com data no período`, 't')}
+      </tbody></table>
+      <div class="rx-restr">Conciliação da Auditoria de Adquirentes (ERP × adquirente × extrato) com os créditos dos extratos bancários (OFX): só entram os créditos que a Auditoria casou com um repasse; créditos sem lote correspondente seguem na DFC pela sua própria categoria.</div>
+      ${q.avisos.map(a => `<div class="rx-av">⚠ ${E(a)}</div>`).join('')}</div>`;
+  },
+});
+
+/* ---------------- ganchos: DFC (consolidar/classificar), Realizado × Previsto, Resumo Executivo ---------------- */
+Object.assign(DFC, {
+  _o18: { classificar: DFC.classificar, consolidar: DFC.consolidar }, _ov18: 0,
+  /** a sobreposição vale só dentro da leitura da DFC (consolidar) ou quando a tela pede (ctx.ov18); o motor da Auditoria chama sem nenhum dos dois */
+  classificar(t, regras, ctx) {
+    const r = DFC._o18.classificar.call(this, t, regras, ctx);
+    return g18() && (this._ov18 > 0 || (ctx && ctx.ov18)) ? Adq18.sobrepor(t, r) : r;
+  },
+  consolidar() {
+    if (!g18()) return DFC._o18.consolidar.apply(this, arguments);
+    this._ov18++; try { return DFC._o18.consolidar.apply(this, arguments); } finally { this._ov18--; }
+  },
+});
+Object.assign(Cruzamento, {
+  _o18: { calcular: Cruzamento.calcular },
+  calcular(mes) { const c = Cruzamento._o18.calcular.apply(this, arguments); return g18() ? Adq18.previstoNoCruzamento(c, mes) : c; },
+});
+Object.assign(DFC_RESUMO, {
+  _o18: { montar: DFC_RESUMO.montar, html: DFC_RESUMO.html },
+  montar(e) { const m = DFC_RESUMO._o18.montar.apply(this, arguments); if (g18() && e && e.cartoes18) m.cartoes18 = e.cartoes18; return m; },
+  /** o quadro entra antes das Notas Explicativas, que passam a ser o Quadro 4 */
+  html(m) {
+    const h = DFC_RESUMO._o18.html.apply(this, arguments); if (!g18() || !m || !m.cartoes18) return h;
+    const q = Adq18.htmlReconciliacao(m.cartoes18), i3 = h.indexOf('<div class="rx-q"><h2>Quadro 3 — Notas Explicativas'), ia = h.indexOf('<div class="rx-ass">'), i = i3 >= 0 ? i3 : ia;
+    return i < 0 ? h + q : h.slice(0, i) + q + h.slice(i).replace('Quadro 3 — Notas Explicativas', 'Quadro 4 — Notas Explicativas');
+  },
+});
+Object.assign(FluxoDFC, {
+  _o18: { dadosResumo06: FluxoDFC.dadosResumo06, origemRot05: FluxoDFC.origemRot05, modeloExport: FluxoDFC.modeloExport },
+  podeCfg18() { return g18() && Auth.can('fcx.dfc.regras'); },
+  /** grava config/dfc_cartoes18 (k = 'modo' | 'classificar') e regrava a base mensal da DFC (dfc/AAAA-MM) com a classificação nova */
+  async salvarCfg18(k, v) {
+    if (!this.podeCfg18()) return UI.toast('Seu perfil não pode alterar a configuração de cartões da DFC.');
+    const atual = Adq18.cfg(), novo = k === 'modo' ? { ...atual, modoPrevisto: ['auto', 'sempre', 'fcx'].includes(v) ? v : 'auto' } : { ...atual, classificar: v === '1' || v === true };
+    await Repo.salvar('config', ADQ18.K_CFG, novo, { modulo: 'fcx', rotulo: 'DFC × Auditoria de Adquirentes · configuração', detalhe: `previsto: ${ADQ18.MODOS_PREV[novo.modoPrevisto]} · categoria dos créditos auditados: ${novo.classificar ? 'ligada' : 'desligada'}` });
+    try { await this.atualizarBaseDFC(this.mesesBanco()); } catch (e) { console.warn('[v14.18] base da DFC', e); }
+    App.render();
+  },
+  dadosResumo06(per, escopo) {
+    const e = FluxoDFC._o18.dadosResumo06.apply(this, arguments); if (!g18() || !e) return e;
+    try {
+      if (e.previstoPorMes) Adq18.previstoResumo(e.previstoPorMes, per.meses);
+      e.cartoes18 = Adq18.reconciliar(per.meses, escopo && !escopo.todas ? escopo.ids : null);
+    } catch (err) { console.warn('[v14.18] Resumo × Auditoria', err); }
+    return e;
+  },
+  origemRot05(c) {
+    return g18() && c && c.origem === ADQ18.ORIGEM_DFC
+      ? `<span class="pill info" title="Crédito do OFX casado pela Auditoria de Adquirentes com o repasse da adquirente (sem classificação manual e sem outra categoria)">Auditoria</span> ${esc(c.adquirente || 'adquirente')}`
+      : FluxoDFC._o18.origemRot05.apply(this, arguments);
+  },
+  /** exportações (PDF/Excel/CSV) dizem de onde veio o previsto dos cartões */
+  modeloExport(t) {
+    const m = FluxoDFC._o18.modeloExport.apply(this, arguments);
+    if (!g18() || t !== 'cruzamento' || !m.c || !m.c.previstoAud18 || !m.c.previstoAud18.length) return m;
+    const marca = 'previsto pela Auditoria', ids = new Set(m.c.previstoAud18.map(x => x.id));
+    m.c.linhas.filter(l => ids.has(l.id)).forEach(l => { const row = m.linhas.find(r => r[1] === l.nome && r[2] === (l.sentido === 'E' ? 'Entrada' : 'Saída')); if (row) row[7] = row[7] ? row[7] + ' · ' + marca : marca[0].toUpperCase() + marca.slice(1); });
+    if (m.cab && m.cab[3]) m.cab = m.cab.map((h, j) => j === 3 ? 'Previsto FCX / Auditoria (R$)' : h);
+    (m.blocos || []).forEach(b => { const f = b.leit; b.leit = l => f(l) + (l.fontePrev18 ? ' · ' + marca : ''); });
+    return m;
+  },
+  /** faixa no topo das abas "Realizado × Previsto" e "DFC do mês": o que a Auditoria mudou e a chave do previsto */
+  painelCartoes18() {
+    if (!Adq18.ativoDfc() || !['cruzamento', 'dfc'].includes(this.ui.sub)) return '';
+    const mes = this.ui.mes, R = Adq18.resumoDfc(mes, this.trDFC()); if (!R) return '';
+    const f = Fmt.brl, cfg = R.cfg, pode = this.podeCfg18(), nome = id => (DFC.cat(id) || {}).nome || id;
+    const cl = Object.entries(R.por).map(([id, o]) => `<b>${f(o.valor)}</b> em ${o.n} lançamento(s) → ${esc(nome(id))}`).join(' · ');
+    const pv = Object.entries(R.previsto).map(([id, o]) => `${esc(nome(id))}: <b>${f(o.valor)}</b>`).join(' · ');
+    const ctl = pode ? `<div class="row" style="gap:10px;flex-wrap:wrap;margin:8px 0 0"><div class="field"><label class="lbl" for="c18cl">Categoria dos créditos auditados</label><select id="c18cl" data-a="fd-cartoes-cfg" data-k="classificar"><option value="1" ${cfg.classificar ? 'selected' : ''}>Pela Auditoria (padrão)</option><option value="0" ${cfg.classificar ? '' : 'selected'}>Como no extrato (v14.17)</option></select></div>
+        <div class="field"><label class="lbl" for="c18pv">Previsto dos cartões</label><select id="c18pv" data-a="fd-cartoes-cfg" data-k="modo">${Object.entries(ADQ18.MODOS_PREV).map(([k, r]) => `<option value="${k}" ${cfg.modoPrevisto === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div></div>`
+      : `<p class="hint" style="margin:6px 0 0">Previsto dos cartões: ${esc(ADQ18.MODOS_PREV[cfg.modoPrevisto])}. Categoria dos créditos auditados: ${cfg.classificar ? 'pela Auditoria' : 'como no extrato'}.</p>`;
+    return `<div class="panel c18-panel"><details ${Object.keys(R.por).length || Object.keys(R.previsto).length ? 'open' : ''}><summary><b>Auditoria de Adquirentes × DFC</b> · ${esc(this.mesLabel(mes))}${cl ? '' : ' · nenhum crédito reclassificado'}</summary>
+      <p class="hint" style="margin:8px 0 0">Créditos do OFX que a Auditoria casou com o repasse de uma adquirente entram em <b>${esc(nome(ADQ18.CAT_TERCEIROS))}</b> / <b>${esc(nome(ADQ18.CAT_CREDSYSTEM))}</b> quando não têm classificação manual nem outra categoria específica (ou estavam em Outras entradas operacionais).${cl ? ' Neste mês: ' + cl + '.' : ''}</p>
+      <p class="hint" style="margin:6px 0 0">Líquido Esperado da Auditoria por data de repasse neste mês: ${pv || 'sem repasses previstos pela Auditoria'}. A projeção de saldo do mês segue pelo FCX.</p>${ctl}</details></div>`;
+  },
+});
+
+/* ---- fim v14.18 ---- */
 
 
 
