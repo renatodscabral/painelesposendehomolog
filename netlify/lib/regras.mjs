@@ -15,6 +15,7 @@ export const REGRAS = {
   ieo_auto: ['interact', 'admin'], pe_simulador: ['admin', 'admin'], rh_folhas: ['admin', 'admin'], amb: ['admin', 'admin'],
   lojas_faturamento: ['interact', 'admin'], cred_pendencias: ['admin', 'admin'], ec_taxas: ['admin', 'admin'], conc_fechamento: ['admin', 'admin'],
   parceiros: ['admin', 'admin'], /* v13.94: fornecedores e clientes (CNPJ/CPF) — só o Master ou quem a matriz libera (parceiros.ver/editar/excluir) */
+  adq_contratos: ['admin', 'admin'], adq_lotes: ['admin', 'admin'], adq_agendas: ['admin', 'admin'], adq_erp: ['admin', 'admin'], /* v14.15: agenda de vendas da SafraPay e ERP (Apuração dos Créditos) */ /* v14.14: contratos (Adquirente + Empresa/CNPJ → conta de crédito) e lotes importados (Adquirente + CNPJ + Competência) */
   partes_contratuais: ['admin', 'admin'], /* v14.11: locatários/locadores do Módulo 3 (CPF/CNPJ e chaves PIX) — só o Master ou quem a matriz libera (lojas.contratos.*) */
 };
 export const NIVEL = { nenhum: 0, view: 1, interact: 2, admin: 3 };

@@ -33,7 +33,7 @@ export const FRENTES = [
   { id: 'fcx', rotulo: 'FCX · fluxo de caixa, orçamentos e saídas', colecoes: ['fcx'] },
   { id: 'retaguarda', rotulo: 'Retaguarda de Loja (faltas, caixas, cofre, IEO, alertas, solicitações)', colecoes: ['faltas', 'caixas', 'ret_cofre', 'ret_depositos', 'ret_ocorrencias', 'ret_consumidor', 'cred_pendencias', 'ieo_ocorrencias', 'ieo_fechamentos', 'ieo_laudos', 'ieo_auto', 'ieo_log', 'alertas', 'solicitacoes'] },
   { id: 'credsystem', rotulo: 'Credsystem (metas, campanhas, apurações)', colecoes: ['credsystem', 'credsystem_metas', 'credsystem_campanhas', 'credsystem_apuracoes', 'credsystem_base', 'credsystem_resultados'] },
-  { id: 'adquirentes', rotulo: 'Auditoria de Adquirentes e conciliação', colecoes: ['adq_taxas', 'adq_auditorias', 'adq_excecoes', 'ec_taxas', 'conc_fechamento'] },
+  { id: 'adquirentes', rotulo: 'Auditoria de Adquirentes e conciliação', colecoes: ['adq_taxas', 'adq_auditorias', 'adq_excecoes', 'ec_taxas', 'conc_fechamento', 'adq_contratos', 'adq_lotes', 'adq_agendas', 'adq_erp'] },
   { id: 'config', rotulo: 'Configurações (regras e categorias da DFC, empresas e Matriz, parâmetros, versões liberadas)', colecoes: ['config'] },
   { id: 'usuarios', rotulo: 'Usuários e permissões', colecoes: ['usuarios'] },
   { id: 'notificacoes', rotulo: 'Central de Notificações (regras e disparos)', colecoes: [], tabelas: ['painel_notificacoes_regras'] },

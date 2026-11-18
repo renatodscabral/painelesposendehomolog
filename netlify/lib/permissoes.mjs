@@ -101,6 +101,10 @@ export const COLECOES_MATRIZ = {
   adq_auditorias: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']],
   adq_excecoes: [['retaguarda.adq.ver'], ['retaguarda.adq.importar', 'retaguarda.adq.taxas']],
   ec_taxas: [['retaguarda.adq.ver'], ['retaguarda.adq.taxas']],
+  adq_contratos: [['retaguarda.adq.ver'], ['retaguarda.adq.taxas']], /* v14.14: contrato = regra de negócio da adquirente (mesma permissão das taxas) */
+  adq_lotes: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']], /* v14.14: lote = arquivo importado (mesma permissão da importação) */
+  adq_agendas: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']], /* v14.15: Agenda de Vendas da SafraPay = arquivo importado */
+  adq_erp: [['retaguarda.adq.ver'], ['retaguarda.adq.importar']], /* v14.15: ERP (Apuração dos Créditos) = arquivo importado */
   conc_fechamento: [['retaguarda.adq.ver', 'visao.dashboard', 'fcx.ver'], ['retaguarda.adq.importar']], /* v14.02: o Resumo do Recebível (Tela Inicial) lê o fechamento; antes só o Master/Retaguarda chegavam a ele */
   contasBancarias: [['fcx.dfc.ver'], ['fcx.dfc.contas']],
   extratos: [['fcx.dfc.ver'], ['fcx.dfc.importar']],

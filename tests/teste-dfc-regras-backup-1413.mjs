@@ -33,9 +33,9 @@ const guardaSrv = await import('../netlify/lib/dfc-1413.mjs');
 
 /* ---------- 0 · recurso, Regra de Ouro, nada de marcador de montagem ---------- */
 chk('recurso gestao_v1413 na lista de liberação (v14.13) e helper g13()', /gestao_v1413: \{ versao: 'v14\.13'/.test(html) && /function g13\(\) \{ return typeof Recursos !== 'undefined' && Recursos\.ativo\('gestao_v1413'\); \}/.test(html));
-for (const [f, h] of [['fcx.html', '0c13655f'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
+for (const [f, h] of [['fcx.html', '640800e0'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
   const p = path.join(raiz, 'public', f);
-  chk(`Regra de Ouro: public/${f} idêntico ao da v14.08 (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
+  chk(`Regra de Ouro: public/${f} ${f === 'fcx.html' ? 'idêntico ao da v14.17: v14.08 + a única exceção autorizada (importação de Saídas com os dois layouts do ERP, atrás de gestao_v1417)' : 'idêntico ao da v14.08'} (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
 }
 chk('nenhuma peça deixou marcador de montagem no painel final', !/@@V1413_/.test(html));
 chk('o servidor tem o recurso (dfc-1413) e o painel usa o mesmo nome', guardaSrv.RECURSO === 'gestao_v1413' && guardaSrv.CAMINHO === 'config/dfc');
@@ -87,11 +87,11 @@ function banco(adapterImpl) {                       // memória do navegador (Re
     ui: { mes: '2026-08', sub: 'dfc' }, mesLabel: m => m, esperarForn05: async () => { },
     transacoes: () => Repo.todos('extratos').flatMap(d => (d.transacoes || []).map(t => ({ ...t, contaId: d.contaId, docId: d.id }))),
     mesesBanco: () => [...new Set(Repo.todos('extratos').map(d => d.mes))].sort().reverse(),
-    esperarForn05_: 0,
+    esperarForn05_: 0, trDFC() { return this.transacoes(); }, // v14.17: com o recurso desligado a DFC lê o extrato como está
   };
   const { DFC, DFC_REGRAS_PADRAO } = dfcFn(Repo, () => true, () => true, () => true);
-  M = new Function('Repo', 'Cloud', 'UI', 'App', 'Audit', 'Auth', 'DFC', 'FluxoDFC', 'Fmt', 'esc', 'clone', 'sleep', 'DFC_REGRAS_PADRAO', 'g13', dfcCodigo + '\nreturn Dfc13;')(
-    Repo, { adapter: adapterImpl }, UI, { agendarRender() { } }, Audit, Auth, DFC, FluxoDFC, Fmt, s => String(s ?? ''), clone, () => Promise.resolve(), DFC_REGRAS_PADRAO, () => flags.g13);
+  M = new Function('Repo', 'Cloud', 'UI', 'App', 'Audit', 'Auth', 'DFC', 'FluxoDFC', 'Fmt', 'esc', 'clone', 'sleep', 'DFC_REGRAS_PADRAO', 'g13', 'g17', dfcCodigo + '\nreturn Dfc13;')(
+    Repo, { adapter: adapterImpl }, UI, { agendarRender() { } }, Audit, Auth, DFC, FluxoDFC, Fmt, s => String(s ?? ''), clone, () => Promise.resolve(), DFC_REGRAS_PADRAO, () => flags.g13, () => false);
   return { Repo, UI, Auth, Audit, Fmt, perms, flags, msgs, alertas, audits, FluxoDFC, DFC, DFC_REGRAS_PADRAO, Dfc13: M };
 }
 /** servidor de brincadeira: guarda config/dfc com a MESMA função de trava do servidor real (guardar) e devolve o código do erro como o adaptador devolve */

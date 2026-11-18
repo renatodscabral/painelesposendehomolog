@@ -30,9 +30,9 @@ const srv = await import('../netlify/lib/arvore-rh.mjs'), sv = await import('../
 
 /* ---------- 1 · recurso e Regra de Ouro ---------- */
 chk('recurso gestao_v1412 na lista de liberação (v14.12) e helper g12()', /gestao_v1412: \{ versao: 'v14\.12'/.test(html) && /function g12\(\) \{ return typeof Recursos !== 'undefined' && Recursos\.ativo\('gestao_v1412'\); \}/.test(html));
-for (const [f, h] of [['fcx.html', '0c13655f'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
+for (const [f, h] of [['fcx.html', '640800e0'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
   const p = path.join(raiz, 'public', f);
-  chk(`Regra de Ouro: public/${f} idêntico ao da v14.08 (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
+  chk(`Regra de Ouro: public/${f} ${f === 'fcx.html' ? 'idêntico ao da v14.17: v14.08 + a única exceção autorizada (importação de Saídas com os dois layouts do ERP, atrás de gestao_v1417)' : 'idêntico ao da v14.08'} (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
 }
 chk('nenhuma peça deixou marcador de montagem no painel final', !/@@V1412_/.test(html));
 

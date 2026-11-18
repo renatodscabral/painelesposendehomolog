@@ -5,6 +5,8 @@ import { NIVEL, exigido, validarCaminho, partes, ehUsuarios, lojaPodeGravar } fr
 import { acessoPorMatriz, exclusaoPermitida } from './permissoes.mjs';
 import { podeLerSalarioDoc, salariosLiberados, ehColecaoSalarios } from './arvore-rh.mjs';
 import { protegerConfigDfc } from './dfc-1413.mjs';
+import { protegerAdq1414 } from './adq-1414.mjs';
+import { protegerAdq1415 } from './adq-1415.mjs';
 
 export const LIMITE_DOC = 5.5 * 1024 * 1024;   // bytes de JSON por documento
 export const LIMITE_PAGINA = 3.5 * 1024 * 1024; // bytes de JSON por página de listagem (resposta da função ≤ 6 MB)
@@ -76,6 +78,8 @@ export async function gravar(t, sess, caminho, dados) {
     }
   }
   d = await protegerConfigDfc(t, sess, caminho, d); /* v14.13: regras da DFC pétreas (config/dfc) — só com o recurso gestao_v1413 */
+  d = await protegerAdq1415(t, sess, caminho, d); /* v14.15: agenda de vendas da SafraPay, ERP (Apuração dos Créditos) e lojas/ECs do contrato — só com o recurso gestao_v1415 */
+  d = await protegerAdq1414(t, sess, caminho, d); /* v14.14: contrato (conta de crédito obrigatória e existente) e lote (chave = adquirente + CNPJ + competência) — só com o recurso gestao_v1414 */
   const texto = JSON.stringify(d);
   if (Buffer.byteLength(texto) > LIMITE_DOC) throw new ErroHttp(413, 'Registro grande demais (limite de 5,5 MB por documento).');
   const { colecao, docId } = partes(caminho);

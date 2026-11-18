@@ -1570,6 +1570,7 @@ function fcxV1396(){ try{ const P = window.__embed ? window.parent : null; retur
 function fcxV1399(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('gestao_v1399') && P.CargaFeedback && typeof P.CargaFeedback.mostrar === 'function'); }catch(e){ return false; } } // v13.99: popup de crítica de carga (exibido pelo painel)
 function fcxCarga99(rel){ if(!fcxV1399()) return; try{ window.parent.CargaFeedback.mostrar(rel); }catch(e){} }
 function fcxArq99(file){ return [{nome:file.name, tamanho:file.size}]; }
+function fcxV1417(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Pagto17 && typeof P.Pagto17.ativo==='function' && P.Pagto17.ativo() && typeof P.Pagto17.lerArquivo==='function' && typeof P.Pagto17.interpretar==='function' && typeof P.Pagto17.relatorioCarga==='function'); }catch(e){ return false; } } // v14.17 (complemento): Saídas reconhece os dois layouts do Contas a Pagar do ERP (leitor único no painel)
 function fcxV1387(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('rd_cartao_v1387')); }catch(e){ return false; } } // v13.87: Recebível Diário · débito × crédito, prestação no débito por bandeira, Credsystem consolidada
 function fcxV1386(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('contabil_v1386')); }catch(e){ return false; } } // v13.86: plano de contas lido do Módulo Contábil (somente leitura)
 function fcxV1385(){ try{ const P = window.__embed ? window.parent : null; return !!(P && P.Recursos && P.Recursos.ativo('fcx_periodo_v1385')); }catch(e){ return false; } } // v13.85: período por calendário + detalhamento diário em agrupadores
@@ -2569,6 +2570,37 @@ function statusToTipo(s){
 function importSaidasFile(input){
   const file = input.files[0]; if(!file) return;
   window.__origem99 = 'FCX · Saídas';
+  if(!fcxV1417()) return importSaidasLegado(file);
+  fcxImportSaidas17(file).then(ok=>{ if(!ok) importSaidasLegado(file); }).catch(err=>{ console.warn('[saídas v14.17]', err); importSaidasLegado(file); }); // layout não reconhecido ou falha de leitura: o leitor de sempre
+}
+/* v14.17 (complemento) · leitor dos dois layouts do ERP (modelo atual e modelo antigo): o painel abre o arquivo e interpreta (mesmo motor do botão "Importar Baixas do ERP (CNAB)" da DFC).
+   Devolve true quando o arquivo foi tratado aqui (inclusive quando nada entrou), false quando o layout não é nenhum dos dois (segue o leitor de sempre). */
+async function fcxImportSaidas17(file){
+  const P = window.parent.Pagto17, arq = await P.lerArquivo(file, window.XLSX), rel = P.interpretar(arq.sheets, {soBaixas:false});
+  if(!rel.layout) return false;
+  const mode = state._saidasImportMode || 'append';
+  if(!rel.linhas.length){
+    showToast('Nenhuma linha reconhecida no arquivo');
+    fcxCarga99(Object.assign(P.relatorioCarga('FCX · Saídas', arq, rel, {}), {processadas:0, erro:'Nenhuma linha válida depois dos filtros do layout reconhecido.'}));
+    return true;
+  }
+  const novas99 = new Set();
+  rel.linhas.forEach(s=>{
+    if(!state.config.accounts.includes(s.conta)){ state.config.accounts.push(s.conta); fcx1386Nova(s.conta); novas99.add(s.conta); }
+    if(!state.config.costCenters.includes(s.centro)) state.config.costCenters.push(s.centro);
+  });
+  const novos = rel.linhas.map(s=>Object.assign({}, s)); let reimp = 0;
+  if(mode==='replace') state.saidas = novos;
+  else { const ids = new Set(novos.map(x=>x.id)), antes = state.saidas.length; state.saidas = state.saidas.filter(x=>!ids.has(x.id)).concat(novos); reimp = antes + novos.length - state.saidas.length; } // ids estáveis: reimportar o mesmo arquivo não duplica
+  fcxCarga99(P.relatorioCarga('FCX · Saídas', arq, rel, {
+    campos:[['Modo', mode==='replace' ? 'substituir todas as saídas' : 'acrescentar às existentes'], ['Já existiam (atualizadas)', String(reimp)], ['Contas novas', String(novas99.size)]],
+    avisos:[...novas99].map(c=>'Conta nova: '+c+' — incluída no plano e enviada para revisão no Módulo Contábil')}));
+  const grava = [saveSaidas(), saveConfig()];
+  if(fcxV1378()){ state.cargaSaidas = { em: new Date().toISOString(), arquivo: file.name, linhas: novos.length, modo: mode }; grava.push(window.storage.set('esp2:cargaSaidas', JSON.stringify(state.cargaSaidas), true)); }
+  await Promise.all(grava); render();
+  return true;
+}
+function importSaidasLegado(file){
   readWorkbookFile(file, rows=>{
     const parsed = [], inc99 = [], novas99 = new Set(), rd = fcxV1378(); // v13.78
     rows.forEach((row,i99)=>{
@@ -2661,7 +2693,7 @@ function renderTabSaidas(){
 
   <div class="panel">
     <h2>Importar saídas em massa</h2>
-    <p class="desc">Suba a planilha do sistema contábil (.xlsx ou .csv) com as colunas: Status, Fornecedor, Descrição, Valor, Vencimento, Conta Contábil, Centro de Custo. "A vencer"/"Pago"/"Renegociado" entram como Efetivo; "Previsto" entra como Previsto.</p>
+    <p class="desc">Suba a planilha do sistema contábil (.xlsx ou .csv) com as colunas: Status, Fornecedor, Descrição, Valor, Vencimento, Conta Contábil, Centro de Custo. "A vencer"/"Pago"/"Renegociado" entram como Efetivo; "Previsto" entra como Previsto.${fcxV1417() ? ' Também aceita, com reconhecimento automático do layout, o Contas a Pagar atual (Status, Fornecedor, Valor Pago, Data de Pagamento, Conta Contábil, Centro de Custo, Conta Bancária / Banco de Pagamento, Forma de Pagamento) e a Relação dos Títulos Pagos do ERP antigo (Excel, abas PGTO.* ou AgendaPagto): guarda a data e a conta do pagamento.' : ''}</p>
     <div class="dropzone">
       <div class="field" style="max-width:260px;margin:0 auto 10px;">
         <label>Ao importar</label>

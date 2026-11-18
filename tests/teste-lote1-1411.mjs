@@ -27,9 +27,9 @@ const dobra = async f => { try { await f(); return null; } catch (e) { return e;
 
 /* ---------- 1 · recurso e Regra de Ouro ---------- */
 chk('recurso gestao_v1411 na lista de liberação (v14.11) e helper g11()', /gestao_v1411: \{ versao: 'v14\.11'/.test(html) && /function g11\(\) \{ return typeof Recursos !== 'undefined' && Recursos\.ativo\('gestao_v1411'\); \}/.test(html));
-for (const [f, h] of [['fcx.html', '0c13655f'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
+for (const [f, h] of [['fcx.html', '640800e0'], ['contabilidade.html', 'a41642fb'], ['contabilidade_v1391.html', 'ea73d20b']]) {
   const p = path.join(raiz, 'public', f);
-  chk(`Regra de Ouro: public/${f} idêntico ao da v14.08 (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
+  chk(`Regra de Ouro: public/${f} ${f === 'fcx.html' ? 'idêntico ao da v14.17: v14.08 + a única exceção autorizada (importação de Saídas com os dois layouts do ERP, atrás de gestao_v1417)' : 'idêntico ao da v14.08'} (md5 ${h}…)`, fs.existsSync(p) && md5(fs.readFileSync(p)).startsWith(h));
 }
 
 /* ---------- 2 · Tela Inicial e menu lateral ---------- */
