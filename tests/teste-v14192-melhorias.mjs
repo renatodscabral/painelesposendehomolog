@@ -893,7 +893,7 @@ console.log('\n── 7 · recurso desligado, backend e documentação ──');
   const rd = fs.existsSync(path.join(raiz, 'README.md')) ? fs.readFileSync(path.join(raiz, 'README.md'), 'utf8') : '';
   chk('README: seção "## v14.19.2" com os 6 itens, as 3 travas do ajuste em lote, a Regra de Ouro e as suposições', /## v14\.19\.2/.test(rd) && /Sem movimento no mês/.test(rd) && /Horizontal/.test(rd) && /Ajuste em Lote/i.test(rd) && /ModalProgressoCarga/.test(rd) && /Selecione uma única conta bancária antes de exportar para ajuste em lote\./.test(rd) && /Regra de Ouro/.test(rd), rd.length);
   const tituloFlag = (/gestao_v1419: \{ versao: 'v14\.19', titulo: '([^']*)'/.exec(html) || [])[1] || '';
-  chk('o texto do recurso gestao_v1419 na tela de liberação descreve a v14.19.2 (6 itens) e continua dizendo que fica desligado até "Liberar Versão em Produção"', /v14\.19\.2/.test(tituloFlag) && /Sem movimento/i.test(tituloFlag) && /Realizado/.test(tituloFlag) && /horizontal/i.test(tituloFlag) && /lote/i.test(tituloFlag) && /progresso/i.test(tituloFlag), tituloFlag.slice(0, 200));
+  chk('o texto do recurso gestao_v1419 na tela de liberação descreve os 6 itens dos refinamentos (v14.9 = código v14.19.2) e continua dizendo que fica desligado até "Liberar Versão em Produção"', /refinamentos \(6 melhorias\)/.test(tituloFlag) && /Sem movimento/i.test(tituloFlag) && /Realizado/.test(tituloFlag) && /horizontal/i.test(tituloFlag) && /lote/i.test(tituloFlag) && /progresso/i.test(tituloFlag), tituloFlag.slice(0, 200));
 }
 
 console.log(`\n${OK.length} ok · ${FAIL.length} falha(s)`);
